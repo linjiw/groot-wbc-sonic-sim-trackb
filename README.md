@@ -247,6 +247,74 @@ Each use case has its own lightweight environment. The install scripts use `uv`
 and create isolated venvs automatically — you don't need to manage them manually.
 Training is the only one that requires Isaac Lab (installed separately).
 
+### Local usage and settings checklist
+
+This repo intentionally separates three workflows that should not be mixed:
+
+1. **Fast local policy review / MuJoCo videos** — use the simulator venv:
+
+   ```bash
+   cd ~/GR00T-WholeBodyControl
+   bash install_scripts/install_mujoco_sim.sh        # creates .venv_sim if needed
+   source .venv_sim/bin/activate
+   python check_environment.py --sim                # MuJoCo/Decoupled WBC check
+   python decoupled_wbc/sim2mujoco/scripts/run_mujoco_gear_wbc_record.py \
+       --config g1_gear_wbc_headless.yaml --cmd walk \
+       --out rollouts/wbc_walk.mp4
+   ```
+
+   Review artifacts from the last local validation are documented in
+   [`policy_review_results.md`](policy_review_results.md). The generated videos
+   live under `rollouts/`.
+
+2. **SONIC training / finetuning** — use an Isaac Lab Python 3.11 environment,
+   not `.venv_sim`:
+
+   ```bash
+   # Example when Isaac Lab is installed in a conda env.
+   conda activate env_isaaclab
+   pip install -e "gear_sonic[training]"
+   pip install open3d vector-quantize-pytorch   # undeclared deps used by sample training
+   python check_environment.py --training
+   python download_from_hf.py --training --no-smpl
+   ```
+
+   Full-scale finetuning is GPU-heavy; the release recipe recommends many GPUs.
+   Use the small sample data under `sample_data/` only for smoke tests.
+
+3. **SONIC C++ deploy / real G1** — use the C++ stack in `gear_sonic_deploy/`.
+   Configure machine-local paths with a private shell file:
+
+   ```bash
+   cd ~/GR00T-WholeBodyControl
+   cp gear_sonic_deploy/local_env.example.sh gear_sonic_deploy/local_env.sh
+   $EDITOR gear_sonic_deploy/local_env.sh       # set TensorRT_ROOT, CUDA, ONNX Runtime if needed
+   source gear_sonic_deploy/local_env.sh
+   cd gear_sonic_deploy
+   source scripts/setup_env.sh
+   just build
+   bash deploy.sh --input-type keyboard sim     # always validate sim before real hardware
+   ```
+
+   `gear_sonic_deploy/local_env.sh` and `.env.groot.local` are ignored by git so
+   local TensorRT/CUDA paths do not leak into commits. Do not run
+   `bash deploy.sh ... real` until sim mode is stable and the G1 network
+   interface on `192.168.123.x` is confirmed.
+
+Current local machine status from 2026-05-01 validation:
+
+- LFS assets, release ONNX policies, `sonic_release/last.pt`, sample data, and
+  local review videos are present.
+- `.venv_sim` works for Decoupled WBC MuJoCo rollouts; it has PyTorch CUDA and
+  MuJoCo, but intentionally does not include the full `decoupled_wbc[full]`
+  test dependency set such as `gymnasium`.
+- C++ deploy is still blocked until `TensorRT_ROOT`, `just`, `ninja`,
+  `clang`, and the ONNX Runtime C/C++ package are available to the shell used
+  for `gear_sonic_deploy` builds. CUDA toolkit `nvcc` is currently visible at
+  `/usr/local/cuda/bin/nvcc`.
+- Isaac Lab/training dependencies are not installed in the default shell. Use a
+  dedicated Isaac Lab environment for training checks.
+
 ## Documentation
 
 📚 **[Full Documentation](https://nvlabs.github.io/GR00T-WholeBodyControl/)**

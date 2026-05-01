@@ -6,10 +6,12 @@ Run this before training or deployment to verify all prerequisites are met.
 Usage:
     python check_environment.py              # Check everything
     python check_environment.py --training   # Training checks only
-    python check_environment.py --deploy     # Deployment checks only
+    python check_environment.py --deploy     # C++ deploy checks only
+    python check_environment.py --sim        # MuJoCo/Decoupled WBC sim checks only
 """
 
 import importlib
+from importlib.metadata import PackageNotFoundError
 import os
 import platform
 import shutil
@@ -18,7 +20,6 @@ import sys
 
 
 def check(name, passed, msg_pass="", msg_fail=""):
-    status = "PASS" if passed else "FAIL"
     symbol = "[+]" if passed else "[X]"
     detail = msg_pass if passed else msg_fail
     print(f"  {symbol} {name}: {detail}" if detail else f"  {symbol} {name}")
@@ -53,8 +54,13 @@ def check_git_lfs():
 
     # Check if LFS files are pulled (sample an actual LFS-tracked mesh file)
     mesh_path = "gear_sonic/data/assets/robot_description/urdf/g1/meshes"
-    stl_files = [os.path.join(mesh_path, f) for f in os.listdir(mesh_path) if f.endswith(".STL")] if os.path.isdir(mesh_path) else []
-    sample_file = stl_files[0] if stl_files else "decoupled_wbc/sim2mujoco/resources/robots/g1/policy/GR00T-WholeBodyControl-Balance.onnx"
+    stl_files = []
+    if os.path.isdir(mesh_path):
+        stl_files = [os.path.join(mesh_path, f) for f in os.listdir(mesh_path) if f.endswith(".STL")]
+    sample_file = stl_files[0] if stl_files else (
+        "decoupled_wbc/sim2mujoco/resources/robots/g1/policy/"
+        "GR00T-WholeBodyControl-Balance.onnx"
+    )
     if os.path.exists(sample_file):
         size = os.path.getsize(sample_file)
         if size < 1000:
@@ -111,9 +117,10 @@ def check_isaaclab():
 def check_gear_sonic():
     try:
         from importlib.metadata import version as get_version
+
         ver = get_version("gear_sonic")
         return check("gear_sonic", True, msg_pass=f"installed ({ver})")
-    except ImportError:
+    except (ImportError, PackageNotFoundError):
         return check(
             "gear_sonic",
             False,
@@ -155,7 +162,7 @@ def check_tensorrt():
     # Check for the library
     lib_dir = os.path.join(trt_root, "lib")
     if os.path.isdir(lib_dir):
-        libs = [f for f in os.listdir(lib_dir) if "nvinfer" in f and f.endswith(".so")]
+        libs = [f for f in os.listdir(lib_dir) if "nvinfer" in f and ".so" in f]
         if libs:
             # Try to extract version from filename
             for lib in libs:
@@ -165,6 +172,138 @@ def check_tensorrt():
             return check("TensorRT", True, msg_pass=f"found at {trt_root}")
 
     return check("TensorRT", False, msg_fail=f"libnvinfer not found in {lib_dir}")
+
+
+def check_command_available(command, install_hint):
+    path = shutil.which(command)
+    if path:
+        return check(command, True, msg_pass=path)
+    return check(command, False, msg_fail=f"not found ({install_hint})")
+
+
+def check_cuda_toolkit():
+    nvcc = shutil.which("nvcc")
+    if nvcc:
+        try:
+            output = subprocess.check_output([nvcc, "--version"], text=True, stderr=subprocess.STDOUT)
+            version_line = output.strip().splitlines()[-1]
+        except Exception:
+            version_line = nvcc
+        return check("CUDA toolkit (nvcc)", True, msg_pass=version_line)
+
+    for root in [
+        os.environ.get("CUDAToolkit_ROOT"),
+        os.environ.get("CUDA_HOME"),
+        "/usr/local/cuda",
+        "/usr/local/cuda-13.0",
+        "/usr/local/cuda-12.6",
+        "/usr/local/cuda-12.4",
+        "/usr/local/cuda-12",
+    ]:
+        if not root:
+            continue
+        candidate = os.path.join(root, "bin", "nvcc")
+        if os.path.exists(candidate):
+            return check("CUDA toolkit (nvcc)", True, msg_pass=candidate)
+
+    return check(
+        "CUDA toolkit (nvcc)",
+        False,
+        msg_fail=(
+            "not found (install cuda-toolkit matching TensorRT; "
+            "PyTorch CUDA runtime alone is not enough for C++ builds)"
+        ),
+    )
+
+
+def check_onnxruntime_cmake():
+    candidates = []
+    root_dir = os.environ.get("onnxruntime_ROOT")
+    if root_dir:
+        candidates.append(root_dir)
+    env_dir = os.environ.get("onnxruntime_DIR")
+    if env_dir:
+        candidates.append(env_dir)
+        # Existing deploy scripts sometimes set onnxruntime_DIR to
+        # <root>/lib/cmake/onnxruntime, while this repo's custom CMake finder
+        # searches roots with include/ and lib/ suffixes.
+        cmake_suffix = os.path.join("lib", "cmake", "onnxruntime")
+        if env_dir.endswith(cmake_suffix):
+            candidates.append(os.path.dirname(os.path.dirname(os.path.dirname(env_dir))))
+    candidates.extend(
+        [
+            "/opt/onnxruntime",
+            "/usr/local/onnxruntime",
+            os.path.expanduser("~/.local/onnxruntime"),
+        ]
+    )
+    for root in candidates:
+        if not root or not os.path.isdir(root):
+            continue
+        include = os.path.join(root, "include", "onnxruntime_cxx_api.h")
+        lib_dir = os.path.join(root, "lib")
+        if os.path.exists(include) and os.path.isdir(lib_dir):
+            libs = [name for name in os.listdir(lib_dir) if name.startswith("libonnxruntime.so")]
+            if libs:
+                return check("ONNX Runtime C/C++", True, msg_pass=root)
+    return check(
+        "ONNX Runtime C/C++",
+        False,
+        msg_fail="not found (install ONNX Runtime C/C++ package or set onnxruntime_ROOT)",
+    )
+
+
+def check_deploy_assets():
+    required = [
+        "gear_sonic_deploy/policy/release/model_encoder.onnx",
+        "gear_sonic_deploy/policy/release/model_decoder.onnx",
+        "gear_sonic_deploy/policy/release/observation_config.yaml",
+        "gear_sonic_deploy/planner/target_vel/V2/planner_sonic.onnx",
+        "gear_sonic_deploy/reference/example",
+    ]
+    missing = [path for path in required if not os.path.exists(path)]
+    if missing:
+        return check("Deploy assets", False, msg_fail="missing: " + ", ".join(missing))
+    pointer_like = [path for path in required if path.endswith(".onnx") and os.path.getsize(path) < 1000]
+    if pointer_like:
+        return check(
+            "Deploy assets",
+            False,
+            msg_fail="LFS pointer or truncated files: " + ", ".join(pointer_like),
+        )
+    return check(
+        "Deploy assets",
+        True,
+        msg_pass="release ONNXs, observation config, planner, and reference data present",
+    )
+
+
+def check_deploy_toolchain():
+    results = [
+        check_command_available("cmake", "sudo apt install cmake"),
+        check_command_available("ninja", "sudo apt install ninja-build"),
+        check_command_available("just", "sudo apt install just OR cargo install just"),
+        check_command_available("clang", "sudo apt install clang"),
+        check_cuda_toolkit(),
+        check_onnxruntime_cmake(),
+        check_deploy_assets(),
+    ]
+    return all(results)
+
+
+def check_sim_deps():
+    results = []
+    for module, install_hint in [
+        ("onnxruntime", "bash install_scripts/install_mujoco_sim.sh"),
+        ("mujoco", "bash install_scripts/install_mujoco_sim.sh"),
+        ("decoupled_wbc", "bash install_scripts/install_mujoco_sim.sh"),
+    ]:
+        try:
+            importlib.import_module(module)
+            results.append(check(module, True, msg_pass="installed"))
+        except ImportError:
+            results.append(check(module, False, msg_fail=f"not installed ({install_hint})"))
+    return all(results)
 
 
 def check_disk_space():
@@ -185,8 +324,10 @@ def main():
         mode = "training"
     elif "--deploy" in sys.argv:
         mode = "deploy"
+    elif "--sim" in sys.argv or "--mujoco" in sys.argv:
+        mode = "sim"
 
-    print(f"GR00T-WholeBodyControl Environment Check")
+    print("GR00T-WholeBodyControl Environment Check")
     print(f"Platform: {platform.system()} {platform.machine()}")
     print(f"Python:   {sys.executable}")
     print()
@@ -202,6 +343,11 @@ def main():
     all_pass &= check_disk_space()
     print()
 
+    if mode == "sim":
+        print("Simulation:")
+        all_pass &= check_sim_deps()
+        print()
+
     if mode in ("all", "training"):
         print("Training:")
         all_pass &= check_isaaclab()
@@ -212,6 +358,7 @@ def main():
     if mode in ("all", "deploy"):
         print("Deployment:")
         all_pass &= check_tensorrt()
+        all_pass &= check_deploy_toolchain()
         print()
 
     if all_pass:

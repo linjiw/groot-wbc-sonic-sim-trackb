@@ -113,7 +113,10 @@ CMAKE_PATHS="$SYSTEM_LIB_DIR/cmake"
 
 # Add ONNX Runtime path if we found one
 if [ -n "$onnxruntime_DIR" ]; then
-    ONNX_BASE_PATH=$(dirname $(dirname $onnxruntime_DIR))  # Remove /lib/cmake/onnxruntime to get base path
+    # Remove /lib/cmake/onnxruntime to get the install root expected by
+    # cmake/Findonnxruntime.cmake (it searches <root>/include and <root>/lib).
+    ONNX_BASE_PATH=$(dirname "$(dirname "$(dirname "$onnxruntime_DIR")")")
+    export onnxruntime_ROOT="${onnxruntime_ROOT:-$ONNX_BASE_PATH}"
     CMAKE_PATHS="$ONNX_BASE_PATH:$CMAKE_PATHS"
 fi
 
