@@ -1,0 +1,71 @@
+# Research configuration for the first GR00T + SONIC MVP.
+
+task:
+  name: g1_tabletop_red_cup_to_tray
+  prompt: "pick up the red cup and place it on the tray"
+  embodiment_tag: UNITREE_G1_SONIC
+  action:
+    motion_token_dim: 64
+    left_hand_dim: 7
+    right_hand_dim: 7
+    total_dim: 78
+
+paths:
+  raw_dataset_dir: outputs/g1_red_cup_to_tray_raw
+  cleaned_dataset_dir: outputs/g1_red_cup_to_tray_cleaned
+  split_dir: outputs/g1_red_cup_to_tray_splits
+  direct_baseline_checkpoint_dir: checkpoints/groot_direct_g1_red_cup_to_tray
+  curriculum_checkpoint_dir: checkpoints/groot_curriculum_g1_red_cup_to_tray
+  eval_report_dir: reports/g1_red_cup_to_tray
+
+collection:
+  camera_host: 192.168.123.164
+  camera_port: 5555
+  record_wrist_cameras: false
+  data_collection_frequency: 50
+  initial_successful_demos: 10
+  direct_baseline_successful_demos: 100
+
+training:
+  base_model_path: nvidia/GR00T-N1.7-3B
+  max_steps: 20000
+  save_steps: 5000
+  save_total_limit: 5
+  global_batch_size: 32
+  dataloader_num_workers: 4
+  num_gpus: 4
+  use_wandb: true
+
+eval:
+  min_trials_per_scenario: 20
+  mvp_success_rate: 0.80
+  max_fall_rate: 0.05
+  max_drop_rate: 0.10
+  required_real_slow_successes: 10
+  scenarios:
+    - seen_tabletop
+    - unseen_layout
+    - distractor
+    - lighting_shift
+
+deployment:
+  policy_host: localhost
+  policy_port: 5550
+  default_sonic_checkpoint: gear_sonic_deploy/policy/release/model
+  default_sonic_obs_config: gear_sonic_deploy/policy/release/observation_config.yaml
+  low_latency_sonic_checkpoint: gear_sonic_deploy/policy/low_latency/model
+  low_latency_sonic_obs_config: gear_sonic_deploy/policy/low_latency/observation_config.yaml
+
+safety:
+  start_policy_paused: true
+  require_estop_test: true
+  require_joint_limit_monitor: true
+  require_temperature_monitor: true
+  canary_sequence:
+    - hands_open_close
+    - reach_without_object
+    - touch_object
+    - grasp_object
+    - lift_5cm
+    - place_nearby
+    - full_tabletop_task

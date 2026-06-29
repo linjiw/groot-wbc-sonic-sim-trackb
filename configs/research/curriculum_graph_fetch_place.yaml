@@ -1,0 +1,118 @@
+curriculum:
+  name: cg_wbc_fetch_place_v0
+  competence_threshold: 0.85
+  minimum_eval_episodes_per_stage: 50
+  minimum_real_canary_episodes_per_stage: 10
+  sampler:
+    beta: 5.0
+    anchor_mass: 0.20
+    anchor_replay_fraction: 0.20
+    frontier_fraction: 0.60
+    hardest_unlocked_fraction: 0.20
+
+  stages:
+    - id: S0
+      name: schema_validity
+      unlock: always
+      required_checks:
+        - sonic_schema_pass
+        - dataset_validation_pass
+      task:
+        walking_enabled: false
+        perturbations_enabled: false
+      gates:
+        schema_valid_min: 1.0
+
+    - id: S1
+      name: static_reach
+      prerequisites: [S0]
+      task:
+        robot_base: fixed
+        object_randomization: 0.05
+        target_randomization: 0.00
+        walking_enabled: false
+        perturbations_enabled: false
+      gates:
+        success_rate_min: 0.90
+        fall_rate_max: 0.02
+        action_jerk_max: 0.05
+
+    - id: S2
+      name: grasp_lift
+      prerequisites: [S1]
+      task:
+        robot_base: fixed
+        object_randomization: 0.10
+        lift_height_m: 0.05
+        walking_enabled: false
+        perturbations_enabled: false
+      gates:
+        success_rate_min: 0.85
+        drop_rate_max: 0.10
+        fall_rate_max: 0.02
+
+    - id: S3
+      name: place_nearby
+      prerequisites: [S2]
+      task:
+        robot_base: fixed
+        target_randomization: 0.15
+        walking_enabled: false
+        perturbations_enabled: false
+      gates:
+        success_rate_min: 0.80
+        drop_rate_max: 0.10
+        fall_rate_max: 0.03
+
+    - id: S4
+      name: stand_stabilized_pick_place
+      prerequisites: [S3]
+      task:
+        robot_base: free_standing
+        object_randomization: 0.20
+        target_randomization: 0.20
+        walking_enabled: false
+        perturbations_enabled: false
+      gates:
+        success_rate_min: 0.80
+        fall_rate_max: 0.05
+        torso_oscillation_max: 0.10
+
+    - id: S5
+      name: short_carry_place
+      prerequisites: [S4]
+      task:
+        walking_enabled: true
+        carry_distance_m: [0.25, 0.75]
+        perturbations_enabled: false
+      gates:
+        success_rate_min: 0.75
+        fall_rate_max: 0.05
+        drop_rate_max: 0.15
+
+    - id: S6
+      name: perturbation_carry_place
+      prerequisites: [S5]
+      task:
+        walking_enabled: true
+        carry_distance_m: [0.25, 1.00]
+        perturbations_enabled: true
+        push_force_n: [0.0, 15.0]
+        friction_range: [0.4, 1.0]
+      gates:
+        success_rate_min: 0.70
+        fall_rate_max: 0.08
+        recovery_success_min: 0.80
+
+    - id: S7
+      name: language_visual_generalization
+      prerequisites: [S6]
+      task:
+        object_randomization: 0.70
+        target_randomization: 0.70
+        lighting_randomization: 0.50
+        language_paraphrases: true
+      gates:
+        success_rate_min: 0.70
+        unseen_object_success_min: 0.60
+        unseen_layout_success_min: 0.60
