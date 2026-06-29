@@ -36,6 +36,7 @@ through GR00T fine-tuning and SONIC inference before adding locomotion.
 
 | Milestone | Goal | Exit gate |
 |---|---|---|
+| G0 golden-path proof | Prove one valid tiny SONIC/VLA dataset can traverse schema validation, dataset validation, manifest generation, open-loop wrapper, MVP eval, and curriculum state update. | `outputs/research/g1_fetch_place_tiny_manifest.jsonl`, stage-wise summary, MVP report, and curriculum state history exist; no SONIC runtime/ZMQ/obs-order/action-interface changes. |
 | M0 schema smoke test | Environments, assets, and interfaces load. | G1 RobotModel, 64D token action, 7D hands, deploy obs config, and one dataset sample validate. |
 | M1 tiny vertical slice | Collect and train on 10 tabletop demos. | One cleaned LeRobot dataset loads in GR00T and one inference rollout runs in sim. |
 | M2 direct baseline | Fine-tune GR00T on 50-100 successful demos. | Open-loop eval passes and C++ SONIC sim inference is stable. |
