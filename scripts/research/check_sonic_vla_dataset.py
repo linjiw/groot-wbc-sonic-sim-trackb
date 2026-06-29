@@ -291,6 +291,12 @@ def main() -> int:
         default=500,
         help="Maximum rows per parquet file to sample for vector/numeric checks",
     )
+    parser.add_argument(
+        "--json",
+        dest="json_path",
+        type=Path,
+        help="Optional path to write the validation summary as JSON",
+    )
     args = parser.parse_args()
 
     dataset_arg = args.dataset_path or args.dataset
@@ -312,6 +318,22 @@ def main() -> int:
     check_info_and_videos(dataset, report)
     check_parquet(dataset, report, args.max_rows)
     report.print()
+    if args.json_path:
+        args.json_path.parent.mkdir(parents=True, exist_ok=True)
+        with args.json_path.open("w", encoding="utf-8") as f:
+            json.dump(
+                {
+                    "ok": not report.errors,
+                    "errors": report.errors,
+                    "warnings": report.warnings,
+                    "info": report.info,
+                    "dataset": str(dataset),
+                },
+                f,
+                indent=2,
+                sort_keys=True,
+            )
+            f.write("\n")
     return 1 if report.errors else 0
 
 
