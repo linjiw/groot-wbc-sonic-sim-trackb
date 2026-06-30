@@ -339,6 +339,77 @@ row.metrics.eval.terminated_final=1
 
 The `ok_for_causal_comparison=false` value is intentional for the current artifact because only one manifest exists. Once baseline and curriculum manifests are supplied for the same seed/dataset/checkpoint, the comparison harness will mark the pair causal-comparison-ready only if controls match.
 
+## Paired experiment launcher/spec harness
+
+Added a dry-run-friendly paired experiment launcher:
+
+```text
+scripts/research/run_sonic_paired_experiment.py
+tests/research/test_run_sonic_paired_experiment.py
+configs/research/sonic_paired_sample_validation_fixture.json
+```
+
+Purpose:
+
+- encode a paired baseline/curriculum experiment as an explicit JSON spec,
+- keep the fixed dataset/checkpoint/seed controls in one place,
+- optionally execute train/eval commands with captured logs,
+- summarize logs or consume existing summaries,
+- build per-variant manifests,
+- run the manifest comparison harness,
+- emit one final run-plan directory for paper bookkeeping.
+
+Validation:
+
+```text
+source /home/robotixx/miniconda3/etc/profile.d/conda.sh && conda activate env_isaaclab
+python -m pytest -q \
+  tests/research/test_run_sonic_paired_experiment.py \
+  tests/research/test_compare_sonic_manifests.py \
+  tests/research/test_sonic_experiment_manifest.py \
+  tests/research/test_sonic_log_summary.py \
+  tests/research/test_curriculum_sampler.py \
+  tests/research/test_curriculum_gates.py \
+  tests/research/test_manifest_builder_fixture.py \
+  tests/research/test_data_collection_launcher.py
+
+26 passed in 0.70s
+```
+
+Dry-run fixture generated without launching heavy IsaacLab training:
+
+```bash
+python scripts/research/run_sonic_paired_experiment.py \
+  --spec configs/research/sonic_paired_sample_validation_fixture.json \
+  --output-dir outputs/research/paired_sample_validation_fixture \
+  --dry-run \
+  --repo-root /home/robotixx/GR00T-WholeBodyControl
+```
+
+Generated artifacts:
+
+```text
+outputs/research/paired_sample_validation_fixture/run_plan.json
+outputs/research/paired_sample_validation_fixture/run_plan.md
+outputs/research/paired_sample_validation_fixture/baseline_fixture/manifest.json
+outputs/research/paired_sample_validation_fixture/curriculum_fixture/manifest.json
+outputs/research/paired_sample_validation_fixture/comparison.json
+outputs/research/paired_sample_validation_fixture/comparison.md
+```
+
+Verified fields:
+
+```text
+dry_run=true
+variant_count=2
+manifest_count=2
+control_mismatches=0
+validation_errors=0
+ok_for_causal_comparison=true
+```
+
+Important caveat: this fixture intentionally reuses the existing sample summary for both variants. It validates harness plumbing only; it is not a baseline/curriculum scientific result. The next real experiment should replace the fixture summaries with fresh logs from two actually distinct commands.
+
 ## Controlled variables for paper-grade experiments
 
 Keep fixed unless explicitly ablated:

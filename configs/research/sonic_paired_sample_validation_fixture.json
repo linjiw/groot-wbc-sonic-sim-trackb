@@ -1,0 +1,25 @@
+{
+  "experiment_group": "sample_pair_validation_fixture",
+  "hypothesis": "The paired-run harness can enforce fixed SONIC controls and produce comparison artifacts before launching heavy IsaacLab training; this fixture is validation plumbing, not a scientific baseline/curriculum result.",
+  "seed": 0,
+  "dataset_robot": "sample_data/robot_filtered",
+  "dataset_smpl": "sample_data/smpl_filtered",
+  "checkpoint": "sonic_release/last.pt",
+  "git_commit": "c23f2ba",
+  "variants": [
+    {
+      "name": "baseline_fixture",
+      "summary_json": "outputs/research/sonic_sample_summary.json",
+      "train_command": "python gear_sonic/train_agent_trl.py +exp=manager/universal_token/all_modes/sonic_release num_envs=16 headless=True use_wandb=false exp_var=baseline_fixture_seed0 ++algo.config.num_learning_iterations=100 ++algo.config.save_interval=999999 ++manager_env.commands.motion.motion_lib_cfg.motion_file=sample_data/robot_filtered ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=sample_data/smpl_filtered",
+      "eval_command": "python gear_sonic/eval_agent_trl.py +checkpoint=sonic_release/last.pt +headless=True ++eval_callbacks=im_eval ++run_eval_loop=False ++num_envs=2 ++algo.config.eval.num_eval_episodes=4 ++manager_env.commands.motion.motion_lib_cfg.motion_file=sample_data/robot_filtered ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=sample_data/smpl_filtered ++manager_env.commands.motion.motion_lib_cfg.max_unique_motions=2 +manager_env/terminations=tracking/eval",
+      "interpretation": "dry_run_fixture_reuses_existing_sample_summary__not_a_new_baseline_result"
+    },
+    {
+      "name": "curriculum_fixture",
+      "summary_json": "outputs/research/sonic_sample_summary.json",
+      "train_command": "python gear_sonic/train_agent_trl.py +exp=manager/universal_token/all_modes/sonic_release num_envs=16 headless=True use_wandb=false exp_var=curriculum_fixture_seed0 ++algo.config.num_learning_iterations=100 ++algo.config.save_interval=999999 ++manager_env.commands.motion.motion_lib_cfg.motion_file=sample_data/robot_filtered ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=sample_data/smpl_filtered",
+      "eval_command": "python gear_sonic/eval_agent_trl.py +checkpoint=sonic_release/last.pt +headless=True ++eval_callbacks=im_eval ++run_eval_loop=False ++num_envs=2 ++algo.config.eval.num_eval_episodes=4 ++manager_env.commands.motion.motion_lib_cfg.motion_file=sample_data/robot_filtered ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=sample_data/smpl_filtered ++manager_env.commands.motion.motion_lib_cfg.max_unique_motions=2 +manager_env/terminations=tracking/eval",
+      "interpretation": "dry_run_fixture_reuses_existing_sample_summary__not_a_new_curriculum_result"
+    }
+  ]
+}
