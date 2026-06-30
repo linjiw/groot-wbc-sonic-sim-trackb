@@ -410,6 +410,111 @@ ok_for_causal_comparison=true
 
 Important caveat: this fixture intentionally reuses the existing sample summary for both variants. It validates harness plumbing only; it is not a baseline/curriculum scientific result. The next real experiment should replace the fixture summaries with fresh logs from two actually distinct commands.
 
+## Paired micro-experiment execution gate
+
+Added an executable paired micro-experiment spec:
+
+```text
+configs/research/sonic_paired_sample_micro_execute.json
+```
+
+Controlled contrast:
+
+| Variant | Changed condition |
+|---|---|
+| `uniform_sampling_micro` | `manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.enable=false` |
+| `adaptive_sampling_micro` | `manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.enable=true`, `uniform_sampling_rate=0.1` |
+
+Fixed controls:
+
+```text
+seed=0
+num_envs=8
+num_learning_iterations=10
+dataset_robot=sample_data/robot_filtered
+dataset_smpl=sample_data/smpl_filtered
+checkpoint=sonic_release/last.pt for eval smoke
+```
+
+Execution command attempted:
+
+```bash
+python scripts/research/run_sonic_paired_experiment.py \
+  --spec configs/research/sonic_paired_sample_micro_execute.json \
+  --output-dir outputs/research/paired_sample_micro_execute \
+  --execute \
+  --repo-root /home/robotixx/GR00T-WholeBodyControl
+```
+
+The wrapper command timed out at 600s after both 10-iteration train runs and eval logs had been produced, but before the launcher wrote the final run plan for the second variant. I then re-ran the launcher in `--dry-run` mode against the same output directory to summarize the already-produced logs and build manifests/comparison without re-launching IsaacLab.
+
+Evidence from generated config files confirms the intended single experimental knob:
+
+```text
+logs_rl/.../sonic_release_uniform_sampling_micro_seed0-20260630_184900/config.yaml:
+  adaptive_sampling.enable: false
+
+logs_rl/.../sonic_release_adaptive_sampling_micro_seed0-20260630_185404/config.yaml:
+  adaptive_sampling.enable: true
+```
+
+Training summaries:
+
+| Variant | Iterations | Timesteps | Mean reward | Anchor pos error | Body pos error | Train OK |
+|---|---:|---:|---:|---:|---:|---|
+| `uniform_sampling_micro` | 10 | 1920 | 0.98515 | 0.1207 | 0.1041 | true |
+| `adaptive_sampling_micro` | 10 | 1920 | 1.02088 | 0.1078 | 0.0904 | true |
+
+Adaptive-sampling diagnostics appeared only in the adaptive variant log, including:
+
+```text
+Env/adp_samp/prob_max_over_uniform: 3.4619
+Env/adp_samp/effective_num_bins: 69.4364
+Env/adp_samp/num_concentrated_bins: 0.0000
+```
+
+Comparison artifacts:
+
+```text
+outputs/research/paired_sample_micro_execute/run_plan.json
+outputs/research/paired_sample_micro_execute/uniform_sampling_micro/summary.json
+outputs/research/paired_sample_micro_execute/adaptive_sampling_micro/summary.json
+outputs/research/paired_sample_micro_execute/uniform_sampling_micro/manifest.json
+outputs/research/paired_sample_micro_execute/adaptive_sampling_micro/manifest.json
+outputs/research/paired_sample_micro_execute/comparison.json
+```
+
+Final comparison status after tightening the comparison harness:
+
+```text
+manifest_count=2
+control_mismatches=0
+validation_errors=0
+metric_warnings=4
+ok_for_causal_comparison=false
+warning_fields=['eval.all.mpjpe_g', 'eval.ok']
+```
+
+Interpretation: the paired micro-experiment validates that the training contrast is executable under fixed simulation controls and that adaptive-sampling telemetry is visible. It is not paper-grade causal evidence yet because the eval smoke did not emit `All:` MPJPE metrics for these runs (`eval.ok=false`, although there were no tracebacks). The next gate is to make eval bounded and metric-complete for micro runs before scaling.
+
+The comparison harness was also tightened so `ok_for_causal_comparison` now requires primary train/eval metrics to be present and healthy, not just matching controls.
+
+Validation after this change:
+
+```text
+python -m pytest -q \
+  tests/research/test_run_sonic_paired_experiment.py \
+  tests/research/test_compare_sonic_manifests.py \
+  tests/research/test_sonic_experiment_manifest.py \
+  tests/research/test_sonic_log_summary.py \
+  tests/research/test_curriculum_sampler.py \
+  tests/research/test_curriculum_gates.py \
+  tests/research/test_manifest_builder_fixture.py \
+  tests/research/test_data_collection_launcher.py
+
+27 passed in 0.71s
+```
+
 ## Controlled variables for paper-grade experiments
 
 Keep fixed unless explicitly ablated:

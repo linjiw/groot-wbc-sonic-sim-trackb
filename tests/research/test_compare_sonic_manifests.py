@@ -92,6 +92,20 @@ def test_build_comparison_flags_control_mismatch(tmp_path: Path) -> None:
     assert any(item["field"] == "checkpoint" for item in comparison["control_mismatches"])
 
 
+def test_build_comparison_flags_missing_primary_metrics(tmp_path: Path) -> None:
+    baseline = _manifest(tmp_path / "baseline.json", experiment_id="baseline_seed0", variant="baseline")
+    missing_eval = _manifest(tmp_path / "missing_eval.json", experiment_id="curriculum_seed0", variant="curriculum")
+    data = json.loads(missing_eval.read_text(encoding="utf-8"))
+    data["metrics"]["eval"]["ok"] = False
+    data["metrics"]["eval"]["all"] = {}
+    missing_eval.write_text(json.dumps(data), encoding="utf-8")
+
+    comparison = build_comparison([baseline, missing_eval])
+
+    assert comparison["ok_for_causal_comparison"] is False
+    assert {item["field"] for item in comparison["metric_warnings"]} == {"eval.ok", "eval.all.mpjpe_g"}
+
+
 def test_build_comparison_reports_validation_errors(tmp_path: Path) -> None:
     invalid = tmp_path / "invalid.json"
     invalid.write_text(json.dumps({"schema_version": 1, "experiment_id": "broken"}), encoding="utf-8")

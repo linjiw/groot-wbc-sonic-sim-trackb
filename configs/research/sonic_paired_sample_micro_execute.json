@@ -1,0 +1,22 @@
+{
+  "experiment_group": "sample_adaptive_sampling_micro",
+  "hypothesis": "On the tiny local sample-data gate, SONIC training remains executable under fixed IsaacLab controls when only the motion adaptive-sampling condition changes; this is an execution-validation gate before paper-scale baseline/curriculum claims.",
+  "seed": 0,
+  "dataset_robot": "sample_data/robot_filtered",
+  "dataset_smpl": "sample_data/smpl_filtered",
+  "checkpoint": "sonic_release/last.pt",
+  "variants": [
+    {
+      "name": "uniform_sampling_micro",
+      "train_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 python gear_sonic/train_agent_trl.py +exp=manager/universal_token/all_modes/sonic_release num_envs=8 headless=True use_wandb=false seed=0 exp_var=uniform_sampling_micro_seed0 ++algo.config.num_learning_iterations=10 ++algo.config.save_interval=999999 ++manager_env.commands.motion.motion_lib_cfg.motion_file=sample_data/robot_filtered ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=sample_data/smpl_filtered ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.enable=false",
+      "eval_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 python gear_sonic/eval_agent_trl.py +checkpoint=sonic_release/last.pt +headless=True ++eval_callbacks=im_eval ++run_eval_loop=False ++num_envs=2 ++algo.config.eval.num_eval_episodes=4 ++manager_env.commands.motion.motion_lib_cfg.motion_file=sample_data/robot_filtered ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=sample_data/smpl_filtered ++manager_env.commands.motion.motion_lib_cfg.max_unique_motions=2 +manager_env/terminations=tracking/eval",
+      "interpretation": "micro_execution_gate_uniform_sampling__adaptive_sampling_disabled__sample_data_only"
+    },
+    {
+      "name": "adaptive_sampling_micro",
+      "train_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 python gear_sonic/train_agent_trl.py +exp=manager/universal_token/all_modes/sonic_release num_envs=8 headless=True use_wandb=false seed=0 exp_var=adaptive_sampling_micro_seed0 ++algo.config.num_learning_iterations=10 ++algo.config.save_interval=999999 ++manager_env.commands.motion.motion_lib_cfg.motion_file=sample_data/robot_filtered ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=sample_data/smpl_filtered ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.enable=true ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.uniform_sampling_rate=0.1",
+      "eval_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 python gear_sonic/eval_agent_trl.py +checkpoint=sonic_release/last.pt +headless=True ++eval_callbacks=im_eval ++run_eval_loop=False ++num_envs=2 ++algo.config.eval.num_eval_episodes=4 ++manager_env.commands.motion.motion_lib_cfg.motion_file=sample_data/robot_filtered ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=sample_data/smpl_filtered ++manager_env.commands.motion.motion_lib_cfg.max_unique_motions=2 +manager_env/terminations=tracking/eval",
+      "interpretation": "micro_execution_gate_adaptive_sampling_enabled__sample_data_only"
+    }
+  ]
+}

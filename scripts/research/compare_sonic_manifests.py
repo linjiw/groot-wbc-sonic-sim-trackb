@@ -27,6 +27,12 @@ _METRIC_PATHS: tuple[tuple[str, ...], ...] = (
     ("metrics", "eval", "success_rate_final"),
     ("metrics", "eval", "traceback_count"),
 )
+_PRIMARY_METRIC_PATHS: tuple[tuple[str, ...], ...] = (
+    ("metrics", "train", "ok"),
+    ("metrics", "train", "mean_rewards"),
+    ("metrics", "eval", "ok"),
+    ("metrics", "eval", "all", "mpjpe_g"),
+)
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -103,6 +109,20 @@ def _find_control_mismatches(manifests: list[dict[str, Any]]) -> list[dict[str, 
     return mismatches
 
 
+def _find_metric_warnings(manifests: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Find missing/failed primary metrics that make a paper comparison incomplete."""
+    warnings: list[dict[str, Any]] = []
+    for manifest in manifests:
+        label = _manifest_label(manifest)
+        for path in _PRIMARY_METRIC_PATHS:
+            value = _get_nested(manifest, path)
+            if value is None:
+                warnings.append({"experiment": label, "field": _metric_key(path), "problem": "missing"})
+            elif path[-1] == "ok" and value is not True:
+                warnings.append({"experiment": label, "field": _metric_key(path), "problem": "not_true", "value": value})
+    return warnings
+
+
 def build_comparison(manifest_paths: list[Path]) -> dict[str, Any]:
     """Build a comparison summary from one or more SONIC experiment manifests."""
     if not manifest_paths:
@@ -138,6 +158,7 @@ def build_comparison(manifest_paths: list[Path]) -> dict[str, Any]:
     variants = sorted({str(m.get("variant")) for m in manifests if m.get("variant") is not None})
     seeds = sorted({m.get("seed") for m in manifests if m.get("seed") is not None})
     mismatches = _find_control_mismatches(manifests)
+    metric_warnings = _find_metric_warnings(manifests)
     return {
         "schema_version": 1,
         "kind": "sonic_manifest_comparison",
@@ -145,9 +166,10 @@ def build_comparison(manifest_paths: list[Path]) -> dict[str, Any]:
         "variants": variants,
         "seeds": seeds,
         "control_mismatches": mismatches,
+        "metric_warnings": metric_warnings,
         "validation_errors": validation_errors,
         "rows": rows,
-        "ok_for_causal_comparison": not validation_errors and not mismatches and len(records) >= 2,
+        "ok_for_causal_comparison": not validation_errors and not mismatches and not metric_warnings and len(records) >= 2,
     }
 
 
@@ -183,6 +205,17 @@ def write_comparison_markdown(path: Path, comparison: dict[str, Any]) -> None:
                 f.write(f"| `{item['path']}` | `{json.dumps(item['errors'])}` |\n")
         else:
             f.write("None.\n")
+
+        metric_warnings = comparison.get("metric_warnings", [])
+        f.write("\n## Metric Warnings\n\n")
+        if metric_warnings:
+            f.write("| Experiment | Field | Problem | Value |\n|---|---|---|---|\n")
+            for item in metric_warnings:
+                f.write(
+                    f"| `{item.get('experiment')}` | `{item.get('field')}` | `{item.get('problem')}` | {_format_value(item.get('value'))} |\n"
+                )
+        else:
+            f.write("None. Primary train/eval metrics are present and healthy.\n")
 
         metric_keys = [_metric_key(path) for path in _METRIC_PATHS]
         f.write("\n## Experiment Rows\n\n")
