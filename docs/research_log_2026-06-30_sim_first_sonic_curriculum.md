@@ -218,6 +218,71 @@ eval.terminated_final=1
 
 This is now the minimum reporting contract for the next simulation experiments.
 
+## Paired experiment manifest harness
+
+Added a manifest builder/validator so every future baseline/curriculum run can be compared from an explicit, reproducible record rather than implicit shell history:
+
+```text
+scripts/research/sonic_experiment_manifest.py
+tests/research/test_sonic_experiment_manifest.py
+```
+
+The manifest schema records:
+
+```text
+experiment_id
+hypothesis
+variant
+seed
+git_commit
+controlled_variables
+datasets
+checkpoint
+train/eval commands
+summary artifact path
+parsed metrics
+interpretation/status
+```
+
+Validation:
+
+```text
+python -m pytest -q \
+  tests/research/test_sonic_experiment_manifest.py \
+  tests/research/test_sonic_log_summary.py \
+  tests/research/test_curriculum_sampler.py \
+  tests/research/test_curriculum_gates.py \
+  tests/research/test_manifest_builder_fixture.py \
+  tests/research/test_data_collection_launcher.py
+
+19 passed in 0.69s
+```
+
+Current sample manifest generated from real artifacts:
+
+```text
+outputs/research/sonic_sample_experiment_manifest.json
+outputs/research/sonic_sample_experiment_manifest.md
+```
+
+Key fields:
+
+```text
+experiment_id=sample_release_eval_seed0
+variant=released_checkpoint_sample_eval
+seed=0
+checkpoint=sonic_release/last.pt
+datasets.robot_motion=sample_data/robot_filtered
+datasets.smpl_motion=sample_data/smpl_filtered
+git_commit=f5d6554
+metrics.train.total_timesteps=38400
+metrics.eval.all.mpjpe_g=130.802
+status=needs_review
+interpretation=harness_ok_not_convergence__eval_sequence_terminated__sample_data_only
+```
+
+This establishes the comparison unit for the paper: future runs should add one manifest per seed/variant, then compare manifests under fixed datasets, checkpoints, commands, and evaluation settings.
+
 ## Controlled variables for paper-grade experiments
 
 Keep fixed unless explicitly ablated:
