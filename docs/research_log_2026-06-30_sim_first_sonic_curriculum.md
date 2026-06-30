@@ -283,6 +283,62 @@ interpretation=harness_ok_not_convergence__eval_sequence_terminated__sample_data
 
 This establishes the comparison unit for the paper: future runs should add one manifest per seed/variant, then compare manifests under fixed datasets, checkpoints, commands, and evaluation settings.
 
+## Manifest comparison harness
+
+Added a comparison script that consumes one or more manifest JSON files and emits a paper-facing JSON/Markdown comparison table:
+
+```text
+scripts/research/compare_sonic_manifests.py
+tests/research/test_compare_sonic_manifests.py
+```
+
+Purpose:
+
+- validate every supplied manifest using the manifest schema,
+- extract stable train/eval fields into a table,
+- check whether controlled variables, dataset paths, and checkpoint match across variants,
+- fail loudly when mismatches would break causal comparison.
+
+Validation:
+
+```text
+source /home/robotixx/miniconda3/etc/profile.d/conda.sh && conda activate env_isaaclab
+python -m pytest -q \
+  tests/research/test_compare_sonic_manifests.py \
+  tests/research/test_sonic_experiment_manifest.py \
+  tests/research/test_sonic_log_summary.py \
+  tests/research/test_curriculum_sampler.py \
+  tests/research/test_curriculum_gates.py \
+  tests/research/test_manifest_builder_fixture.py \
+  tests/research/test_data_collection_launcher.py
+
+23 passed in 0.72s
+```
+
+Current one-manifest smoke comparison generated from the real sample manifest:
+
+```bash
+python scripts/research/compare_sonic_manifests.py \
+  --manifest outputs/research/sonic_sample_experiment_manifest.json \
+  --output-json outputs/research/sonic_sample_manifest_comparison.json \
+  --output-md outputs/research/sonic_sample_manifest_comparison.md
+```
+
+Key fields:
+
+```text
+manifest_count=1
+control_mismatches=[]
+validation_errors=[]
+ok_for_causal_comparison=false
+row.experiment_id=sample_release_eval_seed0
+row.metrics.train.mean_rewards=0.85156
+row.metrics.eval.all.mpjpe_g=130.802
+row.metrics.eval.terminated_final=1
+```
+
+The `ok_for_causal_comparison=false` value is intentional for the current artifact because only one manifest exists. Once baseline and curriculum manifests are supplied for the same seed/dataset/checkpoint, the comparison harness will mark the pair causal-comparison-ready only if controls match.
+
 ## Controlled variables for paper-grade experiments
 
 Keep fixed unless explicitly ablated:
