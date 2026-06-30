@@ -65,9 +65,8 @@ def _bootstrap_venv():
     os.execv(str(venv_python), [str(venv_python)] + sys.argv)
 
 
-_bootstrap_venv()
-
-import tyro
+if __name__ == "__main__":
+    _bootstrap_venv()
 
 
 def _get_local_ip() -> str:
@@ -135,6 +134,9 @@ class DataCollectionLaunchConfig:
 
     dataset_name: str = ""
     """Dataset name for the data exporter. Leave empty to auto-generate from timestamp."""
+
+    root_output_dir: str = "outputs"
+    """Parent directory for saved datasets passed to run_data_exporter.py."""
 
     data_exporter_frequency: int = 50
     """Data collection frequency (Hz) for the data exporter."""
@@ -279,6 +281,27 @@ def _check_pane_alive(pane_index: int) -> bool:
     return result.stdout.strip() != "1"
 
 
+def _build_exporter_cmd(config: DataCollectionLaunchConfig, repo_root: Path) -> str:
+    """Build the data exporter command used by the tmux launcher."""
+    exporter_cmd = (
+        f"cd {repo_root} && "
+        f"source .venv_data_collection/bin/activate && "
+        f"python gear_sonic/scripts/run_data_exporter.py "
+        f"--task-prompt '{config.task_prompt}' "
+        f"--root-output-dir {config.root_output_dir} "
+        f"--data-collection-frequency {config.data_exporter_frequency} "
+        f"--camera-host {config.camera_host} "
+        f"--camera-port {config.camera_port}"
+    )
+    if config.dataset_name:
+        exporter_cmd += f" --dataset-name '{config.dataset_name}'"
+    if config.record_wrist_cameras:
+        exporter_cmd += " --record-wrist-cameras"
+    if not config.text_to_speech:
+        exporter_cmd += " --no-text-to-speech"
+    return exporter_cmd
+
+
 def main(config: DataCollectionLaunchConfig):
     repo_root = Path(__file__).resolve().parent.parent.parent
 
@@ -389,21 +412,7 @@ def main(config: DataCollectionLaunchConfig):
         _send_to_pane(3, viewer_cmd, wait=2.0)
 
     # --- Pane 1 (top-right): Data Exporter ---
-    exporter_cmd = (
-        f"cd {repo_root} && "
-        f"source .venv_data_collection/bin/activate && "
-        f"python gear_sonic/scripts/run_data_exporter.py "
-        f"--task-prompt '{config.task_prompt}' "
-        f"--data-collection-frequency {config.data_exporter_frequency} "
-        f"--camera-host {config.camera_host} "
-        f"--camera-port {config.camera_port}"
-    )
-    if config.dataset_name:
-        exporter_cmd += f" --dataset-name '{config.dataset_name}'"
-    if config.record_wrist_cameras:
-        exporter_cmd += " --record-wrist-cameras"
-    if not config.text_to_speech:
-        exporter_cmd += " --no-text-to-speech"
+    exporter_cmd = _build_exporter_cmd(config, repo_root)
 
     print("Starting data exporter (pane 1)...")
     _send_to_pane(2, exporter_cmd, wait=1.0)
@@ -468,6 +477,8 @@ def _signal_handler(sig, frame):
 
 
 if __name__ == "__main__":
+    import tyro
+
     signal.signal(signal.SIGINT, _signal_handler)
     config = tyro.cli(DataCollectionLaunchConfig)
     main(config)
