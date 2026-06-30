@@ -515,6 +515,96 @@ python -m pytest -q \
 27 passed in 0.71s
 ```
 
+## Bounded metric-complete micro eval gate
+
+Root cause of the previous missing-metric micro eval was twofold:
+
+1. full-sequence sample eval takes roughly 3.8 minutes per variant because sample SMPL motions are 2002 frames long;
+2. `ImEvalCallback` exits with `os._exit(0)` for eval-only runs, so redirected/stdout-captured eval summaries could be lost unless metric prints are flushed before exit.
+
+Implemented fixes:
+
+```text
+gear_sonic/trl/callbacks/im_eval_callback.py
+gear_sonic/config/callbacks/im_eval.yaml
+tests/research/test_im_eval_callback_config.py
+scripts/research/run_sonic_paired_experiment.py
+tests/research/test_run_sonic_paired_experiment.py
+configs/research/sonic_paired_sample_micro_execute.json
+```
+
+Changes:
+
+- added optional `callbacks.im_eval.max_eval_steps`, default `null`, to cap smoke-eval length without changing full eval behavior;
+- flushed `Success Rate`, `Progress Rate`, `All:`, and `Succ:` prints before eval-only `os._exit(0)`;
+- updated the paired launcher to rebuild stale summaries when logs are newer than summary JSON;
+- updated the sample micro spec to use `++callbacks.im_eval.max_eval_steps=200` for bounded eval smoke.
+
+Bounded eval probe:
+
+```bash
+python gear_sonic/eval_agent_trl.py \
+  +checkpoint=sonic_release/last.pt \
+  +headless=True \
+  ++eval_callbacks=im_eval \
+  ++run_eval_loop=False \
+  ++num_envs=2 \
+  ++callbacks.im_eval.max_eval_steps=200 \
+  ++algo.config.eval.num_eval_episodes=4 \
+  ++manager_env.commands.motion.motion_lib_cfg.motion_file=sample_data/robot_filtered \
+  ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=sample_data/smpl_filtered \
+  ++manager_env.commands.motion.motion_lib_cfg.max_unique_motions=2 \
+  +manager_env/terminations=tracking/eval
+```
+
+Evidence:
+
+```text
+log=outputs/research/eval_release/micro_metric_bounded_max200_flush_20260630_193028.log
+rc=0
+Success Rate: 1.0000000000
+Progress Rate: 1.0000000000
+All: mpjpe_g: 16.493, mpjpe_l: 13.255, mpjpe_pa: 9.168, ...
+Succ: mpjpe_g: 16.493, mpjpe_l: 13.255, mpjpe_pa: 9.168, ...
+```
+
+Regenerated paired micro summaries/manifests/comparison from the existing train logs plus new bounded eval logs:
+
+```text
+outputs/research/paired_sample_micro_execute/comparison.json
+manifest_count=2
+control_mismatches=0
+validation_errors=0
+metric_warnings=0
+ok_for_causal_comparison=true
+```
+
+Rows:
+
+```text
+uniform_sampling_micro:  train.mean_rewards=0.98515, eval.ok=true, eval.all.mpjpe_g=16.493, terminated_final=0
+adaptive_sampling_micro: train.mean_rewards=1.02088, eval.ok=true, eval.all.mpjpe_g=16.493, terminated_final=0
+```
+
+Interpretation: this is now a metric-complete sample-data **execution validation** artifact. It still is not a scientific performance claim because both variants share the same released-checkpoint eval smoke; the value is proving that the paper harness can enforce controls, detect stale summaries, run bounded metric eval, and produce a comparison accepted by the stricter metric gate.
+
+Validation after this change:
+
+```text
+python -m pytest -q \
+  tests/research/test_run_sonic_paired_experiment.py \
+  tests/research/test_compare_sonic_manifests.py \
+  tests/research/test_im_eval_callback_config.py \
+  tests/research/test_sonic_experiment_manifest.py \
+  tests/research/test_sonic_log_summary.py \
+  tests/research/test_curriculum_sampler.py \
+  tests/research/test_curriculum_gates.py \
+  tests/research/test_manifest_builder_fixture.py \
+  tests/research/test_data_collection_launcher.py
+
+29 passed in 2.05s
+```
+
 ## Controlled variables for paper-grade experiments
 
 Keep fixed unless explicitly ablated:

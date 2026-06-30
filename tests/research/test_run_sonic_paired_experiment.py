@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 from scripts.research.run_sonic_paired_experiment import (
@@ -120,3 +121,50 @@ def test_materialize_dry_run_without_summaries_creates_plan_only(tmp_path: Path)
     assert plan["ok_for_causal_comparison"] is False
     assert plan["comparison_json"] is None
     assert plan["variants"][0]["manifest_json"] is None
+
+
+def test_materialize_rebuilds_stale_summary_when_logs_are_newer(tmp_path: Path) -> None:
+    output_dir = tmp_path / "paired_run"
+    variant_dir = output_dir / "baseline"
+    variant_dir.mkdir(parents=True)
+    summary_path = variant_dir / "summary.json"
+    train_log = variant_dir / "train.log"
+    eval_log = variant_dir / "eval.log"
+    summary_path.write_text(
+        json.dumps({"schema_version": 1, "train": {"ok": True, "mean_rewards": -1}, "eval": {"ok": False, "all": {}}}),
+        encoding="utf-8",
+    )
+    train_log.write_text(
+        "Learning iteration 1\nMean rewards: 2.5\nTotal timesteps: 24\nTotal time: 1.0s\n",
+        encoding="utf-8",
+    )
+    eval_log.write_text(
+        "All:  mpjpe_g: 1.0 mpjpe_l: 2.0 mpjpe_pa: 3.0\nSucc:  mpjpe_g: 1.0 mpjpe_l: 2.0 mpjpe_pa: 3.0\nTerminated: 0 | Succ rate: 1.000\n",
+        encoding="utf-8",
+    )
+    newer = summary_path.stat().st_mtime + 10
+    os.utime(train_log, (newer, newer))
+    os.utime(eval_log, (newer, newer))
+
+    spec = {
+        "experiment_group": "stale_summary",
+        "hypothesis": "h",
+        "seed": 0,
+        "dataset_robot": "sample_data/robot_filtered",
+        "dataset_smpl": "sample_data/smpl_filtered",
+        "checkpoint": "sonic_release/last.pt",
+        "variants": [
+            {
+                "name": "baseline",
+                "train_command": "python train.py",
+                "eval_command": "python eval.py",
+                "interpretation": "rebuilt",
+            }
+        ],
+    }
+
+    materialize_paired_experiment(spec, output_dir=output_dir, dry_run=True, repo_root=tmp_path)
+
+    rebuilt = json.loads(summary_path.read_text(encoding="utf-8"))
+    assert rebuilt["train"]["mean_rewards"] == 2.5
+    assert rebuilt["eval"]["all"]["mpjpe_g"] == 1.0

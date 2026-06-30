@@ -3,3 +3,5 @@ im_eval:
   eval_frequency: 1
   eval_only: true
   output_dir: ${experiment_dir}/eval_metrics
+  # Optional step cap for fast smoke tests. Leave null for full-sequence metrics.
+  max_eval_steps: null

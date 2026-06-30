@@ -114,6 +114,13 @@ def _relative_or_absolute(path_text: str, base: Path) -> Path:
     return path if path.is_absolute() else base / path
 
 
+def _summary_is_stale(summary_json: Path, train_log: Path, eval_log: Path) -> bool:
+    if not summary_json.exists():
+        return True
+    summary_mtime = summary_json.stat().st_mtime
+    return any(path.exists() and path.stat().st_mtime > summary_mtime for path in (train_log, eval_log))
+
+
 def materialize_paired_experiment(
     spec: dict[str, Any],
     *,
@@ -152,8 +159,8 @@ def materialize_paired_experiment(
                 rc = _run_command(str(variant["eval_command"]), eval_log, cwd=repo_root)
                 command_results.append({"kind": "eval", "returncode": rc, "log": str(eval_log)})
 
-        if summary_json.exists():
-            # Existing summary supplied by spec; keep it immutable and use it as source of truth.
+        if not _summary_is_stale(summary_json, train_log, eval_log):
+            # Existing summary is newer than logs; keep it immutable and use it as source of truth.
             summary_source = summary_json
         elif train_log.exists() or eval_log.exists():
             summary = summarize_logs(train_log if train_log.exists() else None, eval_log if eval_log.exists() else None)

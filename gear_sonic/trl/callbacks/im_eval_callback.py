@@ -108,7 +108,13 @@ class ImEvalCallback(TrainerCallback):
     """Callback to evaluate motion imtiation during training. Supports multigpu ."""
 
     def __init__(
-        self, eval_frequency, empty_cache_freq=20, eval_only=False, output_dir=None, log_keys=None
+        self,
+        eval_frequency,
+        empty_cache_freq=20,
+        eval_only=False,
+        output_dir=None,
+        log_keys=None,
+        max_eval_steps=None,
     ):
         super().__init__()
         self.eval_frequency = eval_frequency
@@ -118,6 +124,7 @@ class ImEvalCallback(TrainerCallback):
         self.in_eval_mode = False
         self.render_only = False
         self.log_keys = log_keys
+        self.max_eval_steps = max_eval_steps
         self._has_object = False
 
     def on_step_end(self, args, state, control, **kwargs):
@@ -402,6 +409,9 @@ class ImEvalCallback(TrainerCallback):
 
         if self.steps_pbar is None and (~self.terminate_state).sum() > 0:
             self.steps_pbar = tqdm(total=int(curr_max), desc="Sequence progress", leave=False)
+
+        if self.max_eval_steps is not None:
+            curr_max = min(int(curr_max), int(self.max_eval_steps))
 
         if self.steps_pbar is not None:
             self.steps_pbar.update(1)
@@ -793,19 +803,21 @@ class ImEvalCallback(TrainerCallback):
                     )
 
                 if self.accelerator.is_main_process:
-                    print(f"Success Rate: {success_rate:.10f}")
-                    print(f"Progress Rate: {progress_rate:.10f}")
+                    print(f"Success Rate: {success_rate:.10f}", flush=True)
+                    print(f"Progress Rate: {progress_rate:.10f}", flush=True)
                     if has_obj_metrics:
                         print(
                             f"Object Pos Error (all): {obj_pos_err_mean:.4f}m | "
-                            f"Object Ori Error (all): {obj_ori_err_mean:.4f}rad"
+                            f"Object Ori Error (all): {obj_ori_err_mean:.4f}rad",
+                            flush=True,
                         )
                     print(
-                        "All: ", " \t".join([f"{k}: {v:.3f}" for k, v in metrics_all_print.items()])
+                        "All: ", " \t".join([f"{k}: {v:.3f}" for k, v in metrics_all_print.items()]), flush=True
                     )
                     print(
                         "Succ: ",
                         " \t".join([f"{k}: {v:.3f}" for k, v in metrics_succ_print.items()]),
+                        flush=True,
                     )
 
                 metrics_succ_print["success_rate"] = success_rate
