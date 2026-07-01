@@ -83,6 +83,31 @@ def test_validate_manifest_accepts_builder_output(tmp_path: Path) -> None:
     assert validate_manifest(manifest) == []
 
 
+def test_build_manifest_records_checkpoint_provenance(tmp_path: Path) -> None:
+    summary_path = tmp_path / "summary.json"
+    _summary(summary_path)
+
+    manifest = build_manifest(
+        experiment_id="posttrain_seed0",
+        hypothesis="h",
+        variant="posttrain",
+        seed=0,
+        dataset_robot="robot",
+        dataset_smpl="smpl",
+        checkpoint="runs/posttrain/last.pt",
+        summary_json=summary_path,
+        train_command="train",
+        eval_command="eval",
+        interpretation="i",
+        checkpoint_source="trained_variant_checkpoint",
+        checkpoint_provenance={"sha256": "abc", "is_release_checkpoint": False},
+    )
+
+    assert manifest["checkpoint_source"] == "trained_variant_checkpoint"
+    assert manifest["checkpoint_provenance"]["sha256"] == "abc"
+    assert validate_manifest(manifest) == []
+
+
 def test_write_manifest_markdown_includes_reproducibility_fields(tmp_path: Path) -> None:
     summary_path = tmp_path / "summary.json"
     _summary(summary_path)

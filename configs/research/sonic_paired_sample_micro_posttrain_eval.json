@@ -1,0 +1,45 @@
+{
+  "experiment_group": "sample_adaptive_sampling_micro_posttrain_eval",
+  "hypothesis": "SIM-M2-pre: the paired harness can evaluate each variant's own 10-iteration post-training checkpoint under bounded MPJPE-complete sample-data eval.",
+  "seed": 0,
+  "dataset_robot": "sample_data/robot_filtered",
+  "dataset_smpl": "sample_data/smpl_filtered",
+  "checkpoint": "VARIANT_SPECIFIC_CHECKPOINTS",
+  "checkpoint_source": "trained_variant_checkpoint",
+  "variants": [
+    {
+      "name": "uniform_sampling_micro",
+      "checkpoint": "logs_rl/TRL_G1_Track/manager/universal_token/all_modes/sonic_release_uniform_sampling_micro_posttrain_seed0-20260701_022413/last.pt",
+      "checkpoint_source": "trained_variant_checkpoint",
+      "checkpoint_provenance": {
+        "exists": true,
+        "is_release_checkpoint": false,
+        "mtime": "2026-07-01T02:24:41.833748",
+        "sha256": "f1803557a1b8735f2eb20bcab4ccb8fe3df93d78e06d21f89947d959ee4ec8eb",
+        "size_bytes": 448600614
+      },
+      "train_log": "outputs/research/paired_sample_micro_posttrain_eval/uniform_sampling_micro/train.log",
+      "eval_log": "outputs/research/paired_sample_micro_posttrain_eval/uniform_sampling_micro/eval.log",
+      "train_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 python gear_sonic/train_agent_trl.py +exp=manager/universal_token/all_modes/sonic_release num_envs=8 headless=True use_wandb=false seed=0 exp_var=uniform_sampling_micro_posttrain_seed0 ++algo.config.num_learning_iterations=10 ++algo.config.save_interval=999999 ++callbacks.model_save.save_last_frequency=10 ++manager_env.commands.motion.motion_lib_cfg.motion_file=sample_data/robot_filtered ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=sample_data/smpl_filtered ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.enable=false",
+      "eval_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 LOGURU_LEVEL=ERROR python gear_sonic/eval_agent_trl.py +checkpoint=logs_rl/TRL_G1_Track/manager/universal_token/all_modes/sonic_release_uniform_sampling_micro_posttrain_seed0-20260701_022413/last.pt +headless=True ++eval_callbacks=im_eval ++run_eval_loop=False ++num_envs=2 ++callbacks.im_eval.max_eval_steps=200 ++algo.config.eval.num_eval_episodes=2 ++manager_env.commands.motion.motion_lib_cfg.motion_file=sample_data/robot_filtered ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=sample_data/smpl_filtered ++manager_env.commands.motion.motion_lib_cfg.max_unique_motions=1 +manager_env/terminations=tracking/eval",
+      "interpretation": "SIM-M2-pre_uniform_variant_trained_checkpoint_eval__sample_data_only"
+    },
+    {
+      "name": "adaptive_sampling_micro",
+      "checkpoint": "logs_rl/TRL_G1_Track/manager/universal_token/all_modes/sonic_release_adaptive_sampling_micro_posttrain_seed0-20260701_022443/last.pt",
+      "checkpoint_source": "trained_variant_checkpoint",
+      "checkpoint_provenance": {
+        "exists": true,
+        "is_release_checkpoint": false,
+        "mtime": "2026-07-01T02:25:11.933069",
+        "sha256": "9c82a8131faeb9954f7917e2cf19953a0a71301ea965487b8447a1bb8d94dc9d",
+        "size_bytes": 448601904
+      },
+      "train_log": "outputs/research/paired_sample_micro_posttrain_eval/adaptive_sampling_micro/train.log",
+      "eval_log": "outputs/research/paired_sample_micro_posttrain_eval/adaptive_sampling_micro/eval.log",
+      "train_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 python gear_sonic/train_agent_trl.py +exp=manager/universal_token/all_modes/sonic_release num_envs=8 headless=True use_wandb=false seed=0 exp_var=adaptive_sampling_micro_posttrain_seed0 ++algo.config.num_learning_iterations=10 ++algo.config.save_interval=999999 ++callbacks.model_save.save_last_frequency=10 ++manager_env.commands.motion.motion_lib_cfg.motion_file=sample_data/robot_filtered ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=sample_data/smpl_filtered ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.enable=true ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.uniform_sampling_rate=0.1",
+      "eval_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 LOGURU_LEVEL=ERROR python gear_sonic/eval_agent_trl.py +checkpoint=logs_rl/TRL_G1_Track/manager/universal_token/all_modes/sonic_release_adaptive_sampling_micro_posttrain_seed0-20260701_022443/last.pt +headless=True ++eval_callbacks=im_eval ++run_eval_loop=False ++num_envs=2 ++callbacks.im_eval.max_eval_steps=200 ++algo.config.eval.num_eval_episodes=2 ++manager_env.commands.motion.motion_lib_cfg.motion_file=sample_data/robot_filtered ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=sample_data/smpl_filtered ++manager_env.commands.motion.motion_lib_cfg.max_unique_motions=1 +manager_env/terminations=tracking/eval",
+      "interpretation": "SIM-M2-pre_adaptive_variant_trained_checkpoint_eval__sample_data_only"
+    }
+  ]
+}

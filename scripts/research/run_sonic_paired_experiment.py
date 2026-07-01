@@ -172,6 +172,7 @@ def materialize_paired_experiment(
 
         manifest_errors: list[str] = []
         if summary_source is not None:
+            checkpoint = str(variant.get("checkpoint") or spec["checkpoint"])
             manifest = build_manifest(
                 experiment_id=str(variant.get("experiment_id") or _variant_id(group, name, seed)),
                 hypothesis=str(spec["hypothesis"]),
@@ -179,12 +180,14 @@ def materialize_paired_experiment(
                 seed=seed,
                 dataset_robot=str(spec["dataset_robot"]),
                 dataset_smpl=str(spec["dataset_smpl"]),
-                checkpoint=str(spec["checkpoint"]),
+                checkpoint=checkpoint,
                 summary_json=summary_source,
                 train_command=variant.get("train_command"),
                 eval_command=str(variant["eval_command"]),
                 interpretation=str(variant["interpretation"]),
                 git_commit=spec.get("git_commit"),
+                checkpoint_source=str(variant.get("checkpoint_source") or spec.get("checkpoint_source") or "configured_checkpoint"),
+                checkpoint_provenance=variant.get("checkpoint_provenance"),
                 status=str(variant.get("status", "needs_review")),
             )
             manifest_errors = validate_manifest(manifest)

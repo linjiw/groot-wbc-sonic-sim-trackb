@@ -98,6 +98,36 @@ def test_materialize_dry_run_builds_manifests_and_comparison(tmp_path: Path) -> 
     assert comparison["rows"][1]["metrics"]["eval.all.mpjpe_g"] == 120.0
 
 
+def test_materialize_uses_variant_checkpoint_and_provenance(tmp_path: Path) -> None:
+    summary = _summary(tmp_path / "summary.json", reward=0.8, mpjpe=10.0)
+    spec = {
+        "experiment_group": "posttrain",
+        "hypothesis": "h",
+        "seed": 0,
+        "dataset_robot": "robot",
+        "dataset_smpl": "smpl",
+        "checkpoint": "sonic_release/last.pt",
+        "variants": [
+            {
+                "name": "uniform",
+                "summary_json": str(summary),
+                "checkpoint": "runs/uniform/last.pt",
+                "checkpoint_source": "trained_variant_checkpoint",
+                "checkpoint_provenance": {"sha256": "abc", "is_release_checkpoint": False},
+                "eval_command": "python eval.py",
+                "interpretation": "posttrain",
+            }
+        ],
+    }
+
+    materialize_paired_experiment(spec, output_dir=tmp_path / "out", dry_run=True, repo_root=tmp_path)
+
+    manifest = json.loads((tmp_path / "out" / "uniform" / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["checkpoint"] == "runs/uniform/last.pt"
+    assert manifest["checkpoint_source"] == "trained_variant_checkpoint"
+    assert manifest["checkpoint_provenance"]["sha256"] == "abc"
+
+
 def test_materialize_dry_run_without_summaries_creates_plan_only(tmp_path: Path) -> None:
     spec = {
         "experiment_group": "plan_only",

@@ -673,6 +673,97 @@ adaptive_sampling_micro: eval.ok=true, eval.all.mpjpe_g=16.493, finite=true
 
 SIM-M1 exit criteria are satisfied for sample-data bounded eval reliability. This is still not an adaptive-sampling performance claim because the eval command uses the released checkpoint; the correct next gate is variant-specific post-training checkpoint eval, then SIM-M2 multi-seed causal sanity.
 
+## SIM-M2-pre variant-specific post-training checkpoint eval
+
+Goal: prove that the comparison harness can evaluate each variant's own 10-iteration trained checkpoint rather than silently reusing `sonic_release/last.pt`.
+
+Protected SIM-M1 reference:
+
+```text
+git tag sim-m1-bounded-eval-metric-complete 98c5afc
+bundle=/home/robotixx/sonic-sim-m1-bounded-eval-metric-complete.bundle
+```
+
+Initial checkpoint audit of the first executed micro contrast (`outputs/research/paired_sample_micro_execute`) found no checkpoint artifacts because the micro run used a save cadence larger than its 10-iteration budget:
+
+```text
+outputs/research/paired_sample_micro_execute/checkpoint_provenance.json
+uniform_sampling_micro.exists=false
+adaptive_sampling_micro.exists=false
+```
+
+Narrow correction: reran the same 10-iteration micro commands with checkpoint saving enabled via:
+
+```text
+++callbacks.model_save.save_last_frequency=10
+```
+
+No training scale was increased.
+
+Checkpoint provenance for the post-train eval gate:
+
+```text
+outputs/research/paired_sample_micro_posttrain_eval/checkpoint_provenance.json
+uniform_sampling_micro:
+  path=logs_rl/TRL_G1_Track/manager/universal_token/all_modes/sonic_release_uniform_sampling_micro_posttrain_seed0-20260701_022413/last.pt
+  size_bytes=448600614
+  sha256=f1803557a1b8735f2eb20bcab4ccb8fe3df93d78e06d21f89947d959ee4ec8eb
+  is_release_checkpoint=false
+adaptive_sampling_micro:
+  path=logs_rl/TRL_G1_Track/manager/universal_token/all_modes/sonic_release_adaptive_sampling_micro_posttrain_seed0-20260701_022443/last.pt
+  size_bytes=448601904
+  sha256=9c82a8131faeb9954f7917e2cf19953a0a71301ea965487b8447a1bb8d94dc9d
+  is_release_checkpoint=false
+checks:
+  uniform_vs_adaptive_distinct_paths=true
+  uniform_vs_adaptive_distinct_sha256=true
+```
+
+Added manifest/comparison support for this gate:
+
+```text
+checkpoint_source=trained_variant_checkpoint
+checkpoint_provenance={sha256,size_bytes,mtime,is_release_checkpoint}
+```
+
+The comparison layer now allows distinct checkpoint paths only when every manifest declares `checkpoint_source=trained_variant_checkpoint`, and it raises `checkpoint_warnings` if a trained-variant comparison uses `sonic_release/last.pt`, duplicates checkpoint paths, or provenance marks a release checkpoint.
+
+SIM-M2-pre config:
+
+```text
+configs/research/sonic_paired_sample_micro_posttrain_eval.json
+```
+
+Generated artifacts:
+
+```text
+outputs/research/paired_sample_micro_posttrain_eval/uniform_sampling_micro/summary.json
+outputs/research/paired_sample_micro_posttrain_eval/uniform_sampling_micro/manifest.json
+outputs/research/paired_sample_micro_posttrain_eval/adaptive_sampling_micro/summary.json
+outputs/research/paired_sample_micro_posttrain_eval/adaptive_sampling_micro/manifest.json
+outputs/research/paired_sample_micro_posttrain_eval/comparison.json
+```
+
+SIM-M2-pre comparison result:
+
+```text
+manifest_count=2
+control_mismatches=0
+validation_errors=0
+metric_warnings=0
+checkpoint_warnings=0
+ok_for_causal_comparison=true
+```
+
+Rows:
+
+```text
+uniform_sampling_micro:  train.mean_rewards=0.98515, eval.ok=true, eval.all.mpjpe_g=31.901
+adaptive_sampling_micro: train.mean_rewards=1.02088, eval.ok=true, eval.all.mpjpe_g=31.925
+```
+
+Interpretation: SIM-M2-pre passes as a trained-checkpoint evaluation validity gate. It proves the harness can train the two micro variants, save distinct post-training checkpoints, record checkpoint provenance, evaluate each checkpoint under bounded MPJPE-complete eval, and compare the resulting manifests without control/metric/checkpoint warnings. It is still not an adaptive-sampling performance result because this is one seed, 10 iterations, tiny `sample_data`, and bounded smoke eval.
+
 Validation after this change:
 
 ```text
@@ -688,7 +779,7 @@ python -m pytest -q \
   tests/research/test_manifest_builder_fixture.py \
   tests/research/test_data_collection_launcher.py
 
-35 passed in 1.99s
+39 passed in 1.97s
 ```
 
 ## Controlled variables for paper-grade experiments

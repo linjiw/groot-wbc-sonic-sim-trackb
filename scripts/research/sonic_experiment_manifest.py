@@ -61,6 +61,8 @@ def build_manifest(
     interpretation: str,
     git_commit: str | None = None,
     controlled_variables: dict[str, str] | None = None,
+    checkpoint_source: str = "configured_checkpoint",
+    checkpoint_provenance: dict[str, Any] | None = None,
     status: str = "needs_review",
 ) -> dict[str, Any]:
     """Create a JSON-serializable manifest from an existing summary artifact."""
@@ -84,6 +86,8 @@ def build_manifest(
             "smpl_motion": dataset_smpl,
         },
         "checkpoint": checkpoint,
+        "checkpoint_source": checkpoint_source,
+        "checkpoint_provenance": checkpoint_provenance or {},
         "commands": {
             "train": train_command,
             "eval": eval_command,

@@ -77,6 +77,52 @@ def test_build_comparison_extracts_rows_and_metrics(tmp_path: Path) -> None:
     assert comparison["rows"][1]["metrics"]["eval.terminated_final"] == 0
 
 
+def test_build_comparison_allows_distinct_trained_variant_checkpoints(tmp_path: Path) -> None:
+    baseline = _manifest(
+        tmp_path / "baseline.json",
+        experiment_id="baseline_seed0",
+        variant="baseline",
+        checkpoint="runs/baseline/last.pt",
+    )
+    treatment = _manifest(
+        tmp_path / "treatment.json",
+        experiment_id="treatment_seed0",
+        variant="treatment",
+        checkpoint="runs/treatment/last.pt",
+    )
+    for manifest_path in (baseline, treatment):
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["checkpoint_source"] = "trained_variant_checkpoint"
+        manifest["checkpoint_provenance"] = {
+            "is_release_checkpoint": False,
+            "sha256": f"sha-{manifest['variant']}",
+        }
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    comparison = build_comparison([baseline, treatment])
+
+    assert comparison["control_mismatches"] == []
+    assert comparison["checkpoint_warnings"] == []
+    assert comparison["ok_for_causal_comparison"] is True
+
+
+def test_build_comparison_flags_release_checkpoint_when_trained_variant_required(tmp_path: Path) -> None:
+    baseline = _manifest(tmp_path / "baseline.json", experiment_id="baseline_seed0", variant="baseline")
+    treatment = _manifest(tmp_path / "treatment.json", experiment_id="treatment_seed0", variant="treatment")
+    for manifest_path in (baseline, treatment):
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["checkpoint_source"] = "trained_variant_checkpoint"
+        manifest["checkpoint_provenance"] = {"is_release_checkpoint": True}
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    comparison = build_comparison([baseline, treatment])
+
+    assert comparison["ok_for_causal_comparison"] is False
+    problems = {warning["problem"] for warning in comparison["checkpoint_warnings"]}
+    assert "release_checkpoint_used" in problems
+    assert "release_checkpoint_path" in problems
+
+
 def test_build_comparison_flags_control_mismatch(tmp_path: Path) -> None:
     baseline = _manifest(tmp_path / "baseline.json", experiment_id="baseline_seed0", variant="baseline")
     mismatched = _manifest(

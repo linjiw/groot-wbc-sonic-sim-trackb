@@ -73,6 +73,10 @@ def _manifest_label(manifest: dict[str, Any]) -> str:
     return f"{variant or 'unknown_variant'}:seed{seed}"
 
 
+def _checkpoint_is_variant_specific(manifests: list[dict[str, Any]]) -> bool:
+    return bool(manifests) and all(m.get("checkpoint_source") == "trained_variant_checkpoint" for m in manifests)
+
+
 def _flatten_control_values(manifest: dict[str, Any]) -> dict[str, Any]:
     values: dict[str, Any] = {}
     for group in _CONTROL_GROUPS:
@@ -97,6 +101,8 @@ def _find_control_mismatches(manifests: list[dict[str, Any]]) -> list[dict[str, 
 
     mismatches: list[dict[str, Any]] = []
     for key in sorted(all_keys):
+        if key == "checkpoint" and _checkpoint_is_variant_specific(manifests):
+            continue
         values = [_flatten_control_values(manifest).get(key) for manifest in manifests]
         unique_values = {json.dumps(value, sort_keys=True, default=str) for value in values}
         if len(unique_values) > 1:
@@ -120,6 +126,31 @@ def _find_metric_warnings(manifests: list[dict[str, Any]]) -> list[dict[str, Any
                 warnings.append({"experiment": label, "field": _metric_key(path), "problem": "missing"})
             elif path[-1] == "ok" and value is not True:
                 warnings.append({"experiment": label, "field": _metric_key(path), "problem": "not_true", "value": value})
+    return warnings
+
+
+def _find_checkpoint_warnings(manifests: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Find checkpoint provenance problems for variant-specific post-training comparisons."""
+    warnings: list[dict[str, Any]] = []
+    if not _checkpoint_is_variant_specific(manifests):
+        return warnings
+    seen_paths: dict[str, str] = {}
+    for manifest in manifests:
+        label = _manifest_label(manifest)
+        checkpoint = manifest.get("checkpoint")
+        provenance = manifest.get("checkpoint_provenance", {})
+        if not checkpoint:
+            warnings.append({"experiment": label, "field": "checkpoint", "problem": "missing"})
+        if isinstance(checkpoint, str) and checkpoint.endswith("sonic_release/last.pt"):
+            warnings.append({"experiment": label, "field": "checkpoint", "problem": "release_checkpoint_path", "value": checkpoint})
+        if isinstance(provenance, dict) and provenance.get("is_release_checkpoint") is True:
+            warnings.append({"experiment": label, "field": "checkpoint_provenance.is_release_checkpoint", "problem": "release_checkpoint_used", "value": True})
+        if isinstance(checkpoint, str):
+            if checkpoint in seen_paths:
+                warnings.append({"experiment": label, "field": "checkpoint", "problem": "duplicate_checkpoint_path", "value": checkpoint})
+                warnings.append({"experiment": seen_paths[checkpoint], "field": "checkpoint", "problem": "duplicate_checkpoint_path", "value": checkpoint})
+            else:
+                seen_paths[checkpoint] = label
     return warnings
 
 
@@ -159,6 +190,7 @@ def build_comparison(manifest_paths: list[Path]) -> dict[str, Any]:
     seeds = sorted({m.get("seed") for m in manifests if m.get("seed") is not None})
     mismatches = _find_control_mismatches(manifests)
     metric_warnings = _find_metric_warnings(manifests)
+    checkpoint_warnings = _find_checkpoint_warnings(manifests)
     return {
         "schema_version": 1,
         "kind": "sonic_manifest_comparison",
@@ -167,9 +199,10 @@ def build_comparison(manifest_paths: list[Path]) -> dict[str, Any]:
         "seeds": seeds,
         "control_mismatches": mismatches,
         "metric_warnings": metric_warnings,
+        "checkpoint_warnings": checkpoint_warnings,
         "validation_errors": validation_errors,
         "rows": rows,
-        "ok_for_causal_comparison": not validation_errors and not mismatches and not metric_warnings and len(records) >= 2,
+        "ok_for_causal_comparison": not validation_errors and not mismatches and not metric_warnings and not checkpoint_warnings and len(records) >= 2,
     }
 
 
