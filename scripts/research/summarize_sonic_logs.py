@@ -73,11 +73,16 @@ def parse_eval_log(text: str) -> dict[str, Any]:
         "succ": _parse_metric_line(text, "Succ"),
     }
     terminated = _last_number(text, rf"Terminated:\s*({_NUMBER})", as_int=True)
-    success_rate = _last_number(text, rf"Succ rate:\s*({_NUMBER})")
+    success_rate = _last_number(text, rf"Success Rate:\s*({_NUMBER})")
+    if success_rate is None:
+        success_rate = _last_number(text, rf"Succ rate:\s*({_NUMBER})")
+    progress_rate = _last_number(text, rf"Progress Rate:\s*({_NUMBER})")
     if terminated is not None:
         summary["terminated_final"] = terminated
     if success_rate is not None:
         summary["success_rate_final"] = success_rate
+    if progress_rate is not None:
+        summary["progress_rate_final"] = progress_rate
     return summary
 
 

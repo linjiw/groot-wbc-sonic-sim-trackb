@@ -1,0 +1,23 @@
+{
+  "name": "sonic_eval_micro_metric_complete",
+  "goal": "SIM-M1 bounded eval metric completeness on sample_data",
+  "repo_root": "/home/robotixx/GR00T-WholeBodyControl",
+  "dataset_robot": "sample_data/robot_filtered",
+  "dataset_smpl": "sample_data/smpl_filtered",
+  "checkpoint": "sonic_release/last.pt",
+  "eval": {
+    "enabled": true,
+    "max_sequences": 1,
+    "max_steps_per_sequence": 200,
+    "num_envs": 2,
+    "headless": true,
+    "require_all_mpjpe": true,
+    "timeout_seconds": 300
+  },
+  "success_criteria": {
+    "traceback": false,
+    "all_mpjpe_present": true,
+    "eval_ok": true,
+    "primary_mpjpe_metric": "mpjpe_g"
+  }
+}

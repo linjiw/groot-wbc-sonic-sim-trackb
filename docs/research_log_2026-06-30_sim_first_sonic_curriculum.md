@@ -588,10 +588,96 @@ adaptive_sampling_micro: train.mean_rewards=1.02088, eval.ok=true, eval.all.mpjp
 
 Interpretation: this is now a metric-complete sample-data **execution validation** artifact. It still is not a scientific performance claim because both variants share the same released-checkpoint eval smoke; the value is proving that the paper harness can enforce controls, detect stale summaries, run bounded metric eval, and produce a comparison accepted by the stricter metric gate.
 
+## SIM-M1 formal eval-only and paired metric-complete gate
+
+Advisor directive: freeze the first executed paired training contrast before additional eval work, then prove bounded eval metric completeness before scaling.
+
+Protected reference:
+
+```text
+git tag sim-micro-adaptive-sampling-v0 d6bb536
+bundle=/home/robotixx/sonic-sim-micro-adaptive-sampling-v0.bundle
+```
+
+The tag `d6bb536` is explicitly labeled as an **executed training contrast with incomplete eval metrics**, not as a positive result.
+
+Added diagnostic and eval-only tooling:
+
+```text
+scripts/research/diagnose_sonic_eval_logs.py
+scripts/research/run_sonic_eval_metric_smoke.py
+configs/research/sonic_eval_micro_metric_complete.json
+configs/research/sonic_paired_sample_micro_metric_complete.json
+tests/research/test_sonic_eval_metric_smoke.py
+```
+
+Diagnostic artifact for the current paired eval logs:
+
+```text
+outputs/research/paired_sample_micro_execute/eval_diagnostics.json
+uniform_sampling_micro: traceback=false, timeout=false, contains_all_mpjpe=true, candidate_metric_lines=4
+adaptive_sampling_micro: traceback=false, timeout=false, contains_all_mpjpe=true, candidate_metric_lines=4
+```
+
+Eval-only SIM-M1 command:
+
+```bash
+python scripts/research/run_sonic_eval_metric_smoke.py \
+  --spec configs/research/sonic_eval_micro_metric_complete.json \
+  --output-dir outputs/research/sonic_eval_micro_metric_complete \
+  --repo-root /home/robotixx/GR00T-WholeBodyControl
+```
+
+Eval-only SIM-M1 result:
+
+```text
+outputs/research/sonic_eval_micro_metric_complete/result.json
+returncode=0
+timed_out=false
+eval_ok=true
+primary_mpjpe_metric=mpjpe_g
+primary_mpjpe_value=17.807
+ok=true
+```
+
+Summary artifact:
+
+```text
+outputs/research/sonic_eval_micro_metric_complete/summary.json
+eval.ok=true
+eval.all.mpjpe_g=17.807
+eval.traceback_count=0
+eval.success_rate_final=1.0
+eval.progress_rate_final=1.0
+```
+
+Parser correction: bounded eval logs emit final `Success Rate:` and `Progress Rate:` lines after tqdm-style interim `Succ rate:` status lines. The summarizer now prefers the final aggregate `Success Rate:` value and records `progress_rate_final`, preventing interim tqdm status from contaminating final eval summaries.
+
+Metric-complete paired comparison artifact:
+
+```text
+outputs/research/paired_sample_micro_metric_complete/comparison.json
+manifest_count=2
+control_mismatches=0
+validation_errors=0
+metric_warnings=0
+ok_for_causal_comparison=true
+```
+
+Rows:
+
+```text
+uniform_sampling_micro:  eval.ok=true, eval.all.mpjpe_g=16.493, finite=true
+adaptive_sampling_micro: eval.ok=true, eval.all.mpjpe_g=16.493, finite=true
+```
+
+SIM-M1 exit criteria are satisfied for sample-data bounded eval reliability. This is still not an adaptive-sampling performance claim because the eval command uses the released checkpoint; the correct next gate is variant-specific post-training checkpoint eval, then SIM-M2 multi-seed causal sanity.
+
 Validation after this change:
 
 ```text
 python -m pytest -q \
+  tests/research/test_sonic_eval_metric_smoke.py \
   tests/research/test_run_sonic_paired_experiment.py \
   tests/research/test_compare_sonic_manifests.py \
   tests/research/test_im_eval_callback_config.py \
@@ -602,7 +688,7 @@ python -m pytest -q \
   tests/research/test_manifest_builder_fixture.py \
   tests/research/test_data_collection_launcher.py
 
-29 passed in 2.05s
+35 passed in 1.99s
 ```
 
 ## Controlled variables for paper-grade experiments

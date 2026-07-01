@@ -65,6 +65,24 @@ Succ:  mpjpe_g: 199.754 \tmpjpe_l: 20.975 \tmpjpe_pa: 12.139 \taccel_dist: 0.868
     assert summary["traceback_count"] == 0
 
 
+def test_parse_eval_log_prefers_final_success_rate_over_tqdm_status() -> None:
+    text = """
+Terminated: 0 | max frames: 200 | steps 199 | Succ rate: 0.000 | Mpjpe: nan
+Success Rate: 1.0000000000
+Progress Rate: 1.0000000000
+All:  mpjpe_g: 16.493 \tmpjpe_l: 13.255 \tmpjpe_pa: 9.168
+Succ:  mpjpe_g: 16.493 \tmpjpe_l: 13.255 \tmpjpe_pa: 9.168
+"""
+
+    summary = parse_eval_log(text)
+
+    assert summary["ok"] is True
+    assert summary["terminated_final"] == 0
+    assert summary["success_rate_final"] == 1.0
+    assert summary["progress_rate_final"] == 1.0
+    assert summary["all"]["mpjpe_g"] == 16.493
+
+
 def test_summarize_logs_writes_json_ready_schema(tmp_path: Path) -> None:
     train_log = tmp_path / "train.log"
     eval_log = tmp_path / "eval.log"
