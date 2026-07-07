@@ -135,3 +135,82 @@ SIM-M2 exit criteria:
 6. Gate on warnings/errors before interpreting any metric deltas.
 
 Do not scale to BONES-SEED, longer training, or performance claims until SIM-M2 passes.
+
+## SIM-M2 result: 3-seed paired micro causal sanity
+
+Date: 2026-07-07
+
+Implementation added an aggregate comparison utility:
+
+```text
+scripts/research/aggregate_sonic_comparisons.py
+tests/research/test_aggregate_sonic_comparisons.py
+```
+
+Runtime orchestrator used for this local gate:
+
+```text
+outputs/research/paired_sample_micro_sim_m2/run_sim_m2.py
+```
+
+Command:
+
+```bash
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate env_isaaclab
+python outputs/research/paired_sample_micro_sim_m2/run_sim_m2.py --seeds 0 1 2 --execute
+```
+
+Artifacts:
+
+```text
+outputs/research/paired_sample_micro_sim_m2/seed0/comparison.json
+outputs/research/paired_sample_micro_sim_m2/seed1/comparison.json
+outputs/research/paired_sample_micro_sim_m2/seed2/comparison.json
+outputs/research/paired_sample_micro_sim_m2/aggregate_comparison.json
+outputs/research/paired_sample_micro_sim_m2/aggregate_table.md
+```
+
+Aggregate gate status:
+
+| Field | Value |
+|---|---:|
+| `comparison_count` | 3 |
+| `seeds` | `[0, 1, 2]` |
+| `ok_for_causal_comparison` | true |
+| `control_mismatches` | 0 |
+| `metric_warnings` | 0 |
+| `checkpoint_warnings` | 0 |
+| `validation_errors` | 0 |
+
+Seed rows:
+
+| Seed | Uniform train mean reward | Adaptive train mean reward | Uniform MPJPE-G | Adaptive MPJPE-G | Adaptive - uniform MPJPE-G |
+|---:|---:|---:|---:|---:|---:|
+| 0 | 0.98515 | 1.02088 | 31.901 | 31.925 | +0.024 |
+| 1 | 0.88738 | 0.89901 | 31.637 | 31.596 | -0.041 |
+| 2 | 0.95787 | 0.81643 | 34.257 | 34.312 | +0.055 |
+
+Aggregate descriptive stats:
+
+| Metric | Value |
+|---|---:|
+| mean uniform MPJPE-G | 32.5983 |
+| mean adaptive MPJPE-G | 32.6110 |
+| mean delta, adaptive - uniform | +0.0127 |
+| sample std of delta | 0.0490 |
+
+Interpretation: SIM-M2 passes as a 3-seed micro causal-sanity **validity gate**. The harness now survives seed expansion, preserves variant-specific checkpoint provenance, emits finite bounded eval metrics, and aggregates seed-level comparisons without control, metric, validation, or checkpoint warnings.
+
+Non-claim: there is still no adaptive-sampling performance benefit here. Deltas are tiny and mixed-sign over a deliberately tiny 10-iteration sample-data smoke. The right conclusion is that the comparison/eval machinery is ready for a more meaningful next gate, not that adaptive sampling improves SONIC.
+
+Recommended next gate after SIM-M2:
+
+1. Preserve the SIM-M2 aggregate as the protected micro validity reference.
+2. Add a slightly more meaningful but still bounded `SIM-M3` gate before BONES-SEED scaling, for example:
+   - same 3 seeds,
+   - modestly longer training budget,
+   - still `sample_data` or a tiny fixed curated motion subset,
+   - same checkpoint-provenance and bounded-eval requirements,
+   - pre-register an effect-size threshold before looking at results.
+3. Only if SIM-M3 shows stable, non-trivial directionality should we consider BONES-SEED or larger training.
