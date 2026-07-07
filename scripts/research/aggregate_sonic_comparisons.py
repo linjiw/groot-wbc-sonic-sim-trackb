@@ -35,6 +35,39 @@ def _sorted_unique(values: list[Any]) -> list[Any]:
     return sorted({value for value in values if value is not None})
 
 
+def _build_effect_summary(
+    records: list[dict[str, Any]],
+    *,
+    effect_metric: str,
+    adaptive_minus_uniform_threshold: float,
+    min_improved_seeds: int,
+) -> dict[str, Any]:
+    delta_key = f"delta.{effect_metric}.adaptive_minus_uniform"
+    deltas = [row.get(delta_key) for row in records]
+    numeric_deltas = [float(value) for value in deltas if isinstance(value, (int, float))]
+    improved_seed_count = sum(1 for value in numeric_deltas if value < 0.0)
+    mean_delta = sum(numeric_deltas) / len(numeric_deltas) if numeric_deltas else None
+    passes = (
+        mean_delta is not None
+        and len(numeric_deltas) == len(records)
+        and mean_delta <= adaptive_minus_uniform_threshold
+        and improved_seed_count >= min_improved_seeds
+    )
+    return {
+        "metric": effect_metric,
+        "adaptive_minus_uniform_threshold": adaptive_minus_uniform_threshold,
+        "min_improved_seeds": min_improved_seeds,
+        "mean_delta_adaptive_minus_uniform": mean_delta,
+        "improved_seed_count": improved_seed_count,
+        "seed_count": len(records),
+        "passes_preregistered_effect_gate": passes,
+    }
+
+
+def _delta_key(metric: str) -> str:
+    return f"delta.{metric}.adaptive_minus_uniform"
+
+
 def _row_for_comparison(comparison: dict[str, Any]) -> dict[str, Any]:
     seeds = comparison.get("seeds") or []
     seed = seeds[0] if len(seeds) == 1 else None
@@ -57,13 +90,19 @@ def _row_for_comparison(comparison: dict[str, Any]) -> dict[str, Any]:
     uniform_mpjpe = aggregate_row.get("uniform.eval.all.mpjpe_g")
     adaptive_mpjpe = aggregate_row.get("adaptive.eval.all.mpjpe_g")
     if isinstance(uniform_mpjpe, (int, float)) and isinstance(adaptive_mpjpe, (int, float)):
-        aggregate_row["delta.eval.all.mpjpe_g.adaptive_minus_uniform"] = adaptive_mpjpe - uniform_mpjpe
+        aggregate_row[_delta_key("eval.all.mpjpe_g")] = adaptive_mpjpe - uniform_mpjpe
     else:
-        aggregate_row["delta.eval.all.mpjpe_g.adaptive_minus_uniform"] = None
+        aggregate_row[_delta_key("eval.all.mpjpe_g")] = None
     return aggregate_row
 
 
-def build_aggregate_comparison(comparison_paths: list[Path]) -> dict[str, Any]:
+def build_aggregate_comparison(
+    comparison_paths: list[Path],
+    *,
+    effect_metric: str | None = None,
+    adaptive_minus_uniform_threshold: float = -0.5,
+    min_improved_seeds: int = 2,
+) -> dict[str, Any]:
     """Build an aggregate over seed-level paired comparison JSON files.
 
     The aggregate is deliberately conservative: every seed-level comparison must
@@ -104,7 +143,7 @@ def build_aggregate_comparison(comparison_paths: list[Path]) -> dict[str, Any]:
     records.sort(key=_seed_sort_key)
     seeds = _sorted_unique(all_seeds)
     variants = _sorted_unique(all_variants)
-    return {
+    aggregate = {
         "schema_version": 1,
         "kind": "sonic_aggregate_comparison",
         "comparison_count": len(records),
@@ -116,6 +155,14 @@ def build_aggregate_comparison(comparison_paths: list[Path]) -> dict[str, Any]:
         "ok_for_causal_comparison": all(seed_level_ok.values()) and not any(warning_counts.values()) and len(records) >= 1,
         "interpretation_guardrail": "No adaptive-sampling performance claim unless all seed-level gates pass and the metric pattern supports it.",
     }
+    if effect_metric is not None:
+        aggregate["effect_summary"] = _build_effect_summary(
+            records,
+            effect_metric=effect_metric,
+            adaptive_minus_uniform_threshold=adaptive_minus_uniform_threshold,
+            min_improved_seeds=min_improved_seeds,
+        )
+    return aggregate
 
 
 def write_aggregate_json(path: Path, aggregate: dict[str, Any]) -> None:
@@ -145,6 +192,21 @@ def write_aggregate_table_markdown(path: Path, aggregate: dict[str, Any]) -> Non
             f.write(f"| `{key}` | {_format_value(aggregate.get(key))} |\n")
         f.write("\n")
         f.write(f"> {aggregate.get('interpretation_guardrail', 'No adaptive-sampling performance claim.')}\n\n")
+        effect_summary = aggregate.get("effect_summary")
+        if isinstance(effect_summary, dict):
+            f.write("## Pre-registered effect gate\n\n")
+            f.write("| Field | Value |\n|---|---|\n")
+            for key in [
+                "metric",
+                "adaptive_minus_uniform_threshold",
+                "min_improved_seeds",
+                "mean_delta_adaptive_minus_uniform",
+                "improved_seed_count",
+                "seed_count",
+                "passes_preregistered_effect_gate",
+            ]:
+                f.write(f"| `{key}` | {_format_value(effect_summary.get(key))} |\n")
+            f.write("\n")
         f.write("## Warning counts\n\n")
         f.write("| Warning type | Count |\n|---|---:|\n")
         for key, value in aggregate.get("warning_counts", {}).items():
@@ -162,9 +224,17 @@ def main() -> int:
     parser.add_argument("--output-json", type=Path, required=True)
     parser.add_argument("--output-md", type=Path, required=True)
     parser.add_argument("--fail-on-invalid", action="store_true")
+    parser.add_argument("--effect-metric", default=None, help="Optional metric key for a pre-registered adaptive-minus-uniform effect gate, e.g. eval.all.mpjpe_g.")
+    parser.add_argument("--adaptive-minus-uniform-threshold", type=float, default=-0.5, help="Mean adaptive-minus-uniform delta must be <= this value to pass the effect gate. Lower MPJPE is better, so beneficial thresholds are negative.")
+    parser.add_argument("--min-improved-seeds", type=int, default=2)
     args = parser.parse_args()
 
-    aggregate = build_aggregate_comparison(args.comparison)
+    aggregate = build_aggregate_comparison(
+        args.comparison,
+        effect_metric=args.effect_metric,
+        adaptive_minus_uniform_threshold=args.adaptive_minus_uniform_threshold,
+        min_improved_seeds=args.min_improved_seeds,
+    )
     write_aggregate_json(args.output_json, aggregate)
     write_aggregate_table_markdown(args.output_md, aggregate)
     print(f"wrote SONIC aggregate comparison to {args.output_json} and {args.output_md}")

@@ -214,3 +214,41 @@ Recommended next gate after SIM-M2:
    - same checkpoint-provenance and bounded-eval requirements,
    - pre-register an effect-size threshold before looking at results.
 3. Only if SIM-M3 shows stable, non-trivial directionality should we consider BONES-SEED or larger training.
+
+## SIM-M3 pre-registered bounded effect-size gate
+
+Date: 2026-07-07
+
+Goal: test whether the SIM-M2-valid harness shows any stable adaptive-sampling direction under a still-small but less trivial training budget. This is **not** a BONES-SEED or paper-performance gate.
+
+Controlled variables:
+
+| Dimension | SIM-M3 value |
+|---|---|
+| Seeds | `0, 1, 2` |
+| `num_envs` | 8 |
+| Learning iterations | 50 |
+| Dataset | `sample_data/robot_filtered` + `sample_data/smpl_filtered` only |
+| Only changed condition | `manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.enable` |
+| Adaptive extra knob | `adaptive_sampling.uniform_sampling_rate=0.1` |
+| Checkpoint save cadence | `++callbacks.model_save.save_last_frequency=50` |
+| Eval | same bounded MPJPE-complete eval as SIM-M2 |
+| Aggregation | `scripts/research/aggregate_sonic_comparisons.py` with effect gate |
+
+Pre-registered effect gate for a **candidate signal** only:
+
+```text
+metric = eval.all.mpjpe_g
+lower_is_better = true
+mean_delta_adaptive_minus_uniform <= -0.5 MPJPE-G
+improved_seed_count >= 2 of 3
+all seed-level comparisons ok_for_causal_comparison=true
+control_mismatches = metric_warnings = checkpoint_warnings = validation_errors = 0
+```
+
+Decision rule:
+
+- If the validity gate fails, fix the harness; do not interpret metrics.
+- If validity passes but the effect gate fails, conclude no adaptive-sampling signal at this bounded budget.
+- If validity and effect gate both pass, label it only as a SIM-M3 candidate signal and design the next fixed-data gate before any BONES-SEED scaling.
+- No adaptive-sampling performance claim is allowed from SIM-M3 alone.
