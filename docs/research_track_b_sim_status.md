@@ -252,3 +252,65 @@ Decision rule:
 - If validity passes but the effect gate fails, conclude no adaptive-sampling signal at this bounded budget.
 - If validity and effect gate both pass, label it only as a SIM-M3 candidate signal and design the next fixed-data gate before any BONES-SEED scaling.
 - No adaptive-sampling performance claim is allowed from SIM-M3 alone.
+
+## SIM-M3 result: bounded effect-size probe
+
+Date: 2026-07-07
+
+Command:
+
+```bash
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate env_isaaclab
+python outputs/research/paired_sample_micro_sim_m3/run_sim_m3.py --seeds 0 1 2 --execute
+```
+
+Artifacts:
+
+```text
+outputs/research/paired_sample_micro_sim_m3/seed0/comparison.json
+outputs/research/paired_sample_micro_sim_m3/seed1/comparison.json
+outputs/research/paired_sample_micro_sim_m3/seed2/comparison.json
+outputs/research/paired_sample_micro_sim_m3/aggregate_comparison.json
+outputs/research/paired_sample_micro_sim_m3/aggregate_table.md
+```
+
+Aggregate validity gate:
+
+| Field | Value |
+|---|---:|
+| `comparison_count` | 3 |
+| `seeds` | `[0, 1, 2]` |
+| `ok_for_causal_comparison` | true |
+| `control_mismatches` | 0 |
+| `metric_warnings` | 0 |
+| `checkpoint_warnings` | 0 |
+| `validation_errors` | 0 |
+
+Pre-registered effect gate:
+
+| Field | Value |
+|---|---:|
+| metric | `eval.all.mpjpe_g` |
+| threshold | adaptive - uniform <= -0.5 |
+| minimum improved seeds | 2 of 3 |
+| mean adaptive - uniform | +0.110667 |
+| improved seeds | 1 of 3 |
+| passes effect gate | false |
+
+Seed rows:
+
+| Seed | Uniform train mean reward | Adaptive train mean reward | Uniform MPJPE-G | Adaptive MPJPE-G | Adaptive - uniform MPJPE-G |
+|---:|---:|---:|---:|---:|---:|
+| 0 | 0.98755 | 0.93542 | 31.835 | 32.037 | +0.202 |
+| 1 | 0.93287 | 0.89537 | 31.554 | 31.696 | +0.142 |
+| 2 | 0.96641 | 0.97600 | 34.244 | 34.232 | -0.012 |
+
+Interpretation: SIM-M3 passes the harness validity gate but fails the pre-registered candidate-effect gate. This is a useful negative result: a modestly longer 50-iteration sample-data gate still does not show a stable adaptive-sampling benefit. Two seeds are worse for adaptive under MPJPE-G and the lone improved seed is effectively tied.
+
+Decision: do not scale this adaptive-sampling mechanism to BONES-SEED as-is. The next step should shift from scaling to diagnosis. Candidate next diagnostics:
+
+1. Audit whether adaptive sampling actually changes the sampled motion/bin distribution over 50 iterations (`Env/adp_samp/*` logs, per-seed concentration/effective-bin metrics).
+2. Add an aggregate diagnostic table for adaptive-sampler telemetry, not just reward/MPJPE.
+3. If the sampler is active but not helpful, test a different bounded mechanism or sampling schedule before any larger data/training expansion.
+4. Preserve SIM-M3 as a negative bounded-effect reference.
