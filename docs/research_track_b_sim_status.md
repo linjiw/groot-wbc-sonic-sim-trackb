@@ -375,3 +375,43 @@ baseline) and the +0.110667/p=0.875 reproduction pass. Remaining before closing 
 gate: run the telemetry summarizer over the 3 adaptive SIM-M3 train logs and the
 checkpoint dump over the 3 adaptive `last.pt` checkpoints on robotixx, and sync the
 outputs into `docs/artifacts/sim_m4/`.
+
+## SIM-M4-prep: preregistered classifier, dynamics simulation, sampler bug fix (no GPU)
+
+Date: 2026-07-09
+
+Built and adversarially reviewed on the tooling checkout ahead of the robotixx SIM-M4b
+sync, so the diagnosis is preregistered in code and the mechanism path is de-risked.
+117 research tests pass; ruff/black clean on touched files.
+
+New/changed:
+
+| Item | Purpose |
+|---|---|
+| `scripts/research/classify_sampler_diagnosis.py` | Mechanizes the §Phase 1 classification rule as tested logic. One command over the two SIM-M4a JSON artifacts emits the verdict (under-active / compound-starved / wrong-target / not-useful) + decision routing. Preregistration-in-code: thresholds are frozen constants (flatness floor `0.9×70=63`, majority over ALL adaptive seeds, dump required at prior-domination threshold 2.0). |
+| `scripts/research/sampler_dynamics_sim.py` | Numerical experiment (labeled simulation, no MPJPE, never a headline) reimplementing the sampler update math to forecast mechanism behavior. |
+| `gear_sonic/utils/motion_lib/motion_lib_base.py` | Fixed a latent `0/0` NaN hazard on `init_num_failures=0` (the SIM-M5a candidate knob): guarded both the per-bin failure-rate division and the all-zero probability normalization. Byte-identical for the release config (`init_num_failures=1`). |
+
+Simulation findings (budget-independent 8→200 episodes/iter, seed-averaged; **validate against
+real SIM-M3 telemetry before acting** — a validation FAIL voids them):
+
+- **F1** — the release failure-rate sampler stays flat in the starved regime
+  (prob_max_over_uniform ≈ 3.7, matching SIM-M3's ~3): reproduces the observed negative.
+- **F2 (plan-altering)** — failure-rate resampling peaks **only on sparse extreme outliers**, not on
+  broad difficulty spread. On a SIM-D1-shaped dataset it correctly targets the hard bins (hard-half
+  mass ratio ≈ 2.9) while staying diffuse (prob_max_over_uniform ≈ 2.4, 0 concentrated bins). The
+  original SIM-M5 peakedness-only activation gate would misclassify this as invalid-inactive.
+  **Action: SIM-M5 activation gate amended in fable-next.md** to add a targeting criterion
+  (hard-half/easy-half mass ratio ≥ 1.5) as an OR path.
+- **F3** — in the truly starved regime neither failure_rate nor error_ema concentrates or targets;
+  a mechanism swap cannot manufacture signal from a flat dataset. **Confirms SIM-D1 must precede
+  mechanism work.**
+- **error_ema is not claimed to beat failure_rate**: only a signal-density (targeting-at-low-budget)
+  edge, which degrades with noise and reverses on sparse-hard outliers; the favorable ordering is
+  an assumption of the sim's `error = difficulty + noise` model. Real error-SNR is a precondition to
+  measure before the SIM-M5b error_ema arm.
+
+This corrects the earlier working hypothesis (which attributed flatness solely to signal starvation):
+flatness has two separable drivers — signal starvation AND low failure-rate contrast under an
+outlier-only concentration metric — and the SIM-M4b checkpoint dump (`prior_dominated_fraction` and
+per-bin failure spread) decides which holds on the real data.

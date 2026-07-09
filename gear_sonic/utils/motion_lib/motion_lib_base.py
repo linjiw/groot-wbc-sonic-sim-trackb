@@ -2528,7 +2528,17 @@ class MotionLibBase:
                 )
 
         with common.Timer("compute_sampling_prob"):
-            failure_rate = self.adp_samp_num_failures / self.adp_samp_num_episodes
+            # Guard per-bin 0/0: num_episodes starts at init_num_failures and only grows, so
+            # this is byte-identical for the release config (init_num_failures=1 => always
+            # >= 1). It only affects init_num_failures=0 (a SIM-M5a candidate knob), where an
+            # unplayed bin would otherwise yield NaN failure_rate. A never-played bin gets
+            # failure_rate 0 (no signal yet). The all-zero normalization is guarded separately
+            # in update_adaptive_sampling_probabilities.
+            failure_rate = torch.where(
+                self.adp_samp_num_episodes > 0,
+                self.adp_samp_num_failures / self.adp_samp_num_episodes,
+                torch.zeros_like(self.adp_samp_num_episodes),
+            )
             self.adp_samp_failure_rate_raw = failure_rate.clone()
             self.adp_samp_failure_rate = failure_rate
             # This is to compute the failure rate with decay.
@@ -2573,9 +2583,19 @@ class MotionLibBase:
         adp_samp_active_failure_rate_clipped = torch.clip(
             self.adp_samp_active_failure_rate, 0.0, adp_samp_failure_rate_upper_bound
         )
-        failure_based_sampling_prob = (
-            adp_samp_active_failure_rate_clipped / adp_samp_active_failure_rate_clipped.sum()
-        )
+        # Guard the normalization when every active bin has zero failure rate (e.g.
+        # init_num_failures=0 with no early terminations observed — the SIM-M5a starved
+        # regime). Byte-identical for the release config (init_num_failures=1 => every
+        # bin's failure_rate is 1.0 => sum > 0); only the all-zero case, which would
+        # otherwise yield NaN probabilities and trip the assertion below, falls back to
+        # uniform.
+        clipped_sum = adp_samp_active_failure_rate_clipped.sum()
+        if clipped_sum > 0:
+            failure_based_sampling_prob = adp_samp_active_failure_rate_clipped / clipped_sum
+        else:
+            failure_based_sampling_prob = torch.ones_like(
+                adp_samp_active_failure_rate_clipped
+            ) / len(adp_samp_active_failure_rate_clipped)
         uniform_sampling_prob = torch.ones_like(failure_based_sampling_prob) / len(
             failure_based_sampling_prob
         )

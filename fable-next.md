@@ -20,9 +20,10 @@ changes in any branch** (64D token + 7D×2 hands, obs ordering, ZMQ layout, LowC
 | SIM-M2 3-seed paired micro (10 iters) | validity PASS, deltas tiny/mixed | tag `sim-m2-3seed-micro-causal-sanity` |
 | SIM-M3 3-seed, 50 iters, preregistered effect gate | validity PASS, **effect gate FAIL** (mean adaptive−uniform MPJPE-G = +0.111, 1/3 seeds improved; post-hoc exact permutation p = 7/8) | tag `sim-m3-bounded-effect-negative` |
 | **SIM-M4a telemetry + statistics tooling** | **DONE** — local half of the exit gate passed (83 tests; +0.110667 / p = 7/8 reproduction) | commit `5d48c72` |
-| SIM-M4b diagnosis | **NEXT** — blocked only on robotixx access | §2 Phase 1 |
+| **SIM-M4-prep: classifier + dynamics sim + sampler guard** | **DONE** — preregistered classifier in code, mechanism forecast, and a launch-blocking sampler bug fixed (117 tests) | §0 "What SIM-M4-prep delivered" |
+| SIM-M4b diagnosis | **NEXT** — blocked only on robotixx access; run `classify_sampler_diagnosis.py` on synced artifacts | §2 Phase 1 |
 | SIM-D1 dataset-headroom gate | pending (D-A HF request should go out now) | §2 Phase 2 |
-| SIM-M5/M6/M7 | branch-conditional on M4b + D1 | §2 Phases 3–5 |
+| SIM-M5/M6/M7 | branch-conditional on M4b + D1; **SIM-M5 activation gate amended** (targeting criterion added, see §2 Phase 3) | §2 Phases 3–5 |
 
 ### What SIM-M4a delivered (commit `5d48c72`)
 
@@ -59,6 +60,47 @@ Naming break to know about: schema-2 aggregates use `a_minus_b` keys; the schema
 on robotixx use `adaptive_minus_uniform`, and the untracked `run_sim_m*.py` there call the OLD
 aggregator signature (`--adaptive-minus-uniform-threshold`) — they will fail loudly against
 this commit. Use `run_sonic_multiseed.py` for everything going forward.
+
+### What SIM-M4-prep delivered (GPU-free; design → sim → adversarial review)
+
+Three critical-path items built and reviewed on the tooling checkout, before the robotixx data
+lands. All under `scripts/research/` + `tests/research/` (117 tests total).
+
+- `classify_sampler_diagnosis.py` (new) — **preregistration-in-code**: the §Phase 1 rule is
+  frozen as tested logic before the SIM-M3 artifacts are synced, so the diagnosis cannot be
+  gamed post-hoc. Consumes the two SIM-M4a JSON artifacts, emits the verdict + routing. Adversarial
+  review hardened it: the flatness floor is the frozen literal `0.9×70 = 63` (not a fraction of the
+  observed bin count, which a 69/71-bin dataset would silently move); the majority is over ALL
+  adaptive seeds (a 1-of-3 verdict is NOT a majority → `insufficient_data`); the no-checkpoint case
+  uses a starvation-**neutral** label (`under_active_starvation_unconfirmed`) instead of asserting
+  starvation it never measured; and it refuses a checkpoint dump generated at the wrong
+  prior-domination threshold.
+- `sampler_dynamics_sim.py` (new) — a **numerical experiment** (labeled simulation, no MPJPE, never
+  a headline) that reimplements the sampler update math faithfully and forecasts mechanism behavior.
+  It **corrected the working hypothesis** and produced the plan-altering findings below.
+- `motion_lib_base.py` (fixed) — the sim surfaced a real latent bug: `init_num_failures=0` (the
+  SIM-M5a candidate knob) divides `0/0` at the failure-rate computation, and then the
+  probability normalization divides `0/0` again when no bin has failures. **Both are now guarded**
+  (byte-identical for the release config, `init_num_failures=1`), so SIM-M5a will not NaN-crash.
+
+**Simulation findings (F1–F4, budget-independent 8→200 episodes/iter, seed-averaged; validate
+against real SIM-M3 telemetry before acting):**
+
+- **F1** — the release failure-rate sampler stays flat in the starved regime
+  (prob_max_over_uniform ≈ 3.7, matching SIM-M3's ~3). Reproduces the observed negative.
+- **F2 (plan-altering)** — the failure-rate sampler **peaks only on sparse extreme outliers, not on
+  broad difficulty spread**. On a SIM-D1-shaped spread dataset it correctly *targets* the hard bins
+  (hard-half mass ratio ≈ 2.9) while staying diffuse (prob_max_over_uniform ≈ 2.4,
+  num_concentrated_bins = 0). So the original SIM-M5 activation gate (`prob_max_over_uniform ≥ 10 AND
+  num_concentrated_bins ≥ 1`) would misclassify a correctly-targeting sampler as *invalid-inactive*.
+  **Fix: added a targeting criterion to the SIM-M5 gate** (see §2 Phase 3).
+- **F3** — in the truly starved regime **neither** failure_rate nor error_ema concentrates or targets
+  (no contrast to exploit). Confirms the plan's routing: a mechanism swap cannot manufacture signal
+  from a flat dataset — **SIM-D1 (difficulty spread) must precede any mechanism work.**
+- **error_ema is NOT claimed to beat failure_rate**: its only sim-internal edge is recovering the
+  difficulty ordering at low sample budget (denser signal); it degrades with error noise and reverses
+  on sparse-hard outliers. `error = difficulty + noise` bakes the ordering in, so real per-episode
+  tracking-error SNR is a **precondition to measure** before the SIM-M5b error_ema arm.
 
 ### Immediate next steps — SIM-M4b checklist (needs robotixx, no training)
 
@@ -102,10 +144,23 @@ Adjust glob paths to the actual `outputs/research/paired_sample_micro_sim_m3/` l
    size-reasonable (NOT the 448 MB `.pt` files). Also run the full test suite on robotixx
    (`pytest tests/research -q`) to close the "pass on robotixx" half of the exit gate.
 
-5. **Apply the preregistered classification rule** (§2 Phase 1) to the committed artifacts,
-   post classification + telemetry table + checkpoint-dump evidence to issue #4, update
-   `docs/research_track_b_sim_status.md`, tag `sim-m4-sampler-telemetry-diagnosis`, and open
-   one new issue for the routed next gate (SIM-M5a or SIM-D1→SIM-M5b).
+5. **Apply the preregistered classification rule** — now mechanized, so this is one command over
+   the committed artifacts (no hand-scoring):
+
+   ```bash
+   python scripts/research/classify_sampler_diagnosis.py \
+     --telemetry-json docs/artifacts/sim_m4/sampler_telemetry.json \
+     --checkpoint-state-json docs/artifacts/sim_m4/sampler_checkpoint_state.json \
+     --output-json docs/artifacts/sim_m4/diagnosis.json \
+     --output-md docs/artifacts/sim_m4/diagnosis.md
+   ```
+
+   Then also validate the simulation's flat-regime prediction against the real telemetry
+   (`sampler_dynamics_sim.py --validate-against docs/artifacts/sim_m4/sampler_telemetry.json`);
+   a validation FAIL voids the F1/F3 forecasts. Post the classifier verdict + telemetry table +
+   checkpoint-dump evidence to issue #4, update `docs/research_track_b_sim_status.md`, tag
+   `sim-m4-sampler-telemetry-diagnosis`, and open one new issue for the routed next gate
+   (SIM-M5a or SIM-D1→SIM-M5b).
 
 6. **In parallel, today (no compute):** submit the D-A HF gated-access request for
    `bones-studio/seed` (§2 Phase 2) — its latency is the SIM-M6 critical path.
@@ -172,6 +227,13 @@ first**, then the mechanism work. Amplifying a flat signal is a no-op.
 6. **Trainer `schedule_dict` is re-applied at eval** (`eval_agent_trl.py:466-470`) — OPEN;
    mandatory guard for any SIM-M5c termination-curriculum arm: scope schedules to train-only
    attributes or strip them from the eval config.
+7. ~~`init_num_failures=0` divides `0/0`~~ — **FIXED in SIM-M4-prep** (found by the dynamics sim).
+   The SIM-M5a candidate knob `init_num_failures=0` produced NaN failure rates (unplayed bins) and
+   NaN sampling probabilities (all-zero-failure regime), which would trip the `>= 0` assertion at
+   `motion_lib_base.py`. Both divisions are now guarded, byte-identical for the release config.
+8. **Peakedness ≠ targeting** — the sim (F2) shows the failure-rate sampler peaks only on sparse
+   outliers, so a peakedness-only activation gate misreads a correctly-targeting-but-diffuse sampler
+   on spread data as inactive. The SIM-M5 activation gate now includes a targeting criterion (§Phase 3).
 
 ---
 
@@ -254,18 +316,32 @@ All arms: 3 seeds (0–2), num_envs=8–16, **200 iters**, SIM-D1-passing datase
 `configs/research/` as `{seed}`-templated multiseed specs, launched by the tracked
 `run_sonic_multiseed.py` (pass `--variant-a <mechanism> --variant-b uniform_...`; the schema-2
 aggregator handles any pairing), frozen eval settings across arms. Two-stage gating
-everywhere: a **mechanism-activation telemetry sub-gate must pass before the effect sub-gate
+everywhere: a **mechanism-activation sub-gate must pass before the effect sub-gate
 is scored**; an inactive-mechanism result is classified *invalid-inactive*, not *negative*.
+
+**Activation sub-gate (amended per simulation finding F2, §0).** The original peakedness-only
+criterion (`prob_max_over_uniform ≥ 10` AND `num_concentrated_bins ≥ 1`) is an *outlier* detector:
+the sim shows a sampler that correctly targets a broad difficulty frontier stays diffuse
+(prob_max_over_uniform ≈ 2–4, num_concentrated_bins = 0) and would be misread as inactive. The
+amended sub-gate passes if **EITHER** peakedness fires (≥ 10 / ≥ 1 concentrated bin) **OR** a
+targeting criterion holds — the trained sampler biases mass toward the harder bins, measured as a
+hard-half/easy-half sampling-mass ratio ≥ 1.5 (requires the per-motion difficulty ranking from the
+SIM-D1 all-motions eval). Peakedness alone remains sufficient; targeting is the added path so a
+diffuse-but-correct reweighting is not thrown away. Both are scored in ≥ 2/3 seeds.
 
 - **SIM-M5a — sampler-schedule probe** (only if plain under-active on discriminative data;
   this is issue #4 deliverable 4). Overrides only documented cfg keys:
   `adaptive_sampling.init_num_failures=0` (kill the flattening prior — the mechanistically
-  correct knob), `uniform_sampling_rate: 0.1→0.05`, optionally `bin_size: 50→150`. Do **not**
-  lead with `failure_counts_multiplier`: it multiplies observed failures, and 5 × ~0 ≈ 0.
-  - Activation sub-gate: final `prob_max_over_uniform ≥ 10` AND `num_concentrated_bins ≥ 1`
-    in ≥2/3 seeds. Effect sub-gate: mean tuned−uniform MPJPE-G ≤ −0.5, ≥2/3 seeds improved,
-    all `ok_for_causal_comparison=true`. Activation fail ⇒ knobs exhausted ⇒ M5b. Max one knob
-    revision total.
+  correct knob; the `0/0` NaN hazard this knob used to trigger is now fixed in
+  `motion_lib_base.py`, §0), `uniform_sampling_rate: 0.1→0.05`, optionally `bin_size: 50→150`.
+  Do **not** lead with `failure_counts_multiplier`: it multiplies observed failures, and 5 × ~0 ≈ 0.
+  - Activation sub-gate: the amended EITHER/OR criterion above, in ≥2/3 seeds. Effect sub-gate:
+    mean tuned−uniform MPJPE-G ≤ −0.5, ≥2/3 seeds improved, all `ok_for_causal_comparison=true`.
+    Activation fail ⇒ knobs exhausted ⇒ M5b. Max one knob revision total.
+  - **Simulation caveat (F2/F3):** the sim forecasts the M5a knobs do NOT activate concentration
+    in the starved regime (flatness is structural without difficulty spread). Treat M5a as
+    worthwhile only if SIM-M4b returns *plain* under-active on an already-discriminative dataset;
+    a compound verdict routes past M5a to SIM-D1 → SIM-M5b.
 - **SIM-M5b — mechanism-family swap** (expected branch). Flag-gated, default-off, unit-tested
   mode key `adaptive_sampling.signal: {failure_rate | error_ema | staged}` in
   `motion_lib_base.py`:
@@ -274,6 +350,12 @@ is scored**; an inactive-mechanism result is classified *invalid-inactive*, not 
     through the call site (`:3212-3217`) into the prob computation (`:2558-2589`), weighting
     bins by error-EMA percentile. Always discriminative even when nothing terminates —
     directly fixes the diagnosed root cause. (~150 LOC + prob-computation unit test.)
+    **Precondition (simulation, §0):** error_ema is a *conditional*, not a guaranteed win — its edge
+    is signal density, it degrades with error noise, and it reverses on sparse-hard outliers.
+    Before this arm, measure the real per-episode tracking-error SNR from `command.metrics` on a
+    SIM-D1-passing dataset; only proceed if the error signal has usable cross-bin contrast. (This
+    arm was intentionally NOT pre-implemented in SIM-M4-prep: it must wait for its gate, per
+    guardrail 7 and because F3 shows a swap cannot help until SIM-D1 provides difficulty spread.)
   - `staged` (competence-gated curriculum, the paper's title mechanism): port the CG-WBC math
     (`scripts/research/curriculum_sampler.py:144-178` — gated unlock + learning-progress
     `|ΔEMA|` softmax weighting + anchor mass) onto motion-lib bins/motions, gates defined in
@@ -322,7 +404,11 @@ thesis (*competence-gated beats unstructured adaptation*) a measured claim rathe
 - **C2 — diagnosis:** telemetry- and checkpoint-grounded triage showing PHC-style failure-rate
   resampling is signal-starved at small data/budget (prior-dominated bins, flat distribution,
   cap never binding), with the under-active / wrong-target / not-useful decision procedure.
-  SIM-M4 delivers this.
+  SIM-M4 delivers this. The mechanistic story is sharpened by the SIM-M4-prep dynamics simulation
+  (§0): failure-rate resampling concentrates *only on sparse extreme outliers*, so it is doubly
+  ill-suited to small easy datasets — nothing terminates (starvation) AND, even with signal, a
+  broad frontier never peaks. This is a mechanism-level explanation, clearly labeled as
+  simulation and to be corroborated by the real SIM-M3 telemetry, never a headline on its own.
 - **C3 — effect (the risk claim):** competence-gated / learning-progress motion sampling
   improves tracking reliability at matched sample budget vs uniform AND vs the field-default
   failure-rate sampler, on data with demonstrated difficulty headroom, ≥4/5 seeds, CI excluding
@@ -366,6 +452,15 @@ paper draft (CoRL/ICRA 2027 cycle) vs methodology+negative-results draft (RLC/wo
    hand-picking comparison files.
 10. (new) Non-finite metric values are reported as absent/rejected, never silently coerced —
     a NaN delta must fail loudly, not read as a significant effect.
+11. (new) `sampler_dynamics_sim.py` is a SIMULATION under an assumed difficulty→signal model: it
+    forecasts mechanism activation/targeting, produces no MPJPE, and supports no headline claim. Its
+    F1/F3 predictions must be validated against real SIM-M3 telemetry (`--validate-against`) before
+    any of its forecasts route a decision; a validation FAIL voids them.
+12. (new) The preregistered SIM-M4b classification thresholds live in
+    `classify_sampler_diagnosis.py` and match §Phase 1 exactly (frozen absolute flatness floor
+    0.9×70, majority over ALL adaptive seeds, checkpoint dump required at prior-domination
+    threshold 2.0). Changing a threshold means editing the frozen constant with a documented reason,
+    not passing a CLI override at analysis time.
 
 ## 5. Explicitly rejected next steps
 
@@ -382,3 +477,10 @@ paper draft (CoRL/ICRA 2027 cycle) vs methodology+negative-results draft (RLC/wo
 - 64+ GPU sonic_release-scale finetunes (budget caps at micro/mid runs).
 - Reviving the untracked robotixx `run_sim_m*.py` against the schema-2 aggregator (old
   signature; superseded by `run_sonic_multiseed.py`).
+- Pre-implementing the SIM-M5b `error_ema`/`staged` mechanism arms before their gate: the sim (F3)
+  shows a mechanism swap cannot manufacture signal on a flat dataset, so the arms wait for SIM-D1 to
+  pass and for the real error-SNR precondition to be measured (guardrail 7). SIM-M4-prep fixed the
+  latent `init=0` sampler bug but deliberately did NOT add the new signal modes.
+- Treating the dynamics simulation's error_ema behavior as evidence it will beat failure_rate: the
+  favorable ordering is baked into `error = difficulty + noise`; only the signal-density effect is
+  earned, and it is regime-dependent.
