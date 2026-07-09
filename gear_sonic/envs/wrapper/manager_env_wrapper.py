@@ -955,8 +955,10 @@ class ManagerEnvWrapper:
                 extras["to_log"]["adp_samp/prob_mean"] = prob.mean()
                 extras["to_log"]["adp_samp/prob_max_over_uniform"] = prob.max() / uniform_prob
                 extras["to_log"]["adp_samp/effective_num_bins"] = 1.0 / (prob**2).sum()
-                # How many bins have prob > 10x uniform (significantly concentrated)
-                # Note: max allowed is 50x uniform, so 10x is 20% of the cap
+                # How many bins have prob > 10x uniform (significantly concentrated).
+                # The cap is config-dependent (adp_samp_failure_rate_max_over_mean:
+                # 50 by default, 200 in the release configs), so 10x is a fixed
+                # concentration marker, not a fixed fraction of the cap.
                 extras["to_log"]["adp_samp/num_concentrated_bins"] = (
                     (prob > 10 * uniform_prob).sum().float()
                 )

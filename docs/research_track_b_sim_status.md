@@ -314,3 +314,64 @@ Decision: do not scale this adaptive-sampling mechanism to BONES-SEED as-is. The
 2. Add an aggregate diagnostic table for adaptive-sampler telemetry, not just reward/MPJPE.
 3. If the sampler is active but not helpful, test a different bounded mechanism or sampling schedule before any larger data/training expansion.
 4. Preserve SIM-M3 as a negative bounded-effect reference.
+
+## SIM-M4a: sampler-telemetry and statistics tooling (no GPU)
+
+Date: 2026-07-09
+
+Closes issue #4 deliverables 1–2 on the tooling side (log/checkpoint sync and the
+SIM-M4b diagnosis remain). All work is local to this checkout; no training runs.
+
+New tracked tools (`scripts/research/`):
+
+| Tool | Purpose |
+|---|---|
+| `summarize_sampler_telemetry.py` | Full per-iteration `[iteration, value]` series for every `Env/adp_samp/*` key (block-based parse keyed on `Learning iteration N` headers), plus first/last/min/max and least-squares slope over the final 20 iterations. Uniform logs yield `adaptive_telemetry_present: false`, never a warning. `nan`/`inf` values are recorded as nulls without shifting series alignment. |
+| `dump_sampler_checkpoint_state.py` | Dumps per-bin `adp_samp_num_episodes`/`adp_samp_num_failures` from checkpoint `env_state_dict['motion_lib']` (the only artifact with the trained distribution — eval never restores sampler state), with observed-failure/prior-domination classification and an unweighted recomputed distribution. Caveats (bin weights not checkpointed, no decay, all-bins vs active-bins clip base) are recorded in the output itself. Run inside `env_isaaclab` on robotixx. |
+| `paired_stats.py` | Exact one-sided sign-flip permutation p (improvement = negative delta; p >= 1/2^n by construction; non-finite inputs rejected) and a deterministic 10k-resample paired bootstrap CI. |
+| `run_sonic_multiseed.py` | Tracked multi-seed orchestrator replacing the robotixx-only `run_sim_m*.py`: renders a `{seed}`-templated spec per seed, materializes via `run_sonic_paired_experiment`, aggregates with the effect gate. A seed that yields no comparison invalidates the run (`ok_for_causal_comparison=false`); variant names are validated against the template. |
+
+Pipeline changes:
+
+- `summarize_sonic_logs.py` now extracts final values for all 16 `adp_samp_*` keys
+  (non-finite final values are reported as absent, not silently replaced by an earlier
+  finite iteration). The 6-key classification subset is exported as
+  `ADP_SAMP_CLASSIFICATION_KEYS` and flows into `compare_sonic_manifests.py`
+  `_METRIC_PATHS` (informational only — deliberately NOT in `_PRIMARY_METRIC_PATHS`, so
+  uniform arms cannot fail `ok_for_causal_comparison`) and the aggregate telemetry table.
+- `aggregate_sonic_comparisons.py` **schema_version 2**: variants parameterized as
+  `--variant-a` (treatment) / `--variant-b` (control), row keys `a.*`/`b.*`, delta key
+  `delta.eval.all.mpjpe_g.a_minus_b`, effect fields `a_minus_b_threshold` /
+  `mean_delta_a_minus_b`. Defaults preserve the SIM-M3 pairing
+  (a=`adaptive_sampling_micro`, b=`uniform_sampling_micro`), so `a_minus_b` ==
+  the preregistered `adaptive_minus_uniform` for SIM-M2/M3 artifacts; schema-1 JSONs on
+  robotixx keep the old key names. New validity guards: one-sided variant-name
+  mismatches and duplicate seeds fail `ok_for_causal_comparison`; duplicate comparison
+  paths and unsupported effect metrics raise.
+- Effect summaries now carry a `statistics` block: exact permutation p, min achievable
+  p, bootstrap 95% CI, and an explicit small-n power note (n=3 ⇒ min p = 0.125, screens
+  only, per guardrail 5).
+
+Preregistered validity reproduction (from the recorded SIM-M3 numbers above, run
+locally through the schema-2 aggregator):
+
+| Field | Value |
+|---|---:|
+| mean delta a−b (adaptive−uniform) | +0.110667 (matches) |
+| exact permutation p (one-sided) | 7/8 = 0.875 |
+| min achievable p at n=3 | 1/8 = 0.125 |
+| bootstrap 95% CI | [-0.012, +0.202] (contains 0) |
+
+The statistics confirm what the effect gate already said: SIM-M3 is a clean negative
+with no hidden signal (p=0.875 is worse than chance toward improvement).
+
+Also fixed while in the area: stale 10×/50× cap comment at
+`manager_env_wrapper.py:958` (release cap is 200×, so 10× is a fixed concentration
+marker, not a fraction of the cap).
+
+Exit-gate status (amended in fable-next.md: 16 keys, not 17; 3 of 6 SIM-M3 logs are
+uniform-arm logs with zero adp_samp keys by design): local tests (83, up from 39+43
+baseline) and the +0.110667/p=0.875 reproduction pass. Remaining before closing the
+gate: run the telemetry summarizer over the 3 adaptive SIM-M3 train logs and the
+checkpoint dump over the 3 adaptive `last.pt` checkpoints on robotixx, and sync the
+outputs into `docs/artifacts/sim_m4/`.

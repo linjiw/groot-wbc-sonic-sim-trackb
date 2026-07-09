@@ -11,7 +11,9 @@ import sys
 from typing import Any
 
 _NUMBER = r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?"
-_ERROR_PATTERN = re.compile(r"Traceback|Error executing job|RuntimeError|Exception|ModuleNotFoundError")
+_ERROR_PATTERN = re.compile(
+    r"Traceback|Error executing job|RuntimeError|Exception|ModuleNotFoundError"
+)
 
 
 _FIELD_PATTERNS: dict[str, str] = {
@@ -26,6 +28,43 @@ _FIELD_PATTERNS: dict[str, str] = {
     "total_time_s": rf"Total time:\s*({_NUMBER})s",
 }
 
+# Adaptive-sampler telemetry printed per iteration as Env/adp_samp/<key>. Only the
+# final value lands here; full series live in summarize_sampler_telemetry.py.
+_ADP_SAMP_KEYS = (
+    "num_episodes_min",
+    "num_episodes_max",
+    "num_episodes_mean",
+    "num_failures_min",
+    "num_failures_max",
+    "num_failures_mean",
+    "failure_rate_min",
+    "failure_rate_max",
+    "failure_rate_mean",
+    "prob_max",
+    "prob_min",
+    "prob_mean",
+    "prob_max_over_uniform",
+    "effective_num_bins",
+    "num_concentrated_bins",
+    "episodes_max_over_mean",
+)
+# Subset used by the SIM-M4 classification rule; single source of truth for the
+# telemetry columns in compare_sonic_manifests and aggregate_sonic_comparisons.
+ADP_SAMP_CLASSIFICATION_KEYS = (
+    "prob_max_over_uniform",
+    "num_concentrated_bins",
+    "effective_num_bins",
+    "episodes_max_over_mean",
+    "failure_rate_mean",
+    "failure_rate_max",
+)
+# %.4f can print nan/inf; match them so a non-finite FINAL value is reported as
+# non-finite instead of silently falling back to an earlier finite iteration.
+_ADP_SAMP_VALUE = rf"(?:{_NUMBER}|nan|-?inf)"
+_FIELD_PATTERNS.update(
+    {f"adp_samp_{key}": rf"Env/adp_samp/{key}:\s*({_ADP_SAMP_VALUE})" for key in _ADP_SAMP_KEYS}
+)
+
 _INT_FIELDS = {"learning_iteration", "total_episodes", "total_timesteps"}
 
 
@@ -34,6 +73,11 @@ def _last_number(text: str, pattern: str, *, as_int: bool = False) -> int | floa
     if not matches:
         return None
     value = float(matches[-1])
+    # A non-finite FINAL value is reported as absent rather than falling back to
+    # an earlier finite iteration (which would misreport stale telemetry) or
+    # emitting NaN into JSON output.
+    if value != value or value in (float("inf"), float("-inf")):
+        return None
     return int(value) if as_int else value
 
 
@@ -60,7 +104,9 @@ def _parse_metric_line(text: str, prefix: str) -> dict[str, float]:
     if not matches:
         return {}
     line = matches[-1]
-    return {key: float(value) for key, value in re.findall(rf"([A-Za-z0-9_]+):\s*({_NUMBER})", line)}
+    return {
+        key: float(value) for key, value in re.findall(rf"([A-Za-z0-9_]+):\s*({_NUMBER})", line)
+    }
 
 
 def parse_eval_log(text: str) -> dict[str, Any]:

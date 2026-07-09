@@ -83,10 +83,60 @@ Succ:  mpjpe_g: 16.493 \tmpjpe_l: 13.255 \tmpjpe_pa: 9.168
     assert summary["all"]["mpjpe_g"] == 16.493
 
 
+def test_parse_training_log_extracts_final_adp_samp_telemetry() -> None:
+    text = """
+ \033[1m Learning iteration 49  \033[0m
+                      Mean rewards: 0.93542
+  Env/adp_samp/num_episodes_mean: 1.9000
+  Env/adp_samp/failure_rate_mean: 0.9000
+Env/adp_samp/prob_max_over_uniform: 2.9000
+ \033[1m Learning iteration 50  \033[0m
+                      Mean rewards: 0.93600
+  Env/adp_samp/num_episodes_mean: 2.1000
+  Env/adp_samp/failure_rate_mean: 0.8500
+Env/adp_samp/prob_max_over_uniform: 3.0500
+Env/adp_samp/num_concentrated_bins: 0.0000
+Env/adp_samp/effective_num_bins: 69.7000
+Env/adp_samp/episodes_max_over_mean: 1.8000
+"""
+
+    summary = parse_training_log(text)
+
+    assert summary["adp_samp_num_episodes_mean"] == 2.1
+    assert summary["adp_samp_failure_rate_mean"] == 0.85
+    assert summary["adp_samp_prob_max_over_uniform"] == 3.05
+    assert summary["adp_samp_num_concentrated_bins"] == 0.0
+    assert summary["adp_samp_effective_num_bins"] == 69.7
+    assert summary["adp_samp_episodes_max_over_mean"] == 1.8
+
+
+def test_parse_training_log_reports_nonfinite_final_adp_samp_value_as_absent() -> None:
+    # %.4f prints nan for non-finite tensors; the final value must not silently
+    # fall back to an earlier finite iteration.
+    text = (
+        "Learning iteration 49\nEnv/adp_samp/failure_rate_mean: 0.9000\n"
+        "Learning iteration 50\nEnv/adp_samp/failure_rate_mean: nan\n"
+    )
+
+    summary = parse_training_log(text)
+
+    assert "adp_samp_failure_rate_mean" not in summary
+
+
+def test_parse_training_log_omits_adp_samp_keys_for_uniform_logs() -> None:
+    text = "Learning iteration 50\nMean rewards: 0.98755\nTotal timesteps: 9600\n"
+
+    summary = parse_training_log(text)
+
+    assert not any(key.startswith("adp_samp_") for key in summary)
+
+
 def test_summarize_logs_writes_json_ready_schema(tmp_path: Path) -> None:
     train_log = tmp_path / "train.log"
     eval_log = tmp_path / "eval.log"
-    train_log.write_text("Learning iteration 1\nMean rewards: 0.5\nTotal timesteps: 384\n", encoding="utf-8")
+    train_log.write_text(
+        "Learning iteration 1\nMean rewards: 0.5\nTotal timesteps: 384\n", encoding="utf-8"
+    )
     eval_log.write_text("All:  mpjpe_g: 1.0 \tmpjpe_l: 2.0\n", encoding="utf-8")
 
     summary = summarize_logs(train_log=train_log, eval_log=eval_log)

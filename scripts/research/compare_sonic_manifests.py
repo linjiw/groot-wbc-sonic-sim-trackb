@@ -10,6 +10,7 @@ import sys
 from typing import Any
 
 from scripts.research.sonic_experiment_manifest import validate_manifest
+from scripts.research.summarize_sonic_logs import ADP_SAMP_CLASSIFICATION_KEYS
 
 _CONTROL_GROUPS = ("controlled_variables", "datasets")
 _CONTROL_FIELDS = ("checkpoint",)
@@ -19,6 +20,10 @@ _METRIC_PATHS: tuple[tuple[str, ...], ...] = (
     ("metrics", "train", "mean_rewards"),
     ("metrics", "train", "total_timesteps"),
     ("metrics", "train", "traceback_count"),
+    # Adaptive-sampler classification telemetry (final values). Informational only:
+    # uniform arms have no adp_samp keys, so these must never join
+    # _PRIMARY_METRIC_PATHS or every uniform arm fails ok_for_causal_comparison.
+    *(("metrics", "train", f"adp_samp_{key}") for key in ADP_SAMP_CLASSIFICATION_KEYS),
     ("metrics", "eval", "ok"),
     ("metrics", "eval", "all", "mpjpe_g"),
     ("metrics", "eval", "all", "mpjpe_l"),
