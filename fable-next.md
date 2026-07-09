@@ -1,9 +1,9 @@
-# fable-next.md — Track B research plan after the SIM-M3 negative result
+# fable-next.md — Track B research plan (SIM-M4a done → SIM-M4b diagnosis next)
 
-Date: 2026-07-08
-Author: Claude (Fable 5), synthesized from a multi-agent read of the repo at `d2d60a8` plus
-adversarial verification of the sampler mechanism and a three-lens plan design
-(diagnosis-scientist / mechanism-designer / paper-strategist) with a completeness-critic pass.
+Date: 2026-07-09 (v2 — reorganized after SIM-M4a landed at `5d48c72`)
+Author: Claude (Fable 5). v1 (2026-07-08) was synthesized from a multi-agent read of the repo
+at `d2d60a8` plus adversarial verification of the sampler mechanism and a three-lens plan
+design; v2 folds in the SIM-M4a implementation results and its adversarial code review.
 
 Scope: research plan for improving SONIC WBC RL training and the curriculum/sampling
 method-framework, honoring GitHub issue #4 and all standing guardrails. **No deploy-contract
@@ -11,23 +11,110 @@ changes in any branch** (64D token + 7D×2 hands, obs ordering, ZMQ layout, LowC
 
 ---
 
-## 1. Where we are
-
-### Milestone chain (all on `sample_data` = 2 motions, num_envs=8, seeds 0–2)
+## 0. Status dashboard
 
 | Gate | Result | Reference |
 |---|---|---|
 | SIM-M1 bounded MPJPE-complete eval | PASS (harness validity) | tag `sim-m1-bounded-eval-metric-complete` |
 | SIM-M2-pre variant-checkpoint eval + provenance | PASS | commit `6327804` |
 | SIM-M2 3-seed paired micro (10 iters) | validity PASS, deltas tiny/mixed | tag `sim-m2-3seed-micro-causal-sanity` |
-| SIM-M3 3-seed, 50 iters, preregistered effect gate | validity PASS, **effect gate FAIL** (mean adaptive−uniform MPJPE-G = +0.111, 1/3 seeds improved) | tag `sim-m3-bounded-effect-negative` |
+| SIM-M3 3-seed, 50 iters, preregistered effect gate | validity PASS, **effect gate FAIL** (mean adaptive−uniform MPJPE-G = +0.111, 1/3 seeds improved; post-hoc exact permutation p = 7/8) | tag `sim-m3-bounded-effect-negative` |
+| **SIM-M4a telemetry + statistics tooling** | **DONE** — local half of the exit gate passed (83 tests; +0.110667 / p = 7/8 reproduction) | commit `5d48c72` |
+| SIM-M4b diagnosis | **NEXT** — blocked only on robotixx access | §2 Phase 1 |
+| SIM-D1 dataset-headroom gate | pending (D-A HF request should go out now) | §2 Phase 2 |
+| SIM-M5/M6/M7 | branch-conditional on M4b + D1 | §2 Phases 3–5 |
 
-Issue #4 (open) demands diagnosis, not scaling: telemetry summarizer for `Env/adp_samp/*`,
-per-seed telemetry aggregation beside MPJPE/reward, an under-active / wrong-target /
-active-but-not-useful classification, then either a bounded sampler-schedule probe
-(if under-active) or a mechanism-family switch (if active-but-not-useful).
+### What SIM-M4a delivered (commit `5d48c72`)
 
-### What the adaptive sampler actually is (verified in code)
+New tracked tools under `scripts/research/`, each with tests in `tests/research/` (83 total):
+
+- `summarize_sampler_telemetry.py` — full per-iteration `[iteration, value]` series for every
+  `Env/adp_samp/*` key (block-based parse on `Learning iteration N` headers; late-appearing
+  guarded keys and `nan`/`inf` handled without desyncing series; uniform logs →
+  `adaptive_telemetry_present: false`, never a warning).
+- `dump_sampler_checkpoint_state.py` — per-bin episodes/failures/failure-rate from checkpoint
+  `env_state_dict['motion_lib']` (the only artifact with the trained distribution — eval never
+  restores sampler state), with prior-domination classification and self-documenting caveats
+  (bin weights not checkpointed; no decay; all-bins vs active-bins clip base — identical on
+  sample_data, which fits one batch). Run inside `env_isaaclab` on robotixx.
+- `paired_stats.py` — exact one-sided sign-flip permutation p (improvement = negative delta;
+  p ≥ 1/2^n by construction; non-finite inputs rejected — NaN would otherwise read as p=0.0)
+  and a deterministic 10k-resample paired bootstrap CI.
+- `run_sonic_multiseed.py` — tracked multi-seed orchestrator replacing the untracked robotixx
+  `run_sim_m*.py`. A seed that yields no comparison **invalidates the run**
+  (`ok_for_causal_comparison=false`) rather than silently shrinking the aggregate; variant
+  names are validated against the spec template.
+- `aggregate_sonic_comparisons.py` **schema_version 2** — `--variant-a` (treatment) /
+  `--variant-b` (control; defaults preserve the SIM-M3 pairing), row keys `a.*`/`b.*`, delta
+  key `delta.eval.all.mpjpe_g.a_minus_b`, effect summary carries permutation p + bootstrap CI
+  + an explicit n=3 power note. New validity failures: one-sided variant-name mismatch,
+  duplicate seeds, duplicate paths, unsupported effect metrics.
+- Classification-telemetry final values flow through `summarize_sonic_logs.py`
+  (`ADP_SAMP_CLASSIFICATION_KEYS` is the single source of truth) →
+  `compare_sonic_manifests.py` `_METRIC_PATHS` (informational only, never
+  `_PRIMARY_METRIC_PATHS`) → the aggregate telemetry table. Non-finite final values report as
+  absent, not as stale finite fallbacks.
+
+Naming break to know about: schema-2 aggregates use `a_minus_b` keys; the schema-1 artifacts
+on robotixx use `adaptive_minus_uniform`, and the untracked `run_sim_m*.py` there call the OLD
+aggregator signature (`--adaptive-minus-uniform-threshold`) — they will fail loudly against
+this commit. Use `run_sonic_multiseed.py` for everything going forward.
+
+### Immediate next steps — SIM-M4b checklist (needs robotixx, no training)
+
+Run on robotixx (`conda activate env_isaaclab`, repo at `5d48c72` or later, repo root).
+Adjust glob paths to the actual `outputs/research/paired_sample_micro_sim_m3/` layout.
+
+1. **Telemetry series** over all 6 SIM-M3 train logs (3 adaptive + 3 uniform):
+
+   ```bash
+   python scripts/research/summarize_sampler_telemetry.py \
+     --train-log outputs/research/paired_sample_micro_sim_m3/seed0/adaptive_sampling_micro/train.log \
+     --train-log outputs/research/paired_sample_micro_sim_m3/seed1/adaptive_sampling_micro/train.log \
+     --train-log outputs/research/paired_sample_micro_sim_m3/seed2/adaptive_sampling_micro/train.log \
+     --train-log outputs/research/paired_sample_micro_sim_m3/seed0/uniform_sampling_micro/train.log \
+     --train-log outputs/research/paired_sample_micro_sim_m3/seed1/uniform_sampling_micro/train.log \
+     --train-log outputs/research/paired_sample_micro_sim_m3/seed2/uniform_sampling_micro/train.log \
+     --output-json docs/artifacts/sim_m4/sampler_telemetry.json
+   ```
+
+   Remote half of the SIM-M4a exit gate: series parse for all emitted keys from the 3
+   adaptive logs; `adaptive_telemetry_present: false` for the 3 uniform logs.
+
+2. **Checkpoint dumps** of the 3 adaptive trained checkpoints (release knobs are the
+   defaults: `--init-num-failures 1 --failure-rate-cap 200 --uniform-sampling-rate 0.1`):
+
+   ```bash
+   python scripts/research/dump_sampler_checkpoint_state.py \
+     --checkpoint <adaptive_seed0>/last.pt \
+     --checkpoint <adaptive_seed1>/last.pt \
+     --checkpoint <adaptive_seed2>/last.pt \
+     --output-json docs/artifacts/sim_m4/sampler_checkpoint_state.json
+   ```
+
+3. **Re-aggregation validity check** with the schema-2 aggregator over the 3 synced
+   seed-level `comparison.json` files; confirm mean delta **+0.110667** and permutation
+   **p = 7/8** match the local reproduction, and note the schema-1→2 key rename in the
+   status doc.
+
+4. **Sync** into tracked `docs/artifacts/sim_m4/`: the telemetry JSON, checkpoint-state JSON,
+   aggregate JSON/MD, the per-seed summary/comparison JSONs, and the 6 raw train logs if
+   size-reasonable (NOT the 448 MB `.pt` files). Also run the full test suite on robotixx
+   (`pytest tests/research -q`) to close the "pass on robotixx" half of the exit gate.
+
+5. **Apply the preregistered classification rule** (§2 Phase 1) to the committed artifacts,
+   post classification + telemetry table + checkpoint-dump evidence to issue #4, update
+   `docs/research_track_b_sim_status.md`, tag `sim-m4-sampler-telemetry-diagnosis`, and open
+   one new issue for the routed next gate (SIM-M5a or SIM-D1→SIM-M5b).
+
+6. **In parallel, today (no compute):** submit the D-A HF gated-access request for
+   `bones-studio/seed` (§2 Phase 2) — its latency is the SIM-M6 critical path.
+
+---
+
+## 1. Context: what we know (verified in code)
+
+### The adaptive sampler
 
 - **Bins:** every motion is split into 50-frame bins (`bin_size: 50`,
   `gear_sonic/config/manager_env/commands/terms/motion.yaml:16-25`;
@@ -40,19 +127,18 @@ active-but-not-useful classification, then either a bounded sampler-schedule pro
   failure rate 1.0 per bin (`:2397-2424`).
 - **Probability:** `failure_rate` clipped at `mean × adp_samp_failure_rate_max_over_mean`
   (release sets **200**, `sonic_release.yaml:70-71`), normalized, blended
-  `0.9 × failure-based + 0.1 × uniform` (`uniform_sampling_rate=0.1`,
-  `:2558-2589`), multiplied by length-agnostic bin weights, renormalized. `max_prob_per_bin`
-  / `max_prob_per_motion` are unset in release (legacy skip path, `:2632-2635`).
-- **Telemetry:** `manager_env_wrapper.py:921-968` emits 16 `adp_samp/*` keys per step
-  (corrected from 17 during SIM-M4a implementation — the wrapper emits exactly 16, and the
-  `prob_*` block plus `episodes_max_over_mean` are conditionally guarded, so adaptive logs may
-  show fewer in early iterations); `trl/trainer/ppo_trainer.py:264-266` prints them per
-  iteration as `Env/adp_samp/<key>: %.4f`.
-  **Stale comment:** `:958-959` says the cap is 50× so "10× = 20% of cap"; release cap is 200×,
-  so `num_concentrated_bins` (bins >10× uniform) is 5% of cap — fix the comment when touching
-  this area.
+  `0.9 × failure-based + 0.1 × uniform` (`uniform_sampling_rate=0.1`, `:2558-2589`),
+  multiplied by length-agnostic bin weights, renormalized. `max_prob_per_bin` /
+  `max_prob_per_motion` are unset in release (legacy skip path, `:2632-2635`). The clip base
+  is the ACTIVE-bin mean — irrelevant for sample_data (one batch) but material for
+  batched-loading datasets; the dump tool records this caveat.
+- **Telemetry:** `manager_env_wrapper.py:921-968` emits **16** `adp_samp/*` keys per step
+  (corrected from 17 during SIM-M4a; the `prob_*` block and `episodes_max_over_mean` are
+  conditionally guarded, so adaptive logs may show fewer keys in early iterations);
+  `trl/trainer/ppo_trainer.py:264-266` prints them per iteration as
+  `Env/adp_samp/<key>: %.4f`. The stale 10×/50× cap comment was fixed in `5d48c72`.
 
-### Diagnosis the telemetry already suggests (to be made official by SIM-M4)
+### Working hypothesis for SIM-M4b (to be made official against committed artifacts)
 
 `prob_max_over_uniform ≈ 3`, `num_concentrated_bins = 0`, `effective_num_bins ≈ 70/70`,
 `episodes_max_over_mean ≈ 1.7–1.9`: the distribution stayed essentially flat. At
@@ -60,100 +146,51 @@ num_envs=8 × 50 iters × 24 steps/env (`sonic_release.yaml:79`) ≈ 9.6k env-st
 with easy motions that mostly reach `motion_time_out` rather than terminate, observed failures
 are ~0 and the failure rate stays **prior-dominated** (1/1 seed). The likely verdict is the
 compound one: **under-active because the dataset produces no discriminative failure signal** —
-which is simultaneously "under-active" and "nothing to discriminate." This matters because
-issue #4 deliverables 4 and 5 prescribe different follow-ups; the compound verdict routes to a
-**dataset-headroom gate first**, then the mechanism work. Amplifying a flat signal is a no-op.
+simultaneously "under-active" and "nothing to discriminate." Issue #4 deliverables 4 and 5
+prescribe different follow-ups; the compound verdict routes to a **dataset-headroom gate
+first**, then the mechanism work. Amplifying a flat signal is a no-op.
 
-### Load-bearing pitfalls discovered in this review (verified against code)
+### Load-bearing pitfalls (verified; status as of `5d48c72`)
 
-1. **Eval never restores sampler state.** Checkpoints DO save it
-   (`env_state_dict['motion_lib']` = per-bin `adp_samp_num_episodes` / `adp_samp_num_failures`,
-   `trl/callbacks/model_save_callback.py:66-136`), but `eval_agent_trl.py:439-440` loads only
-   `policy_state_dict`; `load_env_state_dict` runs only on the training-resume path
-   (`ppo_trainer.py:2215`). So the per-motion `sampling_prob` recorded in eval
-   `metrics_eval.json` is the **uniform init**, not the trained distribution. Any
-   "wrong-target" test must read the checkpoint's `env_state_dict`, not eval output.
-2. **`max_unique_motions=1` in the micro eval commands**
+1. **Eval never restores sampler state** — OPEN, worked around. Checkpoints DO save it
+   (`env_state_dict['motion_lib']`, `trl/callbacks/model_save_callback.py:66-136`), but
+   `eval_agent_trl.py:439-440` loads only `policy_state_dict`. Any "wrong-target" test must
+   read the checkpoint via `dump_sampler_checkpoint_state.py`, never eval `sampling_prob`.
+2. **`max_unique_motions=1` in the micro eval commands** — OPEN
    (`configs/research/sonic_paired_sample_micro_metric_complete.json:14,22` and the posttrain
-   spec) selects 1 of 2 motions via `random.sample` (`motion_lib_base.py:450-458`). Per-motion
-   difficulty scoring and any SIM-D1 headroom eval must drop this limiter and page through all
-   motions. Also audit whether SIM-M3 uniform vs adaptive evals happened to score the same motion.
-3. **Aggregator is hardcoded** to `uniform_sampling_micro` / `adaptive_sampling_micro`
-   (`aggregate_sonic_comparisons.py:13-14`); any new variant name silently yields empty columns.
-4. **3-seed statistics cannot reach significance.** The min sign-flip permutation p at n=3 is
-   0.125. Three-seed gates are causal-sanity screens only; effect claims need ≥5 seeds
-   (min p = 1/32 ≈ 0.031) plus bootstrap CIs.
-5. **`outputs/` is gitignored** (`.gitignore:156-157`); the SIM-M2/M3 orchestrators
-   (`run_sim_m2.py`/`run_sim_m3.py`) and all run artifacts live only on the robotixx machine.
-   Anything the paper depends on needs a tracked home (`docs/artifacts/`) and a tracked
-   orchestrator.
-6. **Trainer `schedule_dict` is re-applied at eval** (`eval_agent_trl.py:466-470` calls
-   `scheduler.update_scheduled_params` at the checkpoint's global step). Any
-   termination-curriculum arm must scope its schedule to train-only attributes or strip it from
-   the eval config, or eval terminations get silently mutated between arms.
+   spec). Per-motion difficulty scoring and the SIM-D1 headroom eval must drop this limiter
+   and page through all motions. Also audit whether SIM-M3 uniform vs adaptive evals happened
+   to score the same motion.
+3. ~~Aggregator hardcoded to two variant names~~ — **FIXED in `5d48c72`**
+   (`--variant-a/--variant-b`, schema 2; unmatched names now fail validity instead of
+   yielding silent empty columns).
+4. **3-seed statistics cannot reach significance** — inherent. Min sign-flip permutation p at
+   n=3 is 0.125; three-seed gates are causal-sanity screens only; effect claims need ≥5 seeds
+   (min p = 1/32 ≈ 0.031) plus bootstrap CIs. The aggregate now prints this power note itself.
+5. **`outputs/` is gitignored** — OPEN by design; mitigated: the orchestrator is now the
+   tracked `run_sonic_multiseed.py`, and paper-relevant artifacts sync to `docs/artifacts/`.
+6. **Trainer `schedule_dict` is re-applied at eval** (`eval_agent_trl.py:466-470`) — OPEN;
+   mandatory guard for any SIM-M5c termination-curriculum arm: scope schedules to train-only
+   attributes or strip them from the eval config.
 
 ---
 
-## 2. The plan: SIM-M4 → SIM-M7
+## 2. The plan: SIM-M4b → SIM-M7
 
-Naming continues the SIM-M convention. Every gate below is preregistered here, before results.
-Heavy runs stay on robotixx `env_isaaclab`; this checkout does tooling, tests, and analysis
-(tests are pure Python — install pytest into the local py3.11 venv).
+Every gate below is preregistered here, before results. Heavy runs stay on robotixx
+`env_isaaclab`; this checkout does tooling, tests, and analysis (local py3.11 venv:
+`.venv_research`, `pytest tests/research -q`).
 
-### Phase 0 — SIM-M4a: telemetry + statistics tooling (no GPU, ~1 day)
+### Phase 0 — SIM-M4a: telemetry + statistics tooling — DONE (`5d48c72`)
 
-Closes issue #4 deliverables 1–2. Build and test before touching any real log.
-
-1. **`scripts/research/summarize_sampler_telemetry.py`** (new): block-based parse of train
-   logs (split on `Learning iteration N`, then match `Env/adp_samp/<key>: <value>` per block —
-   amended from a global-regex design because the guarded `prob_*`/`episodes_max_over_mean`
-   keys appear late or drop out, which silently desyncs positional series); capture the **full
-   per-iteration `[iteration, value]` series** for every emitted key plus `{first, last, min,
-   max, slope over final 20 iters}` scalars. Series is mandatory — last-value cannot
-   distinguish under-active from saturating. Absent telemetry (uniform logs) →
-   `adaptive_telemetry_present: false`, never a warning; `nan`/`inf` recorded as nulls without
-   shifting alignment.
-2. **`scripts/research/dump_sampler_checkpoint_state.py`** (new, torch-only, no Isaac Lab):
-   load each adaptive checkpoint's `env_state_dict['motion_lib']` and dump per-bin
-   episodes/failures/failure-rate and the recomputed sampling distribution. This is the only
-   artifact with the actual final sampled-bin distribution and directly satisfies the status
-   doc's "audit whether adaptive sampling actually changes the sampled bin distribution."
-3. **Plumb telemetry scalars** through the three hardcoded chokepoints:
-   `summarize_sonic_logs.py` `_FIELD_PATTERNS`, `compare_sonic_manifests.py:16-29`
-   `_METRIC_PATHS` (informational only — NOT `_PRIMARY_METRIC_PATHS`, so uniform runs can't
-   break `ok_for_causal_comparison`), `aggregate_sonic_comparisons.py` `_METRIC_KEYS` +
-   markdown columns.
-4. **De-hardcode the aggregator**: `--variant-a/--variant-b` (delta = a−b, improved = delta<0
-   unchanged). Required by every downstream multi-arm milestone. Implementation decision
-   (2026-07-09): clean break to generic `a.*`/`b.*` row keys and `delta.<metric>.a_minus_b`,
-   `schema_version: 2`, with A = treatment / B = control pinned in the docstring and defaults
-   preserving the SIM-M3 pairing (a=adaptive_sampling_micro, b=uniform_sampling_micro). The
-   SIM-M3 numbers are unchanged; only key names moved. Note this rename when re-aggregating in
-   the status doc.
-5. **Statistics upgrade** in the aggregate: mean ± sample std (existing), plus exact one-sided
-   sign-flip permutation p-value on paired deltas and a 10k-resample paired bootstrap CI.
-   Document the n=3 power limit in the output. Validity check: reproduce the recorded SIM-M3
-   mean delta **+0.110667** from the synced comparison.json files.
-6. **`scripts/research/run_sonic_multiseed.py`** (new, tracked): wraps
-   `run_sonic_paired_experiment.py` per seed then aggregates — replaces the untracked
-   robotixx-only `run_sim_m*.py`.
-7. **Tests** under `tests/research/`: synthetic-log round-trip with known series, `%.4f`
-   truncation case, uniform-log-yields-null, aggregator variant parametrization, permutation-p
-   on known deltas, multiseed dry-run materialization. Keep the existing 39 green.
-8. Fix the stale 10×/50× comment at `manager_env_wrapper.py:958-959` while in the area.
-
-**SIM-M4a exit gate** (amended 2026-07-09 to match the verified emitter — 16 keys, not 17;
-3 of the 6 SIM-M3 logs are uniform arms with zero adp_samp keys by design): all new/existing
-tests pass locally and on robotixx; telemetry tool parses all emitted keys as series from the
-3 adaptive SIM-M3 logs and reports `adaptive_telemetry_present: false` for the 3 uniform logs;
-the +0.110667 reproduction matches (locally validated from the recorded status-doc numbers:
-mean +0.110667, permutation p = 7/8, min achievable p = 1/8).
+Summarized in §0. Local exit-gate half passed: 83 tests green; +0.110667 / p = 7/8
+reproduction from the recorded status-doc numbers. Remote half (parse the 6 real SIM-M3 logs;
+tests green on robotixx) folds into SIM-M4b step 1/4.
 
 ### Phase 1 — SIM-M4b: the diagnosis (log/checkpoint sync + analysis, no training)
 
-Sync from robotixx into a tracked `docs/artifacts/sim_m4/`: the 6 SIM-M3 train logs, per-seed
-summary/comparison JSONs, and the 3 adaptive checkpoints' `env_state_dict['motion_lib']`
-tensors (dumped via item 2, small JSON — do not commit the 448 MB .pt files).
+Execution checklist: §0 "Immediate next steps." Artifacts land in tracked
+`docs/artifacts/sim_m4/`.
 
 **Preregistered classification rule** (majority over the 3 adaptive seeds, applied only to
 committed summarizer output):
@@ -161,12 +198,14 @@ committed summarizer output):
 - **Under-active / signal-starved** if, at final iteration: `prob_max_over_uniform < 5` AND
   `num_concentrated_bins == 0` AND `effective_num_bins ≥ 0.9 × 70`, with the starvation check
   that per-bin observed failures are prior-dominated (checkpoint dump:
-  `num_failures − init ≤ 2` for ≥90% of bins). Record explicitly whether the compound verdict
-  applies: failures are absent because episodes time out (easy data), i.e. *under-active because
-  the dataset yields no failure signal*.
+  `num_failures − init ≤ 2` for ≥90% of bins — the dump's `prior_dominated_fraction ≥ 0.9`
+  with the default threshold). Record explicitly whether the compound verdict applies:
+  failures are absent because episodes time out (easy data), i.e. *under-active because the
+  dataset yields no failure signal*.
 - **Wrong-target** if NOT under-active AND the concentrated bins' motions rank-disagree with
   per-motion difficulty from a fresh all-motions eval (n=2 ⇒ sign check only; note the
-  degeneracy in the writeup). Source: checkpoint dump, **not** eval `sampling_prob` (pitfall 1).
+  degeneracy in the writeup). Source: checkpoint dump, **not** eval `sampling_prob`
+  (pitfall 1).
 - **Active-but-not-useful** if concentrated AND correctly targeted AND the SIM-M3 effect gate
   failed (it did).
 
@@ -187,7 +226,8 @@ mechanism family.*
 
 - **D-A (submit immediately, non-gating):** HF gated-access request for `bones-studio/seed`.
   Note: `nvidia/GEAR-SONIC`'s `bones_seed_smpl` tars are SMPL-side only; the robot-side motion
-  lib needs the gated CSVs via `convert_soma_csv_to_motion_lib.py` + `filter_and_copy_bones_data.py`.
+  lib needs the gated CSVs via `convert_soma_csv_to_motion_lib.py` +
+  `filter_and_copy_bones_data.py`.
 - **D-B (immediate bridge):** `scripts/research/build_synthetic_difficulty_set.py` (new) —
   ~24 variants of the 2 sample motions via playback-speed scaling
   (×{0.75, 1.0, 1.25, 1.5, 1.75, 2.0}) and forward/reversed, with the **same transform applied
@@ -211,10 +251,11 @@ STOP mechanism work; the paper pivots to the methodology+diagnosis claims (§3).
 ### Phase 3 — SIM-M5: one branch-conditional mechanism probe (robotixx, micro budget)
 
 All arms: 3 seeds (0–2), num_envs=8–16, **200 iters**, SIM-D1-passing dataset, specs under
-`configs/research/`, launched by the tracked `run_sonic_multiseed.py`, frozen eval settings
-across arms. Two-stage gating everywhere: a **mechanism-activation telemetry sub-gate must pass
-before the effect sub-gate is scored**; an inactive-mechanism result is classified
-*invalid-inactive*, not *negative*.
+`configs/research/` as `{seed}`-templated multiseed specs, launched by the tracked
+`run_sonic_multiseed.py` (pass `--variant-a <mechanism> --variant-b uniform_...`; the schema-2
+aggregator handles any pairing), frozen eval settings across arms. Two-stage gating
+everywhere: a **mechanism-activation telemetry sub-gate must pass before the effect sub-gate
+is scored**; an inactive-mechanism result is classified *invalid-inactive*, not *negative*.
 
 - **SIM-M5a — sampler-schedule probe** (only if plain under-active on discriminative data;
   this is issue #4 deliverable 4). Overrides only documented cfg keys:
@@ -276,7 +317,8 @@ thesis (*competence-gated beats unstructured adaptation*) a measured claim rathe
 - **C1 — methodology (banked):** preregistered, validity-gated paired-experiment protocol for
   curriculum claims in humanoid WBC tracking — manifests, checkpoint provenance,
   control-mismatch/metric/checkpoint gates, effect gates fixed before results, preserved
-  negative tags. SIM-M1…M3 are the demonstration.
+  negative tags. SIM-M1…M3 are the demonstration; SIM-M4a's exact-permutation/bootstrap
+  reporting and gate-integrity guards (missing seeds invalidate the run) strengthen it.
 - **C2 — diagnosis:** telemetry- and checkpoint-grounded triage showing PHC-style failure-rate
   resampling is signal-starved at small data/budget (prior-dominated bins, flat distribution,
   cap never binding), with the under-active / wrong-target / not-useful decision procedure.
@@ -297,10 +339,11 @@ ExBody/OmniH2O; DeepMimic RSI for the init/termination-curriculum axes; rliable
 (Agarwal et al. 2021) for the small-n statistics framing. Do not cite the unimplemented
 20/60/20 curriculum split or motionbricks as capabilities.
 
-**Timeline from 2026-07-08:** Jul 08–10 Phase 0 + D-A request + bridge set. Jul 10–12 SIM-M4
-diagnosis, close issue #4. Jul 12–13 SIM-D1. Jul 14–18 SIM-M5 (branch by diagnosis). Jul 20–31
-SIM-M6 (slips if no real dataset passes SIM-D1; fallback proceeds regardless). Aug 01 go/no-go:
-full paper draft (CoRL/ICRA 2027 cycle) vs methodology+negative-results draft (RLC/workshop).
+**Timeline from 2026-07-09** (Phase 0 landed on schedule): Jul 09 — D-A HF request out;
+Jul 09–11 SIM-M4b (robotixx sync + diagnosis, close issue #4); Jul 11–13 SIM-D1 (+ D-B bridge
+set if the compound verdict holds); Jul 14–18 SIM-M5 (branch by diagnosis); Jul 20–31 SIM-M6
+(slips if no real dataset passes SIM-D1; fallback proceeds regardless). Aug 01 go/no-go: full
+paper draft (CoRL/ICRA 2027 cycle) vs methodology+negative-results draft (RLC/workshop).
 
 ---
 
@@ -318,6 +361,11 @@ full paper draft (CoRL/ICRA 2027 cycle) vs methodology+negative-results draft (R
 7. New mechanisms ship flag-gated and default-off; `adaptive_sampling.signal` unset must be
    byte-identical to current behavior.
 8. One issue per gate; each closes with artifacts, a tag, and a status-doc update.
+9. (new, from SIM-M4a review) Aggregates over a subset of the preregistered seeds are invalid
+   by construction — `run_sonic_multiseed.py` and the aggregator enforce this; never bypass by
+   hand-picking comparison files.
+10. (new) Non-finite metric values are reported as absent/rejected, never silently coerced —
+    a NaN delta must fail loudly, not read as a significant effect.
 
 ## 5. Explicitly rejected next steps
 
@@ -325,10 +373,12 @@ full paper draft (CoRL/ICRA 2027 cycle) vs methodology+negative-results draft (R
   the path goes through diagnosis + headroom gates).
 - Leading the schedule probe with `failure_counts_multiplier` (multiplies a ~0 signal).
 - Correlating eval-time `sampling_prob` with MPJPE for the wrong-target test (provably uniform
-  at eval; use checkpoint `env_state_dict`).
+  at eval; use the checkpoint dump).
 - LAFAN-retargeted robot motions paired with unrelated BONES-SEED SMPL (corrupts aux
   alignment losses / encoder sampling).
 - Pursuing the VLA/G0/GR00T fine-tune track for this paper (explicitly demoted; only its
   sampler/gating math is ported).
 - Using motionbricks (vendored, unused, LFS pointers unpulled).
 - 64+ GPU sonic_release-scale finetunes (budget caps at micro/mid runs).
+- Reviving the untracked robotixx `run_sim_m*.py` against the schema-2 aggregator (old
+  signature; superseded by `run_sonic_multiseed.py`).
