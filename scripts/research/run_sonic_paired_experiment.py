@@ -31,6 +31,36 @@ from scripts.research.summarize_sonic_logs import summarize_logs, write_markdown
 _REQUIRED_TOP_LEVEL = ("experiment_group", "hypothesis", "seed", "dataset_robot", "dataset_smpl", "checkpoint", "variants")
 _REQUIRED_VARIANT = ("name", "eval_command", "interpretation")
 
+# Eval-strip guard (research_plan_zpd_teacher.md §3.2, expert-endorsed): eval
+# re-applies trainer.schedule_dict at the checkpoint's global step
+# (eval_agent_trl.py:466-470) and only strips train_only_events-scoped entries
+# (:134-142) — a threshold-curriculum schedule inherited from the train exp
+# config would silently corrupt eval comparisons. Hydra override forms that
+# remove the schedule from an eval invocation:
+_SCHEDULE_STRIP_PATTERNS = ("~trainer.schedule_dict", "trainer.schedule_dict=null")
+
+
+def _eval_strip_errors(index: int, variant: dict[str, Any]) -> list[str]:
+    """Materialized-command checks for the schedule_dict eval-strip guard."""
+    errors: list[str] = []
+    eval_command = str(variant.get("eval_command") or "")
+    train_command = str(variant.get("train_command") or "")
+    eval_mentions = "schedule_dict" in eval_command
+    eval_strips = any(pattern in eval_command for pattern in _SCHEDULE_STRIP_PATTERNS)
+    if eval_mentions and not eval_strips:
+        errors.append(
+            f"variants[{index}] eval_command sets schedule_dict without stripping it "
+            f"(use one of {_SCHEDULE_STRIP_PATTERNS}); eval_agent_trl.py re-applies "
+            "schedules at the checkpoint step and would corrupt the comparison"
+        )
+    if "schedule_dict" in train_command and not eval_strips:
+        errors.append(
+            f"variants[{index}] train_command uses schedule_dict but eval_command does "
+            f"not strip it (add one of {_SCHEDULE_STRIP_PATTERNS}); the schedule would "
+            "be re-applied at eval via the shared exp config"
+        )
+    return errors
+
 
 def _load_json(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as f:
@@ -85,6 +115,7 @@ def validate_spec(spec: dict[str, Any]) -> list[str]:
         has_logs = bool(variant.get("train_log") or variant.get("eval_log"))
         if not has_summary and not has_logs and not (variant.get("train_command") or variant.get("eval_command")):
             errors.append(f"variants[{index}] must provide summary_json, logs, or commands")
+        errors.extend(_eval_strip_errors(index, variant))
     return errors
 
 

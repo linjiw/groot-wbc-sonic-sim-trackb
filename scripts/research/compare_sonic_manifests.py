@@ -31,6 +31,13 @@ _METRIC_PATHS: tuple[tuple[str, ...], ...] = (
     ("metrics", "eval", "terminated_final"),
     ("metrics", "eval", "success_rate_final"),
     ("metrics", "eval", "traceback_count"),
+    # Easy-decile retention metric (D8; plumbed by summarize_sonic_logs when a
+    # frozen SIM-D1 difficulty ranking is supplied). Informational here — its
+    # preregistered non-inferiority bound is enforced by the gate scripts, and
+    # arms evaluated without a ranking simply have no value.
+    ("metrics", "eval", "easy_decile", "mpjpe_g"),
+    ("metrics", "eval", "easy_decile", "success_rate"),
+    ("metrics", "eval", "easy_decile", "evaluated_in_decile"),
 )
 _PRIMARY_METRIC_PATHS: tuple[tuple[str, ...], ...] = (
     ("metrics", "train", "ok"),
