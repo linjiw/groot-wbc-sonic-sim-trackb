@@ -415,3 +415,26 @@ This corrects the earlier working hypothesis (which attributed flatness solely t
 flatness has two separable drivers — signal starvation AND low failure-rate contrast under an
 outlier-only concentration metric — and the SIM-M4b checkpoint dump (`prior_dominated_fraction` and
 per-bin failure spread) decides which holds on the real data.
+
+## ZPD-teacher program locked + GPU-free tooling implemented (2026-07-23, no GPU)
+
+The curriculum-MaxRL expert exchange closed (`docs/research_curriculum_maxrl_integration.md`
+sent; `docs/external/SONIC_RESPONSE.md` received; reference implementation vendored at
+`external_dependencies/curriculum-maxrl/`). Twelve decisions locked in
+`docs/research_plan_zpd_teacher.md` (v1.1) — **the major research goal going forward**,
+superseding fable-next.md §2 Phases 3–5. SIM-M4b / SIM-D1 remain the blocking prerequisites.
+
+Commits `8a52afe`..`69b7e2b`, all flag-gated default-off, 182 research tests:
+
+| Item | Purpose |
+|---|---|
+| `motion_lib_base.py` Change A | `adaptive_sampling.signal: learnability\|advantage_mass` — Beta posterior over per-bin survival (hazard complement), exact `E[p(1-p)]`, deterministic optimism interval-max (D3), evidence-half-life decay (D4), 20x-uniform tripwire replacing the mean×cap clip (D9), optional family kernel (D6). Byte-identical to release when `signal` unset (golden-tensor test). |
+| `sampler_dynamics_sim.py` ZPD modes | Preregistered forecast Z1–Z6 + coupled threshold-controller scenarios CTRL1–3 (all reproduce the expert's Q7 findings). Artifacts frozen at `docs/artifacts/sim_m5/`. |
+| **Z6 (plan-altering)** | The v1 hard-half/easy-half ≥ 1.5 activation criterion MISFIRES on ZPD utilities (≈ 0.94 for a correctly-working teacher — it down-weights impossible bins by design). Activation sub-gate re-frozen (plan §4, one revision, before any GPU run): ZPD arms gate on **frontier over-allocation ≥ 1.2 + posterior sanity Spearman ≥ 0.4**; failure_rate arms unchanged. M5-L screen leads with `optimism_k: 0` (forecast: k=1 mildly hurts frontier mass). |
+| Eval-strip guard | `validate_spec` rejects specs whose commands use `trainer.schedule_dict` without stripping it from eval (the eval re-application pitfall, promoted from note to test per expert Q7). |
+| Retention metric (D8) | `eval.easy_decile.*` from the eval callback's `metrics_eval.json` + a frozen SIM-D1 difficulty ranking; informational columns in `compare_sonic_manifests`. |
+| Stall diagnostic (D12) | `scripts/research/stall_diagnostic.py` — frozen capacity-vs-curriculum classification rule; recorder side rides along with M5 eval runs. |
+
+Not implemented, deliberately (gated): Change B schedule config (needs the robotixx
+termination-manager path dry-run first), Change C disagreement probe (after M5-L verdict),
+closed-loop controller M5.6 (after M5-T works).

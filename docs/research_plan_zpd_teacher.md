@@ -1,15 +1,34 @@
 # Research plan: ZPD-teacher motion sampling for SONIC — the curriculum-MaxRL integration
 
-Date: 2026-07-22
-Status: **v1 — post-expert-review design plan.** This document is the major research goal
-going forward. It amends `fable-next.md` §2 Phases 3–5 (SIM-M5/M6/M7) with a concrete,
-expert-reviewed mechanism family; Phases 0–2 (SIM-M4b diagnosis, SIM-D1 headroom gate)
-are unchanged and remain hard prerequisites.
+Date: 2026-07-22 (v1.1 amendment 2026-07-23 — §4 activation sub-gate re-frozen per
+forecast finding Z6, BEFORE any GPU run; see §4 for the amendment record)
+Status: **v1.1 — post-expert-review design plan, GPU-free tooling implemented.** This
+document is the major research goal going forward. It amends `fable-next.md` §2
+Phases 3–5 (SIM-M5/M6/M7) with a concrete, expert-reviewed mechanism family; Phases
+0–2 (SIM-M4b diagnosis, SIM-D1 headroom gate) are unchanged and remain hard
+prerequisites.
 
-Provenance chain (all tracked):
+Provenance chain (all tracked in this repo):
 1. Our analysis → `docs/research_curriculum_maxrl_integration.md` (the handoff doc, §8 = ten questions).
-2. Expert response → `curriculum-maxrl` repo, `SONIC_RESPONSE.md` (answers keyed Q1–Q10; copy the file into `docs/external/` when convenient).
-3. This plan = the design decisions locked from that exchange, the code design, and the preregistered experiment program.
+2. Expert response → `docs/external/SONIC_RESPONSE.md` (answers keyed Q1–Q10).
+3. Reference implementation → `external_dependencies/curriculum-maxrl/` (vendored snapshot:
+   `frontier_rl/teacher.py` FrontierTeacher, `frontier_rl/streaming.py` kernel teacher,
+   `curriculum_maxrl/{THEORY,PROOFS,VALIDATION}.md`).
+4. This plan = the design decisions locked from that exchange, the code design, and the
+   preregistered experiment program.
+
+Implementation status (2026-07-23, commits `8a52afe`..`dd30304`):
+- §3.1 Change A: **implemented + tested** (`motion_lib_base.py`, 27 unit tests, byte-identity verified).
+- §3.4.1 dynamics-sim modes + preregistered forecasts: **done** (Z1–Z6, CTRL1–3; artifacts
+  under `docs/artifacts/sim_m5/`).
+- §3.2 eval-strip unit test: **done** (guard in `validate_spec`, 6 tests).
+- §3.4.3 retention metric plumbing: **done** (`eval.easy_decile.*`, 8 tests).
+- §3.4.2 stall-diagnostic skeleton: **done** (`scripts/research/stall_diagnostic.py`, 8 tests;
+  eval-time recorder side rides along with the M5 runs on robotixx).
+- §3.2 Change B schedule config + dry-run of the termination-manager attribute path: **pending
+  robotixx** (hard launch precondition, unchanged).
+- §3.3 Change C disagreement probe: **deliberately not implemented** (gated on an M5-L verdict, D11).
+- M5.6 closed-loop controller: **deliberately not implemented** (gated on M5-T working, D7).
 
 ---
 
@@ -243,11 +262,27 @@ existing validity gates. Screens = 3 seeds (0–2), 200 iters, num_envs 8–16; 
 ≥5 seeds. Dataset: SIM-D1-passing only.
 
 **Activation sub-gate** (per arm, ≥2/3 seeds, from committed telemetry + checkpoint
-dump): **targeting criterion** — hard-half/easy-half sampling-mass ratio ≥ 1.5
-against the SIM-D1 difficulty ranking (peakedness alone remains sufficient but is NOT
-expected for ZPD utilities — forecast pmax/uniform 1.3–2.0). Additional M5-L-specific
-check: posterior sanity — `posterior_p_mean` rank-correlates with the SIM-D1
-per-motion difficulty ranking (Spearman ≥ 0.4 over bins of evaluated motions).
+dump). **AMENDED 2026-07-23 per preregistered forecast finding Z6**
+(`docs/artifacts/sim_m5/zpd_forecast_preregistered.json`, before any GPU run): the
+v1 targeting criterion (hard-half/easy-half mass ratio ≥ 1.5) is correct for
+*failure-rate* arms but MISFIRES on ZPD utilities — the criterion is
+difficulty-monotone while the ZPD utility deliberately down-weights the impossible
+bins that populate the hard half (forecast: ratio ≈ 0.94 for a correctly-working
+learnability teacher). Activation is therefore signal-family-specific:
+
+- **failure_rate arms (unchanged):** peakedness (pmax/uniform ≥ 10 AND ≥ 1
+  concentrated bin) OR hard-half/easy-half mass ratio ≥ 1.5.
+- **ZPD arms (M5-L, M5-A): frontier over-allocation** — sampling mass on the
+  SIM-D1 frontier band (middle difficulty tercile of evaluated bins) divided by
+  that band's uniform share ≥ 1.2, **AND posterior sanity** — `posterior_p_mean`
+  rank-correlates with the SIM-D1 per-motion difficulty ranking (Spearman ≥ 0.4
+  over bins of evaluated motions; forecast confirms ≈ 0.86 is achievable in the
+  mixed regime). Peakedness remains sufficient if it fires (not expected —
+  forecast pmax/uniform 1.0–2.0).
+
+Forecast-informed knob note (not a gate): optimism k=1 slightly *reduced* frontier
+mass vs k=0 in the forecast (0.69 vs 0.76); the M5-L screen leads with
+`optimism_k: 0` and treats k=1 as the one preregistered knob alternative.
 
 **Effect sub-gate** (screen): mean MPJPE-G delta (arm − uniform) ≤ −0.5, ≥2/3 seeds
 improved, `ok_for_causal_comparison=true` everywhere.

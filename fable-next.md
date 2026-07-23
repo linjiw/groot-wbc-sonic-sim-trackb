@@ -1,9 +1,20 @@
 # fable-next.md — Track B research plan (SIM-M4a done → SIM-M4b diagnosis next)
 
-Date: 2026-07-09 (v2 — reorganized after SIM-M4a landed at `5d48c72`)
+Date: 2026-07-09 (v2 — reorganized after SIM-M4a landed at `5d48c72`; v2.1 note 2026-07-23)
 Author: Claude (Fable 5). v1 (2026-07-08) was synthesized from a multi-agent read of the repo
 at `d2d60a8` plus adversarial verification of the sampler mechanism and a three-lens plan
 design; v2 folds in the SIM-M4a implementation results and its adversarial code review.
+
+> **v2.1 (2026-07-23): the major research goal is now the ZPD-teacher program —
+> `docs/research_plan_zpd_teacher.md` (v1.1), derived from the curriculum-MaxRL expert
+> exchange (`docs/external/SONIC_RESPONSE.md`; reference implementation vendored at
+> `external_dependencies/curriculum-maxrl/`). That plan SUPERSEDES this document's §2
+> Phases 3–5 (SIM-M5/M6/M7): SIM-M5 is restructured into M5-L (learnability teacher,
+> lead arm — implemented, flag-gated, default-off at `29cbb9f`) / M5-T (threshold
+> curriculum) / M5-LT, with re-frozen signal-family-specific activation gates (see the
+> Z6 amendment there). Phases 0–2 below (SIM-M4b diagnosis, SIM-D1 headroom gate) are
+> UNCHANGED and remain the blocking prerequisites; §4 guardrails and §5 rejections
+> stand. Where this file and the ZPD plan conflict, the ZPD plan wins.**
 
 Scope: research plan for improving SONIC WBC RL training and the curriculum/sampling
 method-framework, honoring GitHub issue #4 and all standing guardrails. **No deploy-contract
