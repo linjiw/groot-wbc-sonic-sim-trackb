@@ -464,7 +464,14 @@ def main(override_config: omegaconf.OmegaConf):
     state.global_step = checkpoint["state"].global_step
 
     schedule_wrapper = easydict.EasyDict(env=env, model=model)
-    if "schedule_dict" in config.trainer:
+    # Truthiness (not key-presence) so `++trainer.schedule_dict=null` on the eval
+    # CLI cleanly strips a schedule carried in from the checkpoint's saved
+    # training config — required for threshold-curriculum arms, where re-applying
+    # the train-time termination schedule would corrupt the eval comparison.
+    # (A key-presence check would pass the None into update_scheduled_params and
+    # crash on .items(); OmegaConf.merge cannot strip via `{}` — dicts merge
+    # recursively — and Hydra `~` deletion cannot reach checkpoint-loaded keys.)
+    if config.trainer.get("schedule_dict"):
         scheduled_params_dict = scheduler.update_scheduled_params(  # noqa: F841
             schedule_wrapper, config.trainer.schedule_dict, state.global_step
         )

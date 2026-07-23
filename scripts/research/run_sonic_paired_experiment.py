@@ -38,6 +38,16 @@ _REQUIRED_VARIANT = ("name", "eval_command", "interpretation")
 # config would silently corrupt eval comparisons. Hydra override forms that
 # remove the schedule from an eval invocation:
 _SCHEDULE_STRIP_PATTERNS = ("~trainer.schedule_dict", "trainer.schedule_dict=null")
+# Trainer config-group overrides that carry a schedule_dict without the literal
+# string appearing in the command. Any trainer config that gains a
+# schedule_dict must be registered here or the guard cannot see it.
+_SCHEDULE_BEARING_TRAINER_CONFIGS = ("trl_threshold_curriculum",)
+
+
+def _uses_schedule(command: str) -> bool:
+    if "schedule_dict" in command:
+        return True
+    return any(f"trainer={name}" in command for name in _SCHEDULE_BEARING_TRAINER_CONFIGS)
 
 
 def _eval_strip_errors(index: int, variant: dict[str, Any]) -> list[str]:
@@ -45,19 +55,19 @@ def _eval_strip_errors(index: int, variant: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     eval_command = str(variant.get("eval_command") or "")
     train_command = str(variant.get("train_command") or "")
-    eval_mentions = "schedule_dict" in eval_command
     eval_strips = any(pattern in eval_command for pattern in _SCHEDULE_STRIP_PATTERNS)
-    if eval_mentions and not eval_strips:
+    if _uses_schedule(eval_command) and not eval_strips:
         errors.append(
             f"variants[{index}] eval_command sets schedule_dict without stripping it "
             f"(use one of {_SCHEDULE_STRIP_PATTERNS}); eval_agent_trl.py re-applies "
             "schedules at the checkpoint step and would corrupt the comparison"
         )
-    if "schedule_dict" in train_command and not eval_strips:
+    if _uses_schedule(train_command) and not eval_strips:
         errors.append(
-            f"variants[{index}] train_command uses schedule_dict but eval_command does "
-            f"not strip it (add one of {_SCHEDULE_STRIP_PATTERNS}); the schedule would "
-            "be re-applied at eval via the shared exp config"
+            f"variants[{index}] train_command uses schedule_dict (directly or via a "
+            f"schedule-bearing trainer config) but eval_command does not strip it "
+            f"(add one of {_SCHEDULE_STRIP_PATTERNS}); eval loads the checkpoint's "
+            "saved training config, so the schedule would be re-applied at eval"
         )
     return errors
 

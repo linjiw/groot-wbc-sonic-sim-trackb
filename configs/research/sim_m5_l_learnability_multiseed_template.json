@@ -1,0 +1,22 @@
+{
+  "experiment_group": "sim_m5_l_learnability",
+  "hypothesis": "M5-L (research_plan_zpd_teacher.md v1.1): on a SIM-D1-passing dataset at matched micro budget (200 iters, num_envs 8-16, 3 paired seeds), the ZPD learnability sampler (signal=learnability, optimism_k=0 per the Z6 knob note, evidence-scaled decay H per D4) reallocates sampling mass from impossible bins to the difficulty frontier (activation: frontier over-allocation >= 1.2 AND posterior Spearman >= 0.4, classify_m5_activation.py) and improves tracking vs uniform (effect screen: mean MPJPE-G delta <= -0.5, >= 2/3 seeds improved). LAUNCH PRECONDITIONS: (1) replace both SIM_D1_PASSING_* dataset path placeholders with the frozen SIM-D1-passing dataset; (2) set adaptive_sampling.evidence_half_life to 4x the measured mean per-bin episode-equivalents per recompute on that dataset (D4 rule; the forecast used max(2, 4*episodes_per_iter/num_bins)); (3) SIM-M4b closed and SIM-D1 passed.",
+  "seed": 0,
+  "dataset_robot": "data/SIM_D1_PASSING_ROBOT_REPLACE_ME",
+  "dataset_smpl": "data/SIM_D1_PASSING_SMPL_REPLACE_ME",
+  "checkpoint": "sonic_release/last.pt",
+  "variants": [
+    {
+      "name": "uniform_m5l",
+      "train_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 python gear_sonic/train_agent_trl.py +exp=manager/universal_token/all_modes/sonic_release num_envs=8 headless=True use_wandb=false seed={seed} exp_var=uniform_m5l_seed{seed} ++algo.config.num_learning_iterations=200 ++algo.config.save_interval=200 ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/SIM_D1_PASSING_ROBOT_REPLACE_ME ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/SIM_D1_PASSING_SMPL_REPLACE_ME ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.enable=false",
+      "eval_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 python gear_sonic/eval_agent_trl.py +checkpoint=outputs/uniform_m5l_seed{seed}/last.pt +headless=True ++eval_callbacks=im_eval ++run_eval_loop=False ++num_envs=2 ++callbacks.im_eval.max_eval_steps=200 ++algo.config.eval.num_eval_episodes=4 ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/SIM_D1_PASSING_ROBOT_REPLACE_ME ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/SIM_D1_PASSING_SMPL_REPLACE_ME +manager_env/terminations=tracking/eval",
+      "interpretation": "m5l_control__uniform_sampling__frozen_eval"
+    },
+    {
+      "name": "learnability_m5l",
+      "train_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 python gear_sonic/train_agent_trl.py +exp=manager/universal_token/all_modes/sonic_release num_envs=8 headless=True use_wandb=false seed={seed} exp_var=learnability_m5l_seed{seed} ++algo.config.num_learning_iterations=200 ++algo.config.save_interval=200 ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/SIM_D1_PASSING_ROBOT_REPLACE_ME ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/SIM_D1_PASSING_SMPL_REPLACE_ME ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.enable=true ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.signal=learnability ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.optimism_k=0.0 ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.evidence_half_life=EVIDENCE_HALF_LIFE_REPLACE_ME",
+      "eval_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 python gear_sonic/eval_agent_trl.py +checkpoint=outputs/learnability_m5l_seed{seed}/last.pt +headless=True ++eval_callbacks=im_eval ++run_eval_loop=False ++num_envs=2 ++callbacks.im_eval.max_eval_steps=200 ++algo.config.eval.num_eval_episodes=4 ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/SIM_D1_PASSING_ROBOT_REPLACE_ME ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/SIM_D1_PASSING_SMPL_REPLACE_ME +manager_env/terminations=tracking/eval",
+      "interpretation": "m5l_treatment__zpd_learnability_sampler__optimism_off__evidence_decay_D4"
+    }
+  ]
+}

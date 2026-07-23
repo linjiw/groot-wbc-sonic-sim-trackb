@@ -25,8 +25,20 @@ Implementation status (2026-07-23, commits `8a52afe`..`dd30304`):
 - §3.4.3 retention metric plumbing: **done** (`eval.easy_decile.*`, 8 tests).
 - §3.4.2 stall-diagnostic skeleton: **done** (`scripts/research/stall_diagnostic.py`, 8 tests;
   eval-time recorder side rides along with the M5 runs on robotixx).
-- §3.2 Change B schedule config + dry-run of the termination-manager attribute path: **pending
-  robotixx** (hard launch precondition, unchanged).
+- §3.2 Change B: **schedule config authored** (`config/trainer/trl_threshold_curriculum.yaml`,
+  opt-in via `trainer=trl_threshold_curriculum`) + **dry-run tool done**
+  (`scripts/research/verify_schedule_path.py` — resolves candidate object chains through the
+  real scheduler engine, round-trips a probe value, restores; offline self-test green). The
+  live-trainer confirmation on robotixx remains the hard launch precondition. Syntax finding
+  baked into both: `params` is a dict, so the path tail must be `params['threshold']` —
+  the plan's original `@params@threshold` sketch raises AttributeError.
+- §4 activation gates: **preregistered classifier done**
+  (`scripts/research/classify_m5_activation.py` — Z6-amended ZPD rule, unchanged
+  failure_rate rule, M5-T band check, D9 tripwire validity assertion, 2/3-seed aggregation).
+- Launch templates: `configs/research/sim_m5_{l,t}_*_multiseed_template.json`
+  (validate_spec-clean incl. the eval-strip guard; dataset paths are explicit
+  SIM-D1 placeholders). `eval_agent_trl.py` schedule re-application is now
+  truthiness-guarded so `++trainer.schedule_dict=null` strips cleanly.
 - §3.3 Change C disagreement probe: **deliberately not implemented** (gated on an M5-L verdict, D11).
 - M5.6 closed-loop controller: **deliberately not implemented** (gated on M5-T working, D7).
 
@@ -201,11 +213,13 @@ regression (init=0 path stays fixed); family-kernel neutrality when null.
 `trl/utils/scheduler.py:296-353`, applied at `ppo_trainer.py:1702-1706`):
 
 ```yaml
+# Authored as config/trainer/trl_threshold_curriculum.yaml (opt-in trainer group).
+# NOTE the bracket tail — params is a dict; '@params@threshold' raises (v1.1 fix):
 trainer:
   schedule_dict:
-    "env@<verified-path>@get_term_cfg('anchor_pos')@params@threshold":
+    "env@<verified-chain>@termination_manager@get_term_cfg('anchor_pos')@params['threshold']":
       { type: linear, seg_steps: [0, 150], seg_vals: [0.30, 0.15] }
-    "env@<verified-path>@get_term_cfg('ee_body_pos')@params@threshold":
+    "env@<verified-chain>@termination_manager@get_term_cfg('ee_body_pos')@params['threshold']":
       { type: linear, seg_steps: [0, 150], seg_vals: [0.30, 0.15] }
 ```
 
