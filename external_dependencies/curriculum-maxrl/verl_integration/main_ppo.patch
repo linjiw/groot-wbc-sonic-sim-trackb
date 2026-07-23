@@ -1,0 +1,41 @@
+diff --git a/verl/trainer/main_ppo.py b/verl/trainer/main_ppo.py
+index 432b437..d5c8faa 100644
+--- a/verl/trainer/main_ppo.py
++++ b/verl/trainer/main_ppo.py
+@@ -185,7 +185,26 @@ class TaskRunner:
+         # Create training and validation datasets.
+         train_dataset = create_rl_dataset(config.data.train_files, config.data, tokenizer, processor)
+         val_dataset = create_rl_dataset(config.data.val_files, config.data, tokenizer, processor)
+-        train_sampler = create_rl_sampler(config.data, train_dataset)
++
++        curriculum_teacher = None
++        curriculum_cfg = config.data.get("curriculum", None)
++        if curriculum_cfg is not None and curriculum_cfg.get("enable", False):
++            from verl.utils.curriculum import CurriculumSampler, FrontierTeacher
++
++            curriculum_teacher = FrontierTeacher(
++                n_prompts=len(train_dataset),
++                n_rollouts=config.actor_rollout_ref.rollout.n,
++                decay=curriculum_cfg.get("decay", 0.7),
++                floor=curriculum_cfg.get("floor", 0.1),
++                seed=config.data.get("seed", 1),
++                success_threshold=curriculum_cfg.get("success_threshold", 0.5),
++                utility=curriculum_cfg.get("utility", "advmass"),
++                power=curriculum_cfg.get("power", 1.0),
++            )
++            train_sampler = CurriculumSampler(train_dataset, curriculum_teacher, seed=config.data.get("seed", 1))
++            print(f"Curriculum sampling enabled over {len(train_dataset)} prompts (floor={curriculum_teacher.floor}, decay={curriculum_teacher.decay})")
++        else:
++            train_sampler = create_rl_sampler(config.data, train_dataset)
+ 
+         # Initialize the PPO trainer.
+         trainer = RayPPOTrainer(
+@@ -203,6 +222,8 @@ class TaskRunner:
+             train_sampler=train_sampler,
+             device_name=config.trainer.device,
+         )
++        if curriculum_teacher is not None:
++            trainer.curriculum_teacher = curriculum_teacher
+         # Initialize the workers of the trainer.
+         trainer.init_workers()
+         # Start the training process.

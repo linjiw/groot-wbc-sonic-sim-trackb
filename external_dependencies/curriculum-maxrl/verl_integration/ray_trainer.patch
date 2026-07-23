@@ -1,0 +1,45 @@
+diff --git a/verl/trainer/ppo/ray_trainer.py b/verl/trainer/ppo/ray_trainer.py
+index 7a2f2d4..9d3878b 100644
+--- a/verl/trainer/ppo/ray_trainer.py
++++ b/verl/trainer/ppo/ray_trainer.py
+@@ -1404,6 +1404,11 @@ class RayPPOTrainer:
+         dataloader_state_dict = self.train_dataloader.state_dict()
+         torch.save(dataloader_state_dict, dataloader_local_path)
+ 
++        # save curriculum teacher state
++        if getattr(self, "curriculum_teacher", None) is not None:
++            teacher_local_path = os.path.join(local_global_step_folder, "curriculum_teacher.pt")
++            torch.save(self.curriculum_teacher.state_dict(), teacher_local_path)
++
+         # latest checkpointed iteration tracker (for atomic usage)
+         local_latest_checkpointed_iteration = os.path.join(
+             default_local_dir, 
+@@ -1528,6 +1533,12 @@ class RayPPOTrainer:
+         dataloader_local_path = os.path.join(global_step_folder, "data.pt")
+         self._load_dataloader(dataloader_local_path=dataloader_local_path)
+ 
++        # load curriculum teacher state
++        teacher_local_path = os.path.join(global_step_folder, "curriculum_teacher.pt")
++        if getattr(self, "curriculum_teacher", None) is not None and os.path.exists(teacher_local_path):
++            self.curriculum_teacher.load_state_dict(torch.load(teacher_local_path, weights_only=False))
++            print(f"Curriculum teacher state loaded from {teacher_local_path}")
++
+         # Load wandb id
+         wandb_id_save_path = os.path.join(
+             checkpoint_folder,
+@@ -1760,6 +1771,15 @@ class RayPPOTrainer:
+                             reward_tensor, reward_extra_infos_dict = ray.get(future_reward)
+                         batch.batch["token_level_scores"] = reward_tensor
+ 
++                        # feed per-prompt outcomes back to the curriculum teacher
++                        if getattr(self, "curriculum_teacher", None) is not None and "index" in batch.non_tensor_batch:
++                            self.curriculum_teacher.observe_batch(
++                                dataset_indices=batch.non_tensor_batch["index"],
++                                uids=batch.non_tensor_batch["uid"],
++                                scores=reward_tensor.sum(dim=-1).cpu().numpy(),
++                            )
++                            metrics.update(self.curriculum_teacher.metrics())
++
+                         accuracy_interval_fractions_per_prompt_global = None
+                         accuracy_interval_fractions_per_prompt_per_datasource = None
+ 

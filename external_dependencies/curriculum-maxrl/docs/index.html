@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Curriculum-MaxRL — a teacher curriculum derived from the MaxRL objective</title>
+<meta name="description" content="How Maximum Likelihood RL works, why it is an implicit curriculum, and how we derive an explicit teacher curriculum from the estimator's own algebra.">
+<style>
+:root {
+  color-scheme: light;
+  --page:          #f9f9f7;
+  --surface-1:     #fcfcfb;
+  --text-primary:  #0b0b0b;
+  --text-secondary:#52514e;
+  --text-muted:    #898781;
+  --grid:          #e1e0d9;
+  --baseline:      #c3c2b7;
+  --border:        rgba(11,11,11,0.10);
+  --series-1:      #2a78d6;  /* blue   — MaxRL / ours */
+  --series-2:      #008300;  /* green  — RL / reference */
+  --series-3:      #e87ba4;  /* magenta— GRPO */
+  --series-4:      #eda100;  /* yellow — ML */
+  --series-6:      #eb6834;  /* orange — hindsight arm */
+  --seq-250:       #86b6ef;
+  --seq-350:       #5598e7;
+  --seq-450:       #2a78d6;
+  --seq-550:       #1c5cab;
+  --seq-650:       #104281;
+  --accent-wash:   rgba(42,120,214,0.10);
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page:          #0d0d0d;
+  --surface-1:     #1a1a19;
+  --text-primary:  #ffffff;
+  --text-secondary:#c3c2b7;
+  --text-muted:    #898781;
+  --grid:          #2c2c2a;
+  --baseline:      #383835;
+  --border:        rgba(255,255,255,0.10);
+  --series-1:      #3987e5;
+  --series-2:      #008300;
+  --series-3:      #d55181;
+  --series-4:      #c98500;
+  --series-6:      #d95926;
+  --seq-250:       #b7d3f6;
+  --seq-350:       #86b6ef;
+  --seq-450:       #5598e7;
+  --seq-550:       #2a78d6;
+  --seq-650:       #184f95;
+  --accent-wash:   rgba(57,135,229,0.14);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page:          #0d0d0d;
+    --surface-1:     #1a1a19;
+    --text-primary:  #ffffff;
+    --text-secondary:#c3c2b7;
+    --text-muted:    #898781;
+    --grid:          #2c2c2a;
+    --baseline:      #383835;
+    --border:        rgba(255,255,255,0.10);
+    --series-1:      #3987e5;
+    --series-2:      #008300;
+    --series-3:      #d55181;
+    --series-4:      #c98500;
+    --series-6:      #d95926;
+    --seq-250:       #b7d3f6;
+    --seq-350:       #86b6ef;
+    --seq-450:       #5598e7;
+    --seq-550:       #2a78d6;
+    --seq-650:       #184f95;
+    --accent-wash:   rgba(57,135,229,0.14);
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--page); color: var(--text-primary);
+  font: 16px/1.65 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main { max-width: 880px; margin: 0 auto; padding: 0 20px 96px; }
+header.hero { max-width: 880px; margin: 0 auto; padding: 72px 20px 8px; }
+h1 { font-size: 2.1rem; line-height: 1.2; margin: 0 0 10px; letter-spacing: -0.02em; }
+h2 { font-size: 1.45rem; margin: 64px 0 8px; letter-spacing: -0.01em; }
+h3 { font-size: 1.08rem; margin: 32px 0 6px; }
+p, li { color: var(--text-secondary); }
+strong { color: var(--text-primary); }
+a { color: var(--series-1); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.lede { font-size: 1.12rem; color: var(--text-secondary); max-width: 46em; }
+.links { margin: 18px 0 4px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.links a.btn {
+  display: inline-block; padding: 7px 14px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--surface-1); color: var(--text-primary);
+  font-size: 0.92rem; font-weight: 600;
+}
+.links a.btn:hover { text-decoration: none; border-color: var(--series-1); }
+#themeToggle {
+  margin-left: auto; padding: 7px 12px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--surface-1); color: var(--text-secondary); font-size: 0.85rem; cursor: pointer;
+}
+.eyebrow { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 6px; }
+.card {
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px 22px; margin: 20px 0;
+}
+.math {
+  font-family: Georgia, "Times New Roman", serif; font-style: italic;
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 18px; margin: 14px 0; overflow-x: auto;
+  color: var(--text-primary); font-size: 1.05rem; line-height: 1.9;
+}
+.math .rm { font-style: normal; }
+.math sub, .math sup { font-size: 0.72em; }
+.frac { display: inline-block; vertical-align: middle; text-align: center; margin: 0 2px; }
+.frac > .num { display: block; padding: 0 4px; border-bottom: 1px solid currentColor; }
+.frac > .den { display: block; padding: 0 4px; }
+code, .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.88em; }
+code { background: var(--accent-wash); border-radius: 4px; padding: 1px 5px; color: var(--text-primary); }
+pre {
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 16px; overflow-x: auto; line-height: 1.5;
+}
+pre code { background: none; padding: 0; }
+table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 0.94rem; }
+th { text-align: left; color: var(--text-muted); font-weight: 600; font-size: 0.85rem; }
+th, td { padding: 7px 10px; border-bottom: 1px solid var(--grid); }
+td { color: var(--text-secondary); }
+td:first-child { color: var(--text-primary); }
+tbody tr:last-child td { border-bottom: none; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.status { font-weight: 700; }
+.status.ok  { color: var(--series-2); }
+.status.no  { color: #d03b3b; }
+.status.run { color: var(--text-muted); }
+figure { margin: 26px 0; }
+figure .chart-card {
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+  padding: 18px 18px 10px; position: relative;
+}
+figcaption { font-size: 0.88rem; color: var(--text-muted); margin-top: 10px; max-width: 60em; }
+.chart-title { font-weight: 600; font-size: 0.98rem; margin: 0 0 2px; color: var(--text-primary); }
+.chart-sub { font-size: 0.85rem; color: var(--text-muted); margin: 0 0 10px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0 2px; font-size: 0.85rem; color: var(--text-secondary); }
+.legend .key { display: inline-flex; align-items: center; gap: 6px; }
+.legend .swatch-line { width: 18px; height: 0; border-top: 3px solid; border-radius: 2px; }
+svg text { font: 12px system-ui, -apple-system, "Segoe UI", sans-serif; fill: var(--text-muted); }
+svg .dl { font-weight: 600; fill: var(--text-secondary); }
+.slider-row { display: flex; align-items: center; gap: 12px; margin: 6px 0 4px; font-size: 0.9rem; color: var(--text-secondary); flex-wrap: wrap; }
+.slider-row input[type=range] { width: 220px; accent-color: var(--series-1); }
+.slider-row .val { font-weight: 700; color: var(--text-primary); min-width: 64px; font-variant-numeric: tabular-nums; }
+.tooltip {
+  position: absolute; pointer-events: none; background: var(--surface-1);
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
+  font-size: 0.82rem; box-shadow: 0 2px 10px rgba(0,0,0,0.12); display: none; z-index: 5;
+  min-width: 150px;
+}
+.tooltip .tt-x { color: var(--text-muted); margin-bottom: 4px; }
+.tooltip .row { display: flex; align-items: center; gap: 7px; line-height: 1.5; }
+.tooltip .lk { width: 12px; border-top: 3px solid; border-radius: 2px; flex: none; }
+.tooltip .v { font-weight: 700; color: var(--text-primary); margin-left: auto; font-variant-numeric: tabular-nums; }
+details { margin: 8px 0 0; font-size: 0.88rem; }
+details summary { cursor: pointer; color: var(--text-muted); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } }
+.gap-card { border-left: 3px solid var(--series-1); padding-left: 16px; margin: 16px 0; }
+.gap-card h3 { margin: 0 0 4px; }
+.gap-card p { margin: 0; }
+ol.loop { counter-reset: step; list-style: none; padding: 0; }
+ol.loop li {
+  position: relative; padding: 10px 0 10px 44px; border-bottom: 1px solid var(--grid);
+}
+ol.loop li:last-child { border-bottom: none; }
+ol.loop li::before {
+  counter-increment: step; content: counter(step);
+  position: absolute; left: 0; top: 10px; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent-wash); color: var(--series-1); font-weight: 700;
+  display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
+}
+.footnote { font-size: 0.85rem; color: var(--text-muted); }
+hr { border: none; border-top: 1px solid var(--grid); margin: 56px 0; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <p class="eyebrow">Research notes · curriculum learning × MaxRL</p>
+  <h1>The estimator is the curriculum</h1>
+  <p class="lede">
+    In RL with verifiable rewards, rollout compute is wasted twice: on prompts the model has
+    mastered (nothing left to learn) and on prompts it can't touch (every rollout fails —
+    group estimators emit <em>zero gradient</em>). We measured it: under uniform sampling,
+    <strong>65–75% of rollout groups produce no learning signal</strong>. The fix needs no new
+    machinery. We prove MaxRL's expected learning signal on a prompt is exactly
+    <strong>2·(pass@N&nbsp;−&nbsp;pass@1)</strong> — solvable in N tries but not in one — and
+    that formula <em>is</em> the curriculum: sample by it, and the first waste disappears. For
+    all-fail prompts no sampling rule can help, so we <em>recycle</em>: a failed rollout is a
+    verified success for the goal it actually reached. Together they beat an <strong>oracle</strong>
+    that knows every true pass rate — because the oracle can only allocate signal that exists,
+    while recycling creates signal that didn't.
+  </p>
+  <div class="card" style="margin-top:18px">
+    <p class="eyebrow" style="margin-bottom:8px">The one-sentence pitch</p>
+    <p style="margin:0"><strong>Read the curriculum off the estimator's own algebra, and salvage
+    what the estimator throws away.</strong> No difficulty-band hyperparameters — the rollout
+    budget N you already chose sets the band (peak difficulty ≈ ln&nbsp;N&nbsp;/&nbsp;N); the
+    estimator is never modified, so every unbiasedness result of the base paper carries over.</p>
+  </div>
+  <div class="links">
+    <a class="btn" href="https://github.com/linjiw/curriculum-maxrl">Code &amp; docs ↗</a>
+    <a class="btn" href="https://github.com/linjiw/curriculum-maxrl/blob/main/PAPER.md">Paper draft ↗</a>
+    <a class="btn" href="https://arxiv.org/abs/2602.02710">MaxRL paper ↗</a>
+    <a class="btn" href="https://github.com/linjiw/curriculum-maxrl/blob/main/GUIDE.md">Design guide ↗</a>
+    <button id="themeToggle" type="button">Toggle theme</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================================================ -->
+<h2 id="why">0 · Why this direction</h2>
+
+<p>MaxRL's weight-function view (below) shows the likelihood objective already pours gradient
+into hard prompts — an <em>implicit curriculum</em>. That raises a question with a non-obvious
+answer: <strong>if the objective already reweights toward hard prompts, is there anything left
+for a curriculum to do?</strong> Either curricula are redundant with likelihood-based RL (a
+useful negative result), or they do something gradient reweighting cannot (a useful positive
+one).</p>
+
+<p>The answer is sharply the second, for a structural reason: <strong>weights act on prompts
+only after they are sampled, and only when at least one rollout succeeds.</strong> However
+w(p) is shaped, it cannot rescue a prompt whose group came back all-fail — the group is
+dropped, and that drop is precisely what makes the estimator unbiased — and it cannot un-spend
+compute burned re-confirming mastered prompts. So the curriculum's real job is not "emphasize
+hard prompts" (the objective does that); it is to manage <em>exactly the two regimes the
+estimator is blind to</em>. That reframing — <strong>the estimator's blind spots define the
+curriculum's job description</strong> — is the origin of everything on this page.</p>
+
+<div class="grid2">
+  <div class="card">
+    <h3>Channel 1 → the teacher (waste avoidance)</h3>
+    <p>The estimator learns only from successes (Theorem 1 of the paper), so its expected
+    signal per prompt has a closed form — and that form, 2·(pass@N − pass@1), is a
+    zone-of-proximal-development functional the estimator was computing implicitly all along.
+    Sampling by it is the curriculum. Bounded by the oracle ceiling: allocation only
+    redistributes signal that exists.</p>
+  </div>
+  <div class="card">
+    <h3>Channel 2 → the recycler (signal creation)</h3>
+    <p>If the estimator only learns from successes, <em>manufacture successes</em>. A failed
+    rollout is a verified success for the goal it actually reached; relabeled gradients measure
+    as exact as fresh unbiased ones. The only channel that breaks the oracle ceiling — and its
+    gain scales with how much a recycled skill can <em>compound</em> (+0.22 AUC on fixed task
+    sets, +0.01 on one-shot streams).</p>
+  </div>
+</div>
+<p>There is a third, silent channel: <strong>objective safety</strong>. The identical teacher
+grew coverage under MaxRL in every seed and <em>amplified GRPO's collapse</em> in every seed —
+the objective underneath decides whether a curriculum is safe at all (section 4). Together:
+<strong>the teacher allocates, hindsight creates, the objective decides whether either is
+safe.</strong> The full evidence decomposition, regime map, and practitioner playbook are in
+<a href="https://github.com/linjiw/curriculum-maxrl/blob/main/EVIDENCE.md">EVIDENCE.md</a>.</p>
+
+<!-- ============================================================ -->
+<h2 id="maxrl">1 · How MaxRL works, in three steps</h2>
+
+<p><strong>Step 1 — RL and maximum likelihood optimize different things.</strong>
+For a prompt <span class="mono">x</span>, let <em>p</em> be the model's probability of producing a
+verified-correct answer (its <em>pass rate</em>). Standard RL maximizes the expected reward
+E[<em>p</em>]; maximum likelihood maximizes E[log&nbsp;<em>p</em>]. Their gradients differ by one factor:</p>
+
+<div class="math">
+  ∇J<sub class="rm">RL</sub> <span class="rm">=</span> 𝔼<sub>x</sub>[ ∇p ]
+  &nbsp;&nbsp;&nbsp;<span class="rm">vs.</span>&nbsp;&nbsp;&nbsp;
+  ∇J<sub class="rm">ML</sub> <span class="rm">=</span> 𝔼<sub>x</sub>[ <span class="frac"><span class="num rm">1</span><span class="den">p</span></span> ∇p ]
+</div>
+
+<p>That <em>1/p</em> is the whole story: maximum likelihood pours learning signal into hard,
+low-pass-rate prompts, while plain RL treats every prompt equally. In differentiable
+supervised learning this is why cross-entropy works so well — but with sampled rollouts and a
+binary verifier you cannot compute ∇log&nbsp;<em>p</em> directly.</p>
+
+<p><strong>Step 2 — the Maclaurin bridge.</strong> The paper's key identity expands log&nbsp;<em>p</em> in
+failure events, turning the intractable objective into an infinite mixture of pass@k objectives:</p>
+
+<div class="math">
+  <span class="rm">log</span> p <span class="rm">=</span> −<span class="rm">Σ</span><sub>k≥1</sub>
+  <span class="frac"><span class="num">(1−p)<sup>k</sup></span><span class="den">k</span></span>
+  &nbsp;&nbsp;⇒&nbsp;&nbsp;
+  ∇J<sub class="rm">ML</sub> <span class="rm">=</span> <span class="rm">Σ</span><sub>k≥1</sub>
+  <span class="frac"><span class="num rm">1</span><span class="den">k</span></span> ∇<span class="rm">pass@</span>k
+</div>
+
+<p>Plain RL keeps only the k=1 term — it is a <em>first-order approximation</em> of maximum
+likelihood. Truncating the series at order <em>T</em> gives a family of objectives that
+interpolates from RL (T=1) to ML (T→∞).</p>
+
+<p><strong>Step 3 — a one-line estimator.</strong> Sample N rollouts, count K successes.
+REINFORCE averages score functions over all N samples; MaxRL averages over the K
+<em>successful</em> ones (and skips the prompt when K=0). Theorem 2 of the paper: this simple
+change is unbiased for the truncated objective with <strong>T&nbsp;=&nbsp;N</strong>. So extra rollouts
+don't just cut variance — they raise the fidelity of the objective itself. In the practical
+algorithm it is literally one line: normalize the advantage by the group's <em>mean reward</em>
+(instead of the std as in GRPO, or nothing as in RLOO).</p>
+
+<!-- Chart 1: weight functions -->
+<figure>
+  <div class="chart-card" id="chart1card">
+    <p class="chart-title">Who gets the gradient? Population weight functions w(p)</p>
+    <p class="chart-sub">Every method's gradient is 𝔼[w(p)·∇p]. The curves differ in how hard they lean into low-pass-rate prompts. Drag T.</p>
+    <div class="slider-row">
+      <label for="tSlider">MaxRL truncation T</label>
+      <input type="range" id="tSlider" min="0" max="7" step="1" value="4">
+      <span class="val" id="tVal">T = 16</span>
+    </div>
+    <div class="legend" id="legend1"></div>
+    <svg id="chart1" viewBox="0 0 800 420" role="img" aria-label="Log-log line chart of weight functions w(p) for RL, GRPO, MaxRL and maximum likelihood versus pass rate p"></svg>
+    <div class="tooltip" id="tt1"></div>
+    <details><summary>Table view</summary><div id="table1"></div></details>
+  </div>
+  <figcaption>
+    Weight functions on log–log axes (Section 5 of the paper, our re-derivation).
+    RL is flat. ML is 1/p. MaxRL's w(p)&nbsp;=&nbsp;(1−(1−p)<sup>T</sup>)/p climbs toward ML as T grows —
+    but saturates at T for p&nbsp;≲&nbsp;1/T. Note GRPO's curve <em>turns back up as p→1</em>:
+    it upweights already-mastered prompts, the paper's conjectured driver of pass@k collapse.
+  </figcaption>
+</figure>
+
+<!-- ============================================================ -->
+<h2 id="gaps">2 · Where the implicit curriculum goes silent</h2>
+
+<p>The weight-function view is a <em>population</em> (infinite-sample) statement. With finite
+groups of N rollouts, three gaps open up — and they are precisely the gaps a data-level
+teacher can close:</p>
+
+<div class="gap-card">
+  <h3>Dead prompts (K = 0)</h3>
+  <p>If p ≪ 1/N, all N rollouts fail with probability (1−p)<sup>N</sup> ≈ 1. The group is dropped:
+  zero gradient, wasted generation compute. No choice of w(p) can put signal where the group dies.
+  In our maze experiments, <strong>uniform sampling wasted ~65% of all rollout groups</strong> this way.</p>
+</div>
+<div class="gap-card">
+  <h3>Mastered prompts (p → 1)</h3>
+  <p>∇p → 0, so rollouts are spent re-confirming what the model knows. GRPO is actively worse here:
+  its w(p) inverts and <em>upweights</em> easy prompts, sharpening the distribution.</p>
+</div>
+<div class="gap-card">
+  <h3>Uniform rollout budgets</h3>
+  <p>The paper uses a fixed N per prompt. But since the truncation order is tied to the group size
+  (T = N), harder prompts would benefit from larger groups twice over: more chance of a first
+  success, and a higher-order approximation of the ML objective.</p>
+</div>
+
+<p>A striking finite-sample fact we verified: at p&nbsp;=&nbsp;0.01, N&nbsp;=&nbsp;32, GRPO's population
+curve promises weight ≈ 0.199, but the <em>realized</em> expected signal is 0.100 — half —
+because 72% of groups are all-fail and contribute nothing. Population weight curves describe a
+limit no finite-group trainer lives in.</p>
+
+<!-- ============================================================ -->
+<h2 id="idea">3 · Our proposal: read the curriculum off the estimator</h2>
+
+<p>Instead of importing a curriculum heuristic (difficulty bands, learning-progress bandits),
+we asked: <em>how much learning signal does the MaxRL estimator actually emit on a prompt, in
+expectation?</em> Define the <strong>advantage mass</strong> of a group as the total magnitude of
+its advantage weights, Σ|w|. For MaxRL's variance-reduced estimator
+(w<sub>succ</sub>&nbsp;=&nbsp;1/K&nbsp;−&nbsp;1/N, w<sub>fail</sub>&nbsp;=&nbsp;−1/N, group dropped at K=0),
+the algebra collapses to something exact and interpretable:</p>
+
+<div class="math">
+  𝔼[ <span class="rm">Σ</span>|w| ] <span class="rm">=</span> 2·( <span class="rm">pass@</span>N(p) − <span class="rm">pass@</span>1(p) )
+  <span class="rm">=</span> 2·( (1−(1−p)<sup>N</sup>) − p )
+</div>
+
+<p><strong>The expected learning signal on a prompt is twice the probability that it is solvable
+within N attempts but not within one.</strong> That is a compute-indexed formalization of the
+zone of proximal development, produced by the estimator itself. It vanishes at both ends —
+beyond-frontier prompts (group dies) and mastered prompts (no headroom) — and peaks at</p>
+
+<div class="math">
+  p<sup>★</sup> <span class="rm">=</span> 1 − N<sup>−1/(N−1)</sup> <span class="rm">≈</span>
+  <span class="frac"><span class="num rm">ln N</span><span class="den rm">N</span></span>
+</div>
+
+<p>so larger group sizes automatically shift the optimal curriculum band toward harder prompts —
+the teacher and the objective share the same compute knob.</p>
+
+<!-- Chart 2: advantage mass -->
+<figure>
+  <div class="chart-card" id="chart2card">
+    <p class="chart-title">The derived teacher utility: expected advantage mass vs. pass rate</p>
+    <p class="chart-sub">u(p) = pass@N − pass@1. Drag N and watch the ZPD band widen toward harder prompts; the dot marks the peak p<sup>★</sup> ≈ ln N / N.</p>
+    <div class="slider-row">
+      <label for="nSlider">Group size N</label>
+      <input type="range" id="nSlider" min="0" max="7" step="1" value="5">
+      <span class="val" id="nVal">N = 32</span>
+    </div>
+    <div class="legend" id="legend2"></div>
+    <svg id="chart2" viewBox="0 0 800 420" role="img" aria-label="Line chart of the advantage-mass utility versus pass rate for a chosen group size N, compared with the learnability curve p times one minus p"></svg>
+    <div class="tooltip" id="tt2"></div>
+    <details><summary>Table view</summary><div id="table2"></div></details>
+  </div>
+  <figcaption>
+    x is log-scaled to expose the low-p regime. The green reference is SFL's
+    “learnability” p(1−p) — exactly our utility at N=1, and (we prove) exactly ½ the advantage
+    mass of the RLOO estimator. The learnability-curriculum literature and the estimator algebra
+    are the same object seen from two sides.
+  </figcaption>
+</figure>
+
+<h3>Watch it work: the frontier walk, animated</h3>
+<figure>
+  <div class="chart-card" id="animcard">
+    <p class="chart-title">Live simulation — 24 tasks from easy to impossible, three training schedules</p>
+    <p class="chart-sub">Each bar is a task's pass rate; the ▼ markers show where this step's rollout groups went.
+    Watch <em>uniform</em> waste groups at both ends, the <em>teacher</em> hug the moving frontier, and
+    <em>+hindsight</em> convert dead groups (flashes) into progress on easier tasks.</p>
+    <div class="slider-row">
+      <button id="animBtn" type="button" style="padding:6px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface-1);color:var(--text-primary);cursor:pointer;font-weight:600">▶ Play</button>
+      <button id="animReset" type="button" style="padding:6px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface-1);color:var(--text-secondary);cursor:pointer">Reset</button>
+      <span class="val" id="animStep">step 0</span>
+    </div>
+    <div class="legend">
+      <span class="key"><span class="swatch-line" style="border-top-color:var(--series-2)"></span>uniform</span>
+      <span class="key"><span class="swatch-line" style="border-top-color:var(--series-1)"></span>teacher</span>
+      <span class="key"><span class="swatch-line" style="border-top-color:var(--series-6, #eb6834)"></span>teacher + hindsight</span>
+    </div>
+    <svg id="anim" viewBox="0 0 800 460" role="img" aria-label="Animated simulation of three training schedules over a row of tasks ordered by difficulty, showing sampling positions and pass-rate growth per step"></svg>
+  </div>
+  <figcaption>
+    Same simulation math as the CPU testbed (Beta-posterior teacher, u(p)=pass@N−pass@1 utility,
+    dead-group relabeling to the deepest reachable easier task). The mean-pass counters update
+    live; by ~150 steps the ordering uniform &lt; teacher &lt; teacher+hindsight emerges the same
+    way it does in every real experiment. Reduced-motion users: the Play button steps the
+    simulation; nothing animates unprompted.
+  </figcaption>
+</figure>
+
+<h3>The teacher loop</h3>
+<div class="card">
+<ol class="loop">
+  <li><strong>Track.</strong> Keep a decayed Beta(α, β) posterior over each prompt's pass rate,
+  updated from every group's observed successes (decay 0.7 — validated below: the posterior's job
+  is <em>tracking</em> the moving student, not remembering).</li>
+  <li><strong>Score.</strong> Thompson-sample p̃ from each posterior; compute
+  u(p̃) = (1−(1−p̃)<sup>N</sup>) − p̃. Sampling from the posterior gives optimism on
+  rarely-visited prompts for free.</li>
+  <li><strong>Sample.</strong> Draw the next batch of prompts ∝ u<sup>γ</sup> (γ≈4 when tasks share
+  skills, 1 on flat pools — see the compounding result below), mixed with a uniform floor
+  (default 10%) — the floor is the anti-forgetting/replay channel and keeps posteriors fresh.</li>
+  <li><strong>Allocate (optional).</strong> Split the rollout budget by greedy water-filling on the
+  marginal mass p̃(1−p̃)<sup>N</sup> — the probability the next rollout is the group's
+  <em>first success</em>. Total mass is concave in each N<sub>i</sub>, so greedy is optimal.</li>
+  <li><strong>Train.</strong> MaxRL advantages, unchanged — the estimator was never modified,
+  so all of the paper's unbiasedness results carry over untouched.</li>
+</ol>
+</div>
+
+<p>In the <a href="https://github.com/linjiw/curriculum-maxrl">repo</a> this is
+<code>FrontierTeacher</code> + <code>CurriculumSampler</code>: ~150 lines, wired into the official
+MaxRL/verl trainer behind <code>+data.curriculum.enable=true</code>, with teacher state
+checkpointed alongside the model — and packaged environment-agnostically in
+<a href="https://github.com/linjiw/curriculum-maxrl/tree/main/frontier_rl"><code>frontier_rl/</code></a>
+for gym and robotics tasks.</p>
+
+<h3 id="proof">The two-line proof (Proposition 1)</h3>
+<div class="card">
+<p>Condition on the number of successes K. For K ≥ 1, the MaxRL weights are
+w<sub>succ</sub> = 1/K − 1/N (K of them) and w<sub>fail</sub> = −1/N (N−K of them), so the total
+magnitude telescopes:</p>
+<div class="math">
+  <span class="rm">Σ</span>|w| <span class="rm">=</span> K(<span class="frac"><span class="num rm">1</span><span class="den rm">K</span></span> − <span class="frac"><span class="num rm">1</span><span class="den rm">N</span></span>) + <span class="frac"><span class="num rm">N−K</span><span class="den rm">N</span></span>
+  <span class="rm">=</span> 2(1 − <span class="frac"><span class="num rm">K</span><span class="den rm">N</span></span>)
+  <span class="rm">&nbsp;&nbsp;(and 0 when K=0)</span>
+</div>
+<p>Taking expectations with K ~ Binomial(N, p):</p>
+<div class="math">
+  𝔼[<span class="rm">Σ</span>|w|] <span class="rm">=</span> 2·(P(K≥1) − 𝔼[K]/N)
+  <span class="rm">=</span> 2·((1−(1−p)<sup>N</sup>) − p)
+  <span class="rm">=</span> 2·(<span class="rm">pass@</span>N − <span class="rm">pass@</span>1) <span class="rm">∎</span>
+</div>
+<p>Every claim on this page traces to identities of this kind — seven propositions with proofs in
+<a href="https://github.com/linjiw/curriculum-maxrl/blob/main/curriculum_maxrl/PROOFS.md">PROOFS.md</a>
+(peak location, water-filling optimality, RLOO ≡ learnability, the ~N× frontier-signal ratio,
+the hindsight conditional-law characterization), each Monte-Carlo verified in
+<a href="https://github.com/linjiw/curriculum-maxrl/blob/main/curriculum_maxrl/run_validation.py">run_validation.py</a>.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="results">4 · What we verified (and what failed)</h2>
+
+<h3>Exact formulas, Monte-Carlo checked</h3>
+<table>
+  <thead><tr><th>Estimator</th><th>E[Σ|w|] (exact)</th><th>Reading</th><th class="num">Status</th></tr></thead>
+  <tbody>
+    <tr><td>MaxRL</td><td class="mono">2(pass@N − pass@1)</td><td>solvable in N tries but not in one — the derived teacher utility</td><td class="num"><span class="status ok">✓ 200k-trial MC</span></td></tr>
+    <tr><td>RLOO</td><td class="mono">2p(1−p)</td><td>identical to SFL “learnability” — two literatures, one object</td><td class="num"><span class="status ok">✓ exact</span></td></tr>
+    <tr><td>GRPO</td><td class="mono">≈2√(p(1−p))·P(K∉{0,N})</td><td>realized signal on hard prompts ~2× below the population curve</td><td class="num"><span class="status ok">✓ binomial sum</span></td></tr>
+  </tbody>
+</table>
+
+<h3>CPU skill-chain testbed — teacher × estimator (36 tasks, initial pass rates 10<sup>−level</sup>, 5 seeds)</h3>
+<table>
+  <thead><tr><th>Finding</th><th>Evidence</th></tr></thead>
+  <tbody>
+    <tr><td>MaxRL is an implicit curriculum</td><td>a teacher lifts GRPO by +0.23 final mean-pass but MaxRL by only +0.01 on moderate distributions</td></tr>
+    <tr><td>Teacher × MaxRL are complementary where it counts</td><td>beyond-frontier-heavy regime: combination 0.961 vs 0.871 (MaxRL alone) vs 0.847 (teacher+GRPO)</td></tr>
+    <tr><td>Derived utility ≥ hand-tuned ZPD band</td><td>AUC 0.704–0.712 vs 0.688, with zero band hyperparameters</td></tr>
+    <tr><td>Fastest to the deepest level</td><td>frontier+maxrl: 206 steps vs 248 (uniform+maxrl) vs 262 (zpd+grpo)</td></tr>
+  </tbody>
+</table>
+
+<h3>GPU maze testbed — 1.26M-param transformer, 17×17 mazes, 13 goal-distance levels</h3>
+<table>
+  <thead><tr><th>Finding</th><th>Evidence</th></tr></thead>
+  <tbody>
+    <tr><td>Uniform sampling wastes most of MaxRL's compute</td><td>5.2 of 8 groups/step dead (K=0) → 3.9 with the frontier teacher, 2.6 with learnability</td></tr>
+    <tr><td>Teachers are ~2× faster per step in wall-clock</td><td>frontier-band rollouts terminate early; fixed-step comparisons silently handicap teachers → we use matched wall-clock budgets</td></tr>
+    <tr><td>Teacher posterior tracks truth</td><td>p̂ within ±0.03 of held-out eval pass rates; 60% of sampling mass on the true frontier band</td></tr>
+    <tr><td>Curriculum axes must respect generalization reach</td><td>maze <em>size</em> as difficulty has a hard cliff (0/1024 on 9×9 after 7×7 SFT); goal <em>distance</em> in a fixed maze transfers smoothly</td></tr>
+  </tbody>
+</table>
+
+<h3>Matched wall-clock sweep — 8 configs × 2400 s (complete, single seed)</h3>
+<table>
+  <thead><tr><th>Config</th><th class="num">steps</th><th class="num">dead/8</th><th class="num">AUC</th><th class="num">pass@8</th></tr></thead>
+  <tbody>
+    <tr><td>uniform + maxrl</td><td class="num">583</td><td class="num">5.8</td><td class="num">0.214</td><td class="num">—</td></tr>
+    <tr><td>uniform + grpo</td><td class="num">527</td><td class="num">6.0</td><td class="num">0.216</td><td class="num">0.312</td></tr>
+    <tr><td>frontier + grpo</td><td class="num">751</td><td class="num">5.7</td><td class="num">0.219</td><td class="num">0.269 ↓</td></tr>
+    <tr><td>uniform + maxrl + hindsight</td><td class="num">651</td><td class="num">5.0</td><td class="num">0.222</td><td class="num">0.356</td></tr>
+    <tr><td>frontier + maxrl</td><td class="num">713</td><td class="num">3.9</td><td class="num">0.223</td><td class="num">0.351</td></tr>
+    <tr><td>learnability + maxrl</td><td class="num">787</td><td class="num">3.3</td><td class="num">0.227</td><td class="num">0.356</td></tr>
+    <tr><td>frontier_alp + maxrl</td><td class="num">765</td><td class="num">3.4</td><td class="num">0.233</td><td class="num">0.361</td></tr>
+    <tr><td><strong>frontier + maxrl + hindsight</strong></td><td class="num">694</td><td class="num">3.8</td><td class="num"><strong>0.234</strong></td><td class="num">0.356</td></tr>
+  </tbody>
+</table>
+<p>Every teacher/hindsight variant beats both uniform baselines on learning speed at equal
+wall-clock. <strong>The most instructive result is a refuted hypothesis:</strong> we predicted a
+frontier teacher would rescue GRPO from pass@k collapse by retiring the mastered prompts its
+inverted w(p) overweights. The opposite happened — frontier+grpo collapsed <em>harder</em>
+(pass@8 0.332→0.269) than uniform+grpo (0.351→0.312), losing easy-level retention, while MaxRL
+under the same teacher kept pass@8 flat-to-up. GRPO's inversion was quietly <em>maintaining</em>
+easy prompts; a curriculum removes that maintenance. So the collapse is an objective-level
+pathology that data-level curricula amplify rather than fix — a frontier curriculum
+<em>requires</em> likelihood-style weighting to be safe, which strengthens the paper's central
+claim from the outside.</p>
+
+<p><strong>Multi-seed confirmation (seeds 0–2, paired via shared per-seed warmstarts):</strong>
+both teacher variants beat uniform+maxrl on AUC in <em>every</em> seed (6/6 paired deltas
+positive); frontier_alp+maxrl wins final mean-pass with the tightest spread
+(0.246&nbsp;±&nbsp;0.002 vs 0.230&nbsp;±&nbsp;0.015). The coverage divergence is systematic, not
+seed noise: GRPO's pass@8 <em>decays</em> in every seed (mean 0.308→0.271) while teacher+MaxRL
+<em>grows</em> it (0.316→0.348) — the paper's coverage-collapse dynamic reproduced at 1.26M
+scale, with the curriculum widening the gap in both directions.</p>
+
+<h3>Hindsight relabeling — the biggest single gain</h3>
+<p>MaxRL's Theorem 1 makes the estimator <em>success-conditioned</em>: it learns only from
+successes. The HER-style complement: a failed trajectory is a success <em>for the goal it
+actually reached</em>. Relabeling dead groups to their deepest achieved sub-goal converts
+wasted compute into live MaxRL groups:</p>
+<table>
+  <thead><tr><th>Config (CPU skill-chain, 5 seeds)</th><th class="num">Final</th><th class="num">AUC (speed)</th></tr></thead>
+  <tbody>
+    <tr><td>uniform + maxrl</td><td class="num">0.966</td><td class="num">0.653</td></tr>
+    <tr><td>uniform + maxrl + <strong>hindsight</strong></td><td class="num">0.978</td><td class="num"><strong>0.878</strong></td></tr>
+    <tr><td>advmass teacher + maxrl</td><td class="num">0.979</td><td class="num">0.704</td></tr>
+    <tr><td>advmass teacher + maxrl + <strong>hindsight</strong></td><td class="num"><strong>0.984</strong></td><td class="num"><strong>0.883</strong></td></tr>
+  </tbody>
+</table>
+<p>Division of labor: the <strong>teacher avoids</strong> spending compute beyond the frontier;
+<strong>hindsight salvages</strong> whatever still fails there. In the hard 16-level regime hindsight
+alone (0.970) even beats the teacher alone (0.961), and the combination stays best (0.978).
+Two later validation results sharpened this: <strong>the hindsight gradient is exact
+on-structure</strong> — per-group cosine to the true success-conditioned ML gradient equals that
+of unbiased fresh groups (0.956 vs 0.958), and the mean relabeled gradient converges to cosine
+1.000 (Prop. 6 + V1); and in a <strong>frontier-heavy regime</strong> (max pool pass rate 10⁻⁵)
+uniform, DAPO dynamic sampling, and the plain teacher all flatline at exactly 0 while
+teacher+hindsight reaches 0.98 — reallocating compute among unlearnable tasks cannot help;
+hindsight <em>creates</em> the missing signal by inventing the curriculum below the pool,
+igniting learnability within ~400 groups, then going silent as natural successes take over.</p>
+
+<h3>Beating the oracle — and the concentration surprise</h3>
+<p>Two late results sharpened the method. First, sampling ∝ u(p)<sup>γ</sup> with γ≈4 beats
+proportional sampling (AUC 0.782 vs 0.728): the mass functional is the right <em>ordering</em>,
+but learning <em>compounds</em> on structured task pools — steps on the highest-mass task unlock
+the next — so the optimal temperature is sharper than proportional. (A two-line ODE model
+isolates the cause: with shared skills the γ effect reproduces quantitatively; on a flat pool it
+vanishes.) Second, the headline:</p>
+
+<figure>
+  <div class="chart-card" id="chart3card">
+    <p class="chart-title">Learning speed (AUC) by teacher — the oracle line is the ceiling for pure samplers</p>
+    <p class="chart-sub">Skill-chain testbed, 5 seeds. Hover a bar for the value and what the config means.</p>
+    <svg id="chart3" viewBox="0 0 800 340" role="img" aria-label="Horizontal bar chart of AUC by teacher configuration; the full stack with hindsight exceeds the oracle sampler's ceiling"></svg>
+    <div class="tooltip" id="tt3"></div>
+    <details><summary>Table view</summary><div id="table3"></div></details>
+  </div>
+  <figcaption>
+    <strong>The full stack beats the oracle.</strong> The oracle knows every true pass rate and
+    allocates groups perfectly — but it can only collect what natural successes emit. Hindsight
+    changes the game itself, manufacturing verified signal from failures. The method's advantage
+    is not better allocation of the standard signal; it is access to signal the best possible
+    allocator cannot reach.
+  </figcaption>
+</figure>
+
+<p>On the GPU maze, dense hindsight (relabel every deep-enough failed rollout, ~16
+relabels/step) is likewise the new champion (final 0.258, best 0.269 at matched wall-clock),
+while routing relabeled successes into the teacher's posterior inflated it (p̂ 0.81 vs true 0.47)
+and was dropped — the posterior should see only requested-task evidence.</p>
+
+<h3>Hindsight gradients are exact, not approximate</h3>
+<p>The load-bearing question for hindsight: is a relabeled gradient a real ML gradient or
+plausible noise? On the skill chain we can compute the <em>true</em> success-conditioned ML
+gradient exactly and measure alignment. Result — relabeled (hindsight) groups are exactly as
+well-aligned as unbiased fresh groups sampled directly on the relabeled task, and the mean
+hindsight gradient converges to the truth:</p>
+<table>
+  <thead><tr><th>Relabel depth j</th><th class="num">groups</th><th class="num">hindsight cosine</th><th class="num">fresh-group cosine</th><th class="num">cosine of mean</th></tr></thead>
+  <tbody>
+    <tr><td>8</td><td class="num">1,811</td><td class="num">0.861 ± 0.071</td><td class="num">0.854 ± 0.078</td><td class="num"><strong>1.000</strong></td></tr>
+    <tr><td>9</td><td class="num">1,876</td><td class="num">0.948 ± 0.016</td><td class="num">0.946 ± 0.017</td><td class="num"><strong>1.000</strong></td></tr>
+    <tr><td>10</td><td class="num">276</td><td class="num">0.956 ± 0.012</td><td class="num">0.958 ± 0.007</td><td class="num"><strong>1.000</strong></td></tr>
+  </tbody>
+</table>
+<p>The catch (Proposition 6, learned the hard way on a goal-conditioned gridworld): if
+trajectories embed the goal, the relabel must <em>rewrite the conditioning</em> to the achieved
+goal — skipping the rewrite makes hindsight <em>hurt</em> (AUC 0.600 vs 0.658 teacher-only);
+with it, hindsight wins (0.703). This is HER's observation-rewrite, surfaced as a measured
+interface contract in <code>frontier_rl</code>.</p>
+
+<h3>Honest negatives &amp; open items</h3>
+<table>
+  <thead><tr><th>Approach</th><th>Outcome</th><th class="num">Status</th></tr></thead>
+  <tbody>
+    <tr><td>Adaptive truncation T<sub>i</sub> ≈ 1/p̂<sub>i</sub> (decoupled from N via the repo's subset estimator)</td>
+        <td>slightly <em>under</em>performs fixed T=N (AUC 0.698 vs 0.704) — at N=16–32 variance isn't binding, so lowering T only weakens hard-prompt upweighting</td>
+        <td class="num"><span class="status no">✗ negative</span></td></tr>
+    <tr><td>Learning-progress (|Δp̂|) teachers</td>
+        <td>underperform pass-rate-band teachers here — the signal is noisy at N=16 and lags the moving frontier</td>
+        <td class="num"><span class="status no">✗ weak</span></td></tr>
+    <tr><td>H6: teacher patches GRPO's inversion (less pass@k collapse for frontier+grpo)</td>
+        <td>refuted, direction reversed — the teacher <em>amplifies</em> GRPO's collapse (pass@8 0.332→0.269 vs uniform 0.351→0.312); curricula need likelihood-style weighting</td>
+        <td class="num"><span class="status no">✗ refuted</span></td></tr>
+    <tr><td>Hindsight→teacher posterior feedback</td>
+        <td>AUC tie with dense hindsight but worse final; posterior inflates (p̂ 0.81 vs eval 0.47) — dropped; posterior sees requested-task evidence only</td>
+        <td class="num"><span class="status no">✗ dropped</span></td></tr>
+    <tr><td>SmolLM2-360M + GSM8K, curriculum × {maxrl, grpo}</td>
+        <td>launch script ready (<code>verl_integration/</code>); needs a multi-GPU node</td>
+        <td class="num"><span class="status run">⟳ queued</span></td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="framework">5 · One schedule, any environment: <span class="mono">frontier_rl</span></h2>
+
+<p>The validated schedule is packaged as an environment-agnostic framework
+(<a href="https://github.com/linjiw/curriculum-maxrl/tree/main/frontier_rl"><code>frontier_rl/</code></a>,
+numpy-only core). You implement four methods — task bins, group rollout, hindsight relabel, and
+one weighted policy update — and the teacher, estimator, and hindsight logic come for free. The
+same code reproduces the validated numbers on the skill chain (regression anchor) and transfers
+to real Gymnasium environments:</p>
+
+<table>
+  <thead><tr><th>Environment (AUC, matched budgets)</th><th class="num">uniform</th><th class="num">teacher</th><th class="num">teacher + hindsight</th></tr></thead>
+  <tbody>
+    <tr><td>Skill chain (regression anchor, 5 seeds)</td><td class="num">0.650</td><td class="num">0.728</td><td class="num"><strong>0.890</strong></td></tr>
+    <tr><td>Gridworld reach (goal-conditioned, 3 seeds)</td><td class="num">0.592</td><td class="num">0.658</td><td class="num"><strong>0.703</strong></td></tr>
+    <tr><td>Gymnasium <strong>MountainCar</strong> — positional curriculum (3 seeds)</td><td class="num">0.216</td><td class="num">0.228</td><td class="num"><strong>0.246</strong></td></tr>
+    <tr><td>Gymnasium <strong>CartPole</strong> — survival curriculum (3 seeds)</td><td class="num">0.190</td><td class="num">0.225</td><td class="num"><strong>0.246</strong></td></tr>
+  </tbody>
+</table>
+
+<p>MountainCar is the deliberate stress test: sparse flag-success is the classic hard-exploration
+task — the real-world twin of the frontier-heavy regime where pure samplers score exactly zero.
+Its curriculum ("reach x ≥ x*, walking x* from the valley to the flag") is the template for
+robotics reach tasks: swap position bins for end-effector distance bands and the adapter carries
+over. The ordering <em>uniform &lt; teacher &lt; teacher+hindsight</em> holds on every
+environment tested.</p>
+
+<h3>Real training curves — performance rising while the curriculum walks</h3>
+<figure>
+  <div class="chart-card" id="curvecard">
+    <p class="chart-title">Left: mean pass rate over training (line = seed mean, band = seed min–max).
+    Right: the teacher's sampling distribution over the same run — darker = more sampling mass.</p>
+    <div class="slider-row">
+      <label for="envSel">Environment</label>
+      <select id="envSel" style="padding:5px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-1);color:var(--text-primary)">
+        <option value="skill_chain">Skill chain</option>
+        <option value="grid_reach">Gridworld reach</option>
+        <option value="mountaincar">MountainCar</option>
+        <option value="cartpole">CartPole</option>
+      </select>
+    </div>
+    <div class="legend">
+      <span class="key"><span class="swatch-line" style="border-top-color:var(--series-2)"></span>uniform</span>
+      <span class="key"><span class="swatch-line" style="border-top-color:var(--series-1)"></span>teacher</span>
+      <span class="key"><span class="swatch-line" style="border-top-color:var(--series-6)"></span>teacher + hindsight</span>
+    </div>
+    <svg id="curvesvg" viewBox="0 0 800 400" role="img" aria-label="Training curves for three methods with seed bands, next to a heatmap of the teacher's sampling distribution over tasks and time"></svg>
+  </div>
+  <figcaption>
+    Data exported from the actual runs (<code>frontier_rl/examples/export_curves.py</code>,
+    <code>docs/curves.json</code>) — not a mock. The heatmap makes the mechanism visible: the dark
+    band of sampling mass starts on easy tasks and <em>walks rightward</em> (harder) as the policy
+    improves — performance and curriculum are two views of one process. On MountainCar the
+    per-bin-parameter variant is shown (the flag needs the shared policy, see the case study
+    below), so teacher gains are muted there — the honest picture.
+  </figcaption>
+</figure>
+
+<div class="card">
+  <h3>Case study: MountainCar's flag, solved — with clean controls</h3>
+  <p>With a <em>shared</em> goal-conditioned policy (150 steps, 3 seeds, weak tabular learner):
+  training on the flag alone — the standard sparse-reward setup — scores <strong>exactly
+  0.000</strong> (the classic exploration wall); a uniform mixture over easier targets reaches
+  flag pass 0.889; the teacher 0.944; the <strong>full stack 1.000 in every seed</strong> at
+  equal compute. The instructive failure mode: the same curriculum with <em>per-bin</em> policy
+  parameters never reaches the flag at any budget — <strong>curricula operate through shared
+  parameters</strong>; difficulty bins must share the policy (condition on the goal, don't
+  partition by it) or competence has no channel to transfer through. The gym-scale version of
+  our maze-size generalization cliff, and the first thing to check when a curriculum "doesn't
+  work."</p>
+</div>
+
+<pre><code># the whole integration surface
+class MyEnv:                                   # TaskSpace
+    n_tasks: int                               # difficulty bins
+    def rollout_group(task_id, n) -> GroupResult
+    def relabel(group) -> (task', rewards', trajs') | None
+
+class MyPolicy:                                # Policy
+    def update(task_id, trajectories, weights) # your PPO/REINFORCE step
+
+FrontierTrainer(MyEnv(), MyPolicy(), TrainerConfig(hindsight=True)).train(500)</code></pre>
+
+<!-- ============================================================ -->
+<h2 id="benefits">6 · What you actually get</h2>
+
+<p><strong>The measured benefits:</strong></p>
+<table>
+  <thead><tr><th>Benefit</th><th>Number</th></tr></thead>
+  <tbody>
+    <tr><td>More optimization per GPU-hour (dead groups avoided + frontier rollouts terminate early)</td>
+        <td>22–35% more steps at matched wall-clock, gains landing on frontier tasks</td></tr>
+    <tr><td>Coverage grows instead of collapsing</td>
+        <td>pass@8 ↑ 0.316→0.348 every seed (GRPO's ↓ 0.308→0.271 every seed)</td></tr>
+    <tr><td>Inference-time sampling efficiency vs GRPO (samples to target coverage, perfect verifier)</td>
+        <td>up to <strong>11×</strong> fewer samples on the hardest evaluated level — the speedup grows with difficulty (1.2× / 2.7× / 11× at levels 2/3/5)</td></tr>
+    <tr><td>Frontier-heavy regimes: impossible → solved</td>
+        <td>0.00 → 0.98 at equal compute (uniform, DAPO, and plain teacher all score exactly 0)</td></tr>
+    <tr><td>Beats perfect allocation when recycling is available</td>
+        <td>AUC 0.890 vs oracle 0.851</td></tr>
+  </tbody>
+</table>
+<p class="footnote">The inference-efficiency pattern reproduces the MaxRL paper's headline
+(their Fig. 5: 2.3–19.2×) at 1.26M scale with our teacher on top; GRPO's coverage curves
+visibly <em>flatten</em> at large k (saturating at 0.88/0.56 where ours reach 1.00/0.62) —
+collapse expressed in inference currency: extra samples stop helping. Single-checkpoint
+numbers; the multiplier-grows-with-difficulty pattern is the finding.</p>
+
+<p><strong>The hidden benefits — quieter, arguably worth more:</strong></p>
+<div class="grid2">
+  <div class="card">
+    <h3>Zero difficulty hyperparameters</h3>
+    <p>ADARFT-style bands need targets and widths tuned per task. Here the band is
+    <em>derived</em>: the rollout budget N you already chose sets the peak (≈ ln N / N) and the
+    width. Doubling N moves the curriculum harder automatically — the compute knob and the
+    curriculum knob are the same knob.</p>
+  </div>
+  <div class="card">
+    <h3>A safety diagnosis, not just a method</h3>
+    <p>The same algebra that builds the teacher predicts when a curriculum will
+    <em>backfire</em>: GRPO's inverted weight function relies on easy prompts for maintenance,
+    so a frontier curriculum amplifies its collapse. Negative knowledge that saves other
+    people's compute — verified per-seed, not anecdotal.</p>
+  </div>
+  <div class="card">
+    <h3>Conceptual compression</h3>
+    <p>Learnability curricula (p(1−p)), DAPO-style dynamic filtering, and HER stop being three
+    separate tricks: they are the N=1 slice, the sampling shadow, and the success-manufacturing
+    complement of <em>one identity</em>. Fewer moving parts to tune, one theory to reason with.</p>
+  </div>
+  <div class="card">
+    <h3>Free telemetry</h3>
+    <p>The teacher's posterior is a live difficulty map of your task pool — mastered / frontier /
+    dead fractions per training step, at no extra cost. In our runs it tracked held-out truth
+    within ±0.03 and diagnosed a failure mode (posterior inflation) before it hurt.</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="insights">7 · Insights we took from the paper</h2>
+
+<div class="grid2">
+  <div class="card">
+    <h3>Compute changes the objective, not just the variance</h3>
+    <p>For REINFORCE, more rollouts = lower variance on the same objective. For MaxRL, more
+    rollouts = a strictly better objective (T = N). Any curriculum that reallocates rollouts is
+    therefore also reallocating <em>objective fidelity</em> — which is why rollout allocation
+    deserves to be a first-class curriculum axis.</p>
+  </div>
+  <div class="card">
+    <h3>The zero-gradient zone is structural, not a bug</h3>
+    <p>Dropping K=0 groups is what makes the estimator unbiased for the truncated objective.
+    So MaxRL <em>cannot</em> be patched at the loss level to learn from all-fail prompts — the fix
+    has to live in the sampling distribution. That is the cleanest argument we know for pairing
+    it with a teacher.</p>
+  </div>
+  <div class="card">
+    <h3>Population curves mislead at finite N</h3>
+    <p>The elegant w(p) table is an infinite-sample statement. Realized signal is throttled by
+    pass@N for every estimator; on hard prompts GRPO delivers half of what its curve promises.
+    Curriculum design should target the finite-sample quantity — which is exactly what
+    advantage mass is.</p>
+  </div>
+  <div class="card">
+    <h3>Existing curricula are special cases</h3>
+    <p>SFL's learnability p(1−p) is our utility at N=1 and RLOO's exact advantage mass; SEC's
+    empirical-|advantage| bandit reward has our formulas as its exact expectation. The
+    advantage-mass teacher is “oracle SEC for MaxRL” — same target, computable from a posterior
+    before a prompt is ever visited.</p>
+  </div>
+</div>
+
+<hr>
+
+<p class="footnote">
+  Built on the official <a href="https://arxiv.org/abs/2602.02710">MaxRL</a> codebase
+  (Tajwar, Zeng, et&nbsp;al., ICML 2026 — a verl fork). Curriculum design draws on PLR, PAIRED,
+  ALP-GMM, and SFL learnability; see the
+  <a href="https://github.com/linjiw/curriculum-maxrl/blob/main/curriculum_maxrl/RESEARCH.md">verified literature synthesis</a>.
+  Full derivations: <a href="https://github.com/linjiw/curriculum-maxrl/blob/main/curriculum_maxrl/THEORY.md">THEORY.md</a>.
+  Method-by-method verification status: <a href="https://github.com/linjiw/curriculum-maxrl/blob/main/GUIDE.md">GUIDE.md</a>.
+</p>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- theme toggle ---------- */
+  var root = document.documentElement;
+  document.getElementById("themeToggle").addEventListener("click", function () {
+    var dark = root.getAttribute("data-theme") === "dark" ||
+      (!root.getAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
+    root.setAttribute("data-theme", dark ? "light" : "dark");
+    drawAll();
+  });
+
+  function cssVar(name) {
+    return getComputedStyle(document.body).getPropertyValue(name).trim();
+  }
+
+  /* ---------- shared chart scaffolding ---------- */
+  var W = 800, H = 420, M = { top: 18, right: 96, bottom: 44, left: 62 };
+  var IW = W - M.left - M.right, IH = H - M.top - M.bottom;
+
+  function el(tag, attrs, text) {
+    var e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.appendChild(document.createTextNode(text));
+    return e;
+  }
+
+  function fmt(v) {
+    if (v >= 100) return v.toFixed(0);
+    if (v >= 1) return v.toFixed(1);
+    if (v >= 0.01) return v.toFixed(2);
+    return v.toExponential(0).replace("e-", "e-");
+  }
+
+  function buildLegend(id, series) {
+    var box = document.getElementById(id);
+    box.textContent = "";
+    series.forEach(function (s) {
+      var key = document.createElement("span");
+      key.className = "key";
+      var sw = document.createElement("span");
+      sw.className = "swatch-line";
+      sw.style.borderTopColor = cssVar(s.color);
+      key.appendChild(sw);
+      key.appendChild(document.createTextNode(s.name));
+      box.appendChild(key);
+    });
+  }
+
+  function buildTable(id, xLabel, xs, series, xFmt) {
+    var host = document.getElementById(id);
+    host.textContent = "";
+    var t = document.createElement("table");
+    var thead = document.createElement("thead");
+    var hr = document.createElement("tr");
+    var th0 = document.createElement("th"); th0.textContent = xLabel; hr.appendChild(th0);
+    series.forEach(function (s) {
+      var th = document.createElement("th"); th.className = "num"; th.textContent = s.name; hr.appendChild(th);
+    });
+    thead.appendChild(hr); t.appendChild(thead);
+    var tb = document.createElement("tbody");
+    xs.forEach(function (x, i) {
+      if (i % Math.ceil(xs.length / 12) !== 0) return;
+      var tr = document.createElement("tr");
+      var td0 = document.createElement("td"); td0.textContent = xFmt(x); tr.appendChild(td0);
+      series.forEach(function (s) {
+        var td = document.createElement("td"); td.className = "num";
+        td.textContent = fmt(s.ys[i]); tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); host.appendChild(t);
+  }
+
+  function attachHover(svg, card, tt, xs, series, sx, xFmtFn) {
+    var hair = el("line", { y1: M.top, y2: M.top + IH, stroke: cssVar("--baseline"), "stroke-width": 1, opacity: 0 });
+    svg.appendChild(hair);
+    function move(ev) {
+      var r = svg.getBoundingClientRect();
+      var px = (ev.clientX - r.left) * (W / r.width);
+      if (px < M.left || px > M.left + IW) { leave(); return; }
+      var best = 0, bd = 1e9;
+      for (var i = 0; i < xs.length; i++) {
+        var d = Math.abs(sx(xs[i]) - px);
+        if (d < bd) { bd = d; best = i; }
+      }
+      var cx = sx(xs[best]);
+      hair.setAttribute("x1", cx); hair.setAttribute("x2", cx); hair.setAttribute("opacity", 0.8);
+      tt.textContent = "";
+      var xd = document.createElement("div"); xd.className = "tt-x";
+      xd.textContent = "p = " + xFmtFn(xs[best]); tt.appendChild(xd);
+      series.forEach(function (s) {
+        var row = document.createElement("div"); row.className = "row";
+        var lk = document.createElement("span"); lk.className = "lk";
+        lk.style.borderTopColor = cssVar(s.color); row.appendChild(lk);
+        var nm = document.createElement("span"); nm.textContent = s.name; row.appendChild(nm);
+        var v = document.createElement("span"); v.className = "v";
+        v.textContent = fmt(s.ys[best]); row.appendChild(v);
+        tt.appendChild(row);
+      });
+      tt.style.display = "block";
+      var cr = card.getBoundingClientRect();
+      var lx = (cx / W) * cr.width + 14;
+      if (lx + 170 > cr.width) lx = (cx / W) * cr.width - 184;
+      tt.style.left = lx + "px";
+      tt.style.top = "90px";
+    }
+    function leave() { hair.setAttribute("opacity", 0); tt.style.display = "none"; }
+    svg.addEventListener("pointermove", move);
+    svg.addEventListener("pointerleave", leave);
+  }
+
+  /* ---------- chart 1: weight functions, log-log ---------- */
+  var T_STEPS = [1, 2, 4, 8, 16, 32, 64, 128];
+  var P_MIN = 1e-3, P_MAX = 1;
+  var xs1 = [];
+  for (var i = 0; i <= 160; i++) xs1.push(Math.pow(10, -3 + 3 * i / 160) * 0.999);
+
+  function wRL() { return 1; }
+  function wGRPO(p) { return 1 / Math.sqrt(p * (1 - p) + 1e-12); }
+  function wML(p) { return 1 / p; }
+  function wMaxRL(p, T) { return (1 - Math.pow(1 - p, T)) / p; }
+
+  function drawChart1() {
+    var T = T_STEPS[+document.getElementById("tSlider").value];
+    document.getElementById("tVal").textContent = "T = " + T;
+    var svg = document.getElementById("chart1");
+    svg.textContent = "";
+
+    var Y_MIN = 0.8, Y_MAX = 1200;
+    function sx(p) { return M.left + IW * (Math.log10(p) - Math.log10(P_MIN)) / (Math.log10(P_MAX) - Math.log10(P_MIN)); }
+    function sy(v) {
+      var c = Math.min(Math.max(v, Y_MIN), Y_MAX);
+      return M.top + IH * (1 - (Math.log10(c) - Math.log10(Y_MIN)) / (Math.log10(Y_MAX) - Math.log10(Y_MIN)));
+    }
+
+    [1, 10, 100, 1000].forEach(function (v) {
+      svg.appendChild(el("line", { x1: M.left, x2: M.left + IW, y1: sy(v), y2: sy(v), stroke: cssVar("--grid"), "stroke-width": 1 }));
+      svg.appendChild(el("text", { x: M.left - 8, y: sy(v) + 4, "text-anchor": "end" }, v.toLocaleString()));
+    });
+    [0.001, 0.01, 0.1, 1].forEach(function (p) {
+      svg.appendChild(el("text", { x: sx(p), y: M.top + IH + 20, "text-anchor": "middle" }, p >= 1 ? "1" : p.toString()));
+      svg.appendChild(el("line", { x1: sx(p), x2: sx(p), y1: M.top + IH, y2: M.top + IH + 4, stroke: cssVar("--baseline") }));
+    });
+    svg.appendChild(el("line", { x1: M.left, x2: M.left + IW, y1: M.top + IH, y2: M.top + IH, stroke: cssVar("--baseline"), "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: M.left + IW / 2, y: H - 6, "text-anchor": "middle" }, "pass rate p (log)"));
+    svg.appendChild(el("text", { x: 14, y: M.top + IH / 2, transform: "rotate(-90 14 " + (M.top + IH / 2) + ")", "text-anchor": "middle" }, "weight w(p) (log)"));
+
+    var series = [
+      { name: "RL / REINFORCE", color: "--series-2", f: wRL },
+      { name: "GRPO", color: "--series-3", f: wGRPO },
+      { name: "MaxRL (T=" + T + ")", color: "--series-1", f: function (p) { return wMaxRL(p, T); } },
+      { name: "Maximum likelihood", color: "--series-4", f: wML }
+    ];
+    series.forEach(function (s) {
+      s.ys = xs1.map(s.f);
+      var d = "";
+      xs1.forEach(function (p, j) { d += (j ? "L" : "M") + sx(p).toFixed(1) + "," + sy(s.ys[j]).toFixed(1); });
+      svg.appendChild(el("path", { d: d, fill: "none", stroke: cssVar(s.color), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    });
+    /* selective direct labels — ML/RL at the left edge, MaxRL mid-curve,
+       GRPO at its distinctive right-edge inversion */
+    var lx = sx(1.3e-3);
+    svg.appendChild(el("text", { x: lx, y: sy(wML(1.3e-3)) - 8, class: "dl" }, "ML = 1/p"));
+    svg.appendChild(el("text", { x: lx, y: sy(1) - 8, class: "dl" }, "RL = 1"));
+    if (T > 2) { /* at T<=2 the curve hugs RL and the label would collide */
+      var gap = Math.abs(Math.log10(wGRPO(1.3e-3)) - Math.log10(T));
+      var dy = gap < 0.35 ? 20 : -8; /* dodge the GRPO line when the plateau is near it */
+      svg.appendChild(el("text", { x: lx, y: sy(wMaxRL(1.3e-3, T)) + dy, class: "dl" }, "MaxRL plateau ≈ T"));
+    }
+    var gx = 0.9985;
+    svg.appendChild(el("text", { x: sx(gx) - 6, y: sy(wGRPO(gx)) - 8, "text-anchor": "end", class: "dl" }, "GRPO inverts →"));
+
+    buildLegend("legend1", series);
+    buildTable("table1", "p", xs1, series, function (x) { return x.toPrecision(2); });
+    attachHover(svg, document.getElementById("chart1card"), document.getElementById("tt1"),
+      xs1, series, sx, function (x) { return x.toPrecision(2); });
+  }
+
+  /* ---------- chart 2: advantage mass, log-x linear-y ---------- */
+  var N_STEPS = [1, 2, 4, 8, 16, 32, 64, 128];
+  var xs2 = [];
+  for (var j = 0; j <= 160; j++) xs2.push(Math.pow(10, -4 + 4 * j / 160) * 0.999);
+
+  function uMass(p, N) { return (1 - Math.pow(1 - p, N)) - p; }
+  function uLearn(p) { return p * (1 - p); }
+
+  function drawChart2() {
+    var N = N_STEPS[+document.getElementById("nSlider").value];
+    document.getElementById("nVal").textContent = "N = " + N;
+    var svg = document.getElementById("chart2");
+    svg.textContent = "";
+
+    var XMIN = 1e-4, XMAX = 1;
+    function sx(p) { return M.left + IW * (Math.log10(p) - Math.log10(XMIN)) / (Math.log10(XMAX) - Math.log10(XMIN)); }
+    function sy(v) { return M.top + IH * (1 - v); }
+
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (v) {
+      svg.appendChild(el("line", { x1: M.left, x2: M.left + IW, y1: sy(v), y2: sy(v), stroke: cssVar("--grid"), "stroke-width": 1 }));
+      svg.appendChild(el("text", { x: M.left - 8, y: sy(v) + 4, "text-anchor": "end" }, v.toString()));
+    });
+    [0.0001, 0.001, 0.01, 0.1, 1].forEach(function (p) {
+      svg.appendChild(el("text", { x: sx(p), y: M.top + IH + 20, "text-anchor": "middle" }, p >= 1 ? "1" : p.toString()));
+      svg.appendChild(el("line", { x1: sx(p), x2: sx(p), y1: M.top + IH, y2: M.top + IH + 4, stroke: cssVar("--baseline") }));
+    });
+    svg.appendChild(el("line", { x1: M.left, x2: M.left + IW, y1: M.top + IH, y2: M.top + IH, stroke: cssVar("--baseline"), "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: M.left + IW / 2, y: H - 6, "text-anchor": "middle" }, "pass rate p (log)"));
+    svg.appendChild(el("text", { x: 14, y: M.top + IH / 2, transform: "rotate(-90 14 " + (M.top + IH / 2) + ")", "text-anchor": "middle" }, "utility u(p) = pass@N − pass@1"));
+
+    var series = [
+      { name: "Advantage mass (N=" + N + ")", color: "--series-1", f: function (p) { return uMass(p, N); } },
+      { name: "Learnability p(1−p) — SFL / RLOO", color: "--series-2", f: uLearn }
+    ];
+    series.forEach(function (s, si) {
+      s.ys = xs2.map(s.f);
+      var d = "";
+      xs2.forEach(function (p, k) { d += (k ? "L" : "M") + sx(p).toFixed(1) + "," + sy(s.ys[k]).toFixed(1); });
+      if (si === 0) {
+        var area = d + "L" + sx(XMAX).toFixed(1) + "," + sy(0) + "L" + sx(XMIN).toFixed(1) + "," + sy(0) + "Z";
+        svg.appendChild(el("path", { d: area, fill: cssVar(s.color), opacity: 0.10, stroke: "none" }));
+      }
+      svg.appendChild(el("path", { d: d, fill: "none", stroke: cssVar(s.color), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    });
+
+    /* peak marker with surface ring */
+    var pStar = N === 1 ? 0.5 : 1 - Math.pow(N, -1 / (N - 1));
+    var px = sx(pStar), py = sy(uMass(pStar, N));
+    svg.appendChild(el("circle", { cx: px, cy: py, r: 6, fill: cssVar("--series-1"), stroke: cssVar("--surface-1"), "stroke-width": 2 }));
+    svg.appendChild(el("text", { x: px, y: py - 12, "text-anchor": "middle", class: "dl" },
+      "p★ = " + (pStar < 0.01 ? pStar.toPrecision(2) : pStar.toFixed(2))));
+
+    buildLegend("legend2", series);
+    buildTable("table2", "p", xs2, series, function (x) { return x.toPrecision(2); });
+    attachHover(svg, document.getElementById("chart2card"), document.getElementById("tt2"),
+      xs2, series, sx, function (x) { return x.toPrecision(2); });
+  }
+
+  /* ---------- chart 3: oracle-gap horizontal bars ---------- */
+  var BARS = [
+    { name: "uniform (no teacher)", auc: 0.650, color: "--series-2",
+      note: "flat sampling; 65% of groups dead" },
+    { name: "Thompson teacher, γ=1", auc: 0.728, color: "--series-1",
+      note: "advantage-mass utility, proportional" },
+    { name: "Thompson teacher, γ=4", auc: 0.782, color: "--series-1",
+      note: "sharper concentration — compounding" },
+    { name: "ORACLE (true pass rates)", auc: 0.851, color: "--series-4",
+      note: "best possible pure sampler — the ceiling" },
+    { name: "Thompson γ=4 + dense hindsight", auc: 0.890, color: "--series-1",
+      note: "signal creation beats perfect allocation" }
+  ];
+
+  function drawChart3() {
+    var svg = document.getElementById("chart3");
+    if (!svg) return;
+    svg.textContent = "";
+    var W3 = 800, H3 = 340;
+    var M3 = { top: 14, right: 80, bottom: 34, left: 250 };
+    var IW3 = W3 - M3.left - M3.right, IH3 = H3 - M3.top - M3.bottom;
+    var X0 = 0.5, X1 = 0.95;
+    function sx(v) { return M3.left + IW3 * (v - X0) / (X1 - X0); }
+    [0.5, 0.6, 0.7, 0.8, 0.9].forEach(function (v) {
+      svg.appendChild(el("line", { x1: sx(v), x2: sx(v), y1: M3.top, y2: M3.top + IH3,
+        stroke: cssVar("--grid"), "stroke-width": 1 }));
+      svg.appendChild(el("text", { x: sx(v), y: H3 - 12, "text-anchor": "middle" }, v.toFixed(1)));
+    });
+    svg.appendChild(el("text", { x: M3.left + IW3 / 2, y: H3 + 2, "text-anchor": "middle" }, ""));
+    var bandH = IH3 / BARS.length, barH = Math.min(24, bandH - 10);
+    var oracleX = sx(0.851);
+    BARS.forEach(function (b, i) {
+      var y = M3.top + i * bandH + (bandH - barH) / 2;
+      var isOracle = b.name.indexOf("ORACLE") === 0;
+      var r = el("rect", { x: sx(X0), y: y, width: Math.max(sx(b.auc) - sx(X0), 0),
+        height: barH, rx: 4, fill: cssVar(b.color),
+        opacity: isOracle ? 0.55 : 1 });
+      svg.appendChild(r);
+      svg.appendChild(el("text", { x: M3.left - 10, y: y + barH / 2 + 4,
+        "text-anchor": "end", class: "dl" }, b.name));
+      svg.appendChild(el("text", { x: sx(b.auc) + 8, y: y + barH / 2 + 4, class: "dl" },
+        b.auc.toFixed(3)));
+      /* hover: whole band is the hit target */
+      var hit = el("rect", { x: 0, y: M3.top + i * bandH, width: W3, height: bandH,
+        fill: "transparent" });
+      hit.addEventListener("pointermove", function () {
+        var tt = document.getElementById("tt3");
+        tt.textContent = "";
+        var xd = document.createElement("div"); xd.className = "tt-x";
+        xd.textContent = b.name; tt.appendChild(xd);
+        var row = document.createElement("div"); row.className = "row";
+        var nm = document.createElement("span"); nm.textContent = b.note; row.appendChild(nm);
+        var v = document.createElement("span"); v.className = "v";
+        v.textContent = "AUC " + b.auc.toFixed(3); row.appendChild(v);
+        tt.appendChild(row);
+        tt.style.display = "block";
+        tt.style.left = "60px";
+        tt.style.top = (70 + i * 44) + "px";
+        r.setAttribute("opacity", isOracle ? 0.75 : 0.85);
+      });
+      hit.addEventListener("pointerleave", function () {
+        document.getElementById("tt3").style.display = "none";
+        r.setAttribute("opacity", isOracle ? 0.55 : 1);
+      });
+      svg.appendChild(hit);
+    });
+    /* the oracle ceiling line */
+    svg.appendChild(el("line", { x1: oracleX, x2: oracleX, y1: M3.top - 4, y2: M3.top + IH3,
+      stroke: cssVar("--series-4"), "stroke-width": 1.5, "stroke-dasharray": "none",
+      opacity: 0.9 }));
+    svg.appendChild(el("text", { x: oracleX, y: M3.top - 2, "text-anchor": "middle", class: "dl" },
+      "sampler ceiling"));
+    /* table view */
+    var host = document.getElementById("table3");
+    host.textContent = "";
+    var t = document.createElement("table");
+    var tr0 = document.createElement("tr");
+    ["config", "AUC (5 seeds)"].forEach(function (h) {
+      var th = document.createElement("th"); th.textContent = h; tr0.appendChild(th);
+    });
+    var thead = document.createElement("thead"); thead.appendChild(tr0); t.appendChild(thead);
+    var tb = document.createElement("tbody");
+    BARS.forEach(function (b) {
+      var tr = document.createElement("tr");
+      var td1 = document.createElement("td"); td1.textContent = b.name; tr.appendChild(td1);
+      var td2 = document.createElement("td"); td2.className = "num";
+      td2.textContent = b.auc.toFixed(3); tr.appendChild(td2);
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); host.appendChild(t);
+  }
+
+  /* ---------- animated frontier-walk simulation ---------- */
+  var ANIM = (function () {
+    var T = 24, N = 12, LR = 0.16;
+    var rand = mulberry(42);
+    function mulberry(a) {
+      return function () {
+        a |= 0; a = a + 0x6D2B79F5 | 0;
+        var t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+    function mkState() {
+      // skill-chain-like: task i needs skills 0..i; skill quality in [0,1]
+      var s = [];
+      for (var i = 0; i < T; i++) s.push(0.45); // per-skill success ~0.45^depth: deep tasks truly dead
+      return { uniform: s.slice(), teacher: s.slice(), hind: s.slice(),
+               postA: ones(), postB: ones(), postA2: ones(), postB2: ones(),
+               step: 0, deadFlash: [] };
+    }
+    function ones() { var a = []; for (var i = 0; i < T; i++) a.push(1); return a; }
+    function passRates(skill) {
+      var p = [], acc = 1;
+      for (var i = 0; i < T; i++) { acc *= skill[i]; p.push(acc); }
+      return p;
+    }
+    function trainAt(skill, i, amount) {
+      for (var j = 0; j <= i; j++) skill[j] = Math.min(0.995, skill[j] + amount * (1 - skill[j]));
+    }
+    function betaSample(a, b) { // crude but fine for viz: mean + noise
+      var m = a / (a + b);
+      var v = Math.sqrt(m * (1 - m) / (a + b + 1));
+      return Math.min(0.999, Math.max(0.001, m + (rand() * 2 - 1) * 1.5 * v));
+    }
+    function util(p) { return Math.max((1 - Math.pow(1 - p, N)) - p, 0); }
+    function pick(weights) {
+      var s = 0; for (var i = 0; i < T; i++) s += weights[i];
+      var r = rand() * s;
+      for (var i = 0; i < T; i++) { r -= weights[i]; if (r <= 0) return i; }
+      return T - 1;
+    }
+    var st = mkState();
+    function stepOnce() {
+      st.step++;
+      st.deadFlash = [];
+      // uniform arm
+      for (var g = 0; g < 2; g++) {
+        var i = Math.floor(rand() * T);
+        var p = passRates(st.uniform)[i];
+        var K = binom(N, p);
+        if (K > 0) trainAt(st.uniform, i, LR * (1 - K / N));
+        st.lastUniform = i;
+      }
+      // teacher arm
+      for (g = 0; g < 2; g++) {
+        var w = [];
+        for (var t = 0; t < T; t++) w.push(0.9 * util(betaSample(st.postA[t], st.postB[t])) + 0.1 / T);
+        i = pick(w);
+        p = passRates(st.teacher)[i];
+        K = binom(N, p);
+        st.postA[i] = 1 + (st.postA[i] - 1) * 0.7 + K;
+        st.postB[i] = 1 + (st.postB[i] - 1) * 0.7 + (N - K);
+        if (K > 0) trainAt(st.teacher, i, LR * (1 - K / N));
+        st.lastTeacher = i;
+      }
+      // hindsight arm
+      for (g = 0; g < 2; g++) {
+        w = [];
+        for (t = 0; t < T; t++) w.push(0.9 * util(betaSample(st.postA2[t], st.postB2[t])) + 0.1 / T);
+        i = pick(w);
+        p = passRates(st.hind)[i];
+        K = binom(N, p);
+        st.postA2[i] = 1 + (st.postA2[i] - 1) * 0.7 + K;
+        st.postB2[i] = 1 + (st.postB2[i] - 1) * 0.7 + (N - K);
+        if (K > 0) { trainAt(st.hind, i, LR * (1 - K / N)); }
+        else {
+          // dead group: relabel to deepest prefix with decent per-skill quality
+          var pr = passRates(st.hind);
+          var j = 0;
+          for (t = i; t >= 0; t--) if (pr[t] > 0.15) { j = t; break; }
+          trainAt(st.hind, j, LR * 0.8);
+          st.deadFlash.push([i, j]);
+        }
+        st.lastHind = i;
+      }
+    }
+    function binom(n, p) {
+      var k = 0; for (var i = 0; i < n; i++) if (rand() < p) k++;
+      return k;
+    }
+    return {
+      get state() { return st; },
+      reset: function () { rand = mulberry(42); st = mkState(); },
+      step: stepOnce, T: T
+    };
+  })();
+
+  function drawAnim() {
+    var svg = document.getElementById("anim");
+    if (!svg) return;
+    svg.textContent = "";
+    var W4 = 800, rows = [["uniform", "--series-2"], ["teacher", "--series-1"], ["hind", "--series-6"]];
+    var names = { uniform: "uniform", teacher: "teacher", hind: "teacher + hindsight" };
+    var rowH = 140, top = 16, left = 130, iw = W4 - left - 30;
+    var st = ANIM.state, T = ANIM.T;
+    var bw = iw / T - 3;
+    rows.forEach(function (rr, ri) {
+      var key = rr[0], color = cssVar(rr[1]) || cssVar("--series-4");
+      var y0 = top + ri * rowH, plotH = 86;
+      var skill = st[key];
+      var p = (function (s) { var out = [], acc = 1; for (var i = 0; i < T; i++) { acc *= s[i]; out.push(acc); } return out; })(skill);
+      var mean = p.reduce(function (a, b) { return a + b; }, 0) / T;
+      svg.appendChild(el("text", { x: 8, y: y0 + 14, class: "dl" }, names[key]));
+      svg.appendChild(el("text", { x: 8, y: y0 + 32 }, "mean " + mean.toFixed(3)));
+      svg.appendChild(el("line", { x1: left, x2: left + iw, y1: y0 + plotH, y2: y0 + plotH, stroke: cssVar("--baseline"), "stroke-width": 1 }));
+      for (var i = 0; i < T; i++) {
+        var x = left + (iw / T) * i + 1.5;
+        var h = Math.max(p[i] * plotH, 1);
+        svg.appendChild(el("rect", { x: x, y: y0 + plotH - h, width: bw, height: h, rx: 3, fill: color }));
+      }
+      // sample markers
+      var lastKey = { uniform: "lastUniform", teacher: "lastTeacher", hind: "lastHind" }[key];
+      if (st[lastKey] != null) {
+        var mx = left + (iw / T) * st[lastKey] + 1.5 + bw / 2;
+        svg.appendChild(el("text", { x: mx, y: y0 + plotH + 16, "text-anchor": "middle", class: "dl" }, "▼"));
+      }
+      // hindsight relabel arcs
+      if (key === "hind") {
+        st.deadFlash.forEach(function (df) {
+          var xi = left + (iw / T) * df[0] + bw / 2, xj = left + (iw / T) * df[1] + bw / 2;
+          var midY = y0 + plotH + 30;
+          svg.appendChild(el("path", { d: "M" + xi + "," + (y0 + plotH + 18) + " Q" + ((xi + xj) / 2) + "," + midY + " " + xj + "," + (y0 + plotH + 18),
+            fill: "none", stroke: color, "stroke-width": 2, "stroke-dasharray": "4 3", opacity: 0.9 }));
+          svg.appendChild(el("text", { x: (xi + xj) / 2, y: midY + 12, "text-anchor": "middle" }, "relabel"));
+        });
+      }
+    });
+    svg.appendChild(el("text", { x: left, y: 452 }, "tasks: easy →"));
+    svg.appendChild(el("text", { x: left + iw, y: 452, "text-anchor": "end" }, "→ impossible"));
+    document.getElementById("animStep").textContent = "step " + ANIM.state.step;
+  }
+
+  var animTimer = null;
+  document.getElementById("animBtn").addEventListener("click", function () {
+    var btn = this;
+    if (animTimer) { clearInterval(animTimer); animTimer = null; btn.textContent = "▶ Play"; return; }
+    btn.textContent = "⏸ Pause";
+    animTimer = setInterval(function () {
+      ANIM.step(); drawAnim();
+      if (ANIM.state.step >= 300) { clearInterval(animTimer); animTimer = null; btn.textContent = "▶ Play"; }
+    }, 90);
+  });
+  document.getElementById("animReset").addEventListener("click", function () {
+    if (animTimer) { clearInterval(animTimer); animTimer = null; document.getElementById("animBtn").textContent = "▶ Play"; }
+    ANIM.reset(); drawAnim();
+  });
+  drawAnim();
+
+  /* ---------- real training curves + curriculum heatmap ---------- */
+  var CURVES = null;
+  function loadCurves() {
+    fetch("curves.json").then(function (r) { return r.json(); })
+      .then(function (d) { CURVES = d; drawCurves(); })
+      .catch(function () { /* file:// or offline — leave panel empty */ });
+  }
+  function drawCurves() {
+    var svg = document.getElementById("curvesvg");
+    if (!svg || !CURVES) return;
+    svg.textContent = "";
+    drawCurves._labelYs = [];
+    var envName = document.getElementById("envSel").value;
+    var env = CURVES[envName];
+    if (!env) return;
+    var W5 = 800, H5 = 400;
+    // left panel: curves
+    var L = { top: 16, left: 52, w: 360, h: 320 };
+    var methods = [["uniform", "--series-2"], ["teacher", "--series-1"], ["hindsight", "--series-6"]];
+    var maxLen = 0, maxV = 0;
+    methods.forEach(function (mm) {
+      var e = env.methods[mm[0]];
+      maxLen = Math.max(maxLen, e.mean.length);
+      maxV = Math.max(maxV, Math.max.apply(null, e.hi));
+    });
+    maxV = Math.min(Math.ceil(maxV * 10) / 10 + 0.05, 1);
+    function sx(i) { return L.left + L.w * i / Math.max(maxLen - 1, 1); }
+    function sy(v) { return L.top + L.h * (1 - v / maxV); }
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (f) {
+      var v = f * maxV;
+      svg.appendChild(el("line", { x1: L.left, x2: L.left + L.w, y1: sy(v), y2: sy(v), stroke: cssVar("--grid"), "stroke-width": 1 }));
+      svg.appendChild(el("text", { x: L.left - 6, y: sy(v) + 4, "text-anchor": "end" }, v.toFixed(2)));
+    });
+    methods.forEach(function (mm) {
+      var e = env.methods[mm[0]], color = cssVar(mm[1]);
+      var band = "";
+      for (var i = 0; i < e.mean.length; i++) band += (i ? "L" : "M") + sx(i).toFixed(1) + "," + sy(e.hi[i]).toFixed(1);
+      for (i = e.mean.length - 1; i >= 0; i--) band += "L" + sx(i).toFixed(1) + "," + sy(e.lo[i]).toFixed(1);
+      svg.appendChild(el("path", { d: band + "Z", fill: color, opacity: 0.12, stroke: "none" }));
+      var d = "";
+      for (i = 0; i < e.mean.length; i++) d += (i ? "L" : "M") + sx(i).toFixed(1) + "," + sy(e.mean[i]).toFixed(1);
+      svg.appendChild(el("path", { d: d, fill: "none", stroke: color, "stroke-width": 2, "stroke-linejoin": "round" }));
+      var last = e.mean[e.mean.length - 1];
+      var ly = sy(last) + 4;
+      while (drawCurves._labelYs.some(function (y) { return Math.abs(y - ly) < 14; })) ly += 14;
+      drawCurves._labelYs.push(ly);
+      svg.appendChild(el("text", { x: sx(e.mean.length - 1) + 4, y: ly, class: "dl" }, last.toFixed(2)));
+    });
+    svg.appendChild(el("line", { x1: L.left, x2: L.left + L.w, y1: L.top + L.h, y2: L.top + L.h, stroke: cssVar("--baseline") }));
+    svg.appendChild(el("text", { x: L.left + L.w / 2, y: H5 - 22, "text-anchor": "middle" },
+      "training step (eval every " + env.eval_every + ")"));
+    svg.appendChild(el("text", { x: 14, y: L.top + L.h / 2, transform: "rotate(-90 14 " + (L.top + L.h / 2) + ")", "text-anchor": "middle" }, "mean pass rate"));
+    // right panel: teacher-distribution heatmap (hindsight arm's teacher)
+    var Hm = { left: 490, top: 16, w: 280, h: 320 };
+    var src = env.methods.hindsight.dist || env.methods.teacher.dist;
+    if (src && src.length) {
+      var Tn = src[0].length, S = src.length;
+      var cw = Hm.w / S, ch = Hm.h / Tn;
+      var vmax = 0;
+      src.forEach(function (col) { col.forEach(function (v) { vmax = Math.max(vmax, v); }); });
+      for (var s = 0; s < S; s++) {
+        for (var t = 0; t < Tn; t++) {
+          var v = src[s][t] / vmax;
+          if (v < 0.04) continue;
+          svg.appendChild(el("rect", { x: Hm.left + s * cw, y: Hm.top + t * ch,
+            width: Math.max(cw - 0.5, 0.5), height: Math.max(ch - 0.5, 0.5),
+            fill: cssVar("--series-1"), opacity: Math.min(0.15 + 0.85 * v, 1) }));
+        }
+      }
+      svg.appendChild(el("rect", { x: Hm.left, y: Hm.top, width: Hm.w, height: Hm.h,
+        fill: "none", stroke: cssVar("--grid") }));
+      svg.appendChild(el("text", { x: Hm.left + Hm.w / 2, y: H5 - 22, "text-anchor": "middle" }, "training step →"));
+      svg.appendChild(el("text", { x: Hm.left - 8, y: Hm.top + 10, "text-anchor": "end" }, "easy"));
+      svg.appendChild(el("text", { x: Hm.left - 8, y: Hm.top + Hm.h, "text-anchor": "end" }, "hard"));
+      svg.appendChild(el("text", { x: Hm.left + Hm.w / 2, y: Hm.top - 4, "text-anchor": "middle", class: "dl" }, "teacher sampling mass"));
+    }
+  }
+  document.getElementById("envSel").addEventListener("change", drawCurves);
+  loadCurves();
+
+  function drawAll() { drawChart1(); drawChart2(); drawChart3(); drawAnim(); drawCurves(); }
+  document.getElementById("tSlider").addEventListener("input", drawChart1);
+  document.getElementById("nSlider").addEventListener("input", drawChart2);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll);
+  drawAll();
+})();
+</script>
+</body>
+</html>
