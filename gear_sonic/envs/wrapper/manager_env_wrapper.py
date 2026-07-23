@@ -132,7 +132,9 @@ class ManagerEnvWrapper:
             self.action_transform_module = custom_instantiate(
                 algo_config.actor, env_config=env_config, algo_config=algo_config, _resolve=False
             ).to(self.device)
-            logger.info(f"Initialized action_transform_module from config: {action_transform_module_cfg}")
+            logger.info(
+                f"Initialized action_transform_module from config: {action_transform_module_cfg}"
+            )
 
             # Load checkpoint if provided
             action_transform_module_checkpoint = self.config.get(
@@ -370,7 +372,9 @@ class ManagerEnvWrapper:
                         # Keep original shape [B, H, W, C] for vision encoder
                         new_obs[k] = v["camera_rgb"]
                         continue
-                    obs_names = self.env.observation_manager._group_obs_term_names[k]  # noqa: SLF001
+                    obs_names = self.env.observation_manager._group_obs_term_names[
+                        k
+                    ]  # noqa: SLF001
                     new_obs[k] = torch.cat(
                         [v[obs_name].reshape(v[obs_name].shape[0], -1) for obs_name in obs_names],
                         dim=-1,
@@ -443,7 +447,9 @@ class ManagerEnvWrapper:
         # Get camera attached link from config
         camera_attached_link = cameras_config.get("camera_attached_link", None)
         if camera_attached_link is None:
-            logger.info("Skipping camera extrinsics randomization: no camera_attached_link configured")
+            logger.info(
+                "Skipping camera extrinsics randomization: no camera_attached_link configured"
+            )
             return
 
         # Only print details on first call
@@ -493,9 +499,15 @@ class ManagerEnvWrapper:
                 pos_delta = np.zeros(3)
 
             # Sample rotation deltas (roll, pitch, yaw)
-            roll_delta = np.random.uniform(-roll_range, roll_range) if roll_range > 0 else 0.0  # noqa: NPY002
-            pitch_delta = np.random.uniform(-pitch_range, pitch_range) if pitch_range > 0 else 0.0  # noqa: NPY002
-            yaw_delta = np.random.uniform(-yaw_range, yaw_range) if yaw_range > 0 else 0.0  # noqa: NPY002
+            roll_delta = (
+                np.random.uniform(-roll_range, roll_range) if roll_range > 0 else 0.0
+            )  # noqa: NPY002
+            pitch_delta = (
+                np.random.uniform(-pitch_range, pitch_range) if pitch_range > 0 else 0.0
+            )  # noqa: NPY002
+            yaw_delta = (
+                np.random.uniform(-yaw_range, yaw_range) if yaw_range > 0 else 0.0
+            )  # noqa: NPY002
 
             # Apply position delta relative to BASE (not current)
             if base_translate is not None:
@@ -968,6 +980,24 @@ class ManagerEnvWrapper:
                 extras["to_log"]["adp_samp/episodes_max_over_mean"] = (
                     self._motion_lib.adp_samp_num_episodes.max() / eps_mean
                 )
+
+            # ZPD-teacher telemetry (research_plan_zpd_teacher.md §3.1.5). The
+            # attributes stay None on the release signal, so nothing new is emitted
+            # and the legacy 16-key set is unchanged.
+            posterior = getattr(self._motion_lib, "adp_samp_posterior_p_mean", None)
+            if posterior is not None:
+                extras["to_log"]["adp_samp/posterior_p_mean_min"] = posterior.min()
+                extras["to_log"]["adp_samp/posterior_p_mean_max"] = posterior.max()
+                extras["to_log"]["adp_samp/posterior_p_mean_mean"] = posterior.mean()
+            for attr, key in (
+                ("_adp_samp_utility_max_over_uniform", "adp_samp/utility_max_over_uniform"),
+                ("_adp_samp_utility_entropy", "adp_samp/utility_entropy"),
+                ("_adp_samp_decay_effective_window", "adp_samp/decay_effective_window"),
+                ("_adp_samp_tripwire_binding", "adp_samp/tripwire_max_prob_binding"),
+            ):
+                value = getattr(self._motion_lib, attr, None)
+                if value is not None:
+                    extras["to_log"][key] = torch.tensor(value, dtype=torch.float)
         new_obs = self.process_raw_obs(obs_dict, flatten_dict_obs=True)
         # Store obs for action_transform_module when obs_dict is not provided in next step()
         self._last_obs_dict = new_obs
@@ -1103,7 +1133,9 @@ class ManagerEnvWrapper:
         if self.motion_command is not None and hasattr(self.motion_command, "_set_debug_vis_impl"):
             self._debug_vis_enabled = not getattr(self, "_debug_vis_enabled", True)
             self.motion_command._set_debug_vis_impl(self._debug_vis_enabled)  # noqa: SLF001
-            logger.info(f"Debug visualization: {'ON' if self._debug_vis_enabled else 'OFF'}")  # noqa: RUF100, T201
+            logger.info(
+                f"Debug visualization: {'ON' if self._debug_vis_enabled else 'OFF'}"
+            )  # noqa: RUF100, T201
 
     # --- Action plotting helpers ---
     def _init_action_plot(self, action_dim: int):
@@ -1626,7 +1658,9 @@ class ManagerEnvWrapper:
                     )
                     logger.info(f"  dx_min range: [{dx_min.min():.3f}, {dx_min.max():.3f}]")
                     logger.info(f"  dx_max range: [{dx_max.min():.3f}, {dx_max.max():.3f}]")
-                    logger.info(f"  Applied offsets: [{x_offsets.min():.3f}, {x_offsets.max():.3f}]")
+                    logger.info(
+                        f"  Applied offsets: [{x_offsets.min():.3f}, {x_offsets.max():.3f}]"
+                    )
 
                 # Apply fixed XY offset range (legacy mode, used if maximal mode is disabled)
                 # Format: [x_min, x_max, y_min, y_max] - per-env randomized

@@ -23,6 +23,14 @@ motion:
       use_failure_rate_decay: false
       decay_gamma: 0.8
       adp_samp_failure_rate_max_over_mean: 50.0
+      # ZPD-teacher signal family (docs/research_plan_zpd_teacher.md §3.1).
+      # Defaults reproduce the release sampler byte-identically.
+      signal: failure_rate        # failure_rate | learnability | advantage_mass
+      evidence_half_life: null    # D4: half-life in episode-equivalents; null = no decay
+      optimism_k: 0.0             # D3: 0 = posterior mean only; 1.0 = interval-max optimism
+      advmass_n: 16               # advantage_mass band knob (M5-A ablation only)
+      tripwire_max_prob_over_uniform: 20.0  # D9: safety ceiling for ZPD signals only
+      family_kernel: null         # D6 remnant: {key_pattern: ..., weights: {1: 0.25}}
 
   resampling_time_range: [1000000000.0, 1000000000.0]  # [1.0e9, 1.0e9]
   debug_vis: true

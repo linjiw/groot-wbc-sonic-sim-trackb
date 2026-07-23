@@ -2423,6 +2423,74 @@ class MotionLibBase:
             / self.adp_samp_num_bins
         )
 
+        # ZPD-teacher mutable state (research_plan_zpd_teacher.md §3.1). The decay
+        # clock (D4) snapshots counts at the last recompute; telemetry attributes
+        # stay None on the release signal so the wrapper emits nothing new.
+        self._adp_samp_eps_at_last_recompute = None
+        self._adp_samp_fails_at_last_recompute = None
+        self.adp_samp_posterior_p_mean = None
+        self._adp_samp_utility_max_over_uniform = None
+        self._adp_samp_utility_entropy = None
+        self._adp_samp_decay_effective_window = None
+        self._adp_samp_tripwire_binding = None
+
+        # D6 remnant: optional evidence sharing across speed-scaled variants of the
+        # same motion (posterior-level pseudo-counts, never raw counts). Default null.
+        self.adp_samp_family_kernel_cfg = self.adaptive_sampling_cfg.get("family_kernel", None)
+        self._adp_samp_kernel_dst = None
+        self._adp_samp_kernel_src = None
+        self._adp_samp_kernel_w = None
+        if self.adp_samp_family_kernel_cfg:
+            self._init_family_kernel()
+
+    def _init_family_kernel(self):
+        """Build the bin-level evidence-sharing edges for speed-scaled motion families.
+
+        Motion keys matching ``key_pattern`` (regex with ``family`` and ``speed``
+        named groups) are grouped per family and ordered by speed. ``weights`` maps
+        neighbor distance in that order to a pseudo-count weight kappa. Bins are
+        aligned across variants by relative phase within the motion (variants have
+        different bin counts after speed scaling).
+        """
+        cfg = self.adp_samp_family_kernel_cfg
+        pattern = re.compile(cfg.get("key_pattern", r"^(?P<family>.+)_x(?P<speed>[0-9.]+)$"))
+        weights = {int(k): float(v) for k, v in (cfg.get("weights") or {1: 0.25}).items()}
+        if any(dist < 1 for dist in weights):
+            raise ValueError(f"family_kernel.weights distances must be >= 1, got {weights}")
+
+        families = {}
+        for motion_id, key in enumerate(self._motion_data_keys):
+            match = pattern.match(str(key))
+            if match:
+                families.setdefault(match["family"], []).append((float(match["speed"]), motion_id))
+
+        dst_list, src_list, w_list = [], [], []
+        for members in families.values():
+            members.sort()
+            for i, (_, motion_id) in enumerate(members):
+                dst_bins = self.orig_motion_id_to_bins[motion_id]
+                n_dst = len(dst_bins)
+                for dist, kappa in weights.items():
+                    for j in (i - dist, i + dist):
+                        if not (0 <= j < len(members)) or j == i:
+                            continue
+                        src_bins = self.orig_motion_id_to_bins[members[j][1]]
+                        n_src = len(src_bins)
+                        for bi in range(n_dst):
+                            phase = bi / (n_dst - 1) if n_dst > 1 else 0.0
+                            sj = round(phase * (n_src - 1)) if n_src > 1 else 0
+                            dst_list.append(int(dst_bins[bi]))
+                            src_list.append(int(src_bins[sj]))
+                            w_list.append(kappa)
+        if dst_list:
+            self._adp_samp_kernel_dst = torch.tensor(
+                dst_list, device=self._device, dtype=torch.long
+            )
+            self._adp_samp_kernel_src = torch.tensor(
+                src_list, device=self._device, dtype=torch.long
+            )
+            self._adp_samp_kernel_w = torch.tensor(w_list, device=self._device, dtype=torch.float64)
+
     def get_state_dict(self):
         """Return a serializable state dict for checkpointing adaptive sampling stats.
 
@@ -2438,6 +2506,13 @@ class MotionLibBase:
                     "adp_samp_num_failures": self.adp_samp_num_failures,
                 }
             )
+            # Decay-clock snapshots (D4). Only present when decay is active, so
+            # release checkpoints keep the exact legacy key set.
+            if getattr(self, "_adp_samp_eps_at_last_recompute", None) is not None:
+                state_dict["adp_samp_eps_at_last_recompute"] = self._adp_samp_eps_at_last_recompute
+                state_dict["adp_samp_fails_at_last_recompute"] = (
+                    self._adp_samp_fails_at_last_recompute
+                )
         return state_dict
 
     def load_state_dict(self, state_dict):
@@ -2456,6 +2531,15 @@ class MotionLibBase:
 
             self.adp_samp_num_episodes[:] = state_dict["adp_samp_num_episodes"].to(self._device)
             self.adp_samp_num_failures[:] = state_dict["adp_samp_num_failures"].to(self._device)
+            # Backward-compatible: checkpoints without the decay-clock keys restart
+            # the clock at the restored counts (release checkpoints, or decay off).
+            if "adp_samp_eps_at_last_recompute" in state_dict:
+                self._adp_samp_eps_at_last_recompute = state_dict[
+                    "adp_samp_eps_at_last_recompute"
+                ].to(self._device)
+                self._adp_samp_fails_at_last_recompute = state_dict[
+                    "adp_samp_fails_at_last_recompute"
+                ].to(self._device)
             self.sync_and_compute_adaptive_sampling(sync_across_gpus=False)
         return
 
@@ -2498,6 +2582,38 @@ class MotionLibBase:
                 )
                 self.adp_samp_num_failures += failure_counts * failure_counts_multiplier
 
+    def _apply_evidence_decay(self):
+        """Evidence-scaled half-life decay of the sampler counts (plan D4).
+
+        At each recompute, the counts accumulated *before* the current window are
+        rescaled by ``0.5 ** (delta_n / H)`` where ``delta_n`` is the per-bin
+        episode-equivalents observed since the last recompute and ``H`` is
+        ``evidence_half_life``. New evidence is never decayed at its own recompute.
+        This makes the effective memory scale-invariant across 8 -> 4096 envs
+        (throughput changes delta_n, not the semantics of H). No-op on the first
+        call (initializes the snapshot).
+
+        Distinct from the dormant ``use_failure_rate_decay`` (backward propagation
+        of difficulty across bins) — that mechanism is untouched.
+        """
+        if getattr(self, "_adp_samp_eps_at_last_recompute", None) is None:
+            self._adp_samp_eps_at_last_recompute = self.adp_samp_num_episodes.clone()
+            self._adp_samp_fails_at_last_recompute = self.adp_samp_num_failures.clone()
+            self._adp_samp_decay_effective_window = float(self.adp_samp_evidence_half_life)
+            return
+
+        delta_eps = (self.adp_samp_num_episodes - self._adp_samp_eps_at_last_recompute).clamp(min=0)
+        delta_fails = (self.adp_samp_num_failures - self._adp_samp_fails_at_last_recompute).clamp(
+            min=0
+        )
+        keep = 0.5 ** (delta_eps / self.adp_samp_evidence_half_life)
+        self.adp_samp_num_episodes = self._adp_samp_eps_at_last_recompute * keep + delta_eps
+        self.adp_samp_num_failures = self._adp_samp_fails_at_last_recompute * keep + delta_fails
+        self._adp_samp_eps_at_last_recompute = self.adp_samp_num_episodes.clone()
+        self._adp_samp_fails_at_last_recompute = self.adp_samp_num_failures.clone()
+        # Telemetry: effective evidence window ~ mean retained episode mass.
+        self._adp_samp_decay_effective_window = float(self.adp_samp_num_episodes.mean())
+
     def sync_and_compute_adaptive_sampling(self, accelerator=None, sync_across_gpus=False):
         """Synchronize adaptive sampling stats across GPUs and recompute probabilities.
 
@@ -2514,6 +2630,9 @@ class MotionLibBase:
         if not self.use_adaptive_sampling:
             return
 
+        if self.adp_samp_evidence_half_life is not None:
+            self._apply_evidence_decay()
+
         if sync_across_gpus:
             with common.Timer("sync_adaptive_sampling_across_gpus"):
                 adp_samp_stats = torch.cat(
@@ -2526,6 +2645,11 @@ class MotionLibBase:
                 self.adp_samp_num_episodes, self.adp_samp_num_failures = adp_samp_stats_all.chunk(
                     2, dim=-1
                 )
+                # Keep the decay clock consistent with the synced counts, otherwise
+                # the next recompute's delta would mix local and cross-GPU evidence.
+                if getattr(self, "_adp_samp_eps_at_last_recompute", None) is not None:
+                    self._adp_samp_eps_at_last_recompute = self.adp_samp_num_episodes.clone()
+                    self._adp_samp_fails_at_last_recompute = self.adp_samp_num_failures.clone()
 
         with common.Timer("compute_sampling_prob"):
             # Guard per-bin 0/0: num_episodes starts at init_num_failures and only grows, so
@@ -2565,37 +2689,177 @@ class MotionLibBase:
             self.update_adaptive_sampling_probabilities()
         return
 
+    # ------------------------------------------------------------------
+    # ZPD-teacher signal family (research_plan_zpd_teacher.md §3.1). All knobs
+    # default to the release behavior: signal "failure_rate" with no decay, no
+    # optimism, no family kernel is byte-identical to the shipped sampler. Read
+    # lazily from adaptive_sampling_cfg (matching pre_failure_sample_window's
+    # style) so stubbed instances need only the cfg dict.
+    # ------------------------------------------------------------------
+
+    @property
+    def adp_samp_signal(self):
+        signal = self.adaptive_sampling_cfg.get("signal", "failure_rate")
+        if signal not in ("failure_rate", "learnability", "advantage_mass"):
+            raise ValueError(
+                f"adaptive_sampling.signal must be one of failure_rate | learnability | "
+                f"advantage_mass, got {signal!r}"
+            )
+        return signal
+
+    @property
+    def adp_samp_evidence_half_life(self):
+        # D4: half-life in episode-equivalents; null = no decay (release).
+        half_life = self.adaptive_sampling_cfg.get("evidence_half_life", None)
+        if half_life is not None and half_life <= 0:
+            raise ValueError(
+                f"adaptive_sampling.evidence_half_life must be positive or null, got {half_life}"
+            )
+        return half_life
+
+    @property
+    def adp_samp_optimism_k(self):
+        # D3: deterministic optimism — utility maximized over [p̄-k·σ, p̄+k·σ].
+        return float(self.adaptive_sampling_cfg.get("optimism_k", 0.0))
+
+    @property
+    def adp_samp_advmass_n(self):
+        # M5-A ablation band knob (advantage_mass only).
+        return int(self.adaptive_sampling_cfg.get("advmass_n", 16))
+
+    @property
+    def adp_samp_tripwire_max_prob_over_uniform(self):
+        # D9: loose safety ceiling (×uniform) replacing the mean×cap clip for ZPD
+        # signals — a preregistered validity assertion, not a shaping mechanism.
+        return float(self.adaptive_sampling_cfg.get("tripwire_max_prob_over_uniform", 20.0))
+
+    def _zpd_posterior_counts(self):
+        """Global Beta counts ``(a, b)`` over per-bin survival probability (plan D1/D2).
+
+        ``p`` is the hazard complement estimated from the occupancy-based counts:
+        successes = episode-equivalents minus failures (clamped at 0 — failure counts
+        are not length-normalized, so short-lived bins can accrue failures faster
+        than episode mass). With the optional family kernel (D6), kappa-weighted
+        pseudo-counts from neighboring speed-scaled variants thicken the posterior;
+        the raw counts and their telemetry stay untouched.
+        """
+        fails = self.adp_samp_num_failures.double().clamp(min=0)
+        succ = (self.adp_samp_num_episodes.double() - fails).clamp(min=0)
+        kernel_dst = getattr(self, "_adp_samp_kernel_dst", None)
+        if kernel_dst is not None:
+            succ_shared = succ.clone()
+            fails_shared = fails.clone()
+            succ_shared.index_add_(
+                0, kernel_dst, self._adp_samp_kernel_w * succ[self._adp_samp_kernel_src]
+            )
+            fails_shared.index_add_(
+                0, kernel_dst, self._adp_samp_kernel_w * fails[self._adp_samp_kernel_src]
+            )
+            succ, fails = succ_shared, fails_shared
+        return 1.0 + succ, 1.0 + fails
+
+    def _compute_zpd_utility(self, bin_index=None):
+        """Posterior mean and ZPD utility per bin (plan D1/D3).
+
+        learnability: ``E[p(1-p)]`` exact under Beta (optimism off) — preferred over
+        ``u(p_mean)`` by Jensen. advantage_mass: ``u(p) = (1-(1-p)^N) - p`` at the
+        posterior mean (M5-A ablation only). With ``optimism_k > 0``, deterministic
+        optimism instead of Thompson: u is unimodal, so its max over
+        ``[p_mean - k*sd, p_mean + k*sd]`` is ``u(p*)`` if the interval contains the
+        peak, else the larger endpoint value.
+        """
+        a, b = self._zpd_posterior_counts()
+        if bin_index is not None:
+            a, b = a[bin_index], b[bin_index]
+        p_mean = a / (a + b)
+
+        if self.adp_samp_signal == "learnability":
+            p_star = 0.5
+
+            def u_fn(p):
+                return p * (1.0 - p)
+
+        else:
+            n_band = float(self.adp_samp_advmass_n)
+            p_star = 1.0 - n_band ** (-1.0 / (n_band - 1.0))
+
+            def u_fn(p):
+                return ((1.0 - (1.0 - p) ** n_band) - p).clamp(min=0)
+
+        k = self.adp_samp_optimism_k
+        if k > 0:
+            var = a * b / ((a + b).square() * (a + b + 1.0))
+            sd = var.sqrt()
+            lo = (p_mean - k * sd).clamp(0.0, 1.0)
+            hi = (p_mean + k * sd).clamp(0.0, 1.0)
+            utility = torch.maximum(u_fn(lo), u_fn(hi))
+            peak_inside = (lo <= p_star) & (p_star <= hi)
+            u_star = p_star * (1.0 - p_star)
+            if self.adp_samp_signal == "advantage_mass":
+                n_band = float(self.adp_samp_advmass_n)
+                u_star = max((1.0 - (1.0 - p_star) ** n_band) - p_star, 0.0)
+            utility = torch.where(peak_inside, torch.full_like(utility, u_star), utility)
+        elif self.adp_samp_signal == "learnability":
+            utility = a * b / ((a + b) * (a + b + 1.0))  # exact E[p(1-p)]
+        else:
+            utility = u_fn(p_mean)
+        return p_mean, utility
+
     def update_adaptive_sampling_probabilities(self):
         """Recompute per-bin sampling probabilities for the currently loaded motion batch.
 
-        Blends failure-rate-based probabilities with a uniform baseline (controlled by
-        ``uniform_sampling_rate``), then applies optional max-probability constraints
-        per bin and per motion to prevent over-concentration on outlier sequences.
-        See the inline comments for detailed rationale on the constraint design.
+        Blends signal-based probabilities (clipped failure rate in release; ZPD
+        utility when ``adaptive_sampling.signal`` selects it) with a uniform baseline
+        (controlled by ``uniform_sampling_rate``), then applies optional
+        max-probability constraints per bin and per motion to prevent
+        over-concentration on outlier sequences. See the inline comments for detailed
+        rationale on the constraint design.
         """
         self.adp_samp_failure_rate = self.adp_samp_failure_rate.double()
         self.adp_samp_active_failure_rate = self.adp_samp_failure_rate[
             self.adp_samp_active_motion_bins
         ]
-        adp_samp_failure_rate_upper_bound = (
-            self.adp_samp_active_failure_rate.mean() * self.adp_samp_failure_rate_max_over_mean
-        )
-        adp_samp_active_failure_rate_clipped = torch.clip(
-            self.adp_samp_active_failure_rate, 0.0, adp_samp_failure_rate_upper_bound
-        )
-        # Guard the normalization when every active bin has zero failure rate (e.g.
-        # init_num_failures=0 with no early terminations observed — the SIM-M5a starved
-        # regime). Byte-identical for the release config (init_num_failures=1 => every
-        # bin's failure_rate is 1.0 => sum > 0); only the all-zero case, which would
-        # otherwise yield NaN probabilities and trip the assertion below, falls back to
-        # uniform.
-        clipped_sum = adp_samp_active_failure_rate_clipped.sum()
-        if clipped_sum > 0:
-            failure_based_sampling_prob = adp_samp_active_failure_rate_clipped / clipped_sum
+        if self.adp_samp_signal in ("learnability", "advantage_mass"):
+            # ZPD branch (plan D1-D3, D9): utility from the Beta posterior over
+            # survival. NO mean×cap clip — the utilities are bounded (learnability by
+            # 1/4) and self-limiting at both ends; safety is the tripwire below.
+            p_mean, utility = self._compute_zpd_utility(self.adp_samp_active_motion_bins)
+            self.adp_samp_posterior_p_mean = p_mean
+            utility_sum = utility.sum()
+            if utility_sum > 0:
+                failure_based_sampling_prob = utility / utility_sum
+            else:
+                failure_based_sampling_prob = torch.ones_like(utility) / len(utility)
+            n_active = len(failure_based_sampling_prob)
+            self._adp_samp_utility_max_over_uniform = float(
+                failure_based_sampling_prob.max() * n_active
+            )
+            self._adp_samp_utility_entropy = float(
+                -(
+                    failure_based_sampling_prob
+                    * torch.log(failure_based_sampling_prob.clamp(min=1e-12))
+                ).sum()
+            )
         else:
-            failure_based_sampling_prob = torch.ones_like(
-                adp_samp_active_failure_rate_clipped
-            ) / len(adp_samp_active_failure_rate_clipped)
+            adp_samp_failure_rate_upper_bound = (
+                self.adp_samp_active_failure_rate.mean() * self.adp_samp_failure_rate_max_over_mean
+            )
+            adp_samp_active_failure_rate_clipped = torch.clip(
+                self.adp_samp_active_failure_rate, 0.0, adp_samp_failure_rate_upper_bound
+            )
+            # Guard the normalization when every active bin has zero failure rate (e.g.
+            # init_num_failures=0 with no early terminations observed — the SIM-M5a starved
+            # regime). Byte-identical for the release config (init_num_failures=1 => every
+            # bin's failure_rate is 1.0 => sum > 0); only the all-zero case, which would
+            # otherwise yield NaN probabilities and trip the assertion below, falls back to
+            # uniform.
+            clipped_sum = adp_samp_active_failure_rate_clipped.sum()
+            if clipped_sum > 0:
+                failure_based_sampling_prob = adp_samp_active_failure_rate_clipped / clipped_sum
+            else:
+                failure_based_sampling_prob = torch.ones_like(
+                    adp_samp_active_failure_rate_clipped
+                ) / len(adp_samp_active_failure_rate_clipped)
         uniform_sampling_prob = torch.ones_like(failure_based_sampling_prob) / len(
             failure_based_sampling_prob
         )
@@ -2607,6 +2871,24 @@ class MotionLibBase:
         self.adp_sampling_active_prob = (
             self.adp_sampling_active_prob / self.adp_sampling_active_prob.sum()
         )
+
+        # D9 tripwire (ZPD signals only): a LOOSE per-bin probability ceiling
+        # (default 20x uniform) that replaces the mean×cap clip as the safety
+        # mechanism. Preregistration treats binding as a validity assertion (a run
+        # where it binds >5% of iterations is invalid-unstable), not as shaping —
+        # so we record binding, clamp, and renormalize.
+        if self.adp_samp_signal in ("learnability", "advantage_mass"):
+            n_active = len(self.adp_sampling_active_prob)
+            tripwire_prob = self.adp_samp_tripwire_max_prob_over_uniform / n_active
+            binding = bool((self.adp_sampling_active_prob > tripwire_prob).any())
+            self._adp_samp_tripwire_binding = 1.0 if binding else 0.0
+            if binding:
+                self.adp_sampling_active_prob = torch.clamp(
+                    self.adp_sampling_active_prob, max=tripwire_prob
+                )
+                self.adp_sampling_active_prob = (
+                    self.adp_sampling_active_prob / self.adp_sampling_active_prob.sum()
+                )
 
         # ==========================================================================
         # MAX PROBABILITY CONSTRAINTS: Prevent over-concentration on challenging motions
@@ -2721,15 +3003,24 @@ class MotionLibBase:
         the same max-probability constraints as the batch-level update.
         """
         self.adp_samp_failure_rate = self.adp_samp_failure_rate.double()
-        adp_samp_failure_rate_upper_bound = (
-            self.adp_samp_failure_rate.mean() * self.adp_samp_failure_rate_max_over_mean
-        )
-        adp_samp_failure_rate_clipped = torch.clip(
-            self.adp_samp_failure_rate, 0.0, adp_samp_failure_rate_upper_bound
-        )
-        failure_based_sampling_prob = (
-            adp_samp_failure_rate_clipped / adp_samp_failure_rate_clipped.sum()
-        )
+        if self.adp_samp_signal in ("learnability", "advantage_mass"):
+            # Same ZPD utility as the batch-level path (no mean×cap clip, D9).
+            _, utility = self._compute_zpd_utility()
+            utility_sum = utility.sum()
+            if utility_sum > 0:
+                failure_based_sampling_prob = utility / utility_sum
+            else:
+                failure_based_sampling_prob = torch.ones_like(utility) / len(utility)
+        else:
+            adp_samp_failure_rate_upper_bound = (
+                self.adp_samp_failure_rate.mean() * self.adp_samp_failure_rate_max_over_mean
+            )
+            adp_samp_failure_rate_clipped = torch.clip(
+                self.adp_samp_failure_rate, 0.0, adp_samp_failure_rate_upper_bound
+            )
+            failure_based_sampling_prob = (
+                adp_samp_failure_rate_clipped / adp_samp_failure_rate_clipped.sum()
+            )
         uniform_sampling_prob = torch.ones_like(failure_based_sampling_prob) / len(
             failure_based_sampling_prob
         )
