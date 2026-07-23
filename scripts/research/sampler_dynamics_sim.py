@@ -67,6 +67,19 @@ _RELEASE_UNIFORM_RATE = 0.1
 _RELEASE_INIT_FAILURES = 1.0
 _CONCENTRATED_MULTIPLE = 10.0  # num_concentrated_bins := #bins with prob > 10x uniform
 
+# ZPD-teacher constants, frozen with research_plan_zpd_teacher.md (§3.4.1). These
+# mirror the Change A implementation in motion_lib_base.py and the plan's locked
+# decisions: D3 (optimism k=1 deterministic interval-max), D4 (half-life H ≈ 4x
+# mean per-bin visits per recompute), D9 (tripwire 20x uniform replaces the cap).
+_ZPD_SIGNALS = ("learnability", "advantage_mass")
+_ZPD_H_MULT = 4.0  # H = _ZPD_H_MULT * episodes_per_iter / n_bins (min 2.0)
+_ZPD_OPTIMISM_K = 1.0
+_ZPD_ADVMASS_N = 16
+_ZPD_TRIPWIRE_X_UNIFORM = 20.0
+# Traversal accounting: a failed episode contributes this fraction of a full
+# bin-traversal in episode-equivalents (real system: steps survived / bin length).
+_TRAVERSAL_PARTIAL_CREDIT = 0.5
+
 
 def _telemetry_from_prob(prob: np.ndarray) -> dict[str, float]:
     """The three flatness diagnostics the real wrapper emits, from a prob vector."""
@@ -98,6 +111,83 @@ def _compute_prob(
     prob = failure_based * (1.0 - uniform_rate) + uniform * uniform_rate
     prob = prob * bin_weights
     return prob / prob.sum()
+
+
+def _zpd_utility(
+    succ: np.ndarray,
+    fails: np.ndarray,
+    *,
+    signal: str,
+    optimism_k: float = _ZPD_OPTIMISM_K,
+    advmass_n: int = _ZPD_ADVMASS_N,
+) -> np.ndarray:
+    """Port of MotionLibBase._compute_zpd_utility (Change A) to numpy.
+
+    Beta(1+succ, 1+fail) posterior over per-bin survival. learnability uses the
+    exact closed form E[p(1-p)] when optimism is off; advantage_mass evaluates
+    u(p) = (1-(1-p)^N) - p at the posterior mean. With optimism_k > 0 the utility
+    is maximized over [p_mean - k*sd, p_mean + k*sd] (unimodal u: peak value if
+    the interval contains the peak, else the larger endpoint).
+    """
+    a = 1.0 + np.maximum(succ, 0.0)
+    b = 1.0 + np.maximum(fails, 0.0)
+    p_mean = a / (a + b)
+    if signal == "learnability":
+        p_star = 0.5
+
+        def u_fn(p: np.ndarray) -> np.ndarray:
+            return p * (1.0 - p)
+
+    elif signal == "advantage_mass":
+        n_band = float(advmass_n)
+        p_star = 1.0 - n_band ** (-1.0 / (n_band - 1.0))
+
+        def u_fn(p: np.ndarray) -> np.ndarray:
+            return np.maximum((1.0 - (1.0 - p) ** n_band) - p, 0.0)
+
+    else:
+        raise ValueError(f"not a ZPD signal: {signal!r}")
+
+    if optimism_k > 0:
+        var = a * b / (np.square(a + b) * (a + b + 1.0))
+        sd = np.sqrt(var)
+        lo = np.clip(p_mean - optimism_k * sd, 0.0, 1.0)
+        hi = np.clip(p_mean + optimism_k * sd, 0.0, 1.0)
+        utility = np.maximum(u_fn(lo), u_fn(hi))
+        peak_inside = (lo <= p_star) & (p_star <= hi)
+        u_star = float(u_fn(np.asarray([p_star]))[0])
+        return np.where(peak_inside, u_star, utility)
+    if signal == "learnability":
+        return a * b / ((a + b) * (a + b + 1.0))  # exact E[p(1-p)]
+    return u_fn(p_mean)
+
+
+def _compute_prob_zpd(
+    utility: np.ndarray,
+    bin_weights: np.ndarray,
+    *,
+    uniform_rate: float,
+    tripwire_x_uniform: float = _ZPD_TRIPWIRE_X_UNIFORM,
+) -> tuple[np.ndarray, bool]:
+    """ZPD probability path (Change A): NO mean-x-cap clip; tripwire ceiling instead.
+
+    Returns (prob, tripwire_binding).
+    """
+    total = utility.sum()
+    if total > 0:
+        based = utility / total
+    else:
+        based = np.full_like(utility, 1.0 / len(utility))
+    uniform = np.full_like(based, 1.0 / len(based))
+    prob = based * (1.0 - uniform_rate) + uniform * uniform_rate
+    prob = prob * bin_weights
+    prob = prob / prob.sum()
+    ceiling = tripwire_x_uniform / len(prob)
+    binding = bool((prob > ceiling).any())
+    if binding:
+        prob = np.minimum(prob, ceiling)
+        prob = prob / prob.sum()
+    return prob, binding
 
 
 def _rank_correlation(a: np.ndarray, b: np.ndarray) -> float:
@@ -146,23 +236,32 @@ def simulate(
     failure_counts_multiplier: float = 1.0,
     error_ema_beta: float = 0.1,
     error_noise: float = 0.05,
+    evidence_half_life: float | None = None,
+    optimism_k: float = _ZPD_OPTIMISM_K,
+    advmass_n: int = _ZPD_ADVMASS_N,
     seed: int = 0,
 ) -> dict[str, Any]:
     """Run the sampler feedback loop against an assumed per-bin difficulty.
 
     ``difficulty[b]`` in [0,1] is the per-episode termination probability of bin
     ``b`` AND the mean of its continuous tracking-error signal. ``signal`` selects
-    the reweighting statistic: ``failure_rate`` (release) or ``error_ema``.
+    the reweighting statistic: ``failure_rate`` (release), ``error_ema``, or the
+    Change A ZPD utilities ``learnability`` / ``advantage_mass`` (Beta posterior
+    over survival with evidence-scaled half-life decay and deterministic optimism,
+    mirroring motion_lib_base.py).
     """
-    if signal not in ("failure_rate", "error_ema"):
+    if signal not in ("failure_rate", "error_ema", *_ZPD_SIGNALS):
         raise ValueError(f"unknown signal {signal!r}")
+    is_zpd = signal in _ZPD_SIGNALS
     rng = np.random.default_rng(seed)
     n = len(difficulty)
     bin_weights = np.ones(n)  # uniform lengths/peer counts => weights renormalize away
 
-    # Release failure-rate state (both counts seeded with the prior).
-    num_failures = np.full(n, init_num_failures, dtype=float)
-    num_episodes = np.full(n, init_num_failures, dtype=float)
+    # ZPD arms start from empty counts (Beta(1,1) prior lives in the utility);
+    # the release prior seeds BOTH counts (:2407-2414).
+    zpd_init = 0.0 if is_zpd else init_num_failures
+    num_failures = np.full(n, zpd_init, dtype=float)
+    num_episodes = np.full(n, zpd_init, dtype=float)
     # error_ema state: EMA of observed per-episode tracking error, plus a seen mask.
     error_ema = np.zeros(n)
     error_seen = np.zeros(n, dtype=bool)
@@ -170,6 +269,7 @@ def simulate(
     prob = np.full(n, 1.0 / n)  # init uniform
     series: list[dict[str, float]] = []
     observed_failures_total = 0.0
+    tripwire_binding_iters = 0
 
     for _ in range(iters):
         # Attribute this iteration's episode-completions to bins by the current
@@ -179,9 +279,36 @@ def simulate(
         terminated = rng.binomial(hit_counts, difficulty)  # Bernoulli(difficulty) per episode
         observed_failures_total += float(terminated.sum())
 
-        # Release update (:2486 length-normalized episodes; :2499 raw failures).
-        num_episodes += hit_counts / bin_motion_length
-        num_failures += terminated * failure_counts_multiplier
+        if is_zpd:
+            # Occupancy semantics (plan D2): survivors credit a full traversal,
+            # failed episodes a partial one; evidence-scaled decay (D4) halves the
+            # OLD counts every ``evidence_half_life`` episode-equivalents per bin.
+            survived = hit_counts - terminated
+            delta_eps = survived + _TRAVERSAL_PARTIAL_CREDIT * terminated
+            delta_fails = terminated.astype(float)
+            if evidence_half_life is not None:
+                keep = 0.5 ** (delta_eps / evidence_half_life)
+                num_episodes = num_episodes * keep + delta_eps
+                num_failures = num_failures * keep + delta_fails
+            else:
+                num_episodes = num_episodes + delta_eps
+                num_failures = num_failures + delta_fails
+        else:
+            # Release update (:2486 length-normalized episodes; :2499 raw failures).
+            num_episodes += hit_counts / bin_motion_length
+            num_failures += terminated * failure_counts_multiplier
+
+        if is_zpd:
+            succ = np.maximum(num_episodes - num_failures, 0.0)
+            utility = _zpd_utility(
+                succ, num_failures, signal=signal, optimism_k=optimism_k, advmass_n=advmass_n
+            )
+            stat = utility  # recorded for the contrast diagnostic below
+            prob, binding = _compute_prob_zpd(utility, bin_weights, uniform_rate=uniform_rate)
+            tripwire_binding_iters += int(binding)
+            tele = _telemetry_from_prob(prob)
+            series.append(tele)
+            continue
 
         if signal == "failure_rate":
             # Faithful ratio, but guard 0/0 (unplayed bins under init_num_failures=0,
@@ -237,6 +364,19 @@ def simulate(
     stat_arr = np.asarray(stat, dtype=float)
     stat_cv = float(stat_arr.std() / stat_arr.mean()) if stat_arr.mean() > 0 else 0.0
 
+    # Mass-fraction diagnostics for the ZPD forecast (impossible-bin waste is the
+    # diagnosed pathology; frontier mass is where a ZPD utility should move it).
+    mastered = difficulty < 0.05
+    frontier = (difficulty >= 0.2) & (difficulty <= 0.8)
+    impossible = difficulty > 0.9
+
+    # Posterior-sanity forecast for the M5-L activation sub-gate: does the Beta
+    # posterior's survival mean rank-correlate with true survival (1 - d)?
+    posterior_rank_corr = None
+    if is_zpd:
+        post_mean = (1.0 + np.maximum(num_episodes - num_failures, 0.0)) / (2.0 + num_episodes)
+        posterior_rank_corr = _rank_correlation(post_mean, 1.0 - difficulty)
+
     return {
         "signal": signal,
         "iters": iters,
@@ -250,6 +390,9 @@ def simulate(
             "failure_counts_multiplier": failure_counts_multiplier,
             "error_ema_beta": error_ema_beta,
             "error_noise": error_noise,
+            "evidence_half_life": evidence_half_life,
+            "optimism_k": optimism_k if is_zpd else None,
+            "advmass_n": advmass_n if signal == "advantage_mass" else None,
             "seed": seed,
         },
         "final_prob_max_over_uniform": final["prob_max_over_uniform"],
@@ -262,6 +405,17 @@ def simulate(
         # Peakedness targeting (unreliable under ties) AND tie-robust mass ratio.
         "targeting_rank_corr_prob_vs_difficulty": _rank_correlation(prob, difficulty),
         "targeting_hard_half_mass_ratio": _hard_half_mass_ratio(prob, difficulty),
+        "mastered_mass": float(prob[mastered].sum()) if mastered.any() else float("nan"),
+        "frontier_mass": float(prob[frontier].sum()) if frontier.any() else float("nan"),
+        "impossible_mass": float(prob[impossible].sum()) if impossible.any() else float("nan"),
+        # Uniform shares of each class, so mass fractions can be read as over/under
+        # allocation (a ZPD utility should be OVER on frontier, UNDER on both ends).
+        "mastered_share": float(mastered.mean()),
+        "frontier_share": float(frontier.mean()),
+        "impossible_share": float(impossible.mean()),
+        "posterior_rank_corr_vs_survival": posterior_rank_corr,
+        # D9 validity assertion input: fraction of iterations where the tripwire bound.
+        "tripwire_binding_fraction": tripwire_binding_iters / iters if is_zpd else None,
         "series_prob_max_over_uniform": [round(s["prob_max_over_uniform"], 4) for s in series],
     }
 
@@ -269,13 +423,17 @@ def simulate(
 def _difficulty_regime(name: str, n: int, seed: int) -> np.ndarray:
     """Assumed per-bin termination/error difficulty in [0,1]. INPUT assumption.
 
-    Three regimes isolate the two separable flatness drivers (density vs contrast):
+    Four regimes isolate the two separable flatness drivers (density vs contrast)
+    plus the mixed regime the ZPD forecast targets:
     - ``starved``: low level AND low relative spread -> few failures, low contrast
       (the sample_data working hypothesis).
     - ``spread``: broad difficulty frontier -> abundant failures, moderate contrast
       (a SIM-D1-PASSING dataset).
     - ``sparse_outlier``: a few very-hard bins amid easy ones -> high contrast on a
       handful of bins (the only structure the failure-rate sampler visibly peaks on).
+    - ``spread_impossible``: 30% mastered / 50% frontier / 20% impossible-at-budget —
+      the regime where failure-rate's difficulty-monotone utility structurally
+      over-commits to hazard≈1 bins (thesis C2).
     """
     rng = np.random.default_rng(1000 + seed)
     if name == "starved":
@@ -286,6 +444,14 @@ def _difficulty_regime(name: str, n: int, seed: int) -> np.ndarray:
         difficulty = np.full(n, 0.02)
         hard = rng.choice(n, size=max(1, n // 20), replace=False)
         difficulty[hard] = 0.95
+        return difficulty
+    if name == "spread_impossible":
+        difficulty = np.empty(n)
+        idx = rng.permutation(n)
+        n_mastered, n_frontier = int(n * 0.3), int(n * 0.5)
+        difficulty[idx[:n_mastered]] = 0.02
+        difficulty[idx[n_mastered : n_mastered + n_frontier]] = rng.uniform(0.2, 0.7, n_frontier)
+        difficulty[idx[n_mastered + n_frontier :]] = 0.98
         return difficulty
     raise ValueError(f"unknown difficulty regime {name!r}")
 
@@ -432,6 +598,324 @@ def run_forecast(
     }
 
 
+def run_zpd_forecast(
+    *,
+    n_bins: int = 70,
+    iters: int = 50,
+    episodes_per_iter: int = 200,
+    seeds: tuple[int, ...] = (0, 1, 2, 3, 4),
+) -> dict[str, Any]:
+    """Preregistered ZPD-utility forecast (research_plan_zpd_teacher.md §3.4.1).
+
+    Replaces the throwaway Appendix A script of the handoff doc with tested
+    tooling. Compares the release failure-rate sampler against the Change A
+    signals (learnability with D3 optimism + D4 evidence-scaled decay;
+    advantage_mass N=16 ablation) across the four difficulty regimes.
+
+    Preregistered forecast findings (frozen before any GPU run):
+    - Z1: in mixed regimes (sparse_outlier, spread_impossible) the release
+      sampler puts a large mass fraction on impossible (d > 0.9) bins;
+      learnability cuts that mass by at least half.
+    - Z2: learnability's frontier mass in spread_impossible exceeds the release
+      sampler's (reallocation goes TO the frontier, not to mastered bins).
+    - Z3: learnability targets the frontier (frontier over-allocation
+      frontier_mass/frontier_share >= 1.2 in spread_impossible) while staying
+      diffuse (pmax/uniform under the peakedness gate) — activation must be
+      measured as frontier allocation, not concentration.
+    - Z4: in the starved regime ZPD signals are as flat as everything else
+      (SIM-D1 headroom gate stays a hard prerequisite).
+    - Z5: the D9 tripwire never binds in any healthy regime (binding fraction
+      0.0) — it is a validity assertion, not a shaping mechanism.
+    - Z6 (GATE-AMENDMENT finding): the hard-half/easy-half mass-ratio >= 1.5
+      criterion — the targeting criterion preregistered for the M5 activation
+      sub-gate — MISFIRES on learnability (ratio ~1.0 across regimes): a ZPD
+      utility is symmetric around the frontier, not difficulty-monotone, so it
+      deliberately down-weights the impossible bins that populate the hard
+      half. The activation gate must be re-frozen on frontier over-allocation
+      (+ posterior sanity, which run-level posterior_rank_corr_vs_survival
+      confirms is measurable) BEFORE any M5-L run, else a correctly working
+      teacher is classified invalid-inactive.
+    """
+    # H (D4): a small multiple of mean per-bin visits per recompute.
+    half_life = max(2.0, _ZPD_H_MULT * episodes_per_iter / n_bins)
+    arms: dict[str, dict[str, Any]] = {
+        "failure_rate": {"signal": "failure_rate"},
+        "learnability": {
+            "signal": "learnability",
+            "evidence_half_life": half_life,
+            "optimism_k": _ZPD_OPTIMISM_K,
+        },
+        "advantage_mass": {
+            "signal": "advantage_mass",
+            "evidence_half_life": half_life,
+            "optimism_k": 0.0,  # ablation isolates the utility shape
+            "advmass_n": _ZPD_ADVMASS_N,
+        },
+    }
+    regimes = ("starved", "spread", "sparse_outlier", "spread_impossible")
+
+    keys = (
+        "final_prob_max_over_uniform",
+        "targeting_hard_half_mass_ratio",
+        "mastered_mass",
+        "frontier_mass",
+        "impossible_mass",
+        "mastered_share",
+        "frontier_share",
+        "impossible_share",
+        "posterior_rank_corr_vs_survival",
+    )
+    runs: dict[str, dict[str, Any]] = {}
+    for arm_name, kw in arms.items():
+        for regime in regimes:
+            per_seed = [
+                simulate(
+                    _difficulty_regime(regime, n_bins, s),
+                    iters=iters,
+                    episodes_per_iter=episodes_per_iter,
+                    seed=7000 + s,
+                    **kw,
+                )
+                for s in seeds
+            ]
+            agg = {}
+            for k in keys:
+                values = [r[k] for r in per_seed if r[k] is not None]
+                finite = [v for v in values if v == v]  # drop NaN (class absent)
+                agg[k] = float(np.mean(finite)) if finite else None
+            binding = [r["tripwire_binding_fraction"] for r in per_seed]
+            agg["tripwire_binding_fraction"] = (
+                float(np.mean(binding)) if binding[0] is not None else None
+            )
+            # Over-allocation vs uniform per class (None when the class is absent).
+            for cls in ("mastered", "frontier", "impossible"):
+                mass, share = agg[f"{cls}_mass"], agg[f"{cls}_share"]
+                agg[f"{cls}_over_alloc"] = mass / share if mass is not None and share else None
+            agg["per_seed"] = per_seed
+            runs[f"{arm_name}_{regime}"] = agg
+
+    fr_out = runs["failure_rate_sparse_outlier"]
+    fr_mix = runs["failure_rate_spread_impossible"]
+    ln_out = runs["learnability_sparse_outlier"]
+    ln_mix = runs["learnability_spread_impossible"]
+    ln_starved = runs["learnability_starved"]
+
+    findings = {
+        "Z1_learnability_halves_impossible_mass": bool(
+            ln_out["impossible_mass"] <= 0.5 * fr_out["impossible_mass"]
+            and ln_mix["impossible_mass"] <= 0.5 * fr_mix["impossible_mass"]
+        ),
+        "Z2_learnability_reallocates_to_frontier": bool(
+            ln_mix["frontier_mass"] > fr_mix["frontier_mass"]
+        ),
+        "Z3_zpd_targets_frontier_but_stays_diffuse": bool(
+            ln_mix["frontier_over_alloc"] >= 1.2
+            and ln_mix["final_prob_max_over_uniform"] < _ACTIVATION_PMAX
+        ),
+        "Z4_starved_regime_still_flat_for_zpd": bool(
+            ln_starved["targeting_hard_half_mass_ratio"] < _TARGETING_MASS_RATIO
+        ),
+        "Z5_tripwire_never_binds_in_healthy_regimes": bool(
+            all(
+                runs[key]["tripwire_binding_fraction"] == 0.0
+                for key in runs
+                if runs[key]["tripwire_binding_fraction"] is not None
+            )
+        ),
+        # Z6: the plan's hard-half mass-ratio >= 1.5 activation criterion misfires
+        # on a working ZPD utility (it down-weights impossible bins BY DESIGN, and
+        # impossible bins live in the hard half). If this is True, the M5-L
+        # activation sub-gate must be re-frozen on frontier over-allocation +
+        # posterior sanity before launch.
+        "Z6_hard_half_ratio_activation_criterion_misfires_on_learnability": bool(
+            ln_mix["targeting_hard_half_mass_ratio"] < _TARGETING_MASS_RATIO
+            and ln_mix["frontier_over_alloc"] >= 1.2
+            and (ln_mix["posterior_rank_corr_vs_survival"] or 0.0) >= 0.4
+        ),
+    }
+
+    return {
+        "schema_version": 1,
+        "kind": "zpd_teacher_forecast",
+        "simulated": True,
+        "is_measurement": False,
+        "disclaimer": (
+            "SIMULATION under an assumed static difficulty->termination model (no learning "
+            "dynamics). Forecasts mechanism ALLOCATION only; produces no MPJPE and supports no "
+            "performance claim (guardrail 11). Constants frozen with research_plan_zpd_teacher.md: "
+            f"optimism_k={_ZPD_OPTIMISM_K}, advmass_n={_ZPD_ADVMASS_N}, "
+            f"tripwire={_ZPD_TRIPWIRE_X_UNIFORM}x uniform, H={half_life} episode-equivalents here."
+        ),
+        "config": {
+            "n_bins": n_bins,
+            "iters": iters,
+            "episodes_per_iter": episodes_per_iter,
+            "seeds": list(seeds),
+            "evidence_half_life": half_life,
+        },
+        "findings": findings,
+        "runs": runs,
+    }
+
+
+def simulate_coupled_threshold_controller(
+    *,
+    eta: float,
+    posterior_half_life: float | None = None,
+    iters: int = 400,
+    n_bins: int = 40,
+    episodes_per_iter: int = 64,
+    target_fail_rate: float = 0.35,
+    tau_start: float = 3.0,
+    tau_min: float = 1.0,
+    delta_tau_cap: float | None = None,
+    one_sided: bool = False,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Coupled teacher + threshold-controller + learning-competence simulation.
+
+    Port of the expert's Q7 appendix (docs/external/SONIC_RESPONSE.md) with our
+    Change A learnability utility in place of their advmass draw. The latent
+    competence c[b] is the survival probability at the loosest threshold; the
+    effective survival at threshold strictness tau is c**(1/tau) (tau=1 strict,
+    tau large loose — matching the expert's parameterization). Competence grows
+    with successful visits. The controller nudges tau toward the target global
+    early-termination rate; D7 hardening knobs (one_sided, delta_tau_cap) are
+    exposed so the validation target (overshoot-and-pin at eta >= 0.3) and the
+    mitigation can both be reproduced.
+    """
+    rng = np.random.default_rng(seed)
+    competence = rng.uniform(0.02, 0.6, n_bins)
+    num_episodes = np.zeros(n_bins)
+    num_failures = np.zeros(n_bins)
+    tau = float(tau_start)
+    fail_series: list[float] = []
+    tau_series: list[float] = []
+    posterior_err_series: list[float] = []
+
+    for _ in range(iters):
+        survival = competence ** (1.0 / tau)
+        succ_counts = np.maximum(num_episodes - num_failures, 0.0)
+        utility = _zpd_utility(succ_counts, num_failures, signal="learnability", optimism_k=0.0)
+        prob, _ = _compute_prob_zpd(utility, np.ones(n_bins), uniform_rate=_RELEASE_UNIFORM_RATE)
+
+        visits = rng.multinomial(episodes_per_iter, prob)
+        succ = rng.binomial(visits, survival)
+        fail = visits - succ
+        if posterior_half_life is not None:
+            keep = 0.5 ** (visits / posterior_half_life)
+            num_episodes = num_episodes * keep + visits
+            num_failures = num_failures * keep + fail
+        else:
+            num_episodes = num_episodes + visits
+            num_failures = num_failures + fail
+
+        # Competence grows on successful practice (expert's update, verbatim shape).
+        with np.errstate(divide="ignore", invalid="ignore"):
+            succ_rate = np.where(visits > 0, succ / np.maximum(visits, 1), 0.0)
+        competence = np.clip(
+            competence + 0.002 * (visits / 8.0) * succ_rate * (1.0 - competence), 0.0, 0.99
+        )
+
+        obs_fail = float(fail.sum()) / max(float(visits.sum()), 1.0)
+        fail_series.append(obs_fail)
+        # Controller: tau shrinks (stricter) when failure is below target.
+        delta = eta * (target_fail_rate - obs_fail)
+        if one_sided:
+            delta = min(delta, 0.0)  # D7: only tighten, never loosen
+        if delta_tau_cap is not None:
+            delta = float(np.clip(delta, -delta_tau_cap, delta_tau_cap))
+        tau = float(np.clip(tau + delta, tau_min, tau_start))
+        tau_series.append(tau)
+
+        # Posterior tracking error: |posterior mean survival - true survival|.
+        post_mean = (1.0 + np.maximum(num_episodes - num_failures, 0.0)) / (2.0 + num_episodes)
+        posterior_err_series.append(float(np.abs(post_mean - competence ** (1.0 / tau)).mean()))
+
+    late = slice(iters // 2, None)
+    return {
+        "simulated": True,
+        "is_measurement": False,
+        "params": {
+            "eta": eta,
+            "posterior_half_life": posterior_half_life,
+            "iters": iters,
+            "n_bins": n_bins,
+            "episodes_per_iter": episodes_per_iter,
+            "target_fail_rate": target_fail_rate,
+            "one_sided": one_sided,
+            "delta_tau_cap": delta_tau_cap,
+            "seed": seed,
+        },
+        "final_tau": tau,
+        "late_fail_rate_mean": float(np.mean(fail_series[late])),
+        "late_posterior_error_mean": float(np.mean(posterior_err_series[late])),
+        "pinned_at_strict_bound": bool(
+            np.mean(np.asarray(tau_series[late]) <= tau_min + 1e-9) > 0.9
+        ),
+    }
+
+
+def run_controller_scenarios(*, seeds: tuple[int, ...] = (0, 1, 2)) -> dict[str, Any]:
+    """The expert's Q7 findings as a validation scenario set (plan §3.4.1).
+
+    Validation targets (must reproduce, else the coupled-sim port is wrong):
+    - CTRL1 overshoot-and-pin: eta=0.5 pins tau at the strict bound with late
+      failure rate far above target; eta=0.05 holds failure near the target band.
+    - CTRL2 slow-memory advantage: with the slow controller, LONG posterior
+      memory tracks the moving survival better than fast forgetting (D4 coupling
+      rule: never fast decay + active controller).
+    - CTRL3 D7 hardening: one-sided + rate-capped controller at eta=0.05 does
+      not pin and keeps late failure in the frontier band [0.15, 0.6].
+    """
+
+    def _avg(**kw: Any) -> dict[str, float]:
+        runs = [simulate_coupled_threshold_controller(seed=s, **kw) for s in seeds]
+        return {
+            "late_fail_rate_mean": float(np.mean([r["late_fail_rate_mean"] for r in runs])),
+            "late_posterior_error_mean": float(
+                np.mean([r["late_posterior_error_mean"] for r in runs])
+            ),
+            "pinned_fraction": float(np.mean([r["pinned_at_strict_bound"] for r in runs])),
+        }
+
+    fast_ctrl = _avg(eta=0.5, posterior_half_life=200.0)
+    slow_ctrl = _avg(eta=0.05, posterior_half_life=200.0)
+    slow_ctrl_short_memory = _avg(eta=0.05, posterior_half_life=8.0)
+    hardened = _avg(eta=0.05, posterior_half_life=200.0, one_sided=True, delta_tau_cap=0.002)
+
+    findings = {
+        "CTRL1_overshoot_and_pin_at_high_eta": bool(
+            fast_ctrl["pinned_fraction"] > 0.5
+            and fast_ctrl["late_fail_rate_mean"] > slow_ctrl["late_fail_rate_mean"] + 0.1
+        ),
+        "CTRL2_long_memory_tracks_better_under_slow_controller": bool(
+            slow_ctrl["late_posterior_error_mean"]
+            < slow_ctrl_short_memory["late_posterior_error_mean"]
+        ),
+        "CTRL3_hardened_controller_stays_in_band": bool(
+            hardened["pinned_fraction"] == 0.0 and 0.15 <= hardened["late_fail_rate_mean"] <= 0.6
+        ),
+    }
+    return {
+        "schema_version": 1,
+        "kind": "coupled_threshold_controller_scenarios",
+        "simulated": True,
+        "is_measurement": False,
+        "disclaimer": (
+            "SIMULATION with a toy competence model (expert's Q7 appendix shape). Validates the "
+            "D7 controller rules qualitatively; supports no performance claim (guardrail 11)."
+        ),
+        "findings": findings,
+        "runs": {
+            "eta_0.5_H200": fast_ctrl,
+            "eta_0.05_H200": slow_ctrl,
+            "eta_0.05_H8": slow_ctrl_short_memory,
+            "eta_0.05_hardened_D7": hardened,
+        },
+    }
+
+
 def validate_against_real(
     forecast: dict[str, Any], telemetry_summary: dict[str, Any], *, tol: float = 2.0
 ) -> dict[str, Any]:
@@ -470,25 +954,46 @@ def main() -> int:
     parser.add_argument(
         "--episodes-per-iter",
         type=int,
-        default=20,
-        help="Episode completions per iteration (~num_envs=8 micro scale). Findings F1/F2/F3 "
-        "are contrast-based and budget-independent; a sweep is available via the API.",
+        default=None,
+        help="Episode completions per iteration. Default depends on --forecast: 20 for "
+        "release (~num_envs=8 micro scale; findings F1/F2/F3 are contrast-based and "
+        "budget-independent) and 200 for zpd (the Z-findings are frozen at the "
+        "release-scale budget where evidence actually accrues; the micro-budget "
+        "behavior is covered by Z4's starved regime).",
     )
-    parser.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
+    parser.add_argument("--seeds", type=int, nargs="+", default=None)
     parser.add_argument(
         "--validate-against",
         type=Path,
         default=None,
         help="Real sampler_telemetry.json to check the easy-regime prediction against.",
     )
+    parser.add_argument(
+        "--forecast",
+        choices=("release", "zpd", "controller"),
+        default="release",
+        help="release = original F1-F4 forecast; zpd = Change A utility-family forecast "
+        "(Z1-Z5, research_plan_zpd_teacher.md §3.4.1); controller = coupled "
+        "threshold-controller scenarios (CTRL1-CTRL3, D7 validation targets).",
+    )
     args = parser.parse_args()
 
-    result = run_forecast(
-        n_bins=args.n_bins,
-        iters=args.iters,
-        episodes_per_iter=args.episodes_per_iter,
-        seeds=tuple(args.seeds),
-    )
+    if args.forecast == "zpd":
+        result = run_zpd_forecast(
+            n_bins=args.n_bins,
+            iters=args.iters,
+            episodes_per_iter=args.episodes_per_iter or 200,
+            seeds=tuple(args.seeds) if args.seeds else (0, 1, 2, 3, 4),
+        )
+    elif args.forecast == "controller":
+        result = run_controller_scenarios(seeds=tuple(args.seeds) if args.seeds else (0, 1, 2))
+    else:
+        result = run_forecast(
+            n_bins=args.n_bins,
+            iters=args.iters,
+            episodes_per_iter=args.episodes_per_iter or 20,
+            seeds=tuple(args.seeds) if args.seeds else (0, 1, 2),
+        )
     if args.validate_against is not None:
         with args.validate_against.open("r", encoding="utf-8") as f:
             telemetry = json.load(f)
@@ -501,7 +1006,8 @@ def main() -> int:
     print("[SIMULATION — not a measurement]")
     for q, v in result["findings"].items():
         print(f"  {q}: {v if not isinstance(v, str) else v[:70] + '...'}")
-    print(f"  decision forecast: {result['decision_forecast'][:120]}...")
+    if "decision_forecast" in result:
+        print(f"  decision forecast: {result['decision_forecast'][:120]}...")
     print(f"wrote forecast to {args.output_json}")
     return 0
 
