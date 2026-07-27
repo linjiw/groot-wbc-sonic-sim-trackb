@@ -13,6 +13,10 @@ if TYPE_CHECKING:
 
 # Import joint index functions (single source of truth)
 from gear_sonic.envs.env_utils.joint_utils import get_body_joint_indices, get_hand_joint_indices
+from gear_sonic.utils.m5t_telemetry import (
+    M5T_HEIGHT_TERMINATION_TERMS,
+    build_m5t_height_activation_telemetry,
+)
 
 # Import visualization markers for contact point visualization
 try:
@@ -69,6 +73,13 @@ class ManagerEnvWrapper:
         self._action_lines = None
         self._action_hist = None
         self._hist_idx = 0
+
+        # Opt-in M5-T instrumentation. The raw masks are recorded inside the
+        # scheduled Z-height termination terms before Isaac Lab resets envs.
+        self._log_m5t_height_termination = bool(
+            self.config.get("log_m5t_height_termination", False)
+        )
+        self._m5t_height_termination_masks: dict[str, torch.Tensor] = {}
 
         self._blit_background = None
         self._blit_supported = True
@@ -642,6 +653,20 @@ class ManagerEnvWrapper:
 
         return body_actions
 
+    def record_m5t_height_termination(
+        self, term_name: str, term_mask: torch.Tensor
+    ) -> None:
+        """Capture one raw scheduled-term mask for the current environment step."""
+        if not self._log_m5t_height_termination:
+            return
+        if term_name not in M5T_HEIGHT_TERMINATION_TERMS:
+            raise ValueError(f"unexpected M5-T height termination term: {term_name}")
+        if term_mask.shape != (self.num_envs,):
+            raise ValueError(
+                f"M5-T term {term_name} returned {term_mask.shape}, expected ({self.num_envs},)"
+            )
+        self._m5t_height_termination_masks[term_name] = term_mask.detach()
+
     def step(self, actions):
         if self.action_transform_module is not None:
             # Use provided obs_dict or fall back to stored obs from last reset/step
@@ -862,6 +887,8 @@ class ManagerEnvWrapper:
             except Exception:  # noqa: S110, BLE001
                 pass
 
+        if self._log_m5t_height_termination:
+            self._m5t_height_termination_masks = {}
         obs_dict, rew, terminated, truncated, extras = self.env.step(env_actions)
 
         # compute dones for compatibility with RSL-RL
@@ -930,6 +957,12 @@ class ManagerEnvWrapper:
                 extras["to_log"][k] = v
             else:
                 extras["to_log"][k] = torch.tensor(v, dtype=torch.float)
+        if self._log_m5t_height_termination:
+            extras["to_log"].update(
+                build_m5t_height_activation_telemetry(
+                    self._m5t_height_termination_masks, dones
+                )
+            )
         if self._motion_lib is not None and self._motion_lib.use_adaptive_sampling:
             extras["to_log"][
                 "adp_samp/num_episodes_min"
@@ -1051,13 +1084,14 @@ class ManagerEnvWrapper:
         self.reset_all(global_rank=global_rank)
 
     def forward_motion_samples(self, global_rank=0, world_size=1):
+        """Load the next evaluation batch and return its freshly reset observations."""
         old_start_idx = self.start_idx
         self.start_idx += world_size * self.num_envs
         logger.info(
             f"Forward motions for evaluation from {old_start_idx} to {self.start_idx} - rank: {global_rank} - world size: {world_size}"  # noqa: E501
         )
         self._motion_lib.load_motions_for_evaluation(start_idx=self.start_idx)
-        self.reset_all(global_rank=global_rank)
+        return self.reset_all(global_rank=global_rank)
 
     def focusing_viewer(self):
         if not self.viewer_focused:

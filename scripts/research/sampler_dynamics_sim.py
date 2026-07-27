@@ -191,14 +191,36 @@ def _compute_prob_zpd(
 
 
 def _rank_correlation(a: np.ndarray, b: np.ndarray) -> float:
-    """Spearman rank correlation (stdlib-free) between two vectors.
+    """Tie-aware Spearman correlation using average ranks.
 
-    Unreliable under heavy ties (e.g. a few extreme bins amid many equal-difficulty
-    bins), which is exactly the sparse-outlier regime — use ``_hard_half_mass_ratio``
-    as the primary targeting metric there.
+    Equal values receive the same average rank. In particular, a constant vector
+    has zero variance and returns 0 rather than inheriting an arbitrary correlation
+    from input order.
     """
-    ra = np.argsort(np.argsort(a)).astype(float)
-    rb = np.argsort(np.argsort(b)).astype(float)
+
+    def average_ranks(values: np.ndarray) -> np.ndarray:
+        values = np.asarray(values, dtype=float)
+        if values.ndim != 1:
+            raise ValueError("rank correlation inputs must be one-dimensional")
+        if not np.isfinite(values).all():
+            raise ValueError("rank correlation inputs must be finite")
+        order = np.argsort(values, kind="stable")
+        ranks = np.empty(len(values), dtype=float)
+        start = 0
+        while start < len(values):
+            end = start + 1
+            while end < len(values) and values[order[end]] == values[order[start]]:
+                end += 1
+            ranks[order[start:end]] = 0.5 * (start + end - 1)
+            start = end
+        return ranks
+
+    a = np.asarray(a, dtype=float)
+    b = np.asarray(b, dtype=float)
+    if len(a) != len(b):
+        raise ValueError("rank correlation inputs must have equal length")
+    ra = average_ranks(a)
+    rb = average_ranks(b)
     ra -= ra.mean()
     rb -= rb.mean()
     denom = np.sqrt((ra**2).sum() * (rb**2).sum())

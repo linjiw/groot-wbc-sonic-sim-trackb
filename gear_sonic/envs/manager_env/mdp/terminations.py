@@ -25,6 +25,11 @@ from isaaclab.utils.math import (
 
 from gear_sonic.envs.manager_env.mdp.commands import TrackingCommand, _get_body_indexes
 from gear_sonic.trl.utils.torch_transform import get_heading_q
+from gear_sonic.utils.m5t_telemetry import record_m5t_height_termination
+from gear_sonic.utils.root_xy_diagnostic import (
+    root_xy_distance,
+    root_xy_guard_exceeded,
+)
 
 
 @configclass
@@ -90,8 +95,13 @@ def exceeded_anchor_pos_xy(
         Boolean tensor of shape ``(num_envs,)``.
     """
     command: TrackingCommand = env.command_manager.get_term(command_name)
-    xy_diff = command.anchor_pos_w[:, :2] - command.robot_anchor_pos_w[:, :2]
-    return xy_diff.norm(dim=1).gt(threshold)
+    xy_error = root_xy_distance(command.anchor_pos_w, command.robot_anchor_pos_w)
+    if getattr(command, "_record_root_xy_diagnostic", False):
+        # Isaac Lab resets terminated environments before returning from step().
+        # Preserve the exact tensor used by this termination check so the
+        # callback does not reconstruct a post-reset value.
+        command._root_xy_diagnostic_last_error = xy_error.detach().clone()
+    return root_xy_guard_exceeded(xy_error, threshold_m=threshold)
 
 
 def exceeded_anchor_height(
@@ -124,8 +134,11 @@ def exceeded_anchor_height(
     if threshold_adaptive:
         thresh = torch.full_like(height_diff, threshold)
         thresh[command.running_ref_root_height < root_height_threshold] = down_threshold
-        return height_diff.gt(thresh)
-    return height_diff.gt(threshold)
+        terminated = height_diff.gt(thresh)
+    else:
+        terminated = height_diff.gt(threshold)
+    record_m5t_height_termination(env, "anchor_pos", terminated)
+    return terminated
 
 
 def exceeded_anchor_tilt(
@@ -238,8 +251,11 @@ def exceeded_body_height(
     if threshold_adaptive:
         thresh = torch.full_like(height_err, threshold)
         thresh[command.running_ref_root_height < root_height_threshold] = down_threshold
-        return height_err.gt(thresh).any(dim=-1)
-    return height_err.gt(threshold).any(dim=-1)
+        terminated = height_err.gt(thresh).any(dim=-1)
+    else:
+        terminated = height_err.gt(threshold).any(dim=-1)
+    record_m5t_height_termination(env, "ee_body_pos", terminated)
+    return terminated
 
 
 def tracking_time_out(env: ManagerBasedRLEnv, command_name: str) -> torch.Tensor:
@@ -485,5 +501,3 @@ class CummBodyOriErrorLocal(_CummErrorMixin):
         body_ori_error = axis_angle_from_quat(quat_diff).norm(dim=-1)
         self.error[:] = body_ori_error.max(dim=1).values
         return self._update_counters()
-
-

@@ -91,7 +91,10 @@ def test_run_eval_metric_smoke_fails_without_all_mpjpe(tmp_path: Path) -> None:
 def test_diagnose_eval_log_reports_metric_presence(tmp_path: Path) -> None:
     eval_log = tmp_path / "eval.log"
     eval_log.write_text(
-        "Sequence progress: 100%\nSuccess Rate: 1.0000000000\nAll:  mpjpe_g: 1.0 mpjpe_l: 2.0\nSucc:  mpjpe_g: 1.0\n",
+        "Sequence progress: 100%\n"
+        "Success Rate: 1.0000000000\n"
+        "All:  mpjpe_g: 1.0 mpjpe_l: 2.0\n"
+        "Succ:  mpjpe_g: 1.0\n",
         encoding="utf-8",
     )
 

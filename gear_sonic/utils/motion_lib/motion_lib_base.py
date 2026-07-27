@@ -21,6 +21,11 @@ from gear_sonic.isaac_utils import rotations
 from gear_sonic.trl.utils import common
 from gear_sonic.utils.motion_lib import skeleton
 
+_ZPD_SAMPLER_SCHEMA_KIND = "zpd_adaptive_sampler_state"
+_ZPD_SAMPLER_SCHEMA_VERSION = 1
+_ZPD_SAMPLING_MASS_SEMANTICS = "selected_target_bin_pre_window_shift"
+_SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
+
 
 class FixHeightMode(enum.Enum):
     no_fix = 0
@@ -457,6 +462,12 @@ class MotionLibBase:
             print(  # noqa: T201
                 f"Limited to {max_unique_motions} random motions (from {len(keys)})"
             )  # noqa: RUF100, T201
+
+        # Evaluation manifests need a stable key-to-environment assignment.
+        # This is opt-in so legacy training and release evaluation preserve the
+        # filesystem insertion order exactly.
+        if self.m_cfg.get("sort_motion_keys", False):
+            data_list = {key: data_list[key] for key in sorted(data_list)}
 
         self._motion_data_list = np.array(list(data_list.values()))
         self._motion_data_keys = np.array(list(data_list.keys()))
@@ -2423,6 +2434,16 @@ class MotionLibBase:
             / self.adp_samp_num_bins
         )
 
+        # ZPD-only empirical selected-target-bin mass. Counts are incremented for
+        # the second-stage bin multinomial after global motion selection and
+        # active-batch conditioning, before a frame is drawn and before any
+        # pre_failure_sample_window shift. They are not executed-start-bin counts.
+        signal = self.adaptive_sampling_cfg.get("signal", "failure_rate")
+        if signal in ("learnability", "advantage_mass"):
+            self.adp_samp_bin_draw_counts = torch.zeros(
+                self.adp_samp_num_bins, device=self._device, dtype=torch.long
+            )
+
         # ZPD-teacher mutable state (research_plan_zpd_teacher.md §3.1). The decay
         # clock (D4) snapshots counts at the last recompute; telemetry attributes
         # stay None on the release signal so the wrapper emits nothing new.
@@ -2506,6 +2527,22 @@ class MotionLibBase:
                     "adp_samp_num_failures": self.adp_samp_num_failures,
                 }
             )
+            # M5 activation analysis needs a stable bin -> motion-key map. Keep
+            # release/failure-rate checkpoints byte-compatible by recording this
+            # metadata only for the flag-gated ZPD research signals.
+            signal = self.adaptive_sampling_cfg.get("signal", "failure_rate")
+            if signal in ("learnability", "advantage_mass") and hasattr(
+                self, "adp_samp_bins"
+            ):
+                state_dict["adp_samp_bin_motion_ids"] = self.adp_samp_bins[:, 0]
+                state_dict["adp_samp_bin_ranges"] = self.adp_samp_bins[:, 1:3]
+                state_dict["adp_samp_motion_data_keys"] = [
+                    str(key) for key in self._motion_data_keys
+                ]
+                state_dict["adp_samp_bin_weights"] = self.adp_samp_bin_weights
+                state_dict["adp_samp_bin_draw_counts"] = self.adp_samp_bin_draw_counts
+                state_dict["adp_samp_zpd_schema"] = self._zpd_checkpoint_schema()
+                state_dict["adp_samp_zpd_config"] = self._zpd_checkpoint_config()
             # Decay-clock snapshots (D4). Only present when decay is active, so
             # release checkpoints keep the exact legacy key set.
             if getattr(self, "_adp_samp_eps_at_last_recompute", None) is not None:
@@ -2518,13 +2555,16 @@ class MotionLibBase:
     def load_state_dict(self, state_dict):
         """Restore adaptive sampling statistics from a checkpoint.
 
-        Validates that the bin count matches before restoring. If it does not match
-        (e.g. dataset changed between runs), the load is silently skipped.
+        Failure-rate checkpoints retain the legacy bin-count check and skip behavior.
+        ZPD checkpoints additionally require an exact semantic bin identity/order
+        match (motion key plus frame range) before any mutable state is restored.
 
         Args:
             state_dict: Dict previously returned by ``get_state_dict()``.
         """
         if self.use_adaptive_sampling and "adp_samp_num_episodes" in state_dict:
+            if self.adp_samp_signal in ("learnability", "advantage_mass"):
+                self._validate_zpd_checkpoint_bin_identity(state_dict)
             if len(self.adp_samp_num_failures) != len(state_dict["adp_samp_num_failures"]):
                 print("Adaptive sampling state dict does not match. Skipping load.")  # noqa: T201
                 return
@@ -2540,8 +2580,166 @@ class MotionLibBase:
                 self._adp_samp_fails_at_last_recompute = state_dict[
                     "adp_samp_fails_at_last_recompute"
                 ].to(self._device)
+            if "adp_samp_bin_draw_counts" in state_dict:
+                self.adp_samp_bin_draw_counts[:] = state_dict[
+                    "adp_samp_bin_draw_counts"
+                ].to(self._device)
             self.sync_and_compute_adaptive_sampling(sync_across_gpus=False)
         return
+
+    @staticmethod
+    def _zpd_checkpoint_schema():
+        """Versioned semantics for flag-gated ZPD checkpoint state."""
+        return {
+            "kind": _ZPD_SAMPLER_SCHEMA_KIND,
+            "version": _ZPD_SAMPLER_SCHEMA_VERSION,
+            "sampling_mass_semantics": _ZPD_SAMPLING_MASS_SEMANTICS,
+        }
+
+    def _zpd_checkpoint_config(self):
+        """Normalized ZPD knobs whose exact identity is required on resume."""
+        paired_digest = self.adaptive_sampling_cfg.get("paired_dataset_sha256", None)
+        if paired_digest is not None:
+            paired_digest = str(paired_digest).lower()
+            if _SHA256_RE.fullmatch(paired_digest) is None:
+                raise ValueError(
+                    "adaptive_sampling.paired_dataset_sha256 must be a 64-character "
+                    f"SHA-256 digest when provided, got {paired_digest!r}"
+                )
+        bin_size = int(self.adaptive_sampling_cfg.get("bin_size", 50))
+        if bin_size <= 0:
+            raise ValueError(f"adaptive_sampling.bin_size must be positive, got {bin_size}")
+        evidence_half_life = self.adp_samp_evidence_half_life
+        return {
+            "signal": self.adp_samp_signal,
+            "optimism_k": self.adp_samp_optimism_k,
+            "evidence_half_life": (
+                float(evidence_half_life) if evidence_half_life is not None else None
+            ),
+            "advmass_n": self.adp_samp_advmass_n,
+            "uniform_sampling_rate": float(self.uniform_sampling_rate),
+            "tripwire_max_prob_over_uniform": self.adp_samp_tripwire_max_prob_over_uniform,
+            "bin_size": bin_size,
+            "paired_dataset_sha256": paired_digest,
+        }
+
+    def _validate_zpd_checkpoint_bin_identity(self, state_dict):
+        """Reject a ZPD resume unless schema, config, and every bin match exactly."""
+        required = (
+            "adp_samp_bin_motion_ids",
+            "adp_samp_bin_ranges",
+            "adp_samp_motion_data_keys",
+            "adp_samp_bin_weights",
+            "adp_samp_bin_draw_counts",
+            "adp_samp_zpd_schema",
+            "adp_samp_zpd_config",
+        )
+        missing = [key for key in required if key not in state_dict]
+        if missing:
+            raise ValueError(
+                "ZPD adaptive sampler checkpoint lacks exact bin identity/state metadata: "
+                f"{missing}. Start a fresh ZPD run rather than resuming unverifiable state."
+            )
+
+        saved_schema = state_dict["adp_samp_zpd_schema"]
+        current_schema = self._zpd_checkpoint_schema()
+        if saved_schema != current_schema:
+            raise ValueError(
+                "ZPD adaptive sampler checkpoint schema mismatch: "
+                f"saved={saved_schema!r}, current={current_schema!r}"
+            )
+        saved_config = state_dict["adp_samp_zpd_config"]
+        current_config = self._zpd_checkpoint_config()
+        if not isinstance(saved_config, dict):
+            raise ValueError(
+                "ZPD adaptive sampler checkpoint configuration must be a dictionary, "
+                f"got {type(saved_config).__name__}"
+            )
+        if saved_config != current_config:
+            differing = sorted(
+                key
+                for key in set(saved_config) | set(current_config)
+                if saved_config.get(key) != current_config.get(key)
+            )
+            raise ValueError(
+                "ZPD adaptive sampler checkpoint configuration/dataset digest mismatch "
+                f"for fields {differing}: saved={saved_config!r}, current={current_config!r}"
+            )
+
+        saved_motion_ids = torch.as_tensor(state_dict["adp_samp_bin_motion_ids"]).cpu().long()
+        saved_ranges = torch.as_tensor(state_dict["adp_samp_bin_ranges"]).cpu().long()
+        saved_motion_keys = [str(key) for key in state_dict["adp_samp_motion_data_keys"]]
+        saved_weights = torch.as_tensor(state_dict["adp_samp_bin_weights"]).cpu()
+        saved_draw_counts = torch.as_tensor(state_dict["adp_samp_bin_draw_counts"]).cpu()
+        current_bins = self.adp_samp_bins.detach().cpu().long()
+        num_bins = len(current_bins)
+
+        lengths = {
+            "motion ids": len(saved_motion_ids),
+            "ranges": len(saved_ranges),
+            "weights": len(saved_weights),
+            "draw counts": len(saved_draw_counts),
+            "episodes": len(state_dict["adp_samp_num_episodes"]),
+            "failures": len(state_dict["adp_samp_num_failures"]),
+        }
+        invalid_lengths = {name: length for name, length in lengths.items() if length != num_bins}
+        invalid_shapes = {
+            "motion ids": tuple(saved_motion_ids.shape),
+            "ranges": tuple(saved_ranges.shape),
+            "weights": tuple(saved_weights.shape),
+            "draw counts": tuple(saved_draw_counts.shape),
+        }
+        shapes_valid = (
+            saved_motion_ids.ndim == 1
+            and saved_ranges.ndim == 2
+            and saved_ranges.shape[1] == 2
+            and saved_weights.ndim == 1
+            and saved_draw_counts.ndim == 1
+        )
+        if invalid_lengths or not shapes_valid:
+            raise ValueError(
+                "ZPD adaptive sampler checkpoint bin metadata length/shape mismatch: "
+                f"expected {num_bins} bins with [start, end] ranges, got {invalid_lengths} "
+                f"and shapes {invalid_shapes}"
+            )
+        if ((saved_motion_ids < 0) | (saved_motion_ids >= len(saved_motion_keys))).any():
+            raise ValueError(
+                "ZPD adaptive sampler checkpoint contains a bin motion id outside its saved "
+                "motion-key table"
+            )
+
+        current_motion_keys = [str(key) for key in self._motion_data_keys]
+        saved_identities = [
+            (saved_motion_keys[int(motion_id)], int(start), int(end))
+            for motion_id, (start, end) in zip(saved_motion_ids.tolist(), saved_ranges.tolist())
+        ]
+        current_identities = [
+            (current_motion_keys[int(motion_id)], int(start), int(end))
+            for motion_id, start, end in current_bins.tolist()
+        ]
+        if saved_identities != current_identities:
+            first_mismatch = next(
+                (
+                    index
+                    for index, (saved, current) in enumerate(
+                        zip(saved_identities, current_identities)
+                    )
+                    if saved != current
+                ),
+                0,
+            )
+            raise ValueError(
+                "ZPD adaptive sampler checkpoint bin identity/order mismatch at bin "
+                f"{first_mismatch}: saved={saved_identities[first_mismatch]!r}, "
+                f"current={current_identities[first_mismatch]!r}"
+            )
+        if not torch.allclose(
+            saved_weights.double(), self.adp_samp_bin_weights.detach().cpu().double()
+        ):
+            raise ValueError(
+                "ZPD adaptive sampler checkpoint bin weights mismatch; dataset/configuration "
+                "changed since the checkpoint"
+            )
 
     def update_adaptive_sampling(self, failure, motion_ids, motion_time_steps):
         """Update adaptive sampling statistics based on training outcomes.
@@ -2629,6 +2827,12 @@ class MotionLibBase:
         """
         if not self.use_adaptive_sampling:
             return
+
+        if self.adp_samp_signal in ("learnability", "advantage_mass"):
+            # New high-level recompute window. Individual probability paths OR
+            # their D9 result into this value so either path is visible, while an
+            # old binding cannot remain latched into the next iteration.
+            self._adp_samp_tripwire_binding = 0.0
 
         if self.adp_samp_evidence_half_life is not None:
             self._apply_evidence_decay()
@@ -2731,7 +2935,88 @@ class MotionLibBase:
     def adp_samp_tripwire_max_prob_over_uniform(self):
         # D9: loose safety ceiling (×uniform) replacing the mean×cap clip for ZPD
         # signals — a preregistered validity assertion, not a shaping mechanism.
-        return float(self.adaptive_sampling_cfg.get("tripwire_max_prob_over_uniform", 20.0))
+        multiplier = float(
+            self.adaptive_sampling_cfg.get("tripwire_max_prob_over_uniform", 20.0)
+        )
+        if not np.isfinite(multiplier) or multiplier < 1.0:
+            raise ValueError(
+                "adaptive_sampling.tripwire_max_prob_over_uniform must be finite and >= 1 "
+                f"for a feasible probability simplex, got {multiplier}"
+            )
+        return multiplier
+
+    @staticmethod
+    def _project_onto_capped_simplex(probabilities, ceiling):
+        """Project normalized nonnegative mass onto ``sum(q)=1, 0<=q<=ceiling``.
+
+        A single clamp followed by normalization can violate the ceiling again.
+        This active-set redistribution instead fixes over-cap bins at the ceiling
+        and redistributes their excess across remaining bins until all constraints
+        hold. The input is already a probability vector, so this is equivalent to
+        the Euclidean capped-simplex projection for an upper bound only.
+        """
+        if probabilities.ndim != 1 or len(probabilities) == 0:
+            raise ValueError("capped-simplex projection requires a non-empty 1D tensor")
+        probabilities = probabilities.double()
+        if not torch.isfinite(probabilities).all() or (probabilities < 0).any():
+            raise ValueError("capped-simplex projection requires finite nonnegative mass")
+        total = probabilities.sum()
+        if total <= 0:
+            probabilities = torch.ones_like(probabilities) / len(probabilities)
+        else:
+            probabilities = probabilities / total
+
+        ceiling = float(ceiling)
+        if ceiling * len(probabilities) < 1.0 - 1e-12:
+            raise ValueError(
+                f"capped-simplex ceiling {ceiling} is infeasible for "
+                f"{len(probabilities)} bins"
+            )
+        ceiling_tensor = torch.as_tensor(
+            ceiling, dtype=probabilities.dtype, device=probabilities.device
+        )
+        projected = probabilities.clone()
+        fixed = torch.zeros_like(projected, dtype=torch.bool)
+
+        # At least one newly over-cap element becomes fixed on each pass.
+        for _ in range(len(projected)):
+            over = (~fixed) & (projected > ceiling_tensor)
+            if not over.any():
+                break
+            excess = (projected[over] - ceiling_tensor).sum()
+            projected[over] = ceiling_tensor
+            fixed |= over
+            free = ~fixed
+            if free.any():
+                projected[free] += excess / free.sum()
+        else:  # pragma: no cover - defensive; loop must converge in <= n passes.
+            raise RuntimeError("capped-simplex projection did not converge")
+
+        # Absorb roundoff into bins with slack without ever exceeding the ceiling.
+        residual = 1.0 - projected.sum()
+        if abs(float(residual)) > 1e-12:
+            slack = (ceiling_tensor - projected).clamp(min=0)
+            slack_total = slack.sum()
+            if residual > 0 and slack_total > 0:
+                projected += residual * slack / slack_total
+            elif residual < 0:
+                positive = projected > 0
+                projected[positive] += residual / positive.sum()
+
+        if projected.max() > ceiling_tensor + 1e-10 or abs(float(projected.sum()) - 1.0) > 1e-9:
+            raise RuntimeError("capped-simplex projection violated its postconditions")
+        return projected
+
+    def _apply_zpd_tripwire(self, probabilities):
+        """Apply D9 after all weighting/constraints and record this path's binding."""
+        num_bins = len(probabilities)
+        ceiling = self.adp_samp_tripwire_max_prob_over_uniform / num_bins
+        binding = bool((probabilities > ceiling).any())
+        previous_binding = getattr(self, "_adp_samp_tripwire_binding", None) or 0.0
+        self._adp_samp_tripwire_binding = 1.0 if binding or previous_binding > 0 else 0.0
+        if not binding:
+            return probabilities
+        return self._project_onto_capped_simplex(probabilities, ceiling)
 
     def _zpd_posterior_counts(self):
         """Global Beta counts ``(a, b)`` over per-bin survival probability (plan D1/D2).
@@ -2872,24 +3157,6 @@ class MotionLibBase:
             self.adp_sampling_active_prob / self.adp_sampling_active_prob.sum()
         )
 
-        # D9 tripwire (ZPD signals only): a LOOSE per-bin probability ceiling
-        # (default 20x uniform) that replaces the mean×cap clip as the safety
-        # mechanism. Preregistration treats binding as a validity assertion (a run
-        # where it binds >5% of iterations is invalid-unstable), not as shaping —
-        # so we record binding, clamp, and renormalize.
-        if self.adp_samp_signal in ("learnability", "advantage_mass"):
-            n_active = len(self.adp_sampling_active_prob)
-            tripwire_prob = self.adp_samp_tripwire_max_prob_over_uniform / n_active
-            binding = bool((self.adp_sampling_active_prob > tripwire_prob).any())
-            self._adp_samp_tripwire_binding = 1.0 if binding else 0.0
-            if binding:
-                self.adp_sampling_active_prob = torch.clamp(
-                    self.adp_sampling_active_prob, max=tripwire_prob
-                )
-                self.adp_sampling_active_prob = (
-                    self.adp_sampling_active_prob / self.adp_sampling_active_prob.sum()
-                )
-
         # ==========================================================================
         # MAX PROBABILITY CONSTRAINTS: Prevent over-concentration on challenging motions
         # ==========================================================================
@@ -2932,6 +3199,10 @@ class MotionLibBase:
 
         # Skip all max_prob constraints if neither is configured (legacy behavior)
         if self.max_prob_per_bin_cfg is None and self.max_prob_per_motion_cfg is None:
+            if self.adp_samp_signal in ("learnability", "advantage_mass"):
+                self.adp_sampling_active_prob = self._apply_zpd_tripwire(
+                    self.adp_sampling_active_prob
+                )
             self.adp_sampling_active_prob = self.adp_sampling_active_prob.float()
             assert (self.adp_sampling_active_prob >= 0).all()
             return
@@ -2992,6 +3263,13 @@ class MotionLibBase:
                 )
         # ==========================================================================
 
+        # D9 is deliberately last: bin weights and either optional concentration
+        # constraint can otherwise push probability back above the safety ceiling.
+        if self.adp_samp_signal in ("learnability", "advantage_mass"):
+            self.adp_sampling_active_prob = self._apply_zpd_tripwire(
+                self.adp_sampling_active_prob
+            )
+
         self.adp_sampling_active_prob = self.adp_sampling_active_prob.float()
         assert (self.adp_sampling_active_prob >= 0).all()
 
@@ -3002,6 +3280,10 @@ class MotionLibBase:
         Aggregates per-bin failure rates into per-motion probabilities and applies
         the same max-probability constraints as the batch-level update.
         """
+        if self.adp_samp_signal in ("learnability", "advantage_mass"):
+            # load_motions() computes the global path here, then the active path
+            # after loading. Start one shared telemetry window for both.
+            self._adp_samp_tripwire_binding = 0.0
         self.adp_samp_failure_rate = self.adp_samp_failure_rate.double()
         if self.adp_samp_signal in ("learnability", "advantage_mass"):
             # Same ZPD utility as the batch-level path (no mean×cap clip, D9).
@@ -3018,9 +3300,17 @@ class MotionLibBase:
             adp_samp_failure_rate_clipped = torch.clip(
                 self.adp_samp_failure_rate, 0.0, adp_samp_failure_rate_upper_bound
             )
-            failure_based_sampling_prob = (
-                adp_samp_failure_rate_clipped / adp_samp_failure_rate_clipped.sum()
-            )
+            # Match the active-batch guard: init_num_failures=0 can legitimately
+            # leave every global bin at zero signal before any termination is
+            # observed. Normalize positive evidence exactly as before; otherwise
+            # use a finite uniform distribution instead of producing 0/0 NaNs.
+            clipped_sum = adp_samp_failure_rate_clipped.sum()
+            if clipped_sum > 0:
+                failure_based_sampling_prob = adp_samp_failure_rate_clipped / clipped_sum
+            else:
+                failure_based_sampling_prob = torch.ones_like(
+                    adp_samp_failure_rate_clipped
+                ) / len(adp_samp_failure_rate_clipped)
         uniform_sampling_prob = torch.ones_like(failure_based_sampling_prob) / len(
             failure_based_sampling_prob
         )
@@ -3037,6 +3327,8 @@ class MotionLibBase:
         # Skip if neither constraint is configured (legacy behavior).
         # ==========================================================================
         if self.max_prob_per_bin_cfg is None and self.max_prob_per_motion_cfg is None:
+            if self.adp_samp_signal in ("learnability", "advantage_mass"):
+                self.adp_sampling_prob = self._apply_zpd_tripwire(self.adp_sampling_prob)
             # Sum up the adp_sampling_prob for each motion's frames (no constraints)
             motion_sampling_probs = torch.zeros(self._num_unique_motions, device=self._device)
             for orig_motion_id in range(self._num_unique_motions):
@@ -3064,6 +3356,12 @@ class MotionLibBase:
             if max_prob_per_bin > 0 and num_bins > 1.0 / max_prob_per_bin:
                 self.adp_sampling_prob = torch.clamp(self.adp_sampling_prob, max=max_prob_per_bin)
                 self.adp_sampling_prob = self.adp_sampling_prob / self.adp_sampling_prob.sum()
+
+        # The global full-dataset ZPD vector is also a live sampling path. Apply
+        # D9 after length weighting and the optional bin constraint, before its
+        # mass is aggregated into the motion-selection distribution.
+        if self.adp_samp_signal in ("learnability", "advantage_mass"):
+            self.adp_sampling_prob = self._apply_zpd_tripwire(self.adp_sampling_prob)
 
         # Sum up the adp_sampling_prob for each motion's frames
         motion_sampling_probs = torch.zeros(self._num_unique_motions, device=self._device)
@@ -3124,10 +3422,10 @@ class MotionLibBase:
     def sample_motion_ids_and_time_steps(self, n):
         """Sample motion IDs and time steps using adaptive sampling probabilities.
 
-        Draws bins from the active-bin distribution, then samples a random frame
-        within each selected bin. Optionally shifts the sampled frame backward by
-        a random offset (``pre_failure_sample_window``) so the policy starts
-        practicing before the difficult segment.
+        Draws target bins from the active-bin distribution, then samples a random
+        frame within each selected bin. ZPD draw telemetry counts that selected
+        target bin before optionally shifting the frame backward by
+        ``pre_failure_sample_window``; it does not represent the executed start bin.
 
         Args:
             n: Number of (motion_id, time_step) pairs to sample.
@@ -3141,6 +3439,10 @@ class MotionLibBase:
             self.adp_sampling_active_prob, num_samples=n, replacement=True
         ).to(self._device)
         bin_ids = self.adp_samp_active_motion_bins[sampled_bin_ids]
+        if hasattr(self, "adp_samp_bin_draw_counts"):
+            self.adp_samp_bin_draw_counts += torch.bincount(
+                bin_ids, minlength=self.adp_samp_num_bins
+            ).to(self.adp_samp_bin_draw_counts.dtype)
         bins = self.adp_samp_bins[bin_ids]
         orig_motion_ids, bin_start, bin_end = bins[:, 0], bins[:, 1], bins[:, 2]
         motion_ids = self.orig_motion_id_to_motion_ids[orig_motion_ids]

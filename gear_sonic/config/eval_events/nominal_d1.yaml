@@ -1,0 +1,10 @@
+# @package _global_
+# Opt-in nominal SIM-D1 verifier: remove environment randomization inherited
+# from the release checkpoint. Training and ordinary release eval are unchanged.
+eval_remove_events:
+  - physics_material
+  - add_joint_default_pos
+  - base_com
+  - randomize_rigid_body_mass
+  - push_robot
+  - compliance_force_push

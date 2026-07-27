@@ -9,7 +9,14 @@ from scripts.research.compare_sonic_manifests import (
 )
 
 
-def _manifest(path: Path, *, experiment_id: str, variant: str, seed: int = 0, checkpoint: str = "sonic_release/last.pt") -> Path:
+def _manifest(
+    path: Path,
+    *,
+    experiment_id: str,
+    variant: str,
+    seed: int = 0,
+    checkpoint: str = "sonic_release/last.pt",
+) -> Path:
     manifest = {
         "schema_version": 1,
         "experiment_id": experiment_id,
@@ -140,7 +147,11 @@ def test_build_comparison_flags_control_mismatch(tmp_path: Path) -> None:
 
 def test_build_comparison_flags_missing_primary_metrics(tmp_path: Path) -> None:
     baseline = _manifest(tmp_path / "baseline.json", experiment_id="baseline_seed0", variant="baseline")
-    missing_eval = _manifest(tmp_path / "missing_eval.json", experiment_id="curriculum_seed0", variant="curriculum")
+    missing_eval = _manifest(
+        tmp_path / "missing_eval.json",
+        experiment_id="curriculum_seed0",
+        variant="curriculum",
+    )
     data = json.loads(missing_eval.read_text(encoding="utf-8"))
     data["metrics"]["eval"]["ok"] = False
     data["metrics"]["eval"]["all"] = {}

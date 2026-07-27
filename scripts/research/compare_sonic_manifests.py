@@ -9,8 +9,16 @@ from pathlib import Path
 import sys
 from typing import Any
 
-from scripts.research.sonic_experiment_manifest import validate_manifest
-from scripts.research.summarize_sonic_logs import ADP_SAMP_CLASSIFICATION_KEYS
+REPO_ROOT = Path(__file__).resolve().parents[2]
+_repo_root = str(REPO_ROOT)
+if _repo_root in sys.path:
+    sys.path.remove(_repo_root)
+sys.path.insert(0, _repo_root)
+
+from scripts.research.sonic_experiment_manifest import validate_manifest  # noqa: E402
+from scripts.research.summarize_sonic_logs import (  # noqa: E402
+    ADP_SAMP_CLASSIFICATION_KEYS,
+)
 
 _CONTROL_GROUPS = ("controlled_variables", "datasets")
 _CONTROL_FIELDS = ("checkpoint",)
@@ -35,9 +43,13 @@ _METRIC_PATHS: tuple[tuple[str, ...], ...] = (
     # frozen SIM-D1 difficulty ranking is supplied). Informational here — its
     # preregistered non-inferiority bound is enforced by the gate scripts, and
     # arms evaluated without a ranking simply have no value.
+    ("metrics", "eval", "easy_decile", "ok"),
     ("metrics", "eval", "easy_decile", "mpjpe_g"),
     ("metrics", "eval", "easy_decile", "success_rate"),
     ("metrics", "eval", "easy_decile", "evaluated_in_decile"),
+    ("metrics", "eval", "easy_decile", "decile_size"),
+    ("metrics", "eval", "easy_decile", "motion_keys"),
+    ("metrics", "eval", "easy_decile", "difficulty_ranking_path"),
 )
 _PRIMARY_METRIC_PATHS: tuple[tuple[str, ...], ...] = (
     ("metrics", "train", "ok"),
@@ -137,7 +149,14 @@ def _find_metric_warnings(manifests: list[dict[str, Any]]) -> list[dict[str, Any
             if value is None:
                 warnings.append({"experiment": label, "field": _metric_key(path), "problem": "missing"})
             elif path[-1] == "ok" and value is not True:
-                warnings.append({"experiment": label, "field": _metric_key(path), "problem": "not_true", "value": value})
+                warnings.append(
+                    {
+                        "experiment": label,
+                        "field": _metric_key(path),
+                        "problem": "not_true",
+                        "value": value,
+                    }
+                )
     return warnings
 
 
@@ -154,13 +173,41 @@ def _find_checkpoint_warnings(manifests: list[dict[str, Any]]) -> list[dict[str,
         if not checkpoint:
             warnings.append({"experiment": label, "field": "checkpoint", "problem": "missing"})
         if isinstance(checkpoint, str) and checkpoint.endswith("sonic_release/last.pt"):
-            warnings.append({"experiment": label, "field": "checkpoint", "problem": "release_checkpoint_path", "value": checkpoint})
+            warnings.append(
+                {
+                    "experiment": label,
+                    "field": "checkpoint",
+                    "problem": "release_checkpoint_path",
+                    "value": checkpoint,
+                }
+            )
         if isinstance(provenance, dict) and provenance.get("is_release_checkpoint") is True:
-            warnings.append({"experiment": label, "field": "checkpoint_provenance.is_release_checkpoint", "problem": "release_checkpoint_used", "value": True})
+            warnings.append(
+                {
+                    "experiment": label,
+                    "field": "checkpoint_provenance.is_release_checkpoint",
+                    "problem": "release_checkpoint_used",
+                    "value": True,
+                }
+            )
         if isinstance(checkpoint, str):
             if checkpoint in seen_paths:
-                warnings.append({"experiment": label, "field": "checkpoint", "problem": "duplicate_checkpoint_path", "value": checkpoint})
-                warnings.append({"experiment": seen_paths[checkpoint], "field": "checkpoint", "problem": "duplicate_checkpoint_path", "value": checkpoint})
+                warnings.append(
+                    {
+                        "experiment": label,
+                        "field": "checkpoint",
+                        "problem": "duplicate_checkpoint_path",
+                        "value": checkpoint,
+                    }
+                )
+                warnings.append(
+                    {
+                        "experiment": seen_paths[checkpoint],
+                        "field": "checkpoint",
+                        "problem": "duplicate_checkpoint_path",
+                        "value": checkpoint,
+                    }
+                )
             else:
                 seen_paths[checkpoint] = label
     return warnings
@@ -214,7 +261,13 @@ def build_comparison(manifest_paths: list[Path]) -> dict[str, Any]:
         "checkpoint_warnings": checkpoint_warnings,
         "validation_errors": validation_errors,
         "rows": rows,
-        "ok_for_causal_comparison": not validation_errors and not mismatches and not metric_warnings and not checkpoint_warnings and len(records) >= 2,
+        "ok_for_causal_comparison": (
+            not validation_errors
+            and not mismatches
+            and not metric_warnings
+            and not checkpoint_warnings
+            and len(records) >= 2
+        ),
     }
 
 
@@ -257,7 +310,8 @@ def write_comparison_markdown(path: Path, comparison: dict[str, Any]) -> None:
             f.write("| Experiment | Field | Problem | Value |\n|---|---|---|---|\n")
             for item in metric_warnings:
                 f.write(
-                    f"| `{item.get('experiment')}` | `{item.get('field')}` | `{item.get('problem')}` | {_format_value(item.get('value'))} |\n"
+                    f"| `{item.get('experiment')}` | `{item.get('field')}` | "
+                    f"`{item.get('problem')}` | {_format_value(item.get('value'))} |\n"
                 )
         else:
             f.write("None. Primary train/eval metrics are present and healthy.\n")
@@ -289,10 +343,20 @@ def write_comparison_markdown(path: Path, comparison: dict[str, Any]) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--manifest", type=Path, action="append", required=True, help="Manifest JSON path. Repeat for comparisons.")
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        action="append",
+        required=True,
+        help="Manifest JSON path. Repeat for comparisons.",
+    )
     parser.add_argument("--output-json", type=Path, required=True)
     parser.add_argument("--output-md", type=Path)
-    parser.add_argument("--fail-on-mismatch", action="store_true", help="Return nonzero if validation or control mismatches exist.")
+    parser.add_argument(
+        "--fail-on-mismatch",
+        action="store_true",
+        help="Return nonzero if validation or control mismatches exist.",
+    )
     args = parser.parse_args()
 
     comparison = build_comparison(args.manifest)

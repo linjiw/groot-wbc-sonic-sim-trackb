@@ -1,16 +1,43 @@
 from __future__ import annotations
 
 import pytest
+import torch
 
-from scripts.research.dump_sampler_checkpoint_state import build_sampler_state_summary
+from scripts.research.dump_sampler_checkpoint_state import (
+    build_sampler_state_summary,
+    extract_sampler_state,
+)
 
 
 def _state(episodes: list[float], failures: list[float]) -> dict:
     return {
         "checkpoint_path": "runs/adaptive_seed0/last.pt",
+        "checkpoint_sha256": "a" * 64,
+        "checkpoint_size_bytes": 123,
         "global_step": 50,
         "adp_samp_num_episodes": episodes,
         "adp_samp_num_failures": failures,
+    }
+
+
+def _zpd_schema() -> dict:
+    return {
+        "kind": "zpd_adaptive_sampler_state",
+        "version": 1,
+        "sampling_mass_semantics": "selected_target_bin_pre_window_shift",
+    }
+
+
+def _zpd_config() -> dict:
+    return {
+        "signal": "learnability",
+        "optimism_k": 0.0,
+        "evidence_half_life": 10.0,
+        "advmass_n": 16,
+        "uniform_sampling_rate": 0.1,
+        "tripwire_max_prob_over_uniform": 20.0,
+        "bin_size": 50,
+        "paired_dataset_sha256": "b" * 64,
     }
 
 
@@ -96,3 +123,87 @@ def test_output_records_caveats_about_weights_and_decay() -> None:
     joined = " ".join(summary["caveats"])
     assert "bin weights" in joined
     assert "decay" in joined
+    assert summary["checkpoint_sha256"] == "a" * 64
+    assert summary["checkpoint_size_bytes"] == 123
+
+
+def test_dump_materializes_bin_motion_keys_when_checkpoint_contains_mapping() -> None:
+    state = _state([2.0, 3.0], [1.0, 2.0])
+    state["adp_samp_bin_motion_ids"] = [1, 0]
+    state["adp_samp_motion_data_keys"] = ["walk", "crouch"]
+
+    summary = build_sampler_state_summary(state)
+
+    assert summary["bin_motion_keys"] == ["crouch", "walk"]
+
+
+def test_dump_rejects_invalid_bin_motion_mapping() -> None:
+    state = _state([2.0], [1.0])
+    state["adp_samp_bin_motion_ids"] = [2]
+    state["adp_samp_motion_data_keys"] = ["walk"]
+
+    with pytest.raises(ValueError, match="outside"):
+        build_sampler_state_summary(state)
+
+
+def test_dump_exposes_zpd_bin_weights_ranges_and_empirical_sampling_mass() -> None:
+    state = _state([4.0, 8.0], [2.0, 3.0])
+    state.update(
+        {
+            "adp_samp_bin_motion_ids": [0, 1],
+            "adp_samp_motion_data_keys": ["walk", "crouch"],
+            "adp_samp_bin_ranges": [[0, 50], [50, 90]],
+            "adp_samp_bin_weights": [0.25, 1.75],
+            "adp_samp_bin_draw_counts": [3, 9],
+            "adp_samp_zpd_schema": _zpd_schema(),
+            "adp_samp_zpd_config": _zpd_config(),
+        }
+    )
+
+    summary = build_sampler_state_summary(state)
+
+    assert summary["sampling_mass_source"] == (
+        "empirical_selected_target_bin_draw_counts_pre_window_shift"
+    )
+    assert summary["sampling_mass_semantics"] == "selected_target_bin_pre_window_shift"
+    assert summary["sampler_schema"] == _zpd_schema()
+    assert summary["sampler_config"] == _zpd_config()
+    assert summary["bins"][0]["bin_weight"] == pytest.approx(0.25)
+    assert summary["bins"][0]["bin_start"] == 0
+    assert summary["bins"][1]["bin_end"] == 90
+    assert summary["bins"][0]["sampled_count"] == 3
+    assert summary["bins"][0]["sampled_fraction"] == pytest.approx(0.25)
+    assert summary["bins"][1]["sampled_fraction"] == pytest.approx(0.75)
+    assert summary["aggregates"]["sampled_count_total"] == 12
+    assert summary["aggregates"]["sampled_fraction_sum"] == pytest.approx(1.0)
+    assert "not executed-start-bin mass" in " ".join(summary["caveats"])
+
+
+def test_checkpoint_extractor_carries_zpd_weight_and_draw_tensors(tmp_path) -> None:
+    checkpoint_path = tmp_path / "checkpoint.pt"
+    torch.save(
+        {
+            "env_state_dict": {
+                "motion_lib": {
+                    "adp_samp_num_episodes": torch.tensor([4.0, 8.0]),
+                    "adp_samp_num_failures": torch.tensor([2.0, 3.0]),
+                    "adp_samp_bin_motion_ids": torch.tensor([0, 1]),
+                    "adp_samp_motion_data_keys": ["walk", "crouch"],
+                    "adp_samp_bin_ranges": torch.tensor([[0, 50], [50, 90]]),
+                    "adp_samp_bin_weights": torch.tensor([0.25, 1.75]),
+                    "adp_samp_bin_draw_counts": torch.tensor([3, 9]),
+                    "adp_samp_zpd_schema": _zpd_schema(),
+                    "adp_samp_zpd_config": _zpd_config(),
+                }
+            }
+        },
+        checkpoint_path,
+    )
+
+    state = extract_sampler_state(checkpoint_path)
+
+    assert state["adp_samp_bin_weights"] == pytest.approx([0.25, 1.75])
+    assert state["adp_samp_bin_draw_counts"] == [3, 9]
+    assert state["adp_samp_bin_ranges"] == [[0, 50], [50, 90]]
+    assert state["adp_samp_zpd_schema"] == _zpd_schema()
+    assert state["adp_samp_zpd_config"] == _zpd_config()

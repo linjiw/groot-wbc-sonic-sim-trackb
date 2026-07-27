@@ -30,18 +30,16 @@ except ImportError:
     import sys
     sys.exit(1)
 
-import filelock  # noqa: I001
 import json
+import logging
 import os
+from pathlib import Path
 import shutil
 import subprocess
 import sys
 
-sys.path.append(os.getcwd())
-import logging
-from pathlib import Path
-
 import easydict
+import filelock
 import hydra
 from hydra import utils
 from hydra.core import hydra_config
@@ -49,11 +47,18 @@ from loguru import logger
 import omegaconf
 import yaml
 
-from gear_sonic import train_agent_trl
-from gear_sonic.trl.utils import common as trl_utils_common
-from gear_sonic.trl.utils import scheduler
-from gear_sonic.utils import common as rl_utils_common
-from gear_sonic.utils import config_utils, obs_utils
+sys.path.append(os.getcwd())
+
+from gear_sonic import train_agent_trl  # noqa: E402
+from gear_sonic.trl.utils import (
+    common as trl_utils_common,  # noqa: E402
+    scheduler,  # noqa: E402
+)
+from gear_sonic.utils import (  # noqa: E402
+    common as rl_utils_common,  # noqa: E402
+    config_utils,
+    obs_utils,
+)
 
 config_utils.register_rl_resolvers()
 
@@ -131,11 +136,22 @@ def main(override_config: omegaconf.OmegaConf):
             print(f"resume wandb from run: {config.wandb.wandb_id}")  # noqa: T201
 
     with omegaconf.open_dict(config):
-        for event in config.manager_env.config.get("train_only_events", []):
+        events_to_remove = list(
+            config.manager_env.config.get("train_only_events", [])
+        )
+        # Optional verifier profiles may remove additional domain-randomization
+        # events without changing the saved release/training configuration.
+        for event in config.get("eval_remove_events", []) or []:
+            if event not in events_to_remove:
+                events_to_remove.append(event)
+        for event in events_to_remove:
             if event in config.manager_env.events:
                 config.manager_env.events.pop(event)
             remove_schedule_keys = []
-            for key in config.trainer.get("schedule_dict", {}):
+            # A threshold-curriculum eval explicitly sets schedule_dict=null so
+            # the saved training schedule cannot alter the frozen verifier.
+            # OmegaConf.get returns None for that override, which is not iterable.
+            for key in config.trainer.get("schedule_dict") or {}:
                 if event in key:
                     remove_schedule_keys.append(key)
             for key in remove_schedule_keys:
@@ -633,7 +649,7 @@ def main(override_config: omegaconf.OmegaConf):
                     break
 
                 results = env.step(actor_state)
-                obs_dict, rewards, dones, infos = (
+                obs_dict, _, dones, _ = (
                     results[0],
                     results[1],
                     results[2],

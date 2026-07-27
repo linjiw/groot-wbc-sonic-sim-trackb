@@ -16,8 +16,10 @@ import sys
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+_repo_root = str(REPO_ROOT)
+if _repo_root in sys.path:
+    sys.path.remove(_repo_root)
+sys.path.insert(0, _repo_root)
 
 from scripts.research.paired_stats import paired_delta_statistics  # noqa: E402
 from scripts.research.summarize_sonic_logs import (  # noqa: E402
@@ -26,7 +28,25 @@ from scripts.research.summarize_sonic_logs import (  # noqa: E402
 
 _DEFAULT_VARIANT_A = "adaptive_sampling_micro"  # treatment
 _DEFAULT_VARIANT_B = "uniform_sampling_micro"  # control
-_METRIC_KEYS = ("train.mean_rewards", "eval.ok", "eval.all.mpjpe_g")
+_METRIC_KEYS = (
+    "train.mean_rewards",
+    "eval.ok",
+    "eval.all.mpjpe_g",
+    "eval.all.mpjpe_l",
+    "eval.easy_decile.ok",
+    "eval.easy_decile.mpjpe_g",
+    "eval.easy_decile.evaluated_in_decile",
+    "eval.easy_decile.decile_size",
+    "eval.easy_decile.motion_keys",
+    "eval.easy_decile.difficulty_ranking_path",
+)
+SUPPORTED_DELTA_METRICS = frozenset(
+    {
+        "eval.all.mpjpe_g",
+        "eval.all.mpjpe_l",
+        "eval.easy_decile.mpjpe_g",
+    }
+)
 # Final-value sampler telemetry for the SIM-M4 classification rule; present only
 # on adaptive arms, so these stay informational (never part of any validity gate).
 _TELEMETRY_KEYS = tuple(f"train.adp_samp_{key}" for key in ADP_SAMP_CLASSIFICATION_KEYS)
@@ -56,6 +76,15 @@ def _sorted_unique(values: list[Any]) -> list[Any]:
 
 def _delta_key(metric: str) -> str:
     return f"delta.{metric}.a_minus_b"
+
+
+def validate_effect_metric(effect_metric: str | None) -> None:
+    """Reject unsupported gates before an experiment spends compute."""
+    if effect_metric is not None and effect_metric not in SUPPORTED_DELTA_METRICS:
+        raise ValueError(
+            f"unsupported effect metric {effect_metric!r}: supported metrics are "
+            f"{sorted(SUPPORTED_DELTA_METRICS)}"
+        )
 
 
 def _build_effect_summary(
@@ -98,6 +127,64 @@ def _build_effect_summary(
     return summary
 
 
+def _is_finite_number(value: Any) -> bool:
+    return (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and value == value
+        and value not in (float("inf"), float("-inf"))
+    )
+
+
+def _build_retention_summary(
+    records: list[dict[str, Any]],
+    *,
+    retention_metric: str,
+    a_minus_b_threshold: float,
+) -> dict[str, Any]:
+    delta_key = _delta_key(retention_metric)
+    deltas = [row.get(delta_key) for row in records]
+    numeric_deltas = [float(value) for value in deltas if _is_finite_number(value)]
+    coverage_ok = True
+    for row in records:
+        a_evaluated = row.get("a.eval.easy_decile.evaluated_in_decile")
+        b_evaluated = row.get("b.eval.easy_decile.evaluated_in_decile")
+        a_decile_size = row.get("a.eval.easy_decile.decile_size")
+        b_decile_size = row.get("b.eval.easy_decile.decile_size")
+        a_keys = row.get("a.eval.easy_decile.motion_keys")
+        b_keys = row.get("b.eval.easy_decile.motion_keys")
+        row_coverage_ok = (
+            row.get("a.eval.easy_decile.ok") is True
+            and row.get("b.eval.easy_decile.ok") is True
+            and all(
+                _is_finite_number(value)
+                for value in (a_evaluated, b_evaluated, a_decile_size, b_decile_size)
+            )
+            and float(a_evaluated) == float(a_decile_size)
+            and float(b_evaluated) == float(b_decile_size)
+            and float(a_decile_size) > 0
+            and a_keys == b_keys
+            and isinstance(a_keys, list)
+            and len(a_keys) == int(a_decile_size)
+            and row.get("a.eval.easy_decile.difficulty_ranking_path")
+            == row.get("b.eval.easy_decile.difficulty_ranking_path")
+        )
+        coverage_ok = coverage_ok and row_coverage_ok
+    mean_delta = sum(numeric_deltas) / len(numeric_deltas) if numeric_deltas else None
+    complete = len(numeric_deltas) == len(records) and coverage_ok
+    return {
+        "metric": retention_metric,
+        "a_minus_b_threshold": a_minus_b_threshold,
+        "mean_delta_a_minus_b": mean_delta,
+        "seed_count": len(records),
+        "complete": complete,
+        "coverage_ok": coverage_ok,
+        "passes_preregistered_retention_gate": (
+            complete and mean_delta is not None and mean_delta <= a_minus_b_threshold
+        ),
+    }
+
+
 def _row_for_comparison(
     comparison: dict[str, Any], *, variant_a: str, variant_b: str
 ) -> dict[str, Any]:
@@ -122,12 +209,13 @@ def _row_for_comparison(
         for metric in _METRIC_KEYS + _TELEMETRY_KEYS:
             aggregate_row[f"{variant_label}.{metric}"] = metrics.get(metric)
 
-    b_mpjpe = aggregate_row.get("b.eval.all.mpjpe_g")
-    a_mpjpe = aggregate_row.get("a.eval.all.mpjpe_g")
-    if isinstance(b_mpjpe, (int, float)) and isinstance(a_mpjpe, (int, float)):
-        aggregate_row[_delta_key("eval.all.mpjpe_g")] = a_mpjpe - b_mpjpe
-    else:
-        aggregate_row[_delta_key("eval.all.mpjpe_g")] = None
+    for metric in SUPPORTED_DELTA_METRICS:
+        b_value = aggregate_row.get(f"b.{metric}")
+        a_value = aggregate_row.get(f"a.{metric}")
+        if _is_finite_number(b_value) and _is_finite_number(a_value):
+            aggregate_row[_delta_key(metric)] = float(a_value) - float(b_value)
+        else:
+            aggregate_row[_delta_key(metric)] = None
     return aggregate_row
 
 
@@ -139,6 +227,8 @@ def build_aggregate_comparison(
     effect_metric: str | None = None,
     a_minus_b_threshold: float = -0.5,
     min_improved_seeds: int = 2,
+    retention_metric: str | None = None,
+    retention_a_minus_b_threshold: float = 0.5,
 ) -> dict[str, Any]:
     """Build an aggregate over seed-level paired comparison JSON files.
 
@@ -151,10 +241,11 @@ def build_aggregate_comparison(
         raise ValueError("variant_a and variant_b must differ")
     # Deltas (and their improvement-is-negative direction) are only computed for
     # this metric; any other request would silently score an all-None gate.
-    if effect_metric is not None and effect_metric != "eval.all.mpjpe_g":
+    validate_effect_metric(effect_metric)
+    if retention_metric is not None and retention_metric != "eval.easy_decile.mpjpe_g":
         raise ValueError(
-            f"unsupported effect metric {effect_metric!r}: only eval.all.mpjpe_g "
-            "has a computed a_minus_b delta with lower-is-better semantics"
+            f"unsupported retention metric {retention_metric!r}: only "
+            "eval.easy_decile.mpjpe_g has frozen-ranking retention semantics"
         )
     resolved = [str(Path(path).resolve()) for path in comparison_paths]
     if len(set(resolved)) != len(resolved):
@@ -235,6 +326,29 @@ def build_aggregate_comparison(
             a_minus_b_threshold=a_minus_b_threshold,
             min_improved_seeds=min_improved_seeds,
         )
+    if retention_metric is not None:
+        aggregate["retention_summary"] = _build_retention_summary(
+            records,
+            retention_metric=retention_metric,
+            a_minus_b_threshold=retention_a_minus_b_threshold,
+        )
+    effect_pass = (
+        aggregate.get("effect_summary", {}).get("passes_preregistered_effect_gate")
+        if effect_metric is not None
+        else None
+    )
+    retention_pass = (
+        aggregate.get("retention_summary", {}).get("passes_preregistered_retention_gate")
+        if retention_metric is not None
+        else None
+    )
+    if effect_metric is not None or retention_metric is not None:
+        requested_gate_results = [
+            result for result in (effect_pass, retention_pass) if result is not None
+        ]
+        aggregate["passes_all_preregistered_result_gates"] = bool(
+            requested_gate_results
+        ) and all(requested_gate_results)
     return aggregate
 
 
@@ -257,6 +371,12 @@ def write_aggregate_table_markdown(path: Path, aggregate: dict[str, Any]) -> Non
         "b.eval.all.mpjpe_g",
         "a.eval.all.mpjpe_g",
         "delta.eval.all.mpjpe_g.a_minus_b",
+        "b.eval.all.mpjpe_l",
+        "a.eval.all.mpjpe_l",
+        "delta.eval.all.mpjpe_l.a_minus_b",
+        "b.eval.easy_decile.mpjpe_g",
+        "a.eval.easy_decile.mpjpe_g",
+        "delta.eval.easy_decile.mpjpe_g.a_minus_b",
     ]
     telemetry_columns = ["seed"] + [f"a.{key}" for key in _TELEMETRY_KEYS]
     with path.open("w", encoding="utf-8") as f:
@@ -307,6 +427,21 @@ def write_aggregate_table_markdown(path: Path, aggregate: dict[str, Any]) -> Non
                 ]:
                     f.write(f"| `{key}` | {_format_value(statistics.get(key))} |\n")
             f.write("\n")
+        retention_summary = aggregate.get("retention_summary")
+        if isinstance(retention_summary, dict):
+            f.write("## Pre-registered retention gate\n\n")
+            f.write("| Field | Value |\n|---|---|\n")
+            for key in [
+                "metric",
+                "a_minus_b_threshold",
+                "mean_delta_a_minus_b",
+                "seed_count",
+                "complete",
+                "coverage_ok",
+                "passes_preregistered_retention_gate",
+            ]:
+                f.write(f"| `{key}` | {_format_value(retention_summary.get(key))} |\n")
+            f.write("\n")
         f.write("## Warning counts\n\n")
         f.write("| Warning type | Count |\n|---|---:|\n")
         for key, value in aggregate.get("warning_counts", {}).items():
@@ -352,7 +487,10 @@ def main() -> int:
     parser.add_argument(
         "--effect-metric",
         default=None,
-        help="Optional metric key for a pre-registered a-minus-b effect gate, e.g. eval.all.mpjpe_g.",
+        help=(
+            "Optional metric key for a pre-registered a-minus-b effect gate, "
+            "e.g. eval.all.mpjpe_l or eval.all.mpjpe_g."
+        ),
     )
     parser.add_argument(
         "--a-minus-b-threshold",
@@ -362,6 +500,17 @@ def main() -> int:
         "Lower MPJPE is better, so beneficial thresholds are negative.",
     )
     parser.add_argument("--min-improved-seeds", type=int, default=2)
+    parser.add_argument(
+        "--retention-metric",
+        default=None,
+        help="Optional frozen-ranking retention metric (eval.easy_decile.mpjpe_g).",
+    )
+    parser.add_argument(
+        "--retention-a-minus-b-threshold",
+        type=float,
+        default=0.5,
+        help="Mean treatment-minus-control retention delta must be <= this bound.",
+    )
     args = parser.parse_args()
 
     aggregate = build_aggregate_comparison(
@@ -371,6 +520,8 @@ def main() -> int:
         effect_metric=args.effect_metric,
         a_minus_b_threshold=args.a_minus_b_threshold,
         min_improved_seeds=args.min_improved_seeds,
+        retention_metric=args.retention_metric,
+        retention_a_minus_b_threshold=args.retention_a_minus_b_threshold,
     )
     write_aggregate_json(args.output_json, aggregate)
     write_aggregate_table_markdown(args.output_md, aggregate)

@@ -7,6 +7,7 @@ from scripts.research.sampler_dynamics_sim import (
     _compute_prob,
     _difficulty_regime,
     _hard_half_mass_ratio,
+    _rank_correlation,
     run_forecast,
     simulate,
     validate_against_real,
@@ -47,6 +48,12 @@ def test_hard_half_mass_ratio_detects_correct_targeting() -> None:
     difficulty = np.linspace(0, 1, 10)
     prob = difficulty / difficulty.sum()  # mass concentrated on hard bins
     assert _hard_half_mass_ratio(prob, difficulty) > 1.5
+
+
+def test_rank_correlation_uses_average_tie_ranks_and_constant_is_zero() -> None:
+    repeated = np.repeat(np.arange(12, dtype=float), 10)
+    assert _rank_correlation(repeated, repeated) == pytest.approx(1.0)
+    assert _rank_correlation(np.ones_like(repeated), repeated) == pytest.approx(0.0)
 
 
 def test_simulate_failure_rate_flat_in_starved_regime() -> None:

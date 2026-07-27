@@ -10,6 +10,23 @@ from tqdm import tqdm
 from transformers import TrainerCallback
 import wandb
 
+from gear_sonic.utils.root_xy_diagnostic import (
+    ROOT_XY_PER_MOTION_FIELDS,
+    root_xy_distance,
+    summarize_root_xy_error_batch,
+    validate_root_xy_threshold,
+)
+
+
+def mean_recorded_mpjpe_mm(mpjpe_batches) -> float:
+    """Return the displayed MPJPE in millimetres.
+
+    Per-step MPJPE values are converted from metres to millimetres when they
+    are recorded.  Keeping the unit conversion here explicit prevents the
+    progress display from scaling those values a second time.
+    """
+    return float(np.mean(mpjpe_batches))
+
 
 def create_html_table(metrics_dict):
     """
@@ -115,6 +132,7 @@ class ImEvalCallback(TrainerCallback):
         output_dir=None,
         log_keys=None,
         max_eval_steps=None,
+        root_xy_diagnostic_threshold_m=None,
     ):
         super().__init__()
         self.eval_frequency = eval_frequency
@@ -125,6 +143,11 @@ class ImEvalCallback(TrainerCallback):
         self.render_only = False
         self.log_keys = log_keys
         self.max_eval_steps = max_eval_steps
+        self.root_xy_diagnostic_threshold_m = (
+            None
+            if root_xy_diagnostic_threshold_m is None
+            else validate_root_xy_threshold(root_xy_diagnostic_threshold_m)
+        )
         self._has_object = False
 
     def on_step_end(self, args, state, control, **kwargs):
@@ -182,7 +205,6 @@ class ImEvalCallback(TrainerCallback):
                 self.env.num_envs, self.env.config.robot.actions_dim, device=self.env.device
             )
             actor_state.update({"obs": obs_dict, "actions": init_actions})
-            actor_state = self._pre_eval_env_step(actor_state)
 
             while not actor_state.get("end_eval", False):
                 self.env.render_results()
@@ -237,6 +259,14 @@ class ImEvalCallback(TrainerCallback):
         if self.eval_only:
             metrics_eval["failed_keys"] = eval_res["failed_keys"]
             metrics_eval["failed_idxes"] = eval_res["failed_idxes"]
+
+        if self.root_xy_diagnostic_threshold_m is not None:
+            metrics_eval["eval/root_xy_diagnostic_threshold_m"] = (
+                self.root_xy_diagnostic_threshold_m
+            )
+            metrics_eval["eval/root_xy_diagnostic_exact_guard_samples"] = (
+                self.root_xy_diagnostic_exact_guard_samples
+            )
 
         return metrics_eval
 
@@ -308,6 +338,31 @@ class ImEvalCallback(TrainerCallback):
         self.obj_pos_error, self.obj_pos_error_all = [], []
         self.obj_ori_error, self.obj_ori_error_all = [], []
 
+        if self.root_xy_diagnostic_threshold_m is not None:
+            if not hasattr(self.env, "motion_command") or self.env.motion_command is None:
+                raise RuntimeError("root XY diagnostics require env.motion_command")
+            self.root_xy_error = []
+            self.root_xy_diagnostic_all = {
+                field: [] for field in ROOT_XY_PER_MOTION_FIELDS
+            }
+            self.root_xy_diagnostic_exact_guard_samples = True
+            self.env.motion_command._record_root_xy_diagnostic = True
+            if hasattr(self.env.motion_command, "_root_xy_diagnostic_last_error"):
+                del self.env.motion_command._root_xy_diagnostic_last_error
+
+    def _collect_root_xy_diagnostic_error(self):
+        """Collect the exact XY error used by the opt-in termination check."""
+        command = self.env.motion_command
+        error = getattr(command, "_root_xy_diagnostic_last_error", None)
+        if error is None:
+            # This fallback keeps the callback independently useful, while the
+            # D2 launcher rejects its output because it was not guard-aligned.
+            error = root_xy_distance(command.anchor_pos_w, command.robot_anchor_pos_w)
+            self.root_xy_diagnostic_exact_guard_samples = False
+        else:
+            del command._root_xy_diagnostic_last_error
+        self.root_xy_error.append(error.detach().cpu())
+
     def _collect_object_tracking_errors(self):
         """Collect per-step object position and orientation errors (ref vs simulated)."""
         try:
@@ -344,6 +399,28 @@ class ImEvalCallback(TrainerCallback):
         actor_state.update({"actions": actions})
         return actor_state
 
+    def _advance_eval_motion(self, actor_state: dict):
+        """Start the next motion from fresh observations and policy rollout state.
+
+        ``forward_motion_samples`` resets the simulator after loading the next
+        batch.  Reusing the pre-reset observation or temporal policy state makes
+        later motions depend on whichever motion preceded them, invalidating
+        all-motion comparisons.
+        """
+        obs_dict = self.env.forward_motion_samples(
+            self.args.global_rank, self.args.world_size
+        )
+        if obs_dict is None:
+            raise RuntimeError(
+                "forward_motion_samples must return observations from the reset"
+            )
+        self.model.policy.init_rollout()
+        actor_state["obs"] = obs_dict
+        actor_state["dones"] = torch.zeros(
+            self.env.num_envs, dtype=torch.bool, device=self.env.device
+        )
+        return actor_state
+
     def _post_eval_env_step(self, actor_state):
         step = actor_state["step"]
         actor_state["end_eval"] = False
@@ -363,6 +440,8 @@ class ImEvalCallback(TrainerCallback):
         # Collect object tracking errors if object exists in scene
         if self._has_object:
             self._collect_object_tracking_errors()
+        if self.root_xy_diagnostic_threshold_m is not None:
+            self._collect_root_xy_diagnostic_error()
 
         # self.gt_rot.append(self.env.extras['ref_body_rot_extend'].cpu().numpy())
         # self.pred_rot.append(self.env._rigid_body_rot_extend.cpu().numpy())
@@ -504,6 +583,15 @@ class ImEvalCallback(TrainerCallback):
                 ]
                 self.obj_pos_error_all.append(per_env_obj_pos_err)
                 self.obj_ori_error_all.append(per_env_obj_ori_err)
+
+            if self.root_xy_diagnostic_threshold_m is not None:
+                root_xy_summary = summarize_root_xy_error_batch(
+                    torch.stack(self.root_xy_error),
+                    self.env._motion_lib.get_motion_num_steps(self.env.motion_ids),
+                    threshold_m=self.root_xy_diagnostic_threshold_m,
+                )
+                for field, values in root_xy_summary.items():
+                    self.root_xy_diagnostic_all[field].append(values)
 
             env_motion_ids = self.env.start_idx + self.env.motion_ids
             self.sampled_motion_idx.append(env_motion_ids)
@@ -657,6 +745,15 @@ class ImEvalCallback(TrainerCallback):
                         [v for batch in self.obj_ori_error_all for v in batch]
                     ).to(self.env.device)
 
+                has_root_xy_metrics = self.root_xy_diagnostic_threshold_m is not None
+                if has_root_xy_metrics:
+                    root_xy_flat = {
+                        field: torch.cat(self.root_xy_diagnostic_all[field]).to(
+                            self.env.device
+                        )
+                        for field in ROOT_XY_PER_MOTION_FIELDS
+                    }
+
                 # Tensor layout: [metrics_all_sum..., length, terminate, progress, (obj_pos_err, obj_ori_err,) motion_idx]
                 tail_tensors = [
                     terminate_hist_concatenate[:, None],
@@ -665,6 +762,11 @@ class ImEvalCallback(TrainerCallback):
                 if has_obj_metrics:
                     tail_tensors.append(obj_pos_err_flat[:, None])
                     tail_tensors.append(obj_ori_err_flat[:, None])
+                if has_root_xy_metrics:
+                    tail_tensors.extend(
+                        root_xy_flat[field][:, None]
+                        for field in ROOT_XY_PER_MOTION_FIELDS
+                    )
                 tail_tensors.append(all_motion_idxes[:, None])
 
                 all_tensors = torch.cat(
@@ -690,19 +792,26 @@ class ImEvalCallback(TrainerCallback):
                 )  # make sure that we are selecting the correct ones.
 
                 # Extract tail columns: terminate, progress, (obj_pos_err, obj_ori_err,) motion_idx
-                num_tail = 3 + (
-                    2 if has_obj_metrics else 0
-                )  # terminate + progress + (obj*2) + motion_idx
+                num_tail = (
+                    3
+                    + (2 if has_obj_metrics else 0)
+                    + (len(ROOT_XY_PER_MOTION_FIELDS) if has_root_xy_metrics else 0)
+                )
                 num_body_metrics = metric_size - num_tail  # metrics_all_sum columns + length
 
                 gathered_terminate_hist_stack = gathered_metrics_stack[:, num_body_metrics].bool()
                 gathered_progress_hist_stack = gathered_metrics_stack[:, num_body_metrics + 1]
+                tail_offset = num_body_metrics + 2
                 if has_obj_metrics:
-                    gathered_obj_pos_err = gathered_metrics_stack[:, num_body_metrics + 2]
-                    gathered_obj_ori_err = gathered_metrics_stack[:, num_body_metrics + 3]
-                    gathered_motion_idxes = gathered_metrics_stack[:, num_body_metrics + 4].long()
-                else:
-                    gathered_motion_idxes = gathered_metrics_stack[:, num_body_metrics + 2].long()
+                    gathered_obj_pos_err = gathered_metrics_stack[:, tail_offset]
+                    gathered_obj_ori_err = gathered_metrics_stack[:, tail_offset + 1]
+                    tail_offset += 2
+                if has_root_xy_metrics:
+                    gathered_root_xy = {}
+                    for field in ROOT_XY_PER_MOTION_FIELDS:
+                        gathered_root_xy[field] = gathered_metrics_stack[:, tail_offset]
+                        tail_offset += 1
+                gathered_motion_idxes = gathered_metrics_stack[:, tail_offset].long()
                 gathered_progress_hist_stack[~gathered_terminate_hist_stack] = 1
 
                 assert (gathered_motion_idxes.diff(dim=0) == 1).all()
@@ -783,6 +892,29 @@ class ImEvalCallback(TrainerCallback):
                         all_metrics_dict["per_env_obj_ori_error"] = [
                             v for batch in self.obj_ori_error_all for v in batch
                         ]
+                if has_root_xy_metrics:
+                    all_metrics_dict.update(
+                        {
+                            "root_xy_error_mean_m": gathered_root_xy[
+                                "root_xy_error_mean_m"
+                            ].cpu().numpy(),
+                            "root_xy_error_p95_m": gathered_root_xy[
+                                "root_xy_error_p95_m"
+                            ].cpu().numpy(),
+                            "root_xy_error_max_m": gathered_root_xy[
+                                "root_xy_error_max_m"
+                            ].cpu().numpy(),
+                            "root_xy_guard_hit": gathered_root_xy[
+                                "root_xy_guard_hit"
+                            ].bool().cpu().numpy(),
+                            "root_xy_first_crossing_frame": gathered_root_xy[
+                                "root_xy_first_crossing_frame"
+                            ].long().cpu().numpy(),
+                            "root_xy_first_crossing_progress": gathered_root_xy[
+                                "root_xy_first_crossing_progress"
+                            ].cpu().numpy(),
+                        }
+                    )
 
                 failed_metrics_dict = {
                     k: all_metrics[gathered_terminate_hist_stack, idx].cpu().numpy()
@@ -801,6 +933,14 @@ class ImEvalCallback(TrainerCallback):
                     failed_metrics_dict["obj_ori_error"] = (
                         gathered_obj_ori_err[gathered_terminate_hist_stack].cpu().numpy()
                     )
+                if has_root_xy_metrics:
+                    for field in ROOT_XY_PER_MOTION_FIELDS:
+                        values = gathered_root_xy[field][gathered_terminate_hist_stack]
+                        if field == "root_xy_guard_hit":
+                            values = values.bool()
+                        elif field == "root_xy_first_crossing_frame":
+                            values = values.long()
+                        failed_metrics_dict[field] = values.cpu().numpy()
 
                 if self.accelerator.is_main_process:
                     print(f"Success Rate: {success_rate:.10f}", flush=True)
@@ -850,20 +990,34 @@ class ImEvalCallback(TrainerCallback):
                         self.obj_ori_error,
                         self.obj_ori_error_all,
                     )
+                    if self.root_xy_diagnostic_threshold_m is not None:
+                        del self.root_xy_error, self.root_xy_diagnostic_all
                     gc.collect()
                     torch.cuda.empty_cache()
+
+                if self.root_xy_diagnostic_threshold_m is not None:
+                    self.env.motion_command._record_root_xy_diagnostic = False
+                    if hasattr(
+                        self.env.motion_command, "_root_xy_diagnostic_last_error"
+                    ):
+                        del self.env.motion_command._root_xy_diagnostic_last_error
 
                 actor_state["end_eval"] = True
                 self.pbar.update(1)
                 self.pbar.refresh()
                 return actor_state
 
-            self.env.forward_motion_samples(self.args.global_rank, self.args.world_size)
+            actor_state = self._advance_eval_motion(actor_state)
             self.terminate_state = torch.zeros(self.env.num_envs, device=self.device)
             self.progress_state = torch.zeros(self.env.num_envs, device=self.env.device)
 
             self.success_rate = 0
             self.curr_steps = 0
+
+            if self.root_xy_diagnostic_threshold_m is not None:
+                self.root_xy_error = []
+                if hasattr(self.env.motion_command, "_root_xy_diagnostic_last_error"):
+                    del self.env.motion_command._root_xy_diagnostic_last_error
 
             self.pbar.update(1)
             self.pbar.refresh()
@@ -886,7 +1040,13 @@ class ImEvalCallback(TrainerCallback):
         if self._has_object and len(self.obj_pos_error_all) > 0:
             mean_obj_pos_err = np.mean([v for batch in self.obj_pos_error_all for v in batch])
             obj_str = f" | ObjPosErr: {mean_obj_pos_err:.4f}m"
-        update_str = f"Terminated: {self.terminate_state.sum().item()} | max frames: {curr_max} | steps {self.curr_steps} | env_loop: {self.env_eval_loop_idx} | eval_time: {eval_time:.1f}m | Start: {self.env.start_idx} | Succ rate: {self.success_rate:.3f} | Mpjpe: {np.mean(self.mpjpe_all) * 1000:.3f}{obj_str}"
+        update_str = (
+            f"Terminated: {self.terminate_state.sum().item()} | max frames: {curr_max} | "
+            f"steps {self.curr_steps} | env_loop: {self.env_eval_loop_idx} | "
+            f"eval_time: {eval_time:.1f}m | Start: {self.env.start_idx} | "
+            f"Succ rate: {self.success_rate:.3f} | "
+            f"Mpjpe: {mean_recorded_mpjpe_mm(self.mpjpe_all):.3f}{obj_str}"
+        )
         self.pbar.set_description(update_str)
 
         return actor_state
