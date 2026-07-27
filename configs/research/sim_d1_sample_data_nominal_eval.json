@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "name": "sim_d1_sample_data_release_nominal_v1",
+  "dataset": "sample_data_release_retro",
+  "dataset_kind": "sample_data",
+  "checkpoint": "sonic_release/last.pt",
+  "checkpoint_sha256": "e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909",
+  "dataset_robot": "sample_data/robot_filtered",
+  "dataset_smpl": "sample_data/smpl_filtered",
+  "coverage_manifest": "configs/research/sim_d1_sample_data_expected_keys.json",
+  "dataset_manifest": {
+    "path": "configs/research/sim_d1_sample_data_manifest.json",
+    "sha256": "47ab5dfcfebf708d6f877806a6886cf9ace068ced746b7355871b4b0f5c85bd4",
+    "sha256_kind": "canonical_json_without_source_locations_v1",
+    "paired_dataset_sha256": "96126d864a123c3955a644242b162b8928c71df512dbb2eecd9e7f81ada7c937"
+  },
+  "output_dir": "outputs/research/sim_d1/sample_data_release_nominal_v1",
+  "num_envs": 1,
+  "seed": 0,
+  "timeout_seconds": 1800,
+  "extra_overrides": [
+    "+eval_events=nominal_d1",
+    "++manager_env.config.terrain_type=plane",
+    "++manager_env.commands.motion.motion_lib_cfg.sort_motion_keys=true",
+    "++manager_env.observations.policy.enable_corruption=false",
+    "++manager_env.observations.tokenizer.enable_corruption=false",
+    "+use_encoder=g1"
+  ]
+}

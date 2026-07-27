@@ -957,14 +957,16 @@ def test_direct_paired_preflight_rejects_nested_smpl_inventory(tmp_path: Path) -
         paired_runner._verify_activation_preflight(spec, repo_root=tmp_path)
 
 
-def test_activation_preflight_rejects_current_sim_d1_fail_artifact(
+def test_activation_preflight_rejects_sim_d1_fail_artifact(
     tmp_path: Path,
 ) -> None:
     spec = _activation_preflight_spec(tmp_path)
-    fail_artifact = (
-        Path(__file__).resolve().parents[2]
-        / "docs/artifacts/sim_d1/d_b_synthetic_release_retro/classification.json"
-    )
+    fail_artifact = tmp_path / "classification.json"
+    classification = json.loads(fail_artifact.read_text(encoding="utf-8"))
+    classification["verdict"] = "FAIL"
+    classification["pass"] = False
+    classification["eligible_for_effect_experiment"] = False
+    fail_artifact.write_text(json.dumps(classification), encoding="utf-8")
     spec["sim_d1_classification_json"] = str(fail_artifact)
     spec["sim_d1_classification_sha256"] = _sha256(fail_artifact)
     with pytest.raises(ValueError, match="must have verdict PASS"):
