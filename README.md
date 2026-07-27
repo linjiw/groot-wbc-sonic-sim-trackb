@@ -201,7 +201,7 @@ from the released checkpoint on [Hugging Face](https://huggingface.co/nvidia/GEA
 
 ```bash
 # Install training dependencies (Isaac Lab must be installed separately — see docs)
-pip install -e "gear_sonic/[training]"
+pip install -e "gear_sonic[training]"
 
 # Download checkpoint + SMPL data from Hugging Face
 pip install huggingface_hub
@@ -276,7 +276,7 @@ python check_environment.py
 
 | I want to... | Environment | How to install |
 |---|---|---|
-| **Train / finetune SONIC** | Isaac Lab's Python env | [Install Isaac Lab](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/index.html), then `pip install -e "gear_sonic/[training]"` |
+| **Train / finetune SONIC** | Isaac Lab's Python env | [Install Isaac Lab](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/index.html), then `pip install -e "gear_sonic[training]"` |
 | **Run MuJoCo simulation** | `.venv_sim` (auto-created) | `bash install_scripts/install_mujoco_sim.sh` |
 | **VR teleoperation** | `.venv_teleop` (auto-created) | `bash install_scripts/install_pico.sh` |
 | **Collect data** | `.venv_data_collection` (auto-created) | `bash install_scripts/install_data_collection.sh` |
