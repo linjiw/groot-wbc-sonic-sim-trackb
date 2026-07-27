@@ -26,7 +26,7 @@ python -c "import isaaclab; print(isaaclab.__version__)"
 From the repository root:
 
 ```bash
-pip install -e "gear_sonic/[training]"
+pip install -e "gear_sonic[training]"
 ```
 
 This installs the training dependencies (Hydra, W&B, HuggingFace TRL, etc.)
@@ -37,6 +37,8 @@ on top of the Isaac Lab environment.
 SONIC model checkpoints and SMPL motion data are hosted on
 [Hugging Face](https://huggingface.co/nvidia/GEAR-SONIC).
 
+For a full training setup:
+
 ```bash
 pip install huggingface_hub
 python download_from_hf.py --training
@@ -46,6 +48,18 @@ This downloads:
 
 - **PyTorch checkpoint** (`sonic_release/last.pt`) for finetuning
 - **SMPL motion data** (`data/smpl_filtered/`) for the SMPL encoder
+
+The full SMPL download is about 30 GB and temporarily needs additional space
+for the Hugging Face cache, staged archive parts, and extracted files. Check
+available disk space before starting it.
+
+For a lightweight launch check, download only the checkpoint and paired sample
+motions instead. This does **not** prepare the full training dataset:
+
+```bash
+python download_from_hf.py --training --no-smpl
+python download_from_hf.py --sample
+```
 
 ## Prepare Robot Motion Data
 
@@ -99,24 +113,43 @@ First, run the pre-flight check to verify all dependencies:
 python check_environment.py --training
 ```
 
-Then run a quick smoke test with a small number of environments:
+Then run a quick smoke test with a small number of environments. The explicit
+dataset overrides are intentional: the downloader writes SMPL files to
+`data/smpl_filtered/`, while the release experiment config retains its original
+`data/bones_seed_smpl` default.
 
 ```bash
 # Interactive (with viewer)
 python gear_sonic/train_agent_trl.py \
     +exp=manager/universal_token/all_modes/sonic_release \
     num_envs=16 headless=False \
-    ++algo.config.num_learning_iterations=5
+    ++algo.config.num_learning_iterations=5 \
+    ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/motion_lib_bones_seed/robot_filtered \
+    ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/smpl_filtered
 
 # Headless (server / no display)
 python gear_sonic/train_agent_trl.py \
     +exp=manager/universal_token/all_modes/sonic_release \
     num_envs=16 headless=True \
-    ++algo.config.num_learning_iterations=5
+    ++algo.config.num_learning_iterations=5 \
+    ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/motion_lib_bones_seed/robot_filtered \
+    ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/smpl_filtered
 ```
 
 After a minute of initialization you should see training metrics (rewards, errors)
 printing to the console.
+
+If you used the lightweight downloads above, run a smaller sample-only smoke
+instead:
+
+```bash
+python gear_sonic/train_agent_trl.py \
+    +exp=manager/universal_token/all_modes/sonic_release \
+    num_envs=2 headless=True \
+    ++algo.config.num_learning_iterations=1 \
+    ++manager_env.commands.motion.motion_lib_cfg.motion_file=sample_data/robot_filtered \
+    ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=sample_data/smpl_filtered
+```
 
 ## Full Training
 

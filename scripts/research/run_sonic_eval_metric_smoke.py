@@ -15,10 +15,27 @@ import subprocess
 import sys
 from typing import Any
 
-from scripts.research.summarize_sonic_logs import summarize_logs, write_markdown
+REPO_ROOT = Path(__file__).resolve().parents[2]
+_repo_root = str(REPO_ROOT)
+if _repo_root in sys.path:
+    sys.path.remove(_repo_root)
+sys.path.insert(0, _repo_root)
 
+from scripts.research.summarize_sonic_logs import (  # noqa: E402
+    summarize_logs,
+    write_markdown,
+)
 
-_REQUIRED_TOP_LEVEL = ("name", "goal", "repo_root", "dataset_robot", "dataset_smpl", "checkpoint", "eval", "success_criteria")
+_REQUIRED_TOP_LEVEL = (
+    "name",
+    "goal",
+    "repo_root",
+    "dataset_robot",
+    "dataset_smpl",
+    "checkpoint",
+    "eval",
+    "success_criteria",
+)
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -92,7 +109,9 @@ def _finite_primary_mpjpe(summary: dict[str, Any], metric_name: str) -> bool:
     return isinstance(value, (int, float)) and math.isfinite(float(value))
 
 
-def run_eval_metric_smoke(spec: dict[str, Any], *, output_dir: Path, repo_root: Path, dry_run: bool = False) -> dict[str, Any]:
+def run_eval_metric_smoke(
+    spec: dict[str, Any], *, output_dir: Path, repo_root: Path, dry_run: bool = False
+) -> dict[str, Any]:
     errors = validate_eval_smoke_spec(spec)
     if errors:
         raise ValueError("invalid spec: " + "; ".join(errors))

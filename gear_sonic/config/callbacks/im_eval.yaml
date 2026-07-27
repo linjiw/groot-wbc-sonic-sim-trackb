@@ -5,3 +5,5 @@ im_eval:
   output_dir: ${experiment_dir}/eval_metrics
   # Optional step cap for fast smoke tests. Leave null for full-sequence metrics.
   max_eval_steps: null
+  # Default-off diagnostic. A positive value records exact per-motion root XY errors.
+  root_xy_diagnostic_threshold_m: null

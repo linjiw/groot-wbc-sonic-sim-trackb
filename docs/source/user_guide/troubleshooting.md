@@ -76,7 +76,7 @@ decoders:
 
 ## 4. `trl` / `transformers` version conflict during pip install
 
-**Symptom:** `pip install -e "gear_sonic/[training]"` fails with a dependency
+**Symptom:** `pip install -e "gear_sonic[training]"` fails with a dependency
 resolution error about incompatible `transformers` versions.
 
 **Cause:** `trl==0.28.0` requires `transformers>=4.56.2`. If you have an older
@@ -85,7 +85,7 @@ resolution error about incompatible `transformers` versions.
 **Fix:**
 
 ```bash
-pip install -e "gear_sonic/[training]" --upgrade
+pip install -e "gear_sonic[training]" --upgrade
 ```
 
 Or install in a fresh environment. If you need a specific `transformers` version

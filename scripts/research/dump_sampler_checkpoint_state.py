@@ -12,30 +12,34 @@ checkpoint (``weights_only=False``) needs the trainer's classes importable. The
 script's own imports are torch-only.
 
 Caveats recorded in the output:
-- Length-based bin weights are not checkpointed, so the recomputed distribution
-  omits them (``recomputed_prob_unweighted``). The training-time weighted
-  distribution is in the ``Env/adp_samp/prob_*`` telemetry; do not compare the
-  unweighted recompute against telemetry thresholds.
-- The recompute assumes ``use_failure_rate_decay=false`` (the release default);
+- Legacy/failure-rate checkpoints do not contain bin weights, so their recomputed
+  distribution remains ``recomputed_prob_unweighted``. New ZPD checkpoints expose
+  weights plus cumulative actual selected-target-bin draws. ``sampled_fraction``
+  is authoritative mass across global selection and active-batch conditioning,
+  measured before the random frame and ``pre_failure_sample_window`` shift; it is
+  not executed-start-bin mass.
+- The failure-rate recompute assumes ``use_failure_rate_decay=false`` (the release default);
   with decay enabled, failures/episodes is not the rate the sampler used.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import math
 from pathlib import Path
 import sys
 from typing import Any
 
 _CAVEATS = [
-    "recomputed_prob_unweighted omits length-based bin weights (not checkpointed); "
-    "training-time weighted probabilities are in Env/adp_samp/prob_* telemetry.",
     "failure_rate assumes use_failure_rate_decay=false (release default).",
     "the clip bound uses the mean failure rate over ALL bins; the sampler clips "
     "against the mean over the ACTIVE bin subset, which differs when motions are "
     "loaded in batches (all sample_data bins fit in one batch, so identical there).",
 ]
+
+_ZPD_SAMPLING_MASS_SEMANTICS = "selected_target_bin_pre_window_shift"
 
 
 def extract_sampler_state(checkpoint_path: Path) -> dict[str, Any]:
@@ -45,7 +49,15 @@ def extract_sampler_state(checkpoint_path: Path) -> dict[str, Any]:
     checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
     env_state = checkpoint.get("env_state_dict") or {}
     motion_lib_state = env_state.get("motion_lib") or {}
-    state: dict[str, Any] = {"checkpoint_path": str(checkpoint_path)}
+    digest = hashlib.sha256()
+    with checkpoint_path.open("rb") as checkpoint_file:
+        for chunk in iter(lambda: checkpoint_file.read(1024 * 1024), b""):
+            digest.update(chunk)
+    state: dict[str, Any] = {
+        "checkpoint_path": str(checkpoint_path),
+        "checkpoint_sha256": digest.hexdigest(),
+        "checkpoint_size_bytes": checkpoint_path.stat().st_size,
+    }
     trainer_state = checkpoint.get("state")
     if trainer_state is not None and hasattr(trainer_state, "global_step"):
         state["global_step"] = int(trainer_state.global_step)
@@ -56,6 +68,29 @@ def extract_sampler_state(checkpoint_path: Path) -> dict[str, Any]:
         state["adp_samp_num_failures"] = [
             float(v) for v in motion_lib_state["adp_samp_num_failures"].cpu().tolist()
         ]
+    if "adp_samp_bin_motion_ids" in motion_lib_state:
+        state["adp_samp_bin_motion_ids"] = [
+            int(v) for v in motion_lib_state["adp_samp_bin_motion_ids"].cpu().tolist()
+        ]
+        state["adp_samp_motion_data_keys"] = [
+            str(v) for v in motion_lib_state.get("adp_samp_motion_data_keys", [])
+        ]
+    if "adp_samp_bin_ranges" in motion_lib_state:
+        state["adp_samp_bin_ranges"] = [
+            [int(value) for value in row]
+            for row in motion_lib_state["adp_samp_bin_ranges"].cpu().tolist()
+        ]
+    if "adp_samp_bin_weights" in motion_lib_state:
+        state["adp_samp_bin_weights"] = [
+            float(v) for v in motion_lib_state["adp_samp_bin_weights"].cpu().tolist()
+        ]
+    if "adp_samp_bin_draw_counts" in motion_lib_state:
+        state["adp_samp_bin_draw_counts"] = [
+            int(v) for v in motion_lib_state["adp_samp_bin_draw_counts"].cpu().tolist()
+        ]
+    for key in ("adp_samp_zpd_schema", "adp_samp_zpd_config"):
+        if key in motion_lib_state:
+            state[key] = dict(motion_lib_state[key])
     return state
 
 
@@ -89,6 +124,8 @@ def build_sampler_state_summary(
     """Pure summary of one checkpoint's sampler state (unit-testable without torch)."""
     summary: dict[str, Any] = {
         "checkpoint_path": state.get("checkpoint_path"),
+        "checkpoint_sha256": state.get("checkpoint_sha256"),
+        "checkpoint_size_bytes": state.get("checkpoint_size_bytes"),
         "global_step": state.get("global_step"),
         "adaptive_state_present": "adp_samp_num_episodes" in state,
         "params": {
@@ -97,8 +134,12 @@ def build_sampler_state_summary(
             "uniform_sampling_rate": uniform_sampling_rate,
             "prior_domination_threshold": prior_domination_threshold,
         },
-        "caveats": _CAVEATS,
+        "caveats": list(_CAVEATS),
     }
+    if "adp_samp_zpd_schema" in state:
+        summary["sampler_schema"] = state["adp_samp_zpd_schema"]
+    if "adp_samp_zpd_config" in state:
+        summary["sampler_config"] = state["adp_samp_zpd_config"]
     if not summary["adaptive_state_present"]:
         return summary
 
@@ -109,6 +150,37 @@ def build_sampler_state_summary(
             f"episode/failure length mismatch or empty: {len(episodes)} vs {len(failures)}"
         )
     n = len(episodes)
+    weights = state.get("adp_samp_bin_weights")
+    draw_counts = state.get("adp_samp_bin_draw_counts")
+    bin_ranges = state.get("adp_samp_bin_ranges")
+    if weights is not None:
+        if len(weights) != n:
+            raise ValueError(f"bin-weight length mismatch: {len(weights)} vs {n} sampler bins")
+        if any(
+            not isinstance(weight, (int, float)) or not math.isfinite(weight) or weight < 0
+            for weight in weights
+        ):
+            raise ValueError("bin weights must be finite nonnegative numbers")
+        summary["caveats"].append(
+            "ZPD bin weights are checkpointed; realized sampled_fraction is preferred "
+            "because sampling also includes global motion selection and active-batch conditioning."
+        )
+    else:
+        summary["caveats"].append(
+            "recomputed_prob_unweighted omits length-based bin weights (not checkpointed in "
+            "legacy/failure-rate state); training-time weighted probabilities are in telemetry."
+        )
+    if draw_counts is not None:
+        if len(draw_counts) != n:
+            raise ValueError(
+                f"bin-draw-count length mismatch: {len(draw_counts)} vs {n} sampler bins"
+            )
+        if any(not isinstance(count, int) or count < 0 for count in draw_counts):
+            raise ValueError("bin draw counts must be nonnegative integers")
+    if bin_ranges is not None:
+        if len(bin_ranges) != n or any(len(row) != 2 for row in bin_ranges):
+            raise ValueError(f"bin-range shape mismatch: expected {n} rows of [start, end]")
+
     observed_failures = [f - init_num_failures for f in failures]
     observed_episodes = [e - init_num_failures for e in episodes]
     failure_rates = [f / e if e > 0 else 0.0 for f, e in zip(failures, episodes)]
@@ -119,10 +191,27 @@ def build_sampler_state_summary(
     )
     uniform = 1.0 / n
     prior_dominated = [obs <= prior_domination_threshold for obs in observed_failures]
+    sampled_total = sum(draw_counts) if draw_counts is not None else None
+    sampled_fractions = (
+        [count / sampled_total for count in draw_counts]
+        if sampled_total
+        else ([0.0] * n if draw_counts is not None else None)
+    )
 
     summary["num_bins"] = n
-    summary["bins"] = [
-        {
+    if "adp_samp_bin_motion_ids" in state:
+        motion_ids = state["adp_samp_bin_motion_ids"]
+        motion_keys = state.get("adp_samp_motion_data_keys", [])
+        if len(motion_ids) != n:
+            raise ValueError(
+                f"bin-motion id length mismatch: {len(motion_ids)} vs {n} sampler bins"
+            )
+        if any(motion_id < 0 or motion_id >= len(motion_keys) for motion_id in motion_ids):
+            raise ValueError("bin-motion id is outside adp_samp_motion_data_keys")
+        summary["bin_motion_keys"] = [motion_keys[motion_id] for motion_id in motion_ids]
+    summary["bins"] = []
+    for i in range(n):
+        bin_summary = {
             "bin": i,
             "num_episodes": episodes[i],
             "num_failures": failures[i],
@@ -132,8 +221,15 @@ def build_sampler_state_summary(
             "recomputed_prob_unweighted": prob[i],
             "prior_dominated": prior_dominated[i],
         }
-        for i in range(n)
-    ]
+        if weights is not None:
+            bin_summary["bin_weight"] = weights[i]
+        if draw_counts is not None:
+            bin_summary["sampled_count"] = draw_counts[i]
+            bin_summary["sampled_fraction"] = sampled_fractions[i]
+        if bin_ranges is not None:
+            bin_summary["bin_start"] = bin_ranges[i][0]
+            bin_summary["bin_end"] = bin_ranges[i][1]
+        summary["bins"].append(bin_summary)
     summary["aggregates"] = {
         "observed_failures_total": sum(observed_failures),
         "observed_failures_max": max(observed_failures),
@@ -146,6 +242,17 @@ def build_sampler_state_summary(
         "effective_num_bins_unweighted": 1.0 / sum(p * p for p in prob),
         "num_concentrated_bins_unweighted": sum(1 for p in prob if p > 10.0 * uniform),
     }
+    if sampled_total is not None:
+        summary["aggregates"]["sampled_count_total"] = sampled_total
+        summary["aggregates"]["sampled_fraction_sum"] = sum(sampled_fractions)
+        summary["sampling_mass_source"] = (
+            "empirical_selected_target_bin_draw_counts_pre_window_shift"
+        )
+        summary["sampling_mass_semantics"] = _ZPD_SAMPLING_MASS_SEMANTICS
+        summary["caveats"].append(
+            "sampled_count/sampled_fraction are selected-target-bin mass before the "
+            "pre_failure_sample_window shift, not executed-start-bin mass."
+        )
     return summary
 
 
@@ -186,7 +293,7 @@ def main() -> int:
         for path in args.checkpoint
     ]
     output = {
-        "schema_version": 1,
+        "schema_version": 2,
         "kind": "sampler_checkpoint_state_dump",
         "checkpoint_count": len(summaries),
         "checkpoints": summaries,

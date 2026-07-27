@@ -18,20 +18,45 @@ def _comparison(
     ok: bool = True,
     warning: bool = False,
     treatment_mpjpe_delta: float = 1.0,
+    treatment_mpjpe_l_delta: float | None = None,
     variant_a: str = "adaptive_sampling_micro",
     variant_b: str = "uniform_sampling_micro",
     telemetry: bool = False,
+    retention_delta: float | None = None,
+    retention_complete: bool = True,
 ) -> Path:
+    if treatment_mpjpe_l_delta is None:
+        treatment_mpjpe_l_delta = treatment_mpjpe_delta
     a_metrics = {
         "train.mean_rewards": 1.1 + seed,
         "eval.ok": True,
         "eval.all.mpjpe_g": 30.0 + seed + treatment_mpjpe_delta,
+        "eval.all.mpjpe_l": 20.0 + seed + treatment_mpjpe_l_delta,
     }
     if telemetry:
         a_metrics["train.adp_samp_prob_max_over_uniform"] = 3.05
         a_metrics["train.adp_samp_num_concentrated_bins"] = 0.0
         a_metrics["train.adp_samp_effective_num_bins"] = 69.7
         a_metrics["train.adp_samp_episodes_max_over_mean"] = 1.8
+    b_metrics = {
+        "train.mean_rewards": 1.0 + seed,
+        "eval.ok": True,
+        "eval.all.mpjpe_g": 30.0 + seed,
+        "eval.all.mpjpe_l": 20.0 + seed,
+    }
+    if retention_delta is not None:
+        evaluated = 2 if retention_complete else 1
+        retention_common = {
+            "eval.easy_decile.ok": True,
+            "eval.easy_decile.evaluated_in_decile": evaluated,
+            "eval.easy_decile.decile_size": 2,
+            "eval.easy_decile.motion_keys": ["easy_0", "easy_1"][:evaluated],
+            "eval.easy_decile.difficulty_ranking_path": "/frozen/d1_ranking.json",
+        }
+        b_metrics.update(retention_common)
+        b_metrics["eval.easy_decile.mpjpe_g"] = 10.0 + seed
+        a_metrics.update(retention_common)
+        a_metrics["eval.easy_decile.mpjpe_g"] = 10.0 + seed + retention_delta
     comparison = {
         "schema_version": 1,
         "kind": "sonic_manifest_comparison",
@@ -54,11 +79,7 @@ def _comparison(
                 "seed": seed,
                 "status": "needs_review",
                 "git_commit": "abc1234",
-                "metrics": {
-                    "train.mean_rewards": 1.0 + seed,
-                    "eval.ok": True,
-                    "eval.all.mpjpe_g": 30.0 + seed,
-                },
+                "metrics": b_metrics,
             },
             {
                 "experiment_id": f"treatment_seed{seed}",
@@ -142,6 +163,70 @@ def test_build_aggregate_comparison_effect_gate_passes_only_when_mean_and_seed_c
     assert aggregate["effect_summary"]["mean_delta_a_minus_b"] < -0.5
     assert aggregate["effect_summary"]["improved_seed_count"] == 3
     assert aggregate["effect_summary"]["passes_preregistered_effect_gate"] is True
+
+
+def test_build_aggregate_comparison_supports_mpjpe_l_effect_gate(tmp_path: Path) -> None:
+    path = _comparison(
+        tmp_path / "seed0.json",
+        seed=0,
+        treatment_mpjpe_delta=4.0,
+        treatment_mpjpe_l_delta=-0.75,
+    )
+
+    aggregate = build_aggregate_comparison(
+        [path],
+        effect_metric="eval.all.mpjpe_l",
+        a_minus_b_threshold=0.0,
+        min_improved_seeds=1,
+    )
+
+    row = aggregate["rows"][0]
+    assert row["delta.eval.all.mpjpe_l.a_minus_b"] == -0.75
+    assert aggregate["effect_summary"]["passes_preregistered_effect_gate"] is True
+
+
+def test_retention_gate_requires_complete_easy_decile_and_noninferiority(
+    tmp_path: Path,
+) -> None:
+    paths = [
+        _comparison(
+            tmp_path / f"seed{seed}.json",
+            seed=seed,
+            treatment_mpjpe_delta=-1.0,
+            retention_delta=delta,
+        )
+        for seed, delta in enumerate((0.3, 0.4, 0.5))
+    ]
+
+    aggregate = build_aggregate_comparison(
+        paths,
+        effect_metric="eval.all.mpjpe_g",
+        retention_metric="eval.easy_decile.mpjpe_g",
+        retention_a_minus_b_threshold=0.5,
+    )
+
+    retention = aggregate["retention_summary"]
+    assert retention["complete"] is True
+    assert retention["coverage_ok"] is True
+    assert retention["mean_delta_a_minus_b"] == pytest.approx(0.4)
+    assert retention["passes_preregistered_retention_gate"] is True
+    assert aggregate["passes_all_preregistered_result_gates"] is True
+
+
+def test_retention_gate_rejects_thin_easy_decile_coverage(tmp_path: Path) -> None:
+    path = _comparison(
+        tmp_path / "seed0.json",
+        seed=0,
+        retention_delta=0.1,
+        retention_complete=False,
+    )
+
+    aggregate = build_aggregate_comparison(
+        [path], retention_metric="eval.easy_decile.mpjpe_g"
+    )
+
+    assert aggregate["retention_summary"]["coverage_ok"] is False
+    assert aggregate["retention_summary"]["passes_preregistered_retention_gate"] is False
 
 
 def test_effect_summary_reproduces_recorded_sim_m3_statistics(tmp_path: Path) -> None:
@@ -260,5 +345,6 @@ def test_write_aggregate_table_markdown_contains_seed_rows_and_guardrail(tmp_pat
     assert "b.eval.all.mpjpe_g" in text
     assert "a.eval.all.mpjpe_g" in text
     assert "delta.eval.all.mpjpe_g.a_minus_b" in text
+    assert "delta.eval.all.mpjpe_l.a_minus_b" in text
     assert "A = treatment, B = control" in text
     assert "Sampler telemetry" in text

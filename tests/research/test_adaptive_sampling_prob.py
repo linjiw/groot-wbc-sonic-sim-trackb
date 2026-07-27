@@ -76,6 +76,26 @@ def test_init_zero_all_bins_zero_failures_falls_back_to_uniform() -> None:
     assert torch.allclose(prob, torch.full((4,), 0.25), atol=1e-6)
 
 
+def test_init_zero_global_full_dataset_path_falls_back_to_uniform() -> None:
+    # load_motions() uses a separate full-dataset probability path before the
+    # active batch exists. It must apply the same zero-signal guard.
+    stub = _sampler_stub([0.0] * 4, [0.0] * 4)
+    stub.adaptive_sampling_cfg = {"init_num_failures": 0}
+    stub.adp_samp_failure_rate = torch.zeros(4, dtype=torch.float32)
+    stub.adp_samp_num_bins = 4
+    stub._num_unique_motions = 4
+    stub._device = "cpu"
+    stub.orig_motion_id_to_bins = [torch.tensor([index]) for index in range(4)]
+
+    stub.update_adaptive_sampling_motion_sequences()
+
+    expected = torch.full((4,), 0.25)
+    assert torch.isfinite(stub.adp_sampling_prob).all()
+    assert torch.isfinite(stub._sampling_prob).all()
+    assert torch.allclose(stub.adp_sampling_prob.float(), expected, atol=1e-6)
+    assert torch.allclose(stub._sampling_prob, expected, atol=1e-6)
+
+
 def test_higher_failure_rate_gets_more_mass() -> None:
     # A bin with a higher failure rate should be sampled more (mechanism sanity).
     stub = _sampler_stub([10.0, 10.0, 10.0], [1.0, 5.0, 1.0])

@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "kind": "official_bones_seed_initial_headroom_summary",
+  "checkpoint": "/home/robotixx/GR00T-WholeBodyControl/sonic_release/last.pt",
+  "checkpoint_sha256": "e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909",
+  "paired_dataset_sha256": "d82ac458c3a6a3134b47cba2fbc2ef3ae63c099a5d050b190b2d1ad31ea5ad91",
+  "evaluator": "gear_sonic/eval_agent_trl.py + eval_callbacks=im_eval + tracking/eval",
+  "motion_count": 128,
+  "failed_motion_count": 7,
+  "metrics": {
+    "success_rate": 0.9453125,
+    "progress_rate": 0.9623540254906402,
+    "mpjpe_l_all_mm": 30.6535685271079,
+    "mpjpe_g_all_mm": 146.25007728352227,
+    "mpjpe_pa_all_mm": 22.744034984246927
+  },
+  "failed_motion_keys": [
+    "jump_off_front_50cm_R_002__A416_M",
+    "ib_combat_turn_jog_start_270_R_003__A437_M",
+    "flip_360_005__A415_M",
+    "dance_hiphop_cabath_path_R_fast_001__A318",
+    "jump_on_50cm_002__A415",
+    "dance_vouge_side_side_walk_180_R_002__A318",
+    "boss_dust_brushing_R_003__A272"
+  ],
+  "raw_metrics": "outputs/research/bones_seed_official_initial_headroom_eval32/metrics_eval.json",
+  "raw_metrics_sha256": "ae29a550049a9450538c081631216570193ced11ea2c41945478ef9007cdd949",
+  "interpretation": "The release checkpoint is success-saturated on this pilot; paired learning speed, progress, and local tracking error remain informative. This is initialization evidence, not a ZPD treatment result."
+}

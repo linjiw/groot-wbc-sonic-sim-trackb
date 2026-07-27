@@ -20,14 +20,17 @@ from scripts.research.verify_schedule_path import (
 
 def test_self_test_chain_verifies_and_restores() -> None:
     trainer = build_mock_trainer()
-    result = verify_candidate_paths(trainer)
+    result = verify_candidate_paths(trainer, parameters=("threshold", "down_threshold"))
     assert result["ok"] is True
     for term in ("anchor_pos", "ee_body_pos"):
-        assert "params['threshold']" in result["verified_paths"][term]
+        for parameter in ("threshold", "down_threshold"):
+            assert f"params['{parameter}']" in result["verified_paths"][f"{term}.{parameter}"]
     # Round-trip restored the original values.
     manager = trainer.env.env.unwrapped.termination_manager
     assert manager.get_term_cfg("anchor_pos").params["threshold"] == pytest.approx(0.15)
     assert manager.get_term_cfg("ee_body_pos").params["threshold"] == pytest.approx(0.15)
+    assert manager.get_term_cfg("anchor_pos").params["down_threshold"] == pytest.approx(0.75)
+    assert manager.get_term_cfg("ee_body_pos").params["down_threshold"] == pytest.approx(0.75)
 
 
 def test_bare_attr_tail_would_fail_dict_params() -> None:

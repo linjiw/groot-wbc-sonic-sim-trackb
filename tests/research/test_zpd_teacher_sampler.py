@@ -37,11 +37,22 @@ def _sampler_stub(
     stub.adp_samp_num_episodes = torch.tensor(num_episodes, dtype=torch.float32)
     stub.adp_samp_num_failures = torch.tensor(num_failures, dtype=torch.float32)
     stub.adp_samp_active_motion_bins = torch.arange(n)
+    stub.adp_samp_num_bins = n
     stub.adp_samp_failure_rate_max_over_mean = cap
-    stub.uniform_sampling_rate = uniform_rate
+    stub.uniform_sampling_rate = float(
+        stub.adaptive_sampling_cfg.get("uniform_sampling_rate", uniform_rate)
+    )
     stub.adp_samp_bin_weights = torch.ones(n)
     stub.max_prob_per_bin_cfg = None
     stub.max_prob_per_motion_cfg = None
+    stub._device = "cpu"
+    if stub.adaptive_sampling_cfg.get("signal", "failure_rate") in (
+        "learnability",
+        "advantage_mass",
+    ):
+        stub.adp_samp_bins = torch.tensor([[i, 0, 50] for i in range(n)])
+        stub._motion_data_keys = np.asarray([f"motion_{i}" for i in range(n)])
+        stub.adp_samp_bin_draw_counts = torch.zeros(n, dtype=torch.long)
     return stub
 
 
@@ -94,6 +105,104 @@ def test_release_path_leaves_zpd_state_untouched() -> None:
         "adp_samp_num_episodes",
         "adp_samp_num_failures",
     }
+
+
+def test_zpd_checkpoint_records_compact_bin_motion_mapping() -> None:
+    stub = _sampler_stub([5.0, 3.0], [2.0, 1.0], cfg={"signal": "learnability"})
+    stub.adp_samp_bins = torch.tensor([[1, 0, 50], [0, 0, 50]])
+    stub._motion_data_keys = np.asarray(["walk", "crouch"])
+
+    state = stub.get_state_dict()
+
+    assert state["adp_samp_bin_motion_ids"].tolist() == [1, 0]
+    assert state["adp_samp_bin_ranges"].tolist() == [[0, 50], [0, 50]]
+    assert state["adp_samp_motion_data_keys"] == ["walk", "crouch"]
+    assert state["adp_samp_bin_weights"].tolist() == [1.0, 1.0]
+    assert state["adp_samp_bin_draw_counts"].tolist() == [0, 0]
+    assert state["adp_samp_zpd_schema"] == {
+        "kind": "zpd_adaptive_sampler_state",
+        "version": 1,
+        "sampling_mass_semantics": "selected_target_bin_pre_window_shift",
+    }
+    assert state["adp_samp_zpd_config"] == {
+        "signal": "learnability",
+        "optimism_k": 0.0,
+        "evidence_half_life": None,
+        "advmass_n": 16,
+        "uniform_sampling_rate": 0.1,
+        "tripwire_max_prob_over_uniform": 20.0,
+        "bin_size": 50,
+        "paired_dataset_sha256": None,
+    }
+
+
+def test_zpd_resume_rejects_reordered_same_count_bins() -> None:
+    source = _sampler_stub(
+        [5.0, 3.0], [2.0, 1.0], cfg={"signal": "learnability"}
+    )
+    state = source.get_state_dict()
+    restored = _sampler_stub(
+        [0.0, 0.0], [0.0, 0.0], cfg={"signal": "learnability"}
+    )
+    restored.adp_samp_bins = restored.adp_samp_bins.flip(0)
+
+    with pytest.raises(ValueError, match="bin identity/order mismatch"):
+        restored.load_state_dict(state)
+
+
+def test_zpd_resume_restores_empirical_draw_counts_after_identity_check() -> None:
+    source = _sampler_stub(
+        [5.0, 3.0], [2.0, 1.0], cfg={"signal": "learnability"}
+    )
+    source.adp_samp_bin_draw_counts[:] = torch.tensor([11, 7])
+    state = source.get_state_dict()
+    restored = _sampler_stub(
+        [0.0, 0.0], [0.0, 0.0], cfg={"signal": "learnability"}
+    )
+
+    restored.load_state_dict(state)
+
+    assert restored.adp_samp_bin_draw_counts.tolist() == [11, 7]
+
+
+@pytest.mark.parametrize(
+    ("field", "changed_value"),
+    [
+        ("signal", "advantage_mass"),
+        ("optimism_k", 1.0),
+        ("evidence_half_life", 10.0),
+        ("advmass_n", 8),
+        ("uniform_sampling_rate", 0.2),
+        ("tripwire_max_prob_over_uniform", 10.0),
+        ("bin_size", 25),
+        ("paired_dataset_sha256", "b" * 64),
+    ],
+)
+def test_zpd_resume_rejects_cross_config_or_dataset_digest(
+    field: str, changed_value: object
+) -> None:
+    base_cfg = {"signal": "learnability", "paired_dataset_sha256": "a" * 64}
+    source = _sampler_stub([5.0, 3.0], [2.0, 1.0], cfg=base_cfg)
+    state = source.get_state_dict()
+    restored_cfg = {**base_cfg, field: changed_value}
+    restored = _sampler_stub([0.0, 0.0], [0.0, 0.0], cfg=restored_cfg)
+
+    with pytest.raises(ValueError, match="configuration/dataset digest mismatch"):
+        restored.load_state_dict(state)
+
+
+def test_zpd_resume_rejects_checkpoint_without_versioned_schema() -> None:
+    source = _sampler_stub(
+        [5.0, 3.0], [2.0, 1.0], cfg={"signal": "learnability"}
+    )
+    state = source.get_state_dict()
+    del state["adp_samp_zpd_schema"]
+    restored = _sampler_stub(
+        [0.0, 0.0], [0.0, 0.0], cfg={"signal": "learnability"}
+    )
+
+    with pytest.raises(ValueError, match="lacks exact bin identity/state metadata"):
+        restored.load_state_dict(state)
 
 
 def test_unknown_signal_rejected() -> None:
@@ -303,9 +412,7 @@ def test_tripwire_binds_on_pathological_concentration_and_is_recorded() -> None:
     stub.sync_and_compute_adaptive_sampling(sync_across_gpus=False)
     prob = stub.adp_sampling_active_prob
     assert stub._adp_samp_tripwire_binding == 1.0
-    # Post-clamp renorm can push slightly above the raw ceiling; assert the
-    # binding materially reduced concentration below the unconstrained level.
-    assert prob.max().item() < 0.30  # unconstrained would be ~0.64
+    assert prob.max().item() <= 20.0 / n + 1e-7
     assert torch.isfinite(prob).all()
     assert prob.sum().item() == pytest.approx(1.0, abs=1e-5)
 
@@ -315,6 +422,89 @@ def test_tripwire_not_binding_on_flat_posterior() -> None:
     stub.sync_and_compute_adaptive_sampling(sync_across_gpus=False)
     assert stub._adp_samp_tripwire_binding == 0.0
     assert torch.allclose(stub.adp_sampling_active_prob, torch.full((8,), 0.125), atol=1e-6)
+
+
+def test_tripwire_is_final_after_pathological_bin_weighting_and_constraints() -> None:
+    n = 100
+    eps = [1001.0] * (n - 1) + [100.0]
+    fails = [1.0] * (n - 1) + [50.0]
+    stub = _sampler_stub(eps, fails, cfg={"signal": "learnability"})
+    stub.adp_samp_bin_weights[-1] = 1_000_000.0
+    # Exercise the non-early-return constraint branch. Its clamp/renormalize may
+    # change mass, but D9 must remain the final invariant.
+    stub.max_prob_per_bin_cfg = 0.9
+
+    stub.sync_and_compute_adaptive_sampling(sync_across_gpus=False)
+
+    assert stub.adp_sampling_active_prob.max().item() <= 20.0 / n + 1e-7
+    assert stub.adp_sampling_active_prob.sum().item() == pytest.approx(1.0, abs=1e-6)
+    assert stub._adp_samp_tripwire_binding == 1.0
+
+
+def test_tripwire_applies_to_global_full_dataset_probability_path() -> None:
+    n = 100
+    eps = [1001.0] * (n - 1) + [100.0]
+    fails = [1.0] * (n - 1) + [50.0]
+    stub = _sampler_stub(eps, fails, cfg={"signal": "learnability"})
+    stub.adp_samp_bin_weights[-1] = 1_000_000.0
+    stub._num_unique_motions = n
+    stub.orig_motion_id_to_bins = [torch.tensor([i]) for i in range(n)]
+    stub.sync_and_compute_adaptive_sampling(sync_across_gpus=False)
+
+    stub.update_adaptive_sampling_motion_sequences()
+
+    assert stub.adp_sampling_prob.max().item() <= 20.0 / n + 1e-9
+    assert stub.adp_sampling_prob.sum().item() == pytest.approx(1.0, abs=1e-9)
+    assert stub._adp_samp_tripwire_binding == 1.0
+
+
+def test_tripwire_telemetry_captures_either_global_or_active_path_in_load_cycle() -> None:
+    n = 100
+    stub = _sampler_stub(
+        [10.0] * n, [5.0] * n, cfg={"signal": "learnability"}
+    )
+    stub.adp_samp_bin_weights[-1] = 1_000_000.0
+    stub._num_unique_motions = n
+    stub.orig_motion_id_to_bins = [torch.tensor([i]) for i in range(n)]
+    stub.adp_samp_failure_rate = torch.full((n,), 0.5)
+
+    stub.update_adaptive_sampling_motion_sequences()
+    assert stub._adp_samp_tripwire_binding == 1.0
+
+    # The subsequently loaded active batch excludes the globally concentrated
+    # bin and is flat. Its non-binding result must not erase the global binding
+    # from the same load/recompute cycle.
+    stub.adp_samp_active_motion_bins = torch.arange(10)
+    stub.update_adaptive_sampling_probabilities()
+
+    assert stub._adp_samp_tripwire_binding == 1.0
+
+
+def test_tripwire_binding_reports_current_recompute_not_old_state() -> None:
+    n = 100
+    stub = _sampler_stub(
+        [1001.0] * (n - 1) + [100.0],
+        [1.0] * (n - 1) + [50.0],
+        cfg={"signal": "learnability"},
+    )
+    stub.sync_and_compute_adaptive_sampling(sync_across_gpus=False)
+    assert stub._adp_samp_tripwire_binding == 1.0
+
+    stub.adp_samp_num_episodes.fill_(10.0)
+    stub.adp_samp_num_failures.fill_(5.0)
+    stub.sync_and_compute_adaptive_sampling(sync_across_gpus=False)
+
+    assert stub._adp_samp_tripwire_binding == 0.0
+
+
+def test_tripwire_multiplier_below_uniform_is_rejected() -> None:
+    stub = _sampler_stub(
+        [10.0, 10.0],
+        [5.0, 5.0],
+        cfg={"signal": "learnability", "tripwire_max_prob_over_uniform": 0.99},
+    )
+    with pytest.raises(ValueError, match=r">= 1"):
+        stub.sync_and_compute_adaptive_sampling(sync_across_gpus=False)
 
 
 # ---------------------------------------------------------------------------
@@ -424,3 +614,22 @@ def test_zpd_telemetry_attributes_populated() -> None:
     assert stub._adp_samp_utility_max_over_uniform is not None
     assert stub._adp_samp_utility_entropy is not None
     assert stub._adp_samp_tripwire_binding is not None
+
+
+def test_zpd_actual_bin_draws_are_counted_cumulatively() -> None:
+    stub = _sampler_stub(
+        [10.0, 10.0, 10.0],
+        [5.0, 5.0, 5.0],
+        cfg={"signal": "learnability", "pre_failure_sample_window": 200},
+    )
+    stub.adp_sampling_active_prob = torch.tensor([0.0, 1.0, 0.0])
+    stub.orig_motion_id_to_motion_ids = torch.arange(3)
+
+    motion_ids, _ = stub.sample_motion_ids_and_time_steps(7)
+    stub.sample_motion_ids_and_time_steps(5)
+
+    assert motion_ids.tolist() == [1] * 7
+    # Counts describe the selected target bin. The subsequently sampled frame may
+    # shift into an earlier bin; that executed-start location is intentionally not
+    # what this evidence records.
+    assert stub.adp_samp_bin_draw_counts.tolist() == [0, 12, 0]

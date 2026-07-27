@@ -17,6 +17,52 @@ import shutil
 
 from tqdm import tqdm
 
+# Keep the released BONES-SEED filename filter in one importable place so
+# research subset builders can apply the exact same eligibility rule before
+# downloading or converting a bounded cohort.
+DEFAULT_FILTER_KEYWORDS = [
+    "bed",
+    "bike",
+    "chair",
+    "climb",
+    "com_up_50cm",
+    "sitting",
+    "step_on",
+    "seat",
+    "table",
+    "_sit_",
+    "sit_",
+    "ladder",
+    "crutch",
+    "_bed_",
+    "_ride_",
+    "scooter",
+    "stepdown",
+    "acrobatics_",
+    "box_HSPU",
+    "cartwheel",
+    "50cm_box_",
+    "on_box",
+    "fall_from",
+    "handstand_ff_",
+    "on_1m",
+    "form_box",
+    "off_1m",
+    "230m",
+    "jump_over_obstacle_",
+    "lift_crate_come_up_",
+    "jump_to_shoulder_roll",
+    "kozak_dance",
+    "stair",
+    "handstand",
+    "box_jump",
+    "monkey_jump",
+    "safety_roll",
+    "box_dips",
+    "walking_on_edge",
+    "push_obstacle",
+]
+
 
 def should_filter_out(filename, filter_keywords, include_keywords=None):
     """
@@ -38,9 +84,7 @@ def should_filter_out(filename, filter_keywords, include_keywords=None):
         )
 
 
-def process_bones_directory(
-    bones_dir, dest_path, filter_keywords, dry_run, verbose, include_keywords=None
-):
+def process_bones_directory(bones_dir, dest_path, filter_keywords, dry_run, verbose, include_keywords=None):
     """
     Process a single bones directory - worker function for multiprocessing.
 
@@ -74,10 +118,7 @@ def process_bones_directory(
         parent = osp.basename(osp.dirname(pkl_file))
         name_to_check = f"{parent}/{base}"
 
-        if (
-            should_filter_out(name_to_check, filter_keywords, include_keywords)
-            and not base == "metadata.pkl"
-        ):
+        if should_filter_out(name_to_check, filter_keywords, include_keywords) and not base == "metadata.pkl":
             filtered_files += 1
             if verbose:
                 print(f"  FILTERED: {osp.basename(pkl_file)}")
@@ -177,9 +218,9 @@ def copy_filtered_bones_data(
         filtered_files += result[2]
 
     # Summary
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("FILTERING SUMMARY")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"Source directory: {source_path}")
     print(f"Destination directory: {dest_path}")
     print(f"Total files found: {total_files}")
@@ -207,46 +248,7 @@ def main():
     )
     parser.add_argument(
         "--filter-keywords",
-        default=[
-            "bed",
-            "bike",
-            "chair",
-            "climb",
-            "com_up_50cm",
-            "sitting",
-            "step_on",
-            "seat",
-            "table",
-            "_sit_",
-            "sit_", "ladder",
-            "crutch",
-            "_bed_",
-            "_ride_",
-            "scooter",
-            "stepdown",
-            "acrobatics_",
-            "box_HSPU",
-            "cartwheel",
-            "50cm_box_",
-            "on_box", "fall_from",
-            "handstand_ff_",
-            "on_1m",
-            "form_box",
-            "off_1m",
-            "230m",
-            "jump_over_obstacle_",
-            "lift_crate_come_up_",
-            "jump_to_shoulder_roll",
-            "kozak_dance",
-            "stair",
-            "handstand",
-            "box_jump",
-            "monkey_jump",
-            "safety_roll",
-            "box_dips",
-            "walking_on_edge",
-            "push_obstacle",
-        ],
+        default=DEFAULT_FILTER_KEYWORDS,
         nargs="+",
         help="Keywords to filter out from filenames",
     )
@@ -254,9 +256,7 @@ def main():
         "--dry-run", action="store_true", help="Show what would be copied without actually copying"
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed output")
-    parser.add_argument(
-        "--add-keywords", nargs="+", help="Additional keywords to add to the default filter list"
-    )
+    parser.add_argument("--add-keywords", nargs="+", help="Additional keywords to add to the default filter list")
     parser.add_argument(
         "--workers",
         type=int,

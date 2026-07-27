@@ -11,7 +11,7 @@ Usage:
 """
 
 import importlib
-from importlib.metadata import PackageNotFoundError
+from importlib.metadata import PackageNotFoundError, version as get_package_version
 import os
 import platform
 import shutil
@@ -124,7 +124,7 @@ def check_gear_sonic():
         return check(
             "gear_sonic",
             False,
-            msg_fail="not installed (pip install -e 'gear_sonic/[training]')",
+            msg_fail="not installed (pip install -e 'gear_sonic[training]')",
         )
 
 
@@ -136,11 +136,20 @@ def check_training_deps():
         ("transformers", "transformers"),
         ("accelerate", "accelerate"),
         ("wandb", "wandb"),
+        ("tensorboard", "tensorboard"),
+        ("open3d", "open3d"),
+        ("vector_quantize_pytorch", "vector-quantize-pytorch"),
+        ("smpl_sim", "smpl_sim"),
     ]:
         try:
             mod = importlib.import_module(pkg)
-            version = getattr(mod, "__version__", "ok")
-            results.append(check(pip_name, True, msg_pass=version))
+            package_version = getattr(mod, "__version__", None)
+            if package_version is None:
+                try:
+                    package_version = get_package_version(pip_name)
+                except PackageNotFoundError:
+                    package_version = "ok"
+            results.append(check(pip_name, True, msg_pass=package_version))
         except ImportError:
             results.append(
                 check(pip_name, False, msg_fail=f"not installed (pip install {pip_name})")

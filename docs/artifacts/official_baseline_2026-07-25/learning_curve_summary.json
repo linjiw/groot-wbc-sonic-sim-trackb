@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "kind": "official_bones_seed_zpd_seed0_learning_curve_summary",
+  "baseline_variant": "official_failure_rate",
+  "treatment_variant": "zpd_learnability",
+  "seed": 0,
+  "motion_count": 128,
+  "all_10_rows_passed": true,
+  "gpu_eval_invocations": 9,
+  "shared_initialization_reuses": 1,
+  "rows": [
+    {
+      "iteration": 0,
+      "transitions": 0,
+      "baseline_success": 0.9609375,
+      "zpd_success": 0.9609375,
+      "baseline_progress": 0.9718711577879731,
+      "zpd_progress": 0.9718711577879731,
+      "baseline_mpjpe_l_mm": 30.999213907120385,
+      "zpd_mpjpe_l_mm": 30.999213907120385,
+      "baseline_mpjpe_g_mm": 152.40725022609976,
+      "zpd_mpjpe_g_mm": 152.40725022609976
+    },
+    {
+      "iteration": 50,
+      "transitions": 153600,
+      "baseline_success": 0.7734375,
+      "zpd_success": 0.7890625,
+      "baseline_progress": 0.8538096421398222,
+      "zpd_progress": 0.8702372552070301,
+      "baseline_mpjpe_l_mm": 38.16286746878061,
+      "zpd_mpjpe_l_mm": 39.951614171203055,
+      "baseline_mpjpe_g_mm": 213.2397662264085,
+      "zpd_mpjpe_g_mm": 300.47573534394877
+    },
+    {
+      "iteration": 100,
+      "transitions": 307200,
+      "baseline_success": 0.7734375,
+      "zpd_success": 0.7421875,
+      "baseline_progress": 0.8575096397835296,
+      "zpd_progress": 0.8362337918078993,
+      "baseline_mpjpe_l_mm": 38.664487414269715,
+      "zpd_mpjpe_l_mm": 41.071827503415186,
+      "baseline_mpjpe_g_mm": 312.9327682039682,
+      "zpd_mpjpe_g_mm": 346.3309903832742
+    },
+    {
+      "iteration": 150,
+      "transitions": 460800,
+      "baseline_success": 0.625,
+      "zpd_success": 0.6328125,
+      "baseline_progress": 0.7739915111742448,
+      "zpd_progress": 0.7693509597011143,
+      "baseline_mpjpe_l_mm": 41.30018865889007,
+      "zpd_mpjpe_l_mm": 41.31265133085172,
+      "baseline_mpjpe_g_mm": 246.95158444364554,
+      "zpd_mpjpe_g_mm": 248.10931863475923
+    },
+    {
+      "iteration": 200,
+      "transitions": 614400,
+      "baseline_success": 0.578125,
+      "zpd_success": 0.5625,
+      "baseline_progress": 0.7160557753231842,
+      "zpd_progress": 0.7256707128835842,
+      "baseline_mpjpe_l_mm": 42.37701182193043,
+      "zpd_mpjpe_l_mm": 43.00024637299849,
+      "baseline_mpjpe_g_mm": 213.24103806753416,
+      "zpd_mpjpe_g_mm": 202.81216151451804
+    }
+  ],
+  "normalized_auc": {
+    "baseline": {
+      "success_rate": 0.7353515625,
+      "progress_rate": 0.8323185649132938,
+      "mpjpe_l_mm": 38.703914101616455,
+      "mpjpe_g_mm": 238.98706575520976
+    },
+    "zpd": {
+      "success_rate": 0.7314453125,
+      "progress_rate": 0.8311482355129556,
+      "mpjpe_l_mm": 39.833955786382354,
+      "mpjpe_g_mm": 268.1314375580728
+    },
+    "delta_zpd_minus_baseline": {
+      "success_rate": -0.00390625,
+      "progress_rate": -0.0011703294003382325,
+      "mpjpe_l_mm": 1.1300416847658994,
+      "mpjpe_g_mm": 29.14437180286302
+    }
+  },
+  "raw_learning_curve_sha256": "465ce01572b8e4e6a446930fdb2846ab3c6c5ab8e27909a286ac85d29db1662c",
+  "raw_execution_sha256": "b37390626eff76cb17b1caab6c848efd3789413df9551b629c4a6e20b64efed5",
+  "interpretation": "ZPD activated but did not improve normalized AUC in seed 0. Both arms degrade sharply from the shared release initialization, so protocol stabilization precedes scale-up."
+}

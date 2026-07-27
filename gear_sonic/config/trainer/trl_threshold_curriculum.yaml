@@ -1,11 +1,14 @@
 # M5-T threshold-curriculum trainer (research_plan_zpd_teacher.md §3.2, Change B).
 #
-# Extends the plain TRL trainer with the first schedule_dict used in this repo:
+# Extends the release auxiliary-loss TRL trainer with the first schedule_dict
+# used in this repo:
 # a STATIC one-sided (loose -> strict, monotone by construction, D7) anneal of
-# the two position-tracking termination thresholds over the first 150 training
-# iterations of a 200-iteration screen. Values: 0.30 (2x release) -> 0.15
-# (release-strict). anchor_ori_full / foot_pos_xyz are NOT scheduled (one axis
-# per arm).
+# the Z-height tracking termination policy over the first 150 training
+# iterations of a 200-iteration screen. Ordinary-root bounds anneal from 0.30
+# (2x the strict vertical bound) to 0.15. Low-root adaptive bounds retain the
+# release 5x ratio and anneal from 1.50 to 0.75. This makes the treatment a
+# uniform 2x -> 1x relaxation of the height-only termination policy;
+# anchor_ori_full / foot_pos_xyz are NOT scheduled (one axis per arm).
 #
 # Opt-in only: no exp config selects this trainer; M5-T train commands pass
 # `trainer=trl_threshold_curriculum`. NEVER let an eval invocation inherit it —
@@ -22,7 +25,7 @@
 # Note the bracket tail: params is a dict, so `params['threshold']` is required
 # (`@params@threshold` getattr's the dict and raises).
 
-_target_: gear_sonic.trl.trainer.ppo_trainer.TRLPPOTrainer
+_target_: gear_sonic.trl.trainer.ppo_trainer_aux_loss.TRLAuxLossPPOTrainer
 
 schedule_dict:
   "env@env@unwrapped@termination_manager@get_term_cfg('anchor_pos')@params['threshold']":
@@ -33,3 +36,11 @@ schedule_dict:
     type: linear
     seg_steps: [0, 150]
     seg_vals: [0.30, 0.15]
+  "env@env@unwrapped@termination_manager@get_term_cfg('anchor_pos')@params['down_threshold']":
+    type: linear
+    seg_steps: [0, 150]
+    seg_vals: [1.50, 0.75]
+  "env@env@unwrapped@termination_manager@get_term_cfg('ee_body_pos')@params['down_threshold']":
+    type: linear
+    seg_steps: [0, 150]
+    seg_vals: [1.50, 0.75]

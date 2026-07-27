@@ -1,0 +1,47 @@
+{
+  "experiment_group": "bones_seed_official_failure_rate_vs_zpd_pilot128",
+  "variant_a": "zpd_learnability",
+  "variant_b": "official_failure_rate",
+  "hypothesis": "At identical release-checkpoint initialization, BONES-SEED pilot data, PPO budget, and official im_eval protocol, replacing only SONIC's failure_rate adaptive-sampling utility with posterior learnability p(1-p) improves learning speed and final success_rate/progress_rate/MPJPE-L/MPJPE-G.",
+  "seed": 0,
+  "dataset_robot": "data/research/bones_seed_official_zpd_pilot128/robot_filtered",
+  "dataset_smpl": "data/research/bones_seed_official_zpd_pilot128/smpl_filtered",
+  "checkpoint": "VARIANT_SPECIFIC_CHECKPOINTS",
+  "checkpoint_source": "trained_variant_checkpoint",
+  "sampler_pair_contract": "official_failure_rate_vs_zpd_learnability_v1",
+  "dataset_manifest_json": "data/research/bones_seed_official_zpd_pilot128/dataset_manifest.json",
+  "dataset_manifest_sha256": "2da4a3cef01be348b7c74735aed3a9b8c9d3285d5605f739dfbdd902deb6dc2a",
+  "dataset_manifest_sha256_kind": "file_bytes",
+  "paired_dataset_sha256": "d82ac458c3a6a3134b47cba2fbc2ef3ae63c099a5d050b190b2d1ad31ea5ad91",
+  "training_python_executable": "/home/robotixx/miniconda3/envs/env_isaaclab/bin/python",
+  "training_initialization_checkpoint": "/home/robotixx/GR00T-WholeBodyControl/sonic_release/last.pt",
+  "training_initialization_checkpoint_sha256": "e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909",
+  "expected_training_iterations": 200,
+  "training_num_envs": 128,
+  "learning_curve": {
+    "protocol": "official_im_eval_paired_learning_curve_v2",
+    "checkpoint_iterations": [0, 50, 100, 150, 200],
+    "rollout_steps_per_iteration": 24,
+    "eval_timeout_seconds": 7200
+  },
+  "variants": [
+    {
+      "name": "official_failure_rate",
+      "checkpoint": "outputs/research/bones_seed_official_pair/seed{seed}/official_failure_rate/last.pt",
+      "checkpoint_source": "trained_variant_checkpoint",
+      "metrics_eval_json": "outputs/research/bones_seed_official_pair/seed{seed}/official_failure_rate/eval_metrics/metrics_eval.json",
+      "train_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 /home/robotixx/miniconda3/envs/env_isaaclab/bin/python gear_sonic/train_agent_trl.py +checkpoint=/home/robotixx/GR00T-WholeBodyControl/sonic_release/last.pt +resume=false +exp=manager/universal_token/all_modes/sonic_release num_envs=128 headless=True use_wandb=false seed={seed} exp_var=bones_pilot128_official_failure_rate_seed{seed} experiment_dir=outputs/research/bones_seed_official_pair/seed{seed}/official_failure_rate ++algo.config.num_learning_iterations=200 ++algo.config.num_steps_per_env=24 ++algo.config.save_interval=50 ++callbacks.model_save.save_frequency=50 ++callbacks.model_save.save_last_frequency=50 ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/research/bones_seed_official_zpd_pilot128/robot_filtered ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/research/bones_seed_official_zpd_pilot128/smpl_filtered ++manager_env.commands.motion.motion_lib_cfg.sort_motion_keys=true ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.enable=true ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.bin_size=50 ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.sequence_length_agnostic=true ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.init_num_failures=1 ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.uniform_sampling_rate=0.1 ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.pre_failure_sample_window=200 ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.use_failure_rate_decay=false ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.decay_gamma=0.8 ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.adp_samp_failure_rate_max_over_mean=200 ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.signal=failure_rate",
+      "eval_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 /home/robotixx/miniconda3/envs/env_isaaclab/bin/python gear_sonic/eval_agent_trl.py +checkpoint=outputs/research/bones_seed_official_pair/seed{seed}/official_failure_rate/last.pt +headless=True ++seed=0 ++eval_callbacks=im_eval ++run_eval_loop=False ++num_envs=128 ++callbacks.im_eval.max_eval_steps=null ++manager_env.observations.policy.enable_corruption=False ++manager_env.observations.tokenizer.enable_corruption=False ++eval_output_dir=outputs/research/bones_seed_official_pair/seed{seed}/official_failure_rate/eval_metrics ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/research/bones_seed_official_zpd_pilot128/robot_filtered ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/research/bones_seed_official_zpd_pilot128/smpl_filtered ++manager_env.commands.motion.motion_lib_cfg.sort_motion_keys=true +manager_env/terminations=tracking/eval",
+      "interpretation": "official SONIC adaptive failure-rate baseline"
+    },
+    {
+      "name": "zpd_learnability",
+      "checkpoint": "outputs/research/bones_seed_official_pair/seed{seed}/zpd_learnability/last.pt",
+      "checkpoint_source": "trained_variant_checkpoint",
+      "metrics_eval_json": "outputs/research/bones_seed_official_pair/seed{seed}/zpd_learnability/eval_metrics/metrics_eval.json",
+      "train_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 /home/robotixx/miniconda3/envs/env_isaaclab/bin/python gear_sonic/train_agent_trl.py +checkpoint=/home/robotixx/GR00T-WholeBodyControl/sonic_release/last.pt +resume=false +exp=manager/universal_token/all_modes/sonic_release num_envs=128 headless=True use_wandb=false seed={seed} exp_var=bones_pilot128_zpd_learnability_seed{seed} experiment_dir=outputs/research/bones_seed_official_pair/seed{seed}/zpd_learnability ++algo.config.num_learning_iterations=200 ++algo.config.num_steps_per_env=24 ++algo.config.save_interval=50 ++callbacks.model_save.save_frequency=50 ++callbacks.model_save.save_last_frequency=50 ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/research/bones_seed_official_zpd_pilot128/robot_filtered ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/research/bones_seed_official_zpd_pilot128/smpl_filtered ++manager_env.commands.motion.motion_lib_cfg.sort_motion_keys=true ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.enable=true ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.bin_size=50 ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.sequence_length_agnostic=true ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.init_num_failures=1 ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.uniform_sampling_rate=0.1 ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.pre_failure_sample_window=200 ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.use_failure_rate_decay=false ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.decay_gamma=0.8 ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.adp_samp_failure_rate_max_over_mean=200 ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.signal=learnability ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.optimism_k=0.0 ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.evidence_half_life=null ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.advmass_n=16 ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.tripwire_max_prob_over_uniform=20.0 ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.family_kernel=null ++manager_env.commands.motion.motion_lib_cfg.adaptive_sampling.paired_dataset_sha256=d82ac458c3a6a3134b47cba2fbc2ef3ae63c099a5d050b190b2d1ad31ea5ad91",
+      "eval_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 /home/robotixx/miniconda3/envs/env_isaaclab/bin/python gear_sonic/eval_agent_trl.py +checkpoint=outputs/research/bones_seed_official_pair/seed{seed}/zpd_learnability/last.pt +headless=True ++seed=0 ++eval_callbacks=im_eval ++run_eval_loop=False ++num_envs=128 ++callbacks.im_eval.max_eval_steps=null ++manager_env.observations.policy.enable_corruption=False ++manager_env.observations.tokenizer.enable_corruption=False ++eval_output_dir=outputs/research/bones_seed_official_pair/seed{seed}/zpd_learnability/eval_metrics ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/research/bones_seed_official_zpd_pilot128/robot_filtered ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/research/bones_seed_official_zpd_pilot128/smpl_filtered ++manager_env.commands.motion.motion_lib_cfg.sort_motion_keys=true +manager_env/terminations=tracking/eval",
+      "interpretation": "single-axis ZPD learnability treatment; no optimism, evidence decay, or family sharing"
+    }
+  ]
+}

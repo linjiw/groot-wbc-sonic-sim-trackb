@@ -1,22 +1,47 @@
 {
   "experiment_group": "sim_m5_t_threshold_curriculum",
-  "hypothesis": "M5-T (research_plan_zpd_teacher.md v1.1, Change B): a static one-sided termination-threshold anneal (anchor_pos + ee_body_pos 0.30 -> 0.15 over iters 0-150, trainer=trl_threshold_curriculum) manufactures a difficulty frontier on data where the release verifier produces none (activation: derived early-termination rate in [0.15, 0.6] for >= 50% of iterations, classify_m5_activation.py --arm m5_t) and improves tracking vs uniform at the RELEASE verifier (effect screen: mean MPJPE-G delta <= -0.5, >= 2/3 seeds improved; eval always at release-strict thresholds via the null schedule override). Adaptive sampling stays at the release failure_rate signal in BOTH arms (one axis per arm). LAUNCH PRECONDITIONS: (1) replace SIM_D1_PASSING_* dataset placeholders; (2) verify_schedule_path.py confirmed the termination-manager object path on the live robotixx trainer and trl_threshold_curriculum.yaml carries the verified prefix; (3) SIM-M4b closed and SIM-D1 passed.",
+  "variant_a": "threshold_schedule_m5t",
+  "variant_b": "release_threshold_m5t",
+  "hypothesis": "M5-T (research_plan_zpd_teacher.md v1.7, Change B): a static one-sided Z-height termination anneal (anchor_pos + ee_body_pos ordinary bounds 0.30 -> 0.15 and low-root adaptive bounds 1.50 -> 0.75 over iters 0-150, trainer=trl_threshold_curriculum) manufactures a difficulty frontier on data where the fixed-threshold control produces none. Activation is the directly instrumented per-iteration fraction of episode ends where anchor_pos or ee_body_pos fired; it must be in [0.15, 0.6] for >= 50% of exact finite iterations 1..200 (classify_m5_activation.py --arm m5_t). The effect screen requires mean MPJPE-G delta <= -0.5 with >= 2/3 seeds improved at a matched fixed strict-vertical 0.15 verifier; eval explicitly sets both vertical thresholds to 0.15 and strips the schedule. Because tracking/eval disables adaptive thresholds, relaxes orientation, and omits foot_pos_xyz, this is not a full release-policy verifier. The 5x low-root/ordinary ratio is invariant during training, so treatment is a uniform 2x -> 1x relaxation of the height-only termination policy. Adaptive sampling stays at the release failure_rate signal in BOTH arms (one axis per arm), and training num_envs exactly equals the frozen dataset motion count so every candidate is active. LAUNCH PRECONDITIONS: (1) replace the SIM_D1_PASSING_* dataset, manifest, ranking, hash, and motion-count placeholders with one frozen SIM-D1-passing dataset; (2) verify_schedule_path.py confirms all four termination-manager parameter paths on the live robotixx trainer and trl_threshold_curriculum.yaml carries the verified prefix; (3) SIM-M4b closed and SIM-D1 passed.",
   "seed": 0,
   "dataset_robot": "data/SIM_D1_PASSING_ROBOT_REPLACE_ME",
   "dataset_smpl": "data/SIM_D1_PASSING_SMPL_REPLACE_ME",
-  "checkpoint": "sonic_release/last.pt",
+  "checkpoint": "VARIANT_SPECIFIC_CHECKPOINTS",
+  "checkpoint_source": "trained_variant_checkpoint",
+  "requires_activation_gate": true,
+  "activation_arm": "m5_t",
+  "dataset_manifest_json": "data/SIM_D1_DATASET_MANIFEST_REPLACE_ME.json",
+  "dataset_manifest_sha256": "DATASET_MANIFEST_SHA256_REPLACE_ME",
+  "dataset_manifest_sha256_kind": "canonical_json_without_source_locations_v1",
+  "sim_d1_classification_json": "data/SIM_D1_CLASSIFICATION_REPLACE_ME.json",
+  "sim_d1_classification_sha256": "SIM_D1_CLASSIFICATION_SHA256_REPLACE_ME",
+  "sim_d1_source_checkpoint_sha256": "SIM_D1_SOURCE_CHECKPOINT_SHA256_REPLACE_ME",
+  "training_python_executable": "TRAINING_PYTHON_EXECUTABLE_REPLACE_ME",
+  "training_initialization_checkpoint": "SIM_D1_SOURCE_CHECKPOINT_REPLACE_ME",
+  "difficulty_ranking_json": "data/SIM_D1_DIFFICULTY_RANKING_REPLACE_ME.json",
+  "difficulty_ranking_sha256": "DIFFICULTY_RANKING_SHA256_REPLACE_ME",
+  "expected_training_iterations": 200,
+  "training_num_envs": "DATASET_MOTION_COUNT_REPLACE_ME",
+  "retention_metric": "eval.easy_decile.mpjpe_g",
+  "retention_a_minus_b_threshold": 0.5,
   "variants": [
     {
-      "name": "uniform_m5t",
-      "train_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 python gear_sonic/train_agent_trl.py +exp=manager/universal_token/all_modes/sonic_release num_envs=8 headless=True use_wandb=false seed={seed} exp_var=uniform_m5t_seed{seed} ++algo.config.num_learning_iterations=200 ++algo.config.save_interval=200 ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/SIM_D1_PASSING_ROBOT_REPLACE_ME ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/SIM_D1_PASSING_SMPL_REPLACE_ME",
-      "eval_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 python gear_sonic/eval_agent_trl.py +checkpoint=outputs/uniform_m5t_seed{seed}/last.pt +headless=True ++trainer.schedule_dict=null ++eval_callbacks=im_eval ++run_eval_loop=False ++num_envs=2 ++callbacks.im_eval.max_eval_steps=200 ++algo.config.eval.num_eval_episodes=4 ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/SIM_D1_PASSING_ROBOT_REPLACE_ME ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/SIM_D1_PASSING_SMPL_REPLACE_ME +manager_env/terminations=tracking/eval",
-      "interpretation": "m5t_control__release_verifier_throughout__schedule_stripped_at_eval_for_symmetry"
+      "name": "release_threshold_m5t",
+      "checkpoint": "outputs/release_threshold_m5t_seed{seed}/last.pt",
+      "checkpoint_source": "trained_variant_checkpoint",
+      "metrics_eval_json": "outputs/release_threshold_m5t_seed{seed}/eval_metrics/metrics_eval.json",
+      "train_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 TRAINING_PYTHON_EXECUTABLE_REPLACE_ME gear_sonic/train_agent_trl.py +checkpoint=SIM_D1_SOURCE_CHECKPOINT_REPLACE_ME +resume=false +exp=manager/universal_token/all_modes/sonic_release num_envs=DATASET_MOTION_COUNT_REPLACE_ME headless=True use_wandb=false ++manager_env.config.log_m5t_height_termination=true seed={seed} exp_var=release_threshold_m5t_seed{seed} experiment_dir=outputs/release_threshold_m5t_seed{seed} ++algo.config.num_learning_iterations=200 ++algo.config.save_interval=200 ++callbacks.model_save.save_last_frequency=200 ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/SIM_D1_PASSING_ROBOT_REPLACE_ME ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/SIM_D1_PASSING_SMPL_REPLACE_ME",
+      "eval_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 TRAINING_PYTHON_EXECUTABLE_REPLACE_ME gear_sonic/eval_agent_trl.py +checkpoint=outputs/release_threshold_m5t_seed{seed}/last.pt +headless=True ++seed=0 ++trainer.schedule_dict=null ++eval_callbacks=im_eval ++run_eval_loop=False ++num_envs=1 ++eval_output_dir=outputs/release_threshold_m5t_seed{seed}/eval_metrics ++callbacks.im_eval.max_eval_steps=null ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/SIM_D1_PASSING_ROBOT_REPLACE_ME ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/SIM_D1_PASSING_SMPL_REPLACE_ME +manager_env/terminations=tracking/eval +eval_events=nominal_d1 ++manager_env.config.terrain_type=plane ++manager_env.commands.motion.motion_lib_cfg.sort_motion_keys=true ++manager_env.observations.policy.enable_corruption=false ++manager_env.observations.tokenizer.enable_corruption=false +use_encoder=g1 ++manager_env.terminations.anchor_pos.params.threshold=0.15 ++manager_env.terminations.anchor_pos.params.down_threshold=0.15 ++manager_env.terminations.ee_body_pos.params.threshold=0.15 ++manager_env.terminations.ee_body_pos.params.down_threshold=0.15",
+      "interpretation": "m5t_control__fixed_vertical_threshold__failure_rate_sampling__eval_at_strict_vertical_0p15"
     },
     {
       "name": "threshold_schedule_m5t",
-      "train_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 python gear_sonic/train_agent_trl.py +exp=manager/universal_token/all_modes/sonic_release trainer=trl_threshold_curriculum num_envs=8 headless=True use_wandb=false seed={seed} exp_var=threshold_schedule_m5t_seed{seed} ++algo.config.num_learning_iterations=200 ++algo.config.save_interval=200 ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/SIM_D1_PASSING_ROBOT_REPLACE_ME ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/SIM_D1_PASSING_SMPL_REPLACE_ME",
-      "eval_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 python gear_sonic/eval_agent_trl.py +checkpoint=outputs/threshold_schedule_m5t_seed{seed}/last.pt +headless=True ++trainer.schedule_dict=null ++eval_callbacks=im_eval ++run_eval_loop=False ++num_envs=2 ++callbacks.im_eval.max_eval_steps=200 ++algo.config.eval.num_eval_episodes=4 ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/SIM_D1_PASSING_ROBOT_REPLACE_ME ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/SIM_D1_PASSING_SMPL_REPLACE_ME +manager_env/terminations=tracking/eval",
-      "interpretation": "m5t_treatment__static_one_sided_threshold_anneal__eval_at_release_verifier_with_schedule_stripped"
+      "checkpoint": "outputs/threshold_schedule_m5t_seed{seed}/last.pt",
+      "checkpoint_source": "trained_variant_checkpoint",
+      "metrics_eval_json": "outputs/threshold_schedule_m5t_seed{seed}/eval_metrics/metrics_eval.json",
+      "train_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 TRAINING_PYTHON_EXECUTABLE_REPLACE_ME gear_sonic/train_agent_trl.py +checkpoint=SIM_D1_SOURCE_CHECKPOINT_REPLACE_ME +resume=false +exp=manager/universal_token/all_modes/sonic_release trainer=trl_threshold_curriculum num_envs=DATASET_MOTION_COUNT_REPLACE_ME headless=True use_wandb=false ++manager_env.config.log_m5t_height_termination=true seed={seed} exp_var=threshold_schedule_m5t_seed{seed} experiment_dir=outputs/threshold_schedule_m5t_seed{seed} ++algo.config.num_learning_iterations=200 ++algo.config.save_interval=200 ++callbacks.model_save.save_last_frequency=200 ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/SIM_D1_PASSING_ROBOT_REPLACE_ME ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/SIM_D1_PASSING_SMPL_REPLACE_ME",
+      "eval_command": "WANDB_MODE=disabled HYDRA_FULL_ERROR=1 TRAINING_PYTHON_EXECUTABLE_REPLACE_ME gear_sonic/eval_agent_trl.py +checkpoint=outputs/threshold_schedule_m5t_seed{seed}/last.pt +headless=True ++seed=0 ++trainer.schedule_dict=null ++eval_callbacks=im_eval ++run_eval_loop=False ++num_envs=1 ++eval_output_dir=outputs/threshold_schedule_m5t_seed{seed}/eval_metrics ++callbacks.im_eval.max_eval_steps=null ++manager_env.commands.motion.motion_lib_cfg.motion_file=data/SIM_D1_PASSING_ROBOT_REPLACE_ME ++manager_env.commands.motion.motion_lib_cfg.smpl_motion_file=data/SIM_D1_PASSING_SMPL_REPLACE_ME +manager_env/terminations=tracking/eval +eval_events=nominal_d1 ++manager_env.config.terrain_type=plane ++manager_env.commands.motion.motion_lib_cfg.sort_motion_keys=true ++manager_env.observations.policy.enable_corruption=false ++manager_env.observations.tokenizer.enable_corruption=false +use_encoder=g1 ++manager_env.terminations.anchor_pos.params.threshold=0.15 ++manager_env.terminations.anchor_pos.params.down_threshold=0.15 ++manager_env.terminations.ee_body_pos.params.threshold=0.15 ++manager_env.terminations.ee_body_pos.params.down_threshold=0.15",
+      "interpretation": "m5t_treatment__static_vertical_threshold_anneal__eval_at_strict_vertical_0p15_with_schedule_stripped"
     }
   ]
 }

@@ -29,7 +29,11 @@ a temporary two-liner right before ``trainer.train()`` in a scratch copy of the
 train entry, or run in an interactive session::
 
     from scripts.research.verify_schedule_path import verify_candidate_paths
-    print(verify_candidate_paths(trainer, terms=("anchor_pos", "ee_body_pos")))
+    print(verify_candidate_paths(
+        trainer,
+        terms=("anchor_pos", "ee_body_pos"),
+        parameters=("threshold", "down_threshold"),
+    ))
 
 Offline self-test (this checkout, no Isaac Lab): ``--self-test`` builds a mock
 object chain shaped like trainer->wrapper->gym->unwrapped->termination_manager
@@ -46,8 +50,10 @@ import sys
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+_repo_root = str(REPO_ROOT)
+if _repo_root in sys.path:
+    sys.path.remove(_repo_root)
+sys.path.insert(0, _repo_root)
 
 from gear_sonic.trl.utils import scheduler as _scheduler  # noqa: E402
 
@@ -64,23 +70,35 @@ _CANDIDATE_CHAINS = (
 )
 
 
-def _path_for(chain: str, term: str) -> str:
+def _path_for(chain: str, term: str, parameter: str = "threshold") -> str:
     # NOTE the bracket syntax on the last segment: term_cfg.params is a dict, and
     # the scheduler engine resolves bare '@name' segments with getattr — a plain
     # '@params@threshold' tail raises AttributeError on the dict. This exact
     # trap is why the plan (§3.2) demands a live dry-run before any M5-T launch.
-    return f"{chain}@termination_manager@get_term_cfg('{term}')@params['threshold']"
+    return f"{chain}@termination_manager@get_term_cfg('{term}')@params['{parameter}']"
 
 
-def _read_threshold(root: Any, chain: str, term: str) -> float:
+def _read_parameter(root: Any, chain: str, term: str, parameter: str) -> float:
     manager = _scheduler._navigate_object_path(root, f"{chain}@termination_manager")
-    return float(manager.get_term_cfg(term).params["threshold"])
+    return float(manager.get_term_cfg(term).params[parameter])
 
 
-def verify_one_path(root: Any, chain: str, term: str, *, probe_value: float = 0.987) -> dict[str, Any]:
+def verify_one_path(
+    root: Any,
+    chain: str,
+    term: str,
+    *,
+    parameter: str = "threshold",
+    probe_value: float = 0.987,
+) -> dict[str, Any]:
     """Resolve + round-trip one candidate path. Never leaves the value mutated."""
-    path = _path_for(chain, term)
-    record: dict[str, Any] = {"path": path, "resolved": False, "roundtrip": False}
+    path = _path_for(chain, term, parameter)
+    record: dict[str, Any] = {
+        "path": path,
+        "parameter": parameter,
+        "resolved": False,
+        "roundtrip": False,
+    }
     try:
         current = _scheduler._navigate_object_path(root, path)
     except Exception as err:  # noqa: BLE001 — any failure means "not this chain"
@@ -89,11 +107,11 @@ def verify_one_path(root: Any, chain: str, term: str, *, probe_value: float = 0.
     record["resolved"] = True
     record["current_value"] = float(current)
 
-    original = _read_threshold(root, chain, term)
+    original = _read_parameter(root, chain, term, parameter)
     schedule = {path: {"type": "segment", "seg_steps": [0], "seg_vals": [probe_value]}}
     try:
         _scheduler.update_scheduled_params(root, schedule, step=0)
-        seen = _read_threshold(root, chain, term)
+        seen = _read_parameter(root, chain, term, parameter)
         record["roundtrip"] = abs(seen - probe_value) < 1e-9
         if not record["roundtrip"]:
             record["error"] = (
@@ -103,29 +121,42 @@ def verify_one_path(root: Any, chain: str, term: str, *, probe_value: float = 0.
     finally:
         restore = {path: {"type": "segment", "seg_steps": [0], "seg_vals": [original]}}
         _scheduler.update_scheduled_params(root, restore, step=0)
-    record["restored_value"] = _read_threshold(root, chain, term)
+    record["restored_value"] = _read_parameter(root, chain, term, parameter)
     return record
 
 
 def verify_candidate_paths(
-    root: Any, *, terms: tuple[str, ...] = ("anchor_pos", "ee_body_pos")
+    root: Any,
+    *,
+    terms: tuple[str, ...] = ("anchor_pos", "ee_body_pos"),
+    parameters: tuple[str, ...] = ("threshold",),
 ) -> dict[str, Any]:
     """Try every candidate chain per term; return verified paths + full trace."""
     result: dict[str, Any] = {"verified_paths": {}, "trace": {}}
     for term in terms:
-        records = []
-        for chain in _CANDIDATE_CHAINS:
-            record = verify_one_path(root, chain, term)
-            records.append(record)
-            if record["roundtrip"]:
-                result["verified_paths"][term] = record["path"]
-                break
-        result["trace"][term] = records
-    result["ok"] = set(result["verified_paths"]) == set(terms)
+        for parameter in parameters:
+            label = term if parameters == ("threshold",) else f"{term}.{parameter}"
+            records = []
+            for chain in _CANDIDATE_CHAINS:
+                record = verify_one_path(
+                    root,
+                    chain,
+                    term,
+                    parameter=parameter,
+                )
+                records.append(record)
+                if record["roundtrip"]:
+                    result["verified_paths"][label] = record["path"]
+                    break
+            result["trace"][label] = records
+    expected = {
+        term if parameters == ("threshold",) else f"{term}.{parameter}"
+        for term in terms
+        for parameter in parameters
+    }
+    result["ok"] = set(result["verified_paths"]) == expected
     if result["ok"]:
-        result["schedule_dict_keys"] = {
-            term: path for term, path in result["verified_paths"].items()
-        }
+        result["schedule_dict_keys"] = {term: path for term, path in result["verified_paths"].items()}
     return result
 
 
@@ -136,7 +167,7 @@ def verify_candidate_paths(
 
 class _MockTermCfg:
     def __init__(self, threshold: float):
-        self.params = {"threshold": threshold}
+        self.params = {"threshold": threshold, "down_threshold": 5.0 * threshold}
 
 
 class _MockTerminationManager:
@@ -167,7 +198,7 @@ def build_mock_trainer() -> Any:
 
 
 def _self_test() -> dict[str, Any]:
-    return verify_candidate_paths(build_mock_trainer())
+    return verify_candidate_paths(build_mock_trainer(), parameters=("threshold", "down_threshold"))
 
 
 def main() -> int:

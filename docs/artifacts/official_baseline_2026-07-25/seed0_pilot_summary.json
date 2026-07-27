@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "kind": "official_bones_seed_zpd_seed0_pilot_summary",
+  "training_source_git_head": "f7dc7390232b0478ed0e60b41d15fd06148f4607",
+  "paired_dataset_sha256": "d82ac458c3a6a3134b47cba2fbc2ef3ae63c099a5d050b190b2d1ad31ea5ad91",
+  "dataset_manifest_sha256": "2da4a3cef01be348b7c74735aed3a9b8c9d3285d5605f739dfbdd902deb6dc2a",
+  "seed": 0,
+  "motion_count": 128,
+  "temporal_bin_count": 1006,
+  "training": {
+    "num_envs": 128,
+    "iterations": 200,
+    "steps_per_environment": 24,
+    "transitions_per_arm": 614400,
+    "checkpoint_iterations": [0, 50, 100, 150, 200]
+  },
+  "release_initialization": {
+    "checkpoint_sha256": "e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909",
+    "metrics_sha256": "ae29a550049a9450538c081631216570193ced11ea2c41945478ef9007cdd949",
+    "success_rate": 0.9453125,
+    "progress_rate": 0.9623540254906402,
+    "mpjpe_l_mm": 30.6535685271079,
+    "mpjpe_g_mm": 146.25007728352227
+  },
+  "arms": {
+    "official_failure_rate": {
+      "checkpoint_sha256": "a4c4246b73932efe31dddda37d9cbea48e39db425b140915a4209d1bcf47f22e",
+      "metrics_sha256": "c15616efa3bc860473dd629fcf7f2ca832432c55aeb53386a66826d60ffab930",
+      "success_rate": 0.578125,
+      "progress_rate": 0.7160557753,
+      "mpjpe_l_mm": 42.377,
+      "mpjpe_g_mm": 213.241,
+      "mpjpe_pa_mm": 31.308,
+      "train_mean_reward": 11.94405,
+      "effective_bins": 282.793,
+      "max_probability_over_uniform": 17.6798,
+      "concentrated_bins": 4
+    },
+    "zpd_learnability": {
+      "checkpoint_sha256": "b9fbcca5ac464d61f83f28f4adc13933feb9ead5923b4d1c5a9b71ba9a8f948a",
+      "metrics_sha256": "675ad03ff20aabb4d76dd0201ef95f7f90db97c1fb26e7af8b7d6ae2087d55a1",
+      "success_rate": 0.5625,
+      "progress_rate": 0.7256707129,
+      "mpjpe_l_mm": 43.0,
+      "mpjpe_g_mm": 202.812,
+      "mpjpe_pa_mm": 31.043,
+      "train_mean_reward": 13.9524,
+      "effective_bins": 608.0992,
+      "max_probability_over_uniform": 6.7397,
+      "concentrated_bins": 0
+    }
+  },
+  "delta_zpd_minus_official": {
+    "success_rate": -0.015625,
+    "progress_rate": 0.0096149376,
+    "mpjpe_l_mm": 0.623,
+    "mpjpe_g_mm": -10.429,
+    "mpjpe_pa_mm": -0.265
+  },
+  "learning_curve": {
+    "complete": true,
+    "all_10_rows_passed": true,
+    "gpu_eval_invocations": 9,
+    "shared_initialization_reuses": 1,
+    "exact_motion_key_coverage": true,
+    "normalized_auc": {
+      "official_failure_rate": {
+        "success_rate": 0.7353515625,
+        "progress_rate": 0.8323185649132938,
+        "mpjpe_l_mm": 38.703914101616455,
+        "mpjpe_g_mm": 238.98706575520976
+      },
+      "zpd_learnability": {
+        "success_rate": 0.7314453125,
+        "progress_rate": 0.8311482355129556,
+        "mpjpe_l_mm": 39.833955786382354,
+        "mpjpe_g_mm": 268.1314375580728
+      },
+      "delta_zpd_minus_official": {
+        "success_rate": -0.00390625,
+        "progress_rate": -0.0011703294003382325,
+        "mpjpe_l_mm": 1.1300416847658994,
+        "mpjpe_g_mm": 29.14437180286302
+      }
+    },
+    "learning_curve_sha256": "465ce01572b8e4e6a446930fdb2846ab3c6c5ab8e27909a286ac85d29db1662c",
+    "execution_sha256": "b37390626eff76cb17b1caab6c848efd3789413df9551b629c4a6e20b64efed5"
+  },
+  "sampler_checkpoint_analysis": {
+    "prior_domination_threshold_observed_failures": 2,
+    "official_failure_rate": {
+      "prior_dominated_bins": 831,
+      "prior_dominated_fraction": 0.8260437375745527,
+      "observed_failures_total": 1776.0,
+      "effective_bins_unweighted": 461.60294003361554
+    },
+    "zpd_learnability": {
+      "prior_dominated_bins": 827,
+      "prior_dominated_fraction": 0.8220675944333996,
+      "observed_failures_total": 1493.0,
+      "selected_target_bin_draws": 3747,
+      "effective_bins_unweighted": 505.686178203928
+    },
+    "raw_checkpoint_state_sha256": "72cff05a35fcd3b780a09c2765227eee73a65191e0d2c5e45d6c97207fda09df",
+    "raw_telemetry_sha256": "86801e79ec7731e6ce6c4b3e33fb40a9ca97a7452ed0fec3e12e06fbd1e786eb"
+  },
+  "comparison_sha256": "7cdad277f682c2fc28d9eb8be0d3f574d5dab4fc876546845ac1ff854a75bc7d",
+  "comparison_ok_for_causal_comparison": true,
+  "mpjpe_l_screen_passed": false,
+  "interpretation": "Single-seed diagnostic. The sampler mechanism activated and flattened sampling, but ZPD did not improve any normalized learning-curve AUC metric; both arms regress sharply from the release initialization."
+}

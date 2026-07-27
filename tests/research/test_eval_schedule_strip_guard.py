@@ -12,7 +12,10 @@ and run_sonic_multiseed): any spec whose materialized commands use
 
 from __future__ import annotations
 
-from scripts.research.run_sonic_multiseed import render_spec_for_seed
+import json
+from pathlib import Path
+
+from scripts.research.run_sonic_multiseed import _template_has_placeholder, render_spec_for_seed
 from scripts.research.run_sonic_paired_experiment import validate_spec
 
 
@@ -66,6 +69,14 @@ def test_schedule_in_train_with_null_strip_in_eval_passes() -> None:
     assert validate_spec(spec) == []
 
 
+def test_eval_entrypoint_handles_null_schedule_during_event_stripping() -> None:
+    source = (
+        Path(__file__).resolve().parents[2] / "gear_sonic" / "eval_agent_trl.py"
+    ).read_text(encoding="utf-8")
+
+    assert 'config.trainer.get("schedule_dict") or {}' in source
+
+
 def test_schedule_set_directly_in_eval_is_rejected() -> None:
     spec = _spec(
         "python gear_sonic/train_agent_trl.py +exp=e",
@@ -101,11 +112,6 @@ def test_schedule_bearing_trainer_config_is_detected_without_literal_key() -> No
 
 def test_m5_spec_templates_pass_guard_for_all_seeds() -> None:
     # The committed launch templates must stay guard-clean end to end.
-    import json
-    from pathlib import Path
-
-    from scripts.research.run_sonic_multiseed import _template_has_placeholder
-
     repo_root = Path(__file__).resolve().parents[2]
     for name in (
         "sim_m5_l_learnability_multiseed_template",
