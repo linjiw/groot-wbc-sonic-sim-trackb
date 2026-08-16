@@ -130,6 +130,37 @@ def _segment_point_distance(
     return float(np.hypot(point[0] - closest[0], point[1] - closest[1]))
 
 
+def _rect_to_path_clearance_deficit(
+    rect: tuple[float, float, float, float],
+    path: np.ndarray,
+    required: np.ndarray,
+) -> float:
+    """Smallest (distance - required) over the path, with a per-point requirement.
+
+    Returns a *deficit*: negative means some point of the path needs more room than
+    the rectangle leaves. A per-point requirement is what lets the corridor pinch in
+    where the robot is slim and widen where its arms swing, instead of being a tube
+    sized for the single worst moment.
+    """
+    min_x, min_y, max_x, max_y = rect
+    corners = ((min_x, min_y), (min_x, max_y), (max_x, min_y), (max_x, max_y))
+    worst = math.inf
+    for index, point in enumerate(path):
+        inside_x = min_x <= point[0] <= max_x
+        inside_y = min_y <= point[1] <= max_y
+        if inside_x and inside_y:
+            return -math.inf
+        dx = max(min_x - point[0], 0.0, point[0] - max_x)
+        dy = max(min_y - point[1], 0.0, point[1] - max_y)
+        worst = min(worst, float(math.hypot(dx, dy)) - float(required[index]))
+    # Segments can pass closer than either endpoint, so also test corners against them.
+    for i, (start, end) in enumerate(zip(path[:-1], path[1:])):
+        need = max(float(required[i]), float(required[i + 1]))
+        for corner in corners:
+            worst = min(worst, _segment_point_distance(corner, start, end) - need)
+    return worst
+
+
 def _rect_to_path_distance(rect: tuple[float, float, float, float], path: np.ndarray) -> float:
     """Minimum distance from an axis-aligned rectangle to a polyline.
 
@@ -167,6 +198,7 @@ def build_clutter_scene(
     scene_id: str,
     seed: int = 0,
     clearance_m: float = 0.75,
+    per_point_clearance_m: np.ndarray | None = None,
     room_margin_m: float = 1.5,
     min_room_size_m: tuple[float, float] = (7.0, 6.0),
     wall_height: float = 2.8,
@@ -201,6 +233,20 @@ def build_clutter_scene(
     # Work in a scene frame centred on the path so the room is symmetric about it.
     path = path - centre
     half_x, half_y = room_x / 2.0, room_y / 2.0
+
+    # A single scalar clearance is a tube sized for the worst moment. When the caller
+    # supplies the measured per-frame swept half-width, the corridor follows the robot.
+    if per_point_clearance_m is None:
+        required_per_point = np.full(len(path), float(clearance_m))
+    else:
+        required_per_point = np.asarray(per_point_clearance_m, dtype=np.float64)
+        if required_per_point.shape != (len(path),):
+            raise ValueError(
+                f"per_point_clearance_m must have {len(path)} entries; "
+                f"got {required_per_point.shape}"
+            )
+        if not np.all(required_per_point > 0):
+            raise ValueError("per_point_clearance_m must be positive")
 
     rng = np.random.default_rng(seed)
     wall_rects = [
@@ -245,7 +291,7 @@ def build_clutter_scene(
                 and rect[3] <= half_y - 0.05
             ):
                 continue
-            if _rect_to_path_distance(rect, path) < clearance_m:
+            if _rect_to_path_clearance_deficit(rect, path, required_per_point) < 0.0:
                 continue
             if any(_rects_overlap(rect, other, piece_gap_m) for other in placed_rects):
                 continue

@@ -250,6 +250,11 @@ class TrajectoryRecorderTerm(recorder_manager.RecorderTerm):
         self._contact_body_names = (
             tuple(self._contact_sensor.body_names) if self._contact_sensor is not None else ()
         )
+        # Per-body world positions come from the articulation itself, not from the
+        # motion command: TrackingCommand.robot_body_pos_w covers only the bodies the
+        # command tracks, whereas the articulation order matches the contact sensor so
+        # geometry and contact can be indexed together.
+        self._body_names = tuple(self.env.scene["robot"].body_names)
 
         # Get motion command for root pose
         try:
@@ -268,6 +273,8 @@ class TrajectoryRecorderTerm(recorder_manager.RecorderTerm):
             "dof_vel": [],
             "root_pos_w": [],
             "root_quat_w": [],
+            "body_pos_w": [],
+            "body_quat_w": [],
             "root_lin_vel_w": [],
             "root_ang_vel_w": [],
             "projected_gravity_b": [],
@@ -315,6 +322,10 @@ class TrajectoryRecorderTerm(recorder_manager.RecorderTerm):
         root_lin_vel = robot.data.root_lin_vel_w.detach().cpu().numpy()
         root_ang_vel = robot.data.root_ang_vel_w.detach().cpu().numpy()
         projected_gravity = robot.data.projected_gravity_b.detach().cpu().numpy()
+        body_pos = robot.data.body_pos_w.detach().cpu().numpy()
+        # Orientation is needed to place body-local collision capsules in world
+        # frame; positions alone only support conservative bounding spheres.
+        body_quat = robot.data.body_quat_w.detach().cpu().numpy()
 
         if self._motion_cmd is not None:
             root_pos = self._motion_cmd.robot_body_pos_w[:, 0].detach().cpu().numpy()
@@ -432,6 +443,9 @@ class TrajectoryRecorderTerm(recorder_manager.RecorderTerm):
             data["root_lin_vel_w"].append(root_lin_vel[i].copy())
             data["root_ang_vel_w"].append(root_ang_vel[i].copy())
             data["projected_gravity_b"].append(projected_gravity[i].copy())
+            # Same frame convention as root_pos_w: scene-local, env origin removed.
+            data["body_pos_w"].append((body_pos[i] - env_origins[i]).copy())
+            data["body_quat_w"].append(body_quat[i].copy())
 
             if applied_action is not None:
                 data["applied_joint_action"].append(applied_action[i].copy())
@@ -538,6 +552,8 @@ class TrajectoryRecorderTerm(recorder_manager.RecorderTerm):
             }
 
             for key in (
+                "body_pos_w",
+                "body_quat_w",
                 "applied_joint_action",
                 "action_motion_token",
                 "policy_meta_action",
@@ -555,6 +571,8 @@ class TrajectoryRecorderTerm(recorder_manager.RecorderTerm):
             ):
                 if data[key]:
                     trajectory[key] = np.asarray(data[key])
+            if "body_pos_w" in trajectory:
+                trajectory["body_names"] = self._body_names
             if "robot_contact_force_norm_w" in trajectory:
                 trajectory["contact_body_names"] = self._contact_body_names
                 trajectory["allowed_foot_contact_body_names"] = self._ALLOWED_FOOT_CONTACT_BODIES

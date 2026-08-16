@@ -65,9 +65,24 @@ are not recorded today** -- that is step one.
    replacing the 2D root-cylinder test in both the planner and the acceptance gate.
 4. Keep the tracking margin, but apply it to the swept volume rather than a nominal radius.
 
-**Payoff.** Corridors can narrow from `0.45 + 0.30 = 0.75 m` to roughly `link radius +
-margin`, i.e. gaps around **0.35-0.45 m** where the body is genuinely slim, while
-*tightening* clearance around arm swing where today's model is blind.
+**Payoff -- and the prediction above was wrong, corrected by measurement.** Implemented
+and measured on a real 249-frame walking rollout (see section 11):
+
+| quantity | value |
+|---|---|
+| swept half-width, arms tucked | **0.273 m** |
+| swept half-width, median | **0.377 m** |
+| swept half-width, peak arm swing | **0.664 m** |
+| old uniform assumption | 0.450 m |
+
+So a *uniform* narrow corridor of 0.35-0.45 m, as this plan originally claimed, would be
+**unsafe**: the robot exceeds it on 22 of 249 frames. The old 0.45 m root cylinder was
+optimistic by 0.056 m on that episode, and 0.45 + 0.30 = 0.75 m was under-specified at
+peak swing, where the true requirement is 0.964 m.
+
+The real unlock is therefore a **per-frame, spatially varying corridor**: 0.573 m where
+the arms are tucked (24% tighter than the old uniform value) and 0.964 m where they swing
+(21% wider than it). Tighter *and* safer, in different places along the same path.
 
 **Risk.** Under-approximating link radii turns a false-accept into a real collision.
 Mitigation: derive radii from the G1 USD collision meshes, not by hand, and cross-check
@@ -209,9 +224,10 @@ Layout first is deliberate; this is the natural next milestone after items A-C.
 
 Each step is independently useful and leaves the dataset valid.
 
-1. **A1** -- record `body_pos_w`. Small, unblocks everything geometric.
-2. **A2** -- swept-volume model, *validated against recorded contact frames* before it is
-   allowed to license narrower gaps.
+1. **A1 -- DONE.** `body_pos_w` and `body_quat_w` are recorded (orientation is required
+   to place body-local capsules; positions alone only support bounding spheres).
+2. **A2 -- DONE.** Swept-volume model built from the G1's 29 collision capsules and
+   validated against independently recorded physics before being used to narrow anything.
 3. **B** -- vertical bands and cantilevered geometry, 3D preflight.
 4. **F** -- density sweep, now that narrow corridors are safe.
 5. **C** -- semantic catalog, placement grammar, semantic export.
@@ -234,3 +250,78 @@ The guarantees already paid for, which every item above must preserve:
 - split-safe scene/layout grouping;
 - honest reporting: quarantined rejects keep their reason codes, and provisional thresholds
   stay labelled provisional.
+
+
+## 11. Implementation log
+
+### 11.1 A1 -- per-body pose recording (done)
+
+`TrajectoryRecorderTerm` now stores `body_pos_w (T, 30, 3)`, `body_quat_w (T, 30, 4)` and
+`body_names`, in the same scene-local frame as `root_pos_w` (verified: the pelvis column
+matches `root_pos_w` to 0.000000 m).
+
+Orientation is recorded as well as position because the collision geometry is defined in
+each link's local frame; positions alone would only support conservative bounding spheres,
+which are too coarse to narrow anything.
+
+**A landmine worth stating.** The articulation body order and the contact-sensor body order
+**differ at 27 of 30 positions**, though they cover the same set. Indexing `body_pos_w`
+against `robot_contact_force_w` positionally would silently pair the wrong link with the
+wrong force. Everything downstream aligns by name.
+
+### 11.2 A2 -- swept-volume model (done)
+
+[`swept_volume.py`](../gear_sonic/dataset_generation/swept_volume.py) places the G1's 29
+primitive collision capsules -- covering the 14 links that have collision geometry -- in
+world frame from the recorded pose.
+
+Geometry source: the Kimodo G1 MJCF, whose link structure was already verified against this
+repository's G1 (same 29 actuated joints, order, axes, limits, parent links, transforms).
+The repository's own `g1_29dof.xml` defines collisions as meshes with no usable radii. The
+numbers are transcribed into the module so it does not depend on an external checkout.
+
+A satisfying cross-check fell out: **exactly those 14 links carry collision geometry, and
+exactly those links were ever observed to register contact force.** The other 16
+articulation bodies reported identically zero force in every rollout because they have no
+collision shape -- which also explains the "24 of 30 bodies are all-zero" observation from
+the contact-decomposition work.
+
+**Validation against independent ground truth**, done before the model was allowed to
+license narrower gaps:
+
+1. *Floor reconstruction.* Foot capsule surfaces reach **z = -0.0008 m**. Nothing in the
+   capsule table knows where the floor is; the model recovers the ground plane to
+   sub-millimetre from body pose alone, which confirms the rotation and offset placement.
+2. *Agreement with recorded contact.* On an episode with **0.000 N** of recorded lateral
+   scene contact, the model predicts **1.070 m** of clearance -- positive, consistent. The
+   nearest link is `right_wrist_yaw_link`, precisely the body the root cylinder ignored.
+3. *Disagreement with the old model, in the direction the measurements predict.* The root
+   cylinder assumed 1.576 - 0.45 = **1.126 m**; the true surface clearance is **1.070 m**.
+   The old model was optimistic by 0.056 m, matching the measured 0.514 m wrist reach
+   against its 0.45 m assumption.
+
+### 11.3 Per-frame corridors in the clutter builder (done)
+
+`build_clutter_scene` accepts `per_point_clearance_m`, so the corridor follows the robot
+instead of being a tube sized for its worst moment. Measured against the uniform model on
+the same path and seed:
+
+| | uniform 0.75 m | per-frame swept |
+|---|---|---|
+| nearest obstacle | 0.762 m | **0.643 m** |
+| median obstacle distance | 1.426 m | **1.258 m** |
+| pieces placed | 27 | 26 |
+| floor occupancy | 27.1% | 24.9% |
+
+Furniture comes 12 cm closer at the tightest point and 17 cm closer on average. Piece count
+and occupancy are slightly *lower*, and that is the model working correctly rather than a
+regression: this motion swings its arms hard, so the per-frame requirement rises to 0.964 m
+at peak swing, and the space the corridor gives back where the robot is slim does not fully
+pay for the space it correctly reclaims where the robot is wide. A motion with tucked arms
+would gain more.
+
+### 11.4 Next
+
+Item B (vertical bands and cantilevered geometry) is the natural follow-on: the swept volume
+is already 3D, and `swept_volume_clearance` takes boxes with `z` extents, so overhead and
+under-table geometry can now be checked properly rather than collapsed to a footprint.
