@@ -7,7 +7,7 @@ import copy
 import dataclasses
 import glob
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import easydict
 from isaaclab.assets import Articulation
@@ -31,6 +31,7 @@ import torch
 
 from gear_sonic.envs.env_utils import joint_utils
 from gear_sonic.isaac_utils import rotations
+from gear_sonic.research.lace.atlas_probe_mode import resolve_atlas_probe_batch
 from gear_sonic.trl.utils import common, order_converter, torch_transform
 from gear_sonic.utils.motion_lib import motion_lib_robot
 
@@ -110,7 +111,10 @@ class TrackingCommand(CommandTerm):
     cfg: TrackingCommandCfg
 
     def __init__(
-        self, cfg: TrackingCommandCfg, env: ManagerBasedRLEnv, max_num_load_motions: int = None  # noqa: RUF013
+        self,
+        cfg: TrackingCommandCfg,
+        env: ManagerBasedRLEnv,
+        max_num_load_motions: int = None,  # noqa: RUF013
     ):
         """Initialize the tracking command with motion library and body mappings.
 
@@ -240,6 +244,77 @@ class TrackingCommand(CommandTerm):
             self.max_num_load_motions = max_num_load_motions
         self.motion_lib.load_motions_for_training(max_num_seqs=self.max_num_load_motions)
         self.use_adaptive_sampling = self.motion_lib.use_adaptive_sampling
+        self._atlas_probe_enabled = bool(self.cfg.atlas_probe_mode)
+        self._atlas_probe_batch = None
+        fixed_distribution_cfg = motion_lib_cfg.get("lace_fixed_distribution", {})
+        self.lace_fixed_distribution_binding = None
+        if fixed_distribution_cfg.get("enable", False):
+            from gear_sonic.research.lace.fixed_distribution import (
+                apply_fixed_distribution,
+                validate_fixed_distribution_command_modes,
+            )
+
+            rigid_objects = getattr(getattr(self._env, "scene", None), "rigid_objects", {})
+            multi_object_mode = any(str(key).startswith("object_") for key in rigid_objects)
+            validate_fixed_distribution_command_modes(
+                use_paired_motions=bool(self.cfg.use_paired_motions),
+                sample_unique_motions=bool(getattr(self.cfg, "sample_unique_motions", False)),
+                is_evaluating=bool(self.is_evaluating),
+                atlas_probe_mode=self._atlas_probe_enabled,
+                multi_object_mode=multi_object_mode,
+            )
+
+            self.lace_fixed_distribution_binding = apply_fixed_distribution(
+                self.motion_lib,
+                fixed_distribution_cfg,
+            )
+        if self._atlas_probe_enabled:
+            assignments = self.cfg.atlas_probe_assignments
+            if assignments is None:
+                raise ValueError(
+                    "atlas_probe_mode=True requires one atlas_probe_assignments row per environment"
+                )
+            loaded_motion_keys = tuple(self.motion_lib.curr_motion_keys)
+            loaded_ids = torch.arange(
+                len(loaded_motion_keys),
+                dtype=torch.long,
+                device=self.device,
+            )
+            loaded_reference_num_steps = (
+                self.motion_lib.get_motion_num_steps(loaded_ids).detach().cpu().tolist()
+            )
+            self._atlas_probe_batch = resolve_atlas_probe_batch(
+                [dict(row) for row in assignments],
+                schedule_sha256=self.cfg.atlas_probe_schedule_sha256,
+                loaded_motion_keys=loaded_motion_keys,
+                loaded_reference_num_steps=loaded_reference_num_steps,
+                num_envs=self.num_envs,
+            )
+            self._atlas_probe_motion_ids = torch.tensor(
+                self._atlas_probe_batch.motion_ids,
+                dtype=torch.long,
+                device=self.device,
+            )
+            self._atlas_probe_start_steps = torch.tensor(
+                self._atlas_probe_batch.start_steps,
+                dtype=torch.long,
+                device=self.device,
+            )
+            self._atlas_probe_reference_num_steps = torch.tensor(
+                self._atlas_probe_batch.reference_num_steps,
+                dtype=torch.long,
+                device=self.device,
+            )
+            self.atlas_probe_rollout_ids = self._atlas_probe_batch.rollout_ids
+            # A frozen atlas batch never consults or updates the native sampler.
+            self.use_adaptive_sampling = False
+        elif (
+            self.cfg.atlas_probe_assignments is not None
+            or self.cfg.atlas_probe_schedule_sha256 is not None
+        ):
+            raise ValueError(
+                "atlas-probe schedule fields were supplied while atlas_probe_mode is disabled"
+            )
 
         # Load contact data for contact-based initialization
         self._load_contact_data()
@@ -269,7 +344,9 @@ class TrackingCommand(CommandTerm):
             )
 
         # Step 1: Select which motions to use
-        if self.cfg.use_paired_motions:
+        if self._atlas_probe_enabled:
+            self.motion_ids = self._atlas_probe_motion_ids.clone()
+        elif self.cfg.use_paired_motions:
             # Assign motion IDs sequentially (wraps around if more envs than motions)
             self.motion_ids = (
                 torch.arange(self.num_envs, device=self.device)
@@ -293,9 +370,12 @@ class TrackingCommand(CommandTerm):
             self.motion_ids = self.motion_lib.sample_motions(self.num_envs)
 
         # Step 2: Sample start time steps for selected motions
-        self.motion_start_time_steps = self.motion_lib.sample_time_steps(
-            self.motion_ids, truncate_time=None
-        )
+        if self._atlas_probe_enabled:
+            self.motion_start_time_steps = self._atlas_probe_start_steps.clone()
+        else:
+            self.motion_start_time_steps = self.motion_lib.sample_time_steps(
+                self.motion_ids, truncate_time=None
+            )
 
         # # Debug: print motion assignments
         # motion_keys = self.motion_lib._motion_data_keys
@@ -305,7 +385,9 @@ class TrackingCommand(CommandTerm):
         #     print(f"env {env_id}: motion_id={motion_id}, motion_key={motion_key}")
 
         # Step 3: Override start time steps if configured
-        if self.cfg.sample_from_n_initial_frames is not None:
+        if self._atlas_probe_enabled:
+            pass
+        elif self.cfg.sample_from_n_initial_frames is not None:
             # Sample uniformly from first N frames
             n_frames = self.cfg.sample_from_n_initial_frames
             self.motion_start_time_steps = torch.randint(
@@ -606,6 +688,11 @@ class TrackingCommand(CommandTerm):
             if not isinstance(motion_lib_cfg, easydict.EasyDict)
             else motion_lib_cfg
         )
+        fixed_distribution_cfg = motion_lib_cfg.get("lace_fixed_distribution", {})
+        if fixed_distribution_cfg.get("enable", False):
+            raise ValueError(
+                "RQ1 fixed-distribution training cannot use the offline command factory"
+            )
 
         num_future_frames = motion_lib_cfg.get("num_future_frames", 8)
         dt_future_ref_frames = motion_lib_cfg.get("dt_future_ref_frames", 0.1)
@@ -740,7 +827,41 @@ class TrackingCommand(CommandTerm):
 
     def set_is_evaluating(self, is_evaluating: bool = True):
         """Toggle evaluation mode, which disables reset randomizations."""
+        fixed_distribution_active = getattr(
+            getattr(self, "motion_lib", None),
+            "lace_fixed_distribution_binding",
+            None,
+        ) is not None or getattr(
+            getattr(self, "motion_lib", None),
+            "_lace_fixed_distribution_required",
+            False,
+        )
+        if fixed_distribution_active and is_evaluating:
+            from gear_sonic.research.lace.fixed_distribution import (
+                assert_fixed_distribution_integrity,
+                validate_fixed_distribution_command_modes,
+            )
+
+            assert_fixed_distribution_integrity(self.motion_lib)
+            validate_fixed_distribution_command_modes(
+                use_paired_motions=bool(self.cfg.use_paired_motions),
+                sample_unique_motions=bool(getattr(self.cfg, "sample_unique_motions", False)),
+                is_evaluating=True,
+                atlas_probe_mode=bool(self._atlas_probe_enabled),
+                multi_object_mode=bool(getattr(self, "_multi_object_mode", False)),
+            )
+        if getattr(self, "_atlas_probe_enabled", False) and is_evaluating:
+            raise RuntimeError(
+                "atlas_probe_mode cannot enable TrackingCommand evaluation mode because that "
+                "would disable reset pose/velocity randomization"
+            )
         self.is_evaluating = is_evaluating
+
+    @property
+    def atlas_probe_batch(self):
+        """Return the frozen atlas batch, or ``None`` when the mode is disabled."""
+
+        return self._atlas_probe_batch
 
     def forward_motion_samples(self, env_ids: Sequence[int]):
         """Assign sequential motion IDs and reset time steps for given envs.
@@ -752,6 +873,25 @@ class TrackingCommand(CommandTerm):
         Args:
             env_ids: Environment indices to reassign motions for.
         """
+        fixed_distribution_active = getattr(
+            self.motion_lib,
+            "lace_fixed_distribution_binding",
+            None,
+        ) is not None or getattr(
+            self.motion_lib,
+            "_lace_fixed_distribution_required",
+            False,
+        )
+        if fixed_distribution_active:
+            from gear_sonic.research.lace.fixed_distribution import (
+                assert_fixed_distribution_integrity,
+            )
+
+            assert_fixed_distribution_integrity(self.motion_lib)
+            raise RuntimeError(
+                "forward_motion_samples is an evaluation/paired sampler bypass and is forbidden "
+                "for an RQ1 fixed distribution"
+            )
         self.motion_ids[env_ids] = (
             torch.arange(self.num_envs).to(self.device)
             % self.motion_lib._num_motions  # noqa: SLF001
@@ -780,7 +920,11 @@ class TrackingCommand(CommandTerm):
         )
 
     @property
-    def command(self) -> torch.Tensor:  # TODO Consider again if this is the best observation  # noqa: TD002, TD003, TD004
+    def command(
+        self,
+    ) -> (
+        torch.Tensor
+    ):  # TODO Consider again if this is the best observation  # noqa: TD002, TD003, TD004
         """Return current-frame joint positions and velocities concatenated.
 
         Returns:
@@ -807,7 +951,11 @@ class TrackingCommand(CommandTerm):
         return self.root_z_multi_future
 
     @property
-    def command_vel(self) -> torch.Tensor:  # TODO Consider again if this is the best observation  # noqa: TD002, TD003, TD004
+    def command_vel(
+        self,
+    ) -> (
+        torch.Tensor
+    ):  # TODO Consider again if this is the best observation  # noqa: TD002, TD003, TD004
         """Return reference root velocity (2D linear + 1D angular) in body frame.
 
         Returns:
@@ -2822,6 +2970,42 @@ class TrackingCommand(CommandTerm):
 
         return sampled_times
 
+    def _apply_atlas_probe_assignments(self, env_ids: Sequence[int]) -> None:
+        """Restore the frozen per-environment motion and integer start rows."""
+
+        if not self._atlas_probe_enabled or self._atlas_probe_batch is None:
+            raise RuntimeError(
+                "atlas-probe assignments requested while atlas_probe_mode is disabled"
+            )
+        current_motion_keys = tuple(self.motion_lib.curr_motion_keys)
+        if any(
+            motion_id >= len(current_motion_keys)
+            for motion_id in self._atlas_probe_batch.motion_ids
+        ):
+            raise RuntimeError(
+                "loaded motion library shrank after atlas-probe schedule resolution; refusing reset"
+            )
+        resolved_motion_keys = tuple(
+            current_motion_keys[motion_id] for motion_id in self._atlas_probe_batch.motion_ids
+        )
+        if resolved_motion_keys != self._atlas_probe_batch.motion_keys:
+            raise RuntimeError(
+                "loaded motion ordering changed after atlas-probe schedule resolution; refusing reset"
+            )
+        fixed_motion_ids = self._atlas_probe_motion_ids[env_ids]
+        expected_lengths = self._atlas_probe_reference_num_steps[env_ids]
+        actual_lengths = self.motion_lib.get_motion_num_steps(fixed_motion_ids)
+        if not torch.equal(actual_lengths.to(expected_lengths.dtype), expected_lengths):
+            raise RuntimeError(
+                "loaded motion lengths changed after atlas-probe schedule resolution; refusing reset"
+            )
+        self.motion_ids[env_ids] = fixed_motion_ids
+        self.motion_start_time_steps[env_ids] = self._atlas_probe_start_steps[env_ids]
+        # Disable CommandTerm's independent wall-clock resampling. Episode reset
+        # and motion_time_out remain active and domain-randomization events still
+        # run before this command reset in ManagerBasedRLEnv._reset_idx.
+        self.time_left[env_ids] = torch.inf
+
     def _resample_command(self, env_ids: Sequence[int]):
         """Resample motion clips, reset robot state, and position objects for given envs.
 
@@ -2839,13 +3023,50 @@ class TrackingCommand(CommandTerm):
         Args:
             env_ids: Environment indices being reset.
         """
+        fixed_distribution_active = getattr(
+            self.motion_lib,
+            "lace_fixed_distribution_binding",
+            None,
+        ) is not None or getattr(
+            self.motion_lib,
+            "_lace_fixed_distribution_required",
+            False,
+        )
+        if fixed_distribution_active:
+            from gear_sonic.research.lace.fixed_distribution import (
+                assert_fixed_distribution_integrity,
+                validate_fixed_distribution_command_modes,
+            )
+
+            assert_fixed_distribution_integrity(self.motion_lib)
+            if (
+                self.lace_fixed_distribution_binding
+                != self.motion_lib.lace_fixed_distribution_binding
+            ):
+                raise RuntimeError(
+                    "TrackingCommand fixed-distribution binding drifted from MotionLib"
+                )
+            if self.use_adaptive_sampling:
+                raise RuntimeError(
+                    "native adaptive sampling cannot be enabled while an RQ1 fixed "
+                    "distribution is active"
+                )
+            validate_fixed_distribution_command_modes(
+                use_paired_motions=bool(self.cfg.use_paired_motions),
+                sample_unique_motions=bool(getattr(self.cfg, "sample_unique_motions", False)),
+                is_evaluating=bool(self.is_evaluating),
+                atlas_probe_mode=bool(self._atlas_probe_enabled),
+                multi_object_mode=bool(self._multi_object_mode),
+            )
         self.time_steps[env_ids] = 0
         # Variable frames: resample per-env num_frames at episode reset
         if self.variable_frames_enabled and len(env_ids) > 0:
             idx = torch.randint(0, len(self._frame_choices), (len(env_ids),), device=self.device)
             self.per_env_num_frames[env_ids] = self._frame_choices[idx]
         if len(env_ids) > 0:
-            if self.is_evaluating:
+            if self._atlas_probe_enabled:
+                self._apply_atlas_probe_assignments(env_ids)
+            elif self.is_evaluating:
                 self.motion_ids[env_ids] = (
                     torch.arange(self.num_envs).to(self.device)
                     % self.motion_lib._num_motions  # noqa: SLF001
@@ -3220,7 +3441,19 @@ class TrackingCommand(CommandTerm):
             self.time_steps + self.motion_start_time_steps
             >= self.motion_lib.get_time_step_total(self.motion_ids)
         )[0]
-        self._resample_command(env_ids)
+        if self._atlas_probe_enabled and len(env_ids) > 0:
+            unexpected = env_ids[~self._env.reset_buf[env_ids].bool()]
+            if len(unexpected) > 0:
+                raise RuntimeError(
+                    "atlas-probe reference exhausted without an environment reset; enable the "
+                    "motion_time_out termination instead of silently restarting the schedule"
+                )
+            # Reset already restored the frozen row earlier in this same env
+            # step. Avoid a second reset/randomization pass when a row begins at
+            # its final frame, while keeping the returned observation in range.
+            self.time_steps[env_ids] = 0
+        else:
+            self._resample_command(env_ids)
 
         # Exponential moving average update for running_ref_root_height.
         # ZL this should be moved to the recorders???
@@ -3405,7 +3638,9 @@ class TrackingCommand(CommandTerm):
             )
 
         # Contact center visualization (lazy init on first callback)
-        if hasattr(self, "contact_center_visualizers") and self.contact_center_visualizers is None:  # noqa: SIM102
+        if (
+            hasattr(self, "contact_center_visualizers") and self.contact_center_visualizers is None
+        ):  # noqa: SIM102
             if hasattr(self, "motion_lib"):
                 self.contact_center_visualizers = {}
                 if hasattr(self.motion_lib, "_motion_object_contact_center_left"):
@@ -4130,6 +4365,14 @@ class TrackingCommandCfg(CommandTermCfg):
     # Requires num_envs <= num_available_motions, otherwise will error
     # Useful for replay/evaluation to ensure coverage of all unique motions
     sample_unique_motions: bool = False
+
+    # Opt-in LACE atlas collection. Each entry must be an exact rollout row
+    # emitted by gear_sonic.research.lace.schedule, and the list length must
+    # equal num_envs. This remains independent of is_evaluating so reset events
+    # and command-level pose/velocity randomization stay active.
+    atlas_probe_mode: bool = False
+    atlas_probe_assignments: list[dict[str, Any]] | None = None
+    atlas_probe_schedule_sha256: str | None = None
 
     # Sample from the first N frames of the motion (random uniform in [0, N-1])
     # If set, this takes precedence over start_from_first_frame

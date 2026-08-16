@@ -21,6 +21,22 @@ WRIST_VIEW_HEIGHT: int = 480
 WRIST_VIEW_WIDTH: int = 640
 FPS: int = 50
 
+SYNTHETIC_G1_STATE_MODALITIES: tuple[str, ...] = (
+    "left_leg",
+    "right_leg",
+    "waist",
+    "left_arm",
+    "right_arm",
+    "left_hand",
+    "right_hand",
+    "projected_gravity",
+)
+SYNTHETIC_G1_ACTION_MODALITIES: tuple[str, ...] = (
+    "motion_token",
+    "left_hand_joints",
+    "right_hand_joints",
+)
+
 
 _JOINT_GROUPS_FOR_STATE: list[str] = [
     "left_leg",
@@ -352,21 +368,89 @@ def get_features_sonic_vla(robot_model: RobotModel) -> dict:
             "dtype": "float32",
             "shape": (9,),
             "names": [
-                "lwrist_x", "lwrist_y", "lwrist_z",
-                "rwrist_x", "rwrist_y", "rwrist_z",
-                "neck_x", "neck_y", "neck_z",
+                "lwrist_x",
+                "lwrist_y",
+                "lwrist_z",
+                "rwrist_x",
+                "rwrist_y",
+                "rwrist_z",
+                "neck_x",
+                "neck_y",
+                "neck_z",
             ],
         },
         "teleop.vr_3pt_orientation": {
             "dtype": "float32",
             "shape": (18,),
             "names": [
-                "lwrist_r00", "lwrist_r10", "lwrist_r01", "lwrist_r11", "lwrist_r02", "lwrist_r12",
-                "rwrist_r00", "rwrist_r10", "rwrist_r01", "rwrist_r11", "rwrist_r02", "rwrist_r12",
-                "neck_r00", "neck_r10", "neck_r01", "neck_r11", "neck_r02", "neck_r12",
+                "lwrist_r00",
+                "lwrist_r10",
+                "lwrist_r01",
+                "lwrist_r11",
+                "lwrist_r02",
+                "lwrist_r12",
+                "rwrist_r00",
+                "rwrist_r10",
+                "rwrist_r01",
+                "rwrist_r11",
+                "rwrist_r02",
+                "rwrist_r12",
+                "neck_r00",
+                "neck_r10",
+                "neck_r01",
+                "neck_r11",
+                "neck_r02",
+                "neck_r12",
             ],
         },
     }
+
+
+def get_modality_config_synthetic_g1(robot_model: RobotModel) -> dict:
+    """Return the minimal modality map consumed by GR00T's G1 SONIC config.
+
+    Synthetic physics rollouts do not contain human SMPL, VR, or teleoperation planner
+    signals. This profile deliberately omits those keys instead of fabricating values.
+    """
+    full_config = get_modality_config_sonic_vla(robot_model)
+    return {
+        "state": {key: full_config["state"][key] for key in SYNTHETIC_G1_STATE_MODALITIES},
+        "action": {key: full_config["action"][key] for key in SYNTHETIC_G1_ACTION_MODALITIES},
+        "video": {"ego_view": full_config["video"]["ego_view"]},
+        "annotation": {
+            "human.task_description": full_config["annotation"]["human.task_description"]
+        },
+    }
+
+
+def get_features_synthetic_g1(robot_model: RobotModel) -> dict:
+    """Return the minimal LeRobot feature schema for synthetic G1 rollouts."""
+    full_features = get_features_sonic_vla(robot_model)
+    feature_keys = (
+        "observation.images.ego_view",
+        "observation.state",
+        "observation.projected_gravity",
+        "action.motion_token",
+        "teleop.left_hand_joints",
+        "teleop.right_hand_joints",
+    )
+    features = {key: dict(full_features[key]) for key in feature_keys}
+    # GR00T casts these inputs, but storing float64 doubles the dataset size and
+    # weakens the on-disk contract. Physics and SONIC both produce float32.
+    for key in (
+        "observation.state",
+        "observation.projected_gravity",
+        "action.motion_token",
+        "teleop.left_hand_joints",
+        "teleop.right_hand_joints",
+    ):
+        features[key]["dtype"] = "float32"
+    features["reference.g1_qpos"] = {
+        "dtype": "float32",
+        "shape": (36,),
+        "names": "g1_qpos_mujoco_order",
+    }
+    return features
 
 
 def get_wrist_camera_features() -> dict:

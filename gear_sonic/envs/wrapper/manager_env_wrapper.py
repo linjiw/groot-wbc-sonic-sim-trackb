@@ -414,18 +414,26 @@ class ManagerEnvWrapper:
             self.env._prev_meta_action = torch.zeros(  # noqa: SLF001
                 self.env.num_envs, meta_action_dim, dtype=torch.float32, device=self.env.device
             )
-            # Full latent buffers for full_latent_rate_l2 reward (decoder input smoothness)
-            # tokenizer_action_dim = latent_dim (e.g., 64 = num_tokens * token_dim)
-            tokenizer_action_dim = self.config.get("tokenizer_action_dim", 64)
-            self.env._full_latent = torch.zeros(  # noqa: SLF001
-                self.env.num_envs, tokenizer_action_dim, dtype=torch.float32, device=self.env.device
-            )
-            self.env._prev_full_latent = torch.zeros(  # noqa: SLF001
-                self.env.num_envs, tokenizer_action_dim, dtype=torch.float32, device=self.env.device
-            )
-
             # Apply camera extrinsics randomization on every reset
             self.apply_random_camera_extrinsics()
+
+        # Full-latent buffers are also required when the released SONIC policy
+        # owns its tokenizer directly (there is no separate action transform
+        # module in that configuration). The eval loop supplies the exact token
+        # that the policy's decoder consumed via ``actions["full_latent"]``.
+        tokenizer_action_dim = self.config.get("tokenizer_action_dim", 64) or 64
+        self.env._full_latent = torch.zeros(  # noqa: SLF001
+            self.env.num_envs,
+            tokenizer_action_dim,
+            dtype=torch.float32,
+            device=self.env.device,
+        )
+        self.env._prev_full_latent = torch.zeros(  # noqa: SLF001
+            self.env.num_envs,
+            tokenizer_action_dim,
+            dtype=torch.float32,
+            device=self.env.device,
+        )
 
         return new_obs
 
@@ -653,9 +661,7 @@ class ManagerEnvWrapper:
 
         return body_actions
 
-    def record_m5t_height_termination(
-        self, term_name: str, term_mask: torch.Tensor
-    ) -> None:
+    def record_m5t_height_termination(self, term_name: str, term_mask: torch.Tensor) -> None:
         """Capture one raw scheduled-term mask for the current environment step."""
         if not self._log_m5t_height_termination:
             return
@@ -668,6 +674,23 @@ class ManagerEnvWrapper:
         self._m5t_height_termination_masks[term_name] = term_mask.detach()
 
     def step(self, actions):
+        policy_full_latent = actions.get("full_latent")
+        if policy_full_latent is not None and self.action_transform_module is None:
+            if not isinstance(policy_full_latent, torch.Tensor):
+                raise TypeError("actions['full_latent'] must be a torch.Tensor")
+            if policy_full_latent.dim() == 3:
+                policy_full_latent = policy_full_latent[:, -1, :]
+            expected_shape = self.env._full_latent.shape  # noqa: SLF001
+            if policy_full_latent.shape != expected_shape:
+                raise ValueError(
+                    "policy full latent shape mismatch: expected "
+                    f"{tuple(expected_shape)}, got {tuple(policy_full_latent.shape)}"
+                )
+            if not torch.isfinite(policy_full_latent).all():
+                raise ValueError("policy full latent contains NaN or infinity")
+            self.env._prev_full_latent = self.env._full_latent.clone()  # noqa: SLF001
+            self.env._full_latent = policy_full_latent.detach().to(self.env.device)  # noqa: SLF001
+
         if self.action_transform_module is not None:
             # Use provided obs_dict or fall back to stored obs from last reset/step
             if "obs_dict" in actions:
@@ -959,9 +982,7 @@ class ManagerEnvWrapper:
                 extras["to_log"][k] = torch.tensor(v, dtype=torch.float)
         if self._log_m5t_height_termination:
             extras["to_log"].update(
-                build_m5t_height_activation_telemetry(
-                    self._m5t_height_termination_masks, dones
-                )
+                build_m5t_height_activation_telemetry(self._m5t_height_termination_masks, dones)
             )
         if self._motion_lib is not None and self._motion_lib.use_adaptive_sampling:
             extras["to_log"][
@@ -1070,11 +1091,18 @@ class ManagerEnvWrapper:
 
     def set_is_evaluating(self, is_evaluating: bool = True, global_rank=0, **_kwargs):
         self.is_evaluating = is_evaluating
+        atlas_probe_batch = None
         if self.motion_command is not None:
-            self.motion_command.set_is_evaluating(is_evaluating)
+            atlas_probe_batch = getattr(self.motion_command, "atlas_probe_batch", None)
+            # TrackingCommand evaluation mode disables reset pose/velocity
+            # randomization. Atlas collection needs the policy in eval mode but
+            # the command in its normal reset/DR lifecycle.
+            self.motion_command.set_is_evaluating(
+                False if atlas_probe_batch is not None else is_evaluating
+            )
         if self.force_command is not None:
             self.force_command.set_is_evaluating(is_evaluating)
-        if is_evaluating:
+        if is_evaluating and atlas_probe_batch is None:
             self.begin_seq_motion_samples(global_rank)
 
     def begin_seq_motion_samples(self, global_rank=0):

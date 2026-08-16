@@ -21,6 +21,24 @@ eval_timestamp: ${now:%Y%m%d_%H%M%S}
 eval_name: TEST
 eval_base_dir: logs_eval
 eval_log_dir: ${eval_base_dir}/${eval_timestamp}-${eval_name}
+
+# Inert unless render_ego/enable_cameras is enabled. Keeping the calibrated G1
+# attachment in the eval overlay makes it available when a released checkpoint's
+# saved training config predates dataset-camera support.
+manager_env:
+  config:
+    render_ego: false
+    cameras:
+      camera_attached_link: torso_link/head_link
+      camera_pos_offset: [0.09, 0.0, 0.43]
+      camera_rot_offset: [1.0, 0.0, 0.0, 0.0]
+      camera_resolution: [480, 640]
+      camera_focal_length: 1.88
+      camera_focus_distance: 1.0
+      camera_horizontal_aperture: 2.6035
+      camera_vertical_aperture: 1.9526
+      camera_clipping_range: [0.05, 30.0]
+
 hydra:
   run:
     dir: ${eval_log_dir}

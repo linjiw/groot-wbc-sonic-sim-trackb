@@ -28,8 +28,10 @@ except ImportError:
         "before running this script.\n"
     )
     import sys
+
     sys.exit(1)
 
+import hashlib
 import json
 import logging
 import os
@@ -50,6 +52,11 @@ import yaml
 sys.path.append(os.getcwd())
 
 from gear_sonic import train_agent_trl  # noqa: E402
+from gear_sonic.dataset_generation.runtime_manifest import (  # noqa: E402
+    build_runtime_capture_context,
+    invalidate_runtime_success_manifest,
+    write_runtime_success_manifest,
+)
 from gear_sonic.trl.utils import (
     common as trl_utils_common,  # noqa: E402
     scheduler,  # noqa: E402
@@ -80,6 +87,9 @@ def main(override_config: omegaconf.OmegaConf):
     logging.getLogger().addHandler(utils_logging.HydraLoggerBridge())
 
     os.chdir(hydra.utils.get_original_cwd())
+    initial_success_manifest = override_config.get("success_manifest", None)
+    if initial_success_manifest is not None:
+        invalidate_runtime_success_manifest(initial_success_manifest)
 
     if override_config.checkpoint is not None:
         has_config = True
@@ -99,12 +109,15 @@ def main(override_config: omegaconf.OmegaConf):
             raw = raw.replace("groot.rl.trl.", "gear_sonic.trl.")
             raw = raw.replace("groot.rl.envs.", "gear_sonic.envs.")
             raw = raw.replace("groot.rl.utils.", "gear_sonic.utils.")
-            raw = raw.replace("groot.rl.agents.modules.modules.", "gear_sonic.trl.modules.base_module.")
+            raw = raw.replace(
+                "groot.rl.agents.modules.modules.", "gear_sonic.trl.modules.base_module."
+            )
             raw = raw.replace("groot.rl.agents.", "gear_sonic.trl.")
             raw = raw.replace("groot/rl/data/", "gear_sonic/data/")
             raw = raw.replace("assets/bm/unitree_description/", "assets/robot_description/")
             raw = raw.replace("1215_bones_seed_filtered", "bones_seed_smpl")
             import io
+
             train_config = omegaconf.OmegaConf.load(io.StringIO(raw))
 
             if train_config.eval_overrides is not None:
@@ -128,6 +141,10 @@ def main(override_config: omegaconf.OmegaConf):
     else:
         config = override_config
 
+    success_manifest = config.get("success_manifest", None)
+    if success_manifest is not None and success_manifest != initial_success_manifest:
+        invalidate_runtime_success_manifest(success_manifest)
+
     meta_path = Path(config.experiment_dir) / "meta.yaml"
     if meta_path.exists():
         meta = yaml.safe_load(open(meta_path))  # noqa: SIM115
@@ -136,9 +153,7 @@ def main(override_config: omegaconf.OmegaConf):
             print(f"resume wandb from run: {config.wandb.wandb_id}")  # noqa: T201
 
     with omegaconf.open_dict(config):
-        events_to_remove = list(
-            config.manager_env.config.get("train_only_events", [])
-        )
+        events_to_remove = list(config.manager_env.config.get("train_only_events", []))
         # Optional verifier profiles may remove additional domain-randomization
         # events without changing the saved release/training configuration.
         for event in config.get("eval_remove_events", []) or []:
@@ -239,9 +254,11 @@ def main(override_config: omegaconf.OmegaConf):
         args_cli.seed = config.seed
         args_cli.env_spacing = env_config.config.env_spacing
         args_cli.output_dir = config.output_dir
-        args_cli.enable_cameras = env_config.config.get(
-            "render_results", False
-        ) or env_config.config.get("enable_cameras", False)
+        args_cli.enable_cameras = (
+            env_config.config.get("render_results", False)
+            or env_config.config.get("enable_cameras", False)
+            or env_config.config.get("render_ego", False)
+        )
 
         args_cli.headless = config.headless
         args_cli.multi_gpu = config.multi_gpu
@@ -386,6 +403,52 @@ def main(override_config: omegaconf.OmegaConf):
 
     env = train_agent_trl.create_manager_env(config, device, args_cli)
 
+    # Protocol bootstrap is intentionally earlier than every explicit reset,
+    # policy construction, checkpoint-weight load, DR reinitialization, and
+    # rollout step below.  The live helper also proves the recorder has emitted
+    # zero rows before and after capture, publishes its receipt last, and marks
+    # the candidate as ineligible for scientific claims until preregistered.
+    from gear_sonic.research.lace.protocol_preflight import (
+        protocol_preflight_binding_from_config,
+    )
+
+    try:
+        lace_preflight_fields = protocol_preflight_binding_from_config(config)
+    except ValueError as error:
+        raise RuntimeError(str(error)) from error
+    if lace_preflight_fields is not None:
+        if bool(config.get("lace_scientific_instrument_required", False)):
+            raise RuntimeError("protocol preflight may not materialize a scientific instrument")
+        resolved_preflight_config = omegaconf.OmegaConf.to_container(
+            config,
+            resolve=True,
+            enum_to_str=True,
+        )
+        if not isinstance(resolved_preflight_config, dict):
+            raise RuntimeError("resolved LACE preflight Hydra config is not a mapping")
+        from gear_sonic.research.lace.protocol_preflight import execute_live_protocol_preflight
+
+        receipt = execute_live_protocol_preflight(
+            request_path=lace_preflight_fields[0],
+            expected_request_file_sha256=lace_preflight_fields[1],
+            launch_plan_path=lace_preflight_fields[3],
+            repo_root=Path(__file__).resolve().parents[1],
+            resolved_hydra_config=resolved_preflight_config,
+            wrapped_env=env,
+        )
+        logger.info(
+            "LACE outcome-free protocol preflight complete: "
+            f"{receipt['protocol_preflight_receipt_sha256']}"
+        )
+        close = getattr(env, "close", None)
+        if callable(close):
+            close()
+        if simulator_type == "IsaacSim":
+            close_app = getattr(simulation_app, "close", None)
+            if callable(close_app):
+                close_app()
+        return
+
     module_dim_dict = getattr(config.algo.config, "module_dim", {})
     policy_backbone_kwargs = {}
     critic_backbone_kwargs = {}
@@ -492,6 +555,60 @@ def main(override_config: omegaconf.OmegaConf):
             schedule_wrapper, config.trainer.schedule_dict, state.global_step
         )
     env.reinit_dr()
+
+    # Scientific LACE identity has live-only inputs (the installed one-pass
+    # termination contract and resolved event manager), so it is materialized
+    # here: after checkpoint/config/schedule application but before policy
+    # rollout. A missing or stale handshake aborts before any scientific row.
+    lace_runtime_instrument = None
+    lace_instrument_required = bool(config.get("lace_scientific_instrument_required", False))
+    lace_handshake_fields = (
+        config.get("lace_instrument_handshake_path", None),
+        config.get("lace_instrument_handshake_file_sha256", None),
+        config.get("lace_launch_plan_path", None),
+    )
+    if lace_instrument_required:
+        if not all(isinstance(value, str) and value for value in lace_handshake_fields):
+            raise RuntimeError("scientific LACE eval requires a complete instrument handshake")
+        resolved_lace_config = omegaconf.OmegaConf.to_container(
+            config,
+            resolve=True,
+            enum_to_str=True,
+        )
+        if not isinstance(resolved_lace_config, dict):
+            raise RuntimeError("resolved LACE Hydra config is not a mapping")
+        from gear_sonic.research.lace.instrument_runtime import (
+            file_sha256,
+            materialize_live_instrument,
+        )
+
+        loaded_checkpoint_path = Path(checkpoint_path).expanduser().resolve()
+        loaded_checkpoint_config_path = loaded_checkpoint_path.parent / "config.yaml"
+        if not loaded_checkpoint_config_path.is_file():
+            raise RuntimeError(
+                "scientific LACE checkpoint is missing its bound companion config.yaml"
+            )
+
+        lace_runtime_instrument = materialize_live_instrument(
+            handshake_path=lace_handshake_fields[0],
+            expected_handshake_file_sha256=lace_handshake_fields[1],
+            launch_plan_path=lace_handshake_fields[2],
+            repo_root=Path(__file__).resolve().parents[1],
+            resolved_hydra_config=resolved_lace_config,
+            loaded_checkpoint_bundle={
+                "checkpoint_path": str(loaded_checkpoint_path),
+                "checkpoint_sha256": file_sha256(loaded_checkpoint_path),
+                "config_path": str(loaded_checkpoint_config_path.resolve()),
+                "config_sha256": file_sha256(loaded_checkpoint_config_path),
+            },
+            wrapped_env=env,
+        )
+        logger.info(
+            "LACE scientific instrument materialized: "
+            f"{lace_runtime_instrument.episode_instrument_sha256}"
+        )
+    elif any(value is not None for value in lace_handshake_fields):
+        raise RuntimeError("non-scientific eval may not carry a LACE instrument handshake")
 
     global_step = checkpoint["state"].global_step
     exported_policy_path = os.path.join(config.experiment_dir, "exported")
@@ -608,6 +725,9 @@ def main(override_config: omegaconf.OmegaConf):
     for callback_name, callback in callbacks.items():  # noqa: B007
         callback.on_step_end(args, state, None, env=env, model=model, accelerator=accelerator)
 
+    exit_reason = "eval_loop_disabled"
+    policy_iterations = 0
+    physics_steps = 0
     if config.get("run_eval_loop", True):
         env.set_is_evaluating(True)
         obs_dict = env.reset_all()
@@ -639,16 +759,23 @@ def main(override_config: omegaconf.OmegaConf):
                 actions = policy_model.rollout(obs_dict=obs_dict)
                 actor_state["actions"] = policy_model.action_mean.detach()
                 actor_state["obs_dict"] = actions["obs_dict"]
+                actor_module = getattr(policy_model, "actor_module", None)
+                policy_full_latent = getattr(actor_module, "_last_full_latent_flat", None)
+                if policy_full_latent is not None:
+                    actor_state["full_latent"] = policy_full_latent.detach()
 
                 step_count += 1
+                policy_iterations = step_count
 
                 if max_render_steps > 0 and step_count >= max_render_steps:
                     logger.info(f"Reached max_render_steps={max_render_steps}. Exiting.")
+                    exit_reason = "max_render_steps"
                     if hasattr(env, "end_render_results"):
                         env.end_render_results()
                     break
 
                 results = env.step(actor_state)
+                physics_steps += 1
                 obs_dict, _, dones, _ = (
                     results[0],
                     results[1],
@@ -661,7 +788,10 @@ def main(override_config: omegaconf.OmegaConf):
                         cb.eval_step(env, results) for cb in eval_step_callbacks.values()
                     )
                     if all_want_exit:
-                        logger.info("All eval step callbacks signaled exit. Exiting evaluation loop.")
+                        logger.info(
+                            "All eval step callbacks signaled exit. Exiting evaluation loop."
+                        )
+                        exit_reason = "eval_callbacks"
                         break
 
                 if run_once:
@@ -671,13 +801,69 @@ def main(override_config: omegaconf.OmegaConf):
                         else envs_completed | dones
                     )
                     if envs_completed.all():
-                        logger.info("All environments completed one episode. Exiting (run_once=True).")
+                        logger.info(
+                            "All environments completed one episode. Exiting (run_once=True)."
+                        )
+                        exit_reason = "run_once"
                         if hasattr(env, "end_render_results"):
                             env.end_render_results()
                         break
 
                 for obs_key in obs_dict.keys():  # noqa: SIM118
                     obs_dict[obs_key] = obs_dict[obs_key].to(device)
+
+    if lace_runtime_instrument is not None:
+        from gear_sonic.research.lace.instrument_runtime import finalize_scientific_rollout
+
+        lace_rollout_binding = finalize_scientific_rollout(lace_runtime_instrument)
+        logger.info(
+            "LACE scientific rollout bound: " f"{lace_rollout_binding['rollout_binding_sha256']}"
+        )
+
+    if success_manifest is not None:
+        if hasattr(env, "end_render_results"):
+            env.end_render_results()
+        recorder_cfg = env_config.get("recorders") or {}
+        render_recorder_cfg = recorder_cfg.get("render_envs") or {}
+        cameras_cfg = env_config.config.get("cameras") or {}
+        motion_lib_cfg = env_config.commands.motion.motion_lib_cfg
+        camera_name = render_recorder_cfg.get("camera_name")
+        manifest_path = write_runtime_success_manifest(
+            success_manifest,
+            checkpoint=str(config.checkpoint),
+            exit_reason=exit_reason,
+            num_envs=int(config.num_envs),
+            policy_iterations=policy_iterations,
+            physics_steps=physics_steps,
+            artifacts={
+                "trajectory_dir": env_config.config.get("save_trajectory_dir", None),
+                "rendering_dir": env_config.config.get("save_rendering_dir", None),
+            },
+            runtime_config_hash=(
+                "sha256:"
+                + hashlib.sha256(
+                    omegaconf.OmegaConf.to_yaml(config, resolve=True).encode("utf-8")
+                ).hexdigest()
+            ),
+            capture_context=build_runtime_capture_context(
+                terrain_type=str(env_config.config.get("terrain_type", "plane")),
+                scene_id=config.get("dataset_scene_id", None),
+                scene_usd_path=env_config.config.get("scene_usd_path", None),
+                task=config.get("dataset_task", None),
+                motion_file=motion_lib_cfg.get("motion_file", None),
+                camera_provenance="isaac_sim" if camera_name is not None else None,
+                camera_name=camera_name,
+                camera_track_root=render_recorder_cfg.get("track_root", None),
+                render_ego=bool(env_config.config.get("render_ego", False)),
+                camera_attached_link=cameras_cfg.get("camera_attached_link", None),
+                camera_resolution=cameras_cfg.get("camera_resolution", None),
+                render_frame_skip=env_config.config.get("render_frame_skip", None),
+                use_encoder=use_encoder,
+            ),
+        )
+        logger.info(f"SONIC_EVAL_SUCCESS manifest={manifest_path} physics_steps={physics_steps}")
+        sys.stdout.flush()
+        sys.stderr.flush()
 
     if simulator_type == "IsaacSim":
         os._exit(0)

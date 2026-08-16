@@ -25,6 +25,16 @@ _ZPD_SAMPLER_SCHEMA_KIND = "zpd_adaptive_sampler_state"
 _ZPD_SAMPLER_SCHEMA_VERSION = 1
 _ZPD_SAMPLING_MASS_SEMANTICS = "selected_target_bin_pre_window_shift"
 _SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
+_LACE_FIXED_DISTRIBUTION_STATE_KEY = "lace_fixed_distribution"
+
+
+def _lace_fixed_distribution_is_active(motion_lib):
+    """Cheap opt-in sentinel that leaves the released sampler import path inert."""
+
+    return (
+        getattr(motion_lib, "lace_fixed_distribution_binding", None) is not None
+        or getattr(motion_lib, "_lace_fixed_distribution_required", False) is True
+    )
 
 
 class FixHeightMode(enum.Enum):
@@ -954,10 +964,22 @@ class MotionLibBase:
         return return_dict
 
     def load_all_motions(self):
+        if _lace_fixed_distribution_is_active(self):
+            from gear_sonic.research.lace.fixed_distribution import (
+                assert_fixed_distribution_reload_allowed,
+            )
+
+            assert_fixed_distribution_reload_allowed(self, "load_all_motions")
         self.all_motions_loaded = True
         self.load_motions(random_sample=False, num_motions_to_load=self._num_unique_motions)
 
     def load_motions_for_training(self, max_num_seqs=None):
+        if _lace_fixed_distribution_is_active(self):
+            from gear_sonic.research.lace.fixed_distribution import (
+                assert_fixed_distribution_reload_allowed,
+            )
+
+            assert_fixed_distribution_reload_allowed(self, "load_motions_for_training")
         if self.all_motions_loaded:
             print("All motions already loaded!!! No need to resample.")  # noqa: T201
             return False
@@ -990,6 +1012,12 @@ class MotionLibBase:
         return True
 
     def load_motions_for_evaluation(self, start_idx=0):
+        if _lace_fixed_distribution_is_active(self):
+            from gear_sonic.research.lace.fixed_distribution import (
+                assert_fixed_distribution_reload_allowed,
+            )
+
+            assert_fixed_distribution_reload_allowed(self, "load_motions_for_evaluation")
         # disable this check to avoid upper body poses randomization in evaluation
         # if self.all_motions_loaded:
         #     print("All motions already loaded!!! No need to resample.")
@@ -1023,6 +1051,12 @@ class MotionLibBase:
         num_motions_to_load=None,
         is_evaluation=False,
     ):
+        if _lace_fixed_distribution_is_active(self):
+            from gear_sonic.research.lace.fixed_distribution import (
+                assert_fixed_distribution_reload_allowed,
+            )
+
+            assert_fixed_distribution_reload_allowed(self, "load_motions")
 
         if "gts" in self.__dict__:
             del (
@@ -2229,9 +2263,20 @@ class MotionLibBase:
         return motion_time_steps
 
     def sample_motions(self, n):
+        fixed_distribution_active = _lace_fixed_distribution_is_active(self)
+        if fixed_distribution_active:
+            from gear_sonic.research.lace.fixed_distribution import (
+                assert_fixed_distribution_integrity,
+                record_fixed_distribution_draws,
+            )
+
+            assert_fixed_distribution_integrity(self)
         motion_ids = torch.multinomial(
             self._sampling_batch_prob, num_samples=n, replacement=True
         ).to(self._device)
+
+        if fixed_distribution_active:
+            record_fixed_distribution_draws(self, motion_ids)
 
         return motion_ids
 
@@ -2531,9 +2576,7 @@ class MotionLibBase:
             # release/failure-rate checkpoints byte-compatible by recording this
             # metadata only for the flag-gated ZPD research signals.
             signal = self.adaptive_sampling_cfg.get("signal", "failure_rate")
-            if signal in ("learnability", "advantage_mass") and hasattr(
-                self, "adp_samp_bins"
-            ):
+            if signal in ("learnability", "advantage_mass") and hasattr(self, "adp_samp_bins"):
                 state_dict["adp_samp_bin_motion_ids"] = self.adp_samp_bins[:, 0]
                 state_dict["adp_samp_bin_ranges"] = self.adp_samp_bins[:, 1:3]
                 state_dict["adp_samp_motion_data_keys"] = [
@@ -2550,6 +2593,16 @@ class MotionLibBase:
                 state_dict["adp_samp_fails_at_last_recompute"] = (
                     self._adp_samp_fails_at_last_recompute
                 )
+        if _lace_fixed_distribution_is_active(self):
+            from gear_sonic.research.lace.fixed_distribution import (
+                assert_fixed_distribution_integrity,
+                fixed_distribution_checkpoint_state,
+            )
+
+            assert_fixed_distribution_integrity(self)
+            state_dict[_LACE_FIXED_DISTRIBUTION_STATE_KEY] = fixed_distribution_checkpoint_state(
+                self
+            )
         return state_dict
 
     def load_state_dict(self, state_dict):
@@ -2562,6 +2615,40 @@ class MotionLibBase:
         Args:
             state_dict: Dict previously returned by ``get_state_dict()``.
         """
+        fixed_distribution_active = _lace_fixed_distribution_is_active(self)
+        has_fixed_distribution_state = _LACE_FIXED_DISTRIBUTION_STATE_KEY in state_dict
+        if fixed_distribution_active or has_fixed_distribution_state:
+            from gear_sonic.research.lace.fixed_distribution import (
+                assert_fixed_distribution_integrity,
+                restore_fixed_distribution_checkpoint_state,
+            )
+
+            if fixed_distribution_active:
+                assert_fixed_distribution_integrity(self)
+            if fixed_distribution_active and not has_fixed_distribution_state:
+                raise ValueError(
+                    "full RQ1 resume requires exact fixed-distribution checkpoint state; "
+                    "for explicit model-only initialization load weights with trainer resume=False "
+                    "so environment state restoration is not invoked"
+                )
+            if fixed_distribution_active and set(state_dict) != {
+                _LACE_FIXED_DISTRIBUTION_STATE_KEY
+            }:
+                raise ValueError(
+                    "full RQ1 resume environment state must contain exactly the locked "
+                    "fixed-distribution state"
+                )
+            if fixed_distribution_active:
+                restore_fixed_distribution_checkpoint_state(
+                    self,
+                    state_dict[_LACE_FIXED_DISTRIBUTION_STATE_KEY],
+                )
+            else:
+                raise ValueError(
+                    "checkpoint contains fixed-distribution state but the current run has no "
+                    "fixed-distribution binding"
+                )
+
         if self.use_adaptive_sampling and "adp_samp_num_episodes" in state_dict:
             if self.adp_samp_signal in ("learnability", "advantage_mass"):
                 self._validate_zpd_checkpoint_bin_identity(state_dict)
@@ -2581,9 +2668,9 @@ class MotionLibBase:
                     "adp_samp_fails_at_last_recompute"
                 ].to(self._device)
             if "adp_samp_bin_draw_counts" in state_dict:
-                self.adp_samp_bin_draw_counts[:] = state_dict[
-                    "adp_samp_bin_draw_counts"
-                ].to(self._device)
+                self.adp_samp_bin_draw_counts[:] = state_dict["adp_samp_bin_draw_counts"].to(
+                    self._device
+                )
             self.sync_and_compute_adaptive_sampling(sync_across_gpus=False)
         return
 
@@ -2935,9 +3022,7 @@ class MotionLibBase:
     def adp_samp_tripwire_max_prob_over_uniform(self):
         # D9: loose safety ceiling (×uniform) replacing the mean×cap clip for ZPD
         # signals — a preregistered validity assertion, not a shaping mechanism.
-        multiplier = float(
-            self.adaptive_sampling_cfg.get("tripwire_max_prob_over_uniform", 20.0)
-        )
+        multiplier = float(self.adaptive_sampling_cfg.get("tripwire_max_prob_over_uniform", 20.0))
         if not np.isfinite(multiplier) or multiplier < 1.0:
             raise ValueError(
                 "adaptive_sampling.tripwire_max_prob_over_uniform must be finite and >= 1 "
@@ -2969,8 +3054,7 @@ class MotionLibBase:
         ceiling = float(ceiling)
         if ceiling * len(probabilities) < 1.0 - 1e-12:
             raise ValueError(
-                f"capped-simplex ceiling {ceiling} is infeasible for "
-                f"{len(probabilities)} bins"
+                f"capped-simplex ceiling {ceiling} is infeasible for " f"{len(probabilities)} bins"
             )
         ceiling_tensor = torch.as_tensor(
             ceiling, dtype=probabilities.dtype, device=probabilities.device
@@ -3266,9 +3350,7 @@ class MotionLibBase:
         # D9 is deliberately last: bin weights and either optional concentration
         # constraint can otherwise push probability back above the safety ceiling.
         if self.adp_samp_signal in ("learnability", "advantage_mass"):
-            self.adp_sampling_active_prob = self._apply_zpd_tripwire(
-                self.adp_sampling_active_prob
-            )
+            self.adp_sampling_active_prob = self._apply_zpd_tripwire(self.adp_sampling_active_prob)
 
         self.adp_sampling_active_prob = self.adp_sampling_active_prob.float()
         assert (self.adp_sampling_active_prob >= 0).all()
@@ -3308,9 +3390,9 @@ class MotionLibBase:
             if clipped_sum > 0:
                 failure_based_sampling_prob = adp_samp_failure_rate_clipped / clipped_sum
             else:
-                failure_based_sampling_prob = torch.ones_like(
+                failure_based_sampling_prob = torch.ones_like(adp_samp_failure_rate_clipped) / len(
                     adp_samp_failure_rate_clipped
-                ) / len(adp_samp_failure_rate_clipped)
+                )
         uniform_sampling_prob = torch.ones_like(failure_based_sampling_prob) / len(
             failure_based_sampling_prob
         )
@@ -3435,6 +3517,15 @@ class MotionLibBase:
                 - motion_ids: ``(n,)`` long tensor with batch-local motion indices.
                 - motion_time_steps: ``(n,)`` int tensor with frame indices.
         """
+        if _lace_fixed_distribution_is_active(self):
+            from gear_sonic.research.lace.fixed_distribution import (
+                assert_fixed_distribution_integrity,
+            )
+
+            if assert_fixed_distribution_integrity(self):
+                raise RuntimeError(
+                    "adaptive bin sampling is forbidden for an RQ1 fixed motion distribution"
+                )
         sampled_bin_ids = torch.multinomial(
             self.adp_sampling_active_prob, num_samples=n, replacement=True
         ).to(self._device)

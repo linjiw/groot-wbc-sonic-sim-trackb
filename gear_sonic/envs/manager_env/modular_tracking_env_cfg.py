@@ -17,6 +17,7 @@ import pxr
 
 from gear_sonic.envs.manager_env.mdp import terrain
 from gear_sonic.envs.manager_env.robots import g1, h2
+from gear_sonic.envs.manager_env.scene_usd import resolve_scene_usd_path
 from gear_sonic.trl.utils import common
 
 
@@ -351,6 +352,22 @@ class MySceneCfg(InteractiveSceneCfg):
                 ),
                 debug_vis=False,
             )
+        elif terrain_type in ("scene_usd", "usd"):
+            # Isaac Lab's USD TerrainImporter creates one global USD instance rather than
+            # cloning it under every environment namespace. Keep the first implementation
+            # honest and deterministic by requiring one environment. Vectorized full-scene
+            # cloning needs a separate scene-asset spawner and collision-isolation design.
+            scene_usd_path = resolve_scene_usd_path(
+                config.get("scene_usd_path", None), num_envs=self.num_envs
+            )
+            self.terrain = TerrainImporterCfg(
+                prim_path="/World/ground",
+                terrain_type="usd",
+                usd_path=scene_usd_path,
+                env_spacing=self.env_spacing,
+                collision_group=-1,
+                debug_vis=False,
+            )
         else:
             raise ValueError(f"Unknown terrain type: {terrain_type}")
 
@@ -388,6 +405,29 @@ class MySceneCfg(InteractiveSceneCfg):
             force_threshold=10.0,
             debug_vis=False,
         )
+        if terrain_type in ("scene_usd", "usd"):
+            # Dataset scenes share this authored support-floor path after
+            # TerrainImporter composes their /World default prim at
+            # /World/ground/terrain. One-body filtered sensors provide pair-resolved
+            # ground evidence; the all-body sensor above remains authoritative
+            # for collisions with every other scene/robot shape.
+            support_floor_path = "/World/ground/terrain/Structure/Floor"
+            self.left_foot_support_contact = ContactSensorCfg(
+                prim_path="{ENV_REGEX_NS}/Robot/left_ankle_roll_link",
+                filter_prim_paths_expr=[support_floor_path],
+                history_length=0,
+                track_air_time=False,
+                force_threshold=10.0,
+                debug_vis=False,
+            )
+            self.right_foot_support_contact = ContactSensorCfg(
+                prim_path="{ENV_REGEX_NS}/Robot/right_ankle_roll_link",
+                filter_prim_paths_expr=[support_floor_path],
+                history_length=0,
+                track_air_time=False,
+                force_threshold=10.0,
+                debug_vis=False,
+            )
 
         # Check if robot has hands (43 DOF robots) - used for hand-related sensors
         robot_type = config.get("robot", {}).get("type", "g1")

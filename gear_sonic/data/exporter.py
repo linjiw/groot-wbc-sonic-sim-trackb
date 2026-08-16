@@ -9,7 +9,7 @@ import json
 import os
 from pathlib import Path
 import shutil
-from typing import Any, Optional
+from typing import Any
 
 import datasets
 from datasets import load_dataset
@@ -25,6 +25,7 @@ from lerobot.common.datasets.utils import (
     get_episode_data_index,
     validate_episode_buffer,
     validate_frame,
+    write_stats,
 )
 import numpy as np
 from PIL import Image as PILImage
@@ -311,9 +312,29 @@ class Gr00tDataExporter(LeRobotDataset):
         for key in self.video_writers:
             self.video_writers[key].stop()
 
+    def cancel_video_writers(self) -> None:
+        """Close current writers without committing their partial video files."""
+        if not hasattr(self, "video_writers"):
+            return
+        for writer in self.video_writers.values():
+            writer.cancel()
+        self.video_writers = {}
+
+    def close(self) -> None:
+        """Release encoder workers after the final episode has been committed.
+
+        ``save_episode`` prepares writers for the next episode. Batch exporters
+        that are finished must close those empty writers explicitly instead of
+        leaving PyAV containers and worker threads alive during interpreter
+        teardown.
+        """
+        if self.episode_buffer is not None and self.episode_buffer.get("size", 0):
+            raise RuntimeError("Cannot close exporter with an unsaved episode buffer")
+        self.cancel_video_writers()
+
     def skip_and_start_new_episode(self) -> None:
         """Skip the current episode and start a new one."""
-        self.stop_video_writers()
+        self.cancel_video_writers()
         self.episode_buffer = self.create_episode_buffer()
         self.video_writers = self.create_video_writer()
 
@@ -360,6 +381,11 @@ class Gr00tDataExporter(LeRobotDataset):
                 episode_buffer[key] = video_paths[key]
 
         self.meta.save_episode(episode_index, episode_length, episode_tasks, ep_stats)
+        # Isaac-GR00T's episode loader requires the aggregate LeRobot statistics
+        # file. LeRobot v2.1 updates ``meta.stats`` in memory but only writes the
+        # per-episode JSONL here, so persist the aggregate after every committed
+        # episode as well.
+        write_stats(self.meta.stats, self.root)
 
         ep_data_index = get_episode_data_index(self.meta.episodes, [episode_index])
         ep_data_index_np = {k: t.numpy() for k, t in ep_data_index.items()}

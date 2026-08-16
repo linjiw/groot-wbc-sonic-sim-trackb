@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "package_id": "g1_dataset_m0_scenes",
+  "description": "Deterministic primitive-only M0 scenes for G1 locomotion dataset smoke tests.",
+  "license": {
+    "spdx": "Apache-2.0",
+    "source": "../../../../../LICENSE",
+    "redistribution_allowed": true
+  },
+  "provenance": {
+    "kind": "repo_authored_primitive_geometry",
+    "description": "Authored in this repository from axis-aligned USD Cube obstacles and a Plane support floor; no imported meshes, materials, textures, or third-party scene content.",
+    "third_party_assets": []
+  },
+  "scenes": [
+    {
+      "scene_id": "household_room",
+      "scene_family": "household",
+      "file": "household_room.usda",
+      "sha256": "sha256:80ca27440b5addf2cd0ef04b37cd71b23723cc904701dd7252ec700f90554ce7",
+      "size_bytes": 7112,
+      "split_group": "household_room_layout_v1",
+      "license_spdx": "Apache-2.0",
+      "redistribution_allowed": true,
+      "provenance": "repo_authored_primitive_geometry",
+      "default_prim": "/World",
+      "up_axis": "Z",
+      "meters_per_unit": 1.0,
+      "support_floor_prim": "/World/Structure/Floor",
+      "support_z_m": 0.0,
+      "walkable_bounds_xy": {
+        "min": [-4.7, -3.7],
+        "max": [4.7, 3.7]
+      },
+      "route_xy": [
+        [0.0, -3.2],
+        [0.0, -1.0],
+        [0.0, 1.0],
+        [0.0, 3.2]
+      ],
+      "route_clearance_radius_m": 0.45,
+      "robot_clearance_height_m": 1.9,
+      "minimum_collision_prims": 13
+    },
+    {
+      "scene_id": "factory_aisle",
+      "scene_family": "factory",
+      "file": "factory_aisle.usda",
+      "sha256": "sha256:ea935ea01582ab42b5155247772a464b1dffda99e20c5795bb56f55752a265d5",
+      "size_bytes": 8710,
+      "split_group": "factory_aisle_layout_v1",
+      "license_spdx": "Apache-2.0",
+      "redistribution_allowed": true,
+      "provenance": "repo_authored_primitive_geometry",
+      "default_prim": "/World",
+      "up_axis": "Z",
+      "meters_per_unit": 1.0,
+      "support_floor_prim": "/World/Structure/Floor",
+      "support_z_m": 0.0,
+      "walkable_bounds_xy": {
+        "min": [-7.6, -3.6],
+        "max": [7.6, 3.6]
+      },
+      "route_xy": [
+        [-7.0, 0.0],
+        [-2.0, 0.0],
+        [-1.4, -1.2],
+        [1.4, -1.2],
+        [2.0, 0.0],
+        [7.0, 0.0]
+      ],
+      "route_clearance_radius_m": 0.45,
+      "robot_clearance_height_m": 1.9,
+      "minimum_collision_prims": 16
+    }
+  ]
+}

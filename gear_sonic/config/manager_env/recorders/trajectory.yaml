@@ -1,0 +1,6 @@
+_target_: gear_sonic.envs.manager_env.mdp.recorders.RecordersCfg
+dataset_export_mode: 0  # custom trajectory files are authoritative; disable Isaac Lab HDF5
+
+trajectory:
+  _target_: gear_sonic.envs.manager_env.mdp.recorders.TrajectoryRecorderCfg
+  save_path: ${manager_env.config.save_trajectory_dir}

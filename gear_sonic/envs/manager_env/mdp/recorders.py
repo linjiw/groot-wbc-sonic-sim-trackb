@@ -62,6 +62,8 @@ class RenderEnvsRecorderTerm(recorder_manager.RecorderTerm):
             self.max_render_envs = 1  # single video from overview_camera
         self.render_frame_skip = self.env.wrapper.config.get("render_frame_skip", 2)
         self.start_idx = self.env.wrapper.start_idx
+        self.camera_name = self.cfg.camera_name
+        self.track_root = self.cfg.track_root
 
         for i in range(self.max_render_envs):
             file_name = f"{self.save_dir}/{self.start_idx+i:06d}.mp4"
@@ -85,32 +87,38 @@ class RenderEnvsRecorderTerm(recorder_manager.RecorderTerm):
             self.frame_id += 1
             return "record_post_step", torch.ones(self.env.num_envs, 1, device=self.env.device)
 
-        # Set camera position based on robot root position
-        root_pos = self.env.command_manager.get_term("motion").robot_body_pos_w[:, 0]
-        camera_offset = self.env.wrapper.config.get("eval_camera_offset", [2, 2, 1])
-        fix_camera = self.env.wrapper.config.get("fix_camera_after_first_frame", False)
-        cam = self.env.scene["eval_camera"]
+        cam = self.env.scene[self.camera_name]
+        if cam is None:
+            raise RuntimeError(
+                f"Camera {self.camera_name!r} was requested by the recorder but is not configured"
+            )
 
-        if fix_camera and self._fixed_eye is not None:
-            # Reuse the camera position from the first frame
-            eye, target = self._fixed_eye, self._fixed_target
-        elif self.group_camera:
-            center = root_pos.mean(dim=0, keepdim=True).expand_as(root_pos)
-            eye = center + torch.tensor(camera_offset, device=self.env.device)
-            target = center
-            if fix_camera:
-                self._fixed_eye = eye.clone()
-                self._fixed_target = center.clone()
-        else:
-            eye = root_pos + torch.tensor(camera_offset, device=self.env.device)
-            target = root_pos
-            if fix_camera:
-                self._fixed_eye = eye.clone()
-                self._fixed_target = root_pos.clone()
+        if self.track_root:
+            # Move a free camera with the robot. Attached cameras such as the
+            # dataset ego camera retain their authored link-relative transform.
+            root_pos = self.env.command_manager.get_term("motion").robot_body_pos_w[:, 0]
+            camera_offset = self.env.wrapper.config.get("eval_camera_offset", [2, 2, 1])
+            fix_camera = self.env.wrapper.config.get("fix_camera_after_first_frame", False)
 
-        # Write world poses to Fabric AND sync to USD so both renderer paths see it
-        cam._view._sync_usd_on_fabric_write = True  # noqa: SLF001
-        cam.set_world_poses_from_view(eye, target)
+            if fix_camera and self._fixed_eye is not None:
+                eye, target = self._fixed_eye, self._fixed_target
+            elif self.group_camera:
+                center = root_pos.mean(dim=0, keepdim=True).expand_as(root_pos)
+                eye = center + torch.tensor(camera_offset, device=self.env.device)
+                target = center
+                if fix_camera:
+                    self._fixed_eye = eye.clone()
+                    self._fixed_target = center.clone()
+            else:
+                eye = root_pos + torch.tensor(camera_offset, device=self.env.device)
+                target = root_pos
+                if fix_camera:
+                    self._fixed_eye = eye.clone()
+                    self._fixed_target = root_pos.clone()
+
+            # Write world poses to Fabric and sync to USD so both renderer paths see it.
+            cam._view._sync_usd_on_fabric_write = True  # noqa: SLF001
+            cam.set_world_poses_from_view(eye, target)
 
         # Two render calls: 1st flushes pose to render pipeline, 2nd captures at new pose
         if hasattr(self.env, "sim"):
@@ -130,31 +138,29 @@ class RenderEnvsRecorderTerm(recorder_manager.RecorderTerm):
             end_idx = self.start_idx + self.max_render_envs
             cur_render_info = self.env.wrapper.config.render_info[self.start_idx : end_idx]
 
-        # Process each environment, loop over the video writers
-        if self.frame_id >= 1:
-            loop = (
-                tqdm(range(self.max_render_envs))
-                if self.first_render
-                else range(self.max_render_envs)
-            )
-            for i in loop:
-                frame = rgb_viewer[i].cpu().numpy()
+        # Record the first post-step frame as well. The trajectory recorder also
+        # starts at frame zero; dropping it here creates a one-frame dataset skew.
+        loop = (
+            tqdm(range(self.max_render_envs)) if self.first_render else range(self.max_render_envs)
+        )
+        for i in loop:
+            frame = rgb_viewer[i].cpu().numpy()
 
-                # Add text overlay if render info is provided
-                if cur_render_info is not None and i < len(cur_render_info):
-                    for j, text in enumerate(cur_render_info[i]):
-                        frame = cv2.putText(
-                            frame,
-                            str(text),
-                            (10, 30 + j * 25),
-                            cv2.FONT_HERSHEY_SIMPLEX,
-                            0.6,
-                            (0, 0, 0),
-                            1,
-                        )
+            # Add text overlay if render info is provided
+            if cur_render_info is not None and i < len(cur_render_info):
+                for j, text in enumerate(cur_render_info[i]):
+                    frame = cv2.putText(
+                        frame,
+                        str(text),
+                        (10, 30 + j * 25),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.6,
+                        (0, 0, 0),
+                        1,
+                    )
 
-                self.video_writers[i].append_data(frame)
-            self.first_render = False
+            self.video_writers[i].append_data(frame)
+        self.first_render = False
 
         self.frame_id += 1
         return "record_post_step", torch.ones(self.env.num_envs, 1, device=self.env.device)
@@ -188,16 +194,24 @@ class RenderEnvsRecorderCfg(manager_term_cfg.RecorderTermCfg):
     class_type = RenderEnvsRecorderTerm
     video_save_path: str = None
     video_quality: int = 5
+    camera_name: str = "eval_camera"
+    track_root: bool = True
 
 
 class TrajectoryRecorderTerm(recorder_manager.RecorderTerm):
-    """Recorder term that saves per-environment trajectory data (joint positions, root pose, object/table state).
+    """Record physics state plus SONIC/reference actions for each environment.
 
-    Saves .trajectory.pkl files alongside the video output, enabling kinematic replay
-    in multi-scene composite renders.
+    The original recorder only stored enough state for kinematic replay. The
+    additional fields make the same artifact useful as the authoritative raw
+    trajectory for synthetic-dataset generation. Existing replay consumers keep
+    working because the original keys and file naming are unchanged.
     """
 
     cfg: TrajectoryRecorderCfg
+    _ALLOWED_FOOT_CONTACT_BODIES = (
+        "left_ankle_roll_link",
+        "right_ankle_roll_link",
+    )
 
     def __init__(self, cfg: TrajectoryRecorderCfg, env: envs.ManagerBasedEnv):
         super().__init__(cfg, env)
@@ -229,6 +243,13 @@ class TrajectoryRecorderTerm(recorder_manager.RecorderTerm):
         # Detect available scene entities
         self._has_object = "object" in self.env.scene.rigid_objects
         self._has_table = "table" in self.env.scene.rigid_objects
+        self._dof_joint_names = tuple(self.env.scene["robot"].joint_names)
+        self._contact_sensor = self.env.scene.sensors.get("contact_forces")
+        self._left_foot_support_sensor = self.env.scene.sensors.get("left_foot_support_contact")
+        self._right_foot_support_sensor = self.env.scene.sensors.get("right_foot_support_contact")
+        self._contact_body_names = (
+            tuple(self._contact_sensor.body_names) if self._contact_sensor is not None else ()
+        )
 
         # Get motion command for root pose
         try:
@@ -244,8 +265,27 @@ class TrajectoryRecorderTerm(recorder_manager.RecorderTerm):
     def _create_empty_data(self) -> dict:
         data = {
             "dof_pos": [],
+            "dof_vel": [],
             "root_pos_w": [],
             "root_quat_w": [],
+            "root_lin_vel_w": [],
+            "root_ang_vel_w": [],
+            "projected_gravity_b": [],
+            "applied_joint_action": [],
+            "action_motion_token": [],
+            "policy_meta_action": [],
+            "reference_g1_qpos": [],
+            "motion_id": [],
+            "motion_time_step": [],
+            "motion_time_s": [],
+            "tracking_metrics": {},
+            "robot_contact_force_norm_w": [],
+            "robot_contact_force_w": [],
+            "left_foot_ground_contact_force_w": [],
+            "right_foot_ground_contact_force_w": [],
+            "max_nonfoot_contact_force_n": [],
+            "left_foot_contact_force_n": [],
+            "right_foot_contact_force_n": [],
         }
         if self._has_object:
             data["object_pos_w"] = []
@@ -266,30 +306,174 @@ class TrajectoryRecorderTerm(recorder_manager.RecorderTerm):
             return "trajectory_record", torch.ones(self.env.num_envs, 1, device=self.env.device)
 
         robot = self.env.scene["robot"]
-        env_origins = self.env.scene.env_origins
+        env_origins = self.env.scene.env_origins.detach().cpu().numpy()
+
+        # Move each batched value to the CPU once instead of once per environment.
+        joint_pos = robot.data.joint_pos.detach().cpu().numpy()
+        joint_vel = robot.data.joint_vel.detach().cpu().numpy()
+        root_quat = robot.data.root_quat_w.detach().cpu().numpy()
+        root_lin_vel = robot.data.root_lin_vel_w.detach().cpu().numpy()
+        root_ang_vel = robot.data.root_ang_vel_w.detach().cpu().numpy()
+        projected_gravity = robot.data.projected_gravity_b.detach().cpu().numpy()
+
+        if self._motion_cmd is not None:
+            root_pos = self._motion_cmd.robot_body_pos_w[:, 0].detach().cpu().numpy()
+        else:
+            root_pos = robot.data.root_pos_w.detach().cpu().numpy()
+
+        action_manager = getattr(self.env, "action_manager", None)
+        applied_action_tensor = getattr(action_manager, "action", None)
+        applied_action = (
+            applied_action_tensor.detach().cpu().numpy()
+            if isinstance(applied_action_tensor, torch.Tensor)
+            else None
+        )
+
+        full_latent_tensor = getattr(self.env, "_full_latent", None)
+        full_latent = (
+            full_latent_tensor.detach().cpu().numpy()
+            if isinstance(full_latent_tensor, torch.Tensor)
+            else None
+        )
+        meta_action_tensor = getattr(self.env, "_last_meta_action", None)
+        meta_action = (
+            meta_action_tensor.detach().cpu().numpy()
+            if isinstance(meta_action_tensor, torch.Tensor)
+            else None
+        )
+
+        reference_qpos = None
+        motion_ids = None
+        motion_time_steps = None
+        motion_times_s = None
+        tracking_metrics: dict[str, np.ndarray] = {}
+        if self._motion_cmd is not None:
+            motion_ids_tensor = self._motion_cmd.motion_ids
+            motion_time_steps_tensor = (
+                self._motion_cmd.motion_start_time_steps + self._motion_cmd.time_steps
+            )
+            reference_root_pos = self._motion_cmd.motion_lib.get_root_pos_w(
+                motion_ids_tensor, motion_time_steps_tensor
+            )
+            reference_root_quat = self._motion_cmd.motion_lib.get_root_quat_w(
+                motion_ids_tensor, motion_time_steps_tensor
+            )
+            reference_qpos = (
+                torch.cat(
+                    [reference_root_pos, reference_root_quat, self._motion_cmd.joint_pos],
+                    dim=-1,
+                )
+                .detach()
+                .cpu()
+                .numpy()
+            )
+            motion_ids = motion_ids_tensor.detach().cpu().numpy()
+            motion_time_steps = motion_time_steps_tensor.detach().cpu().numpy()
+            motion_times_s = motion_time_steps * float(self.env.step_dt)
+            tracking_metrics = {
+                name: value.detach().cpu().numpy()
+                for name, value in self._motion_cmd.metrics.items()
+                if isinstance(value, torch.Tensor)
+            }
+
+        contact_force_norm = None
+        contact_force_w = None
+        left_foot_ground_contact_force_w = None
+        right_foot_ground_contact_force_w = None
+        max_nonfoot_contact_force = None
+        left_foot_contact_force = None
+        right_foot_contact_force = None
+        if self._contact_sensor is not None:
+            contact_force_w = self._contact_sensor.data.net_forces_w.detach().cpu().numpy()
+            contact_force_norm = (
+                torch.linalg.vector_norm(self._contact_sensor.data.net_forces_w, dim=-1)
+                .detach()
+                .cpu()
+                .numpy()
+            )
+            nonfoot_indices = [
+                index
+                for index, body_name in enumerate(self._contact_body_names)
+                if body_name not in self._ALLOWED_FOOT_CONTACT_BODIES
+            ]
+            if nonfoot_indices:
+                max_nonfoot_contact_force = contact_force_norm[:, nonfoot_indices].max(axis=1)
+            else:
+                max_nonfoot_contact_force = np.zeros(self.num_record_envs, dtype=np.float32)
+            for body_name, destination in (
+                ("left_ankle_roll_link", "left"),
+                ("right_ankle_roll_link", "right"),
+            ):
+                if body_name not in self._contact_body_names:
+                    continue
+                values = contact_force_norm[:, self._contact_body_names.index(body_name)]
+                if destination == "left":
+                    left_foot_contact_force = values
+                else:
+                    right_foot_contact_force = values
+        for sensor, destination in (
+            (self._left_foot_support_sensor, "left"),
+            (self._right_foot_support_sensor, "right"),
+        ):
+            if sensor is None or sensor.data.force_matrix_w is None:
+                continue
+            support_force = sensor.data.force_matrix_w[:, 0, 0, :].detach().cpu().numpy()
+            if destination == "left":
+                left_foot_ground_contact_force_w = support_force
+            else:
+                right_foot_ground_contact_force_w = support_force
 
         for i in range(self.num_record_envs):
-            # Joint positions
-            joint_pos = robot.data.joint_pos[i].cpu().numpy().copy()
-            self._frame_data[i]["dof_pos"].append(joint_pos)
+            data = self._frame_data[i]
+            data["dof_pos"].append(joint_pos[i].copy())
+            data["dof_vel"].append(joint_vel[i].copy())
+            data["root_pos_w"].append((root_pos[i] - env_origins[i]).copy())
+            data["root_quat_w"].append(root_quat[i].copy())
+            data["root_lin_vel_w"].append(root_lin_vel[i].copy())
+            data["root_ang_vel_w"].append(root_ang_vel[i].copy())
+            data["projected_gravity_b"].append(projected_gravity[i].copy())
 
-            # Root position (relative to env origin)
-            if self._motion_cmd is not None:
-                root_pos = self._motion_cmd.robot_body_pos_w[i, 0].cpu().numpy().copy()
-            else:
-                root_pos = robot.data.root_pos_w[i].cpu().numpy().copy()
-            root_pos_rel = root_pos - env_origins[i].cpu().numpy()
-            self._frame_data[i]["root_pos_w"].append(root_pos_rel)
-
-            # Root quaternion (wxyz)
-            root_quat = robot.data.root_quat_w[i].cpu().numpy().copy()
-            self._frame_data[i]["root_quat_w"].append(root_quat)
+            if applied_action is not None:
+                data["applied_joint_action"].append(applied_action[i].copy())
+            if full_latent is not None:
+                data["action_motion_token"].append(full_latent[i].copy())
+            if meta_action is not None:
+                data["policy_meta_action"].append(meta_action[i].copy())
+            if reference_qpos is not None:
+                data["reference_g1_qpos"].append(reference_qpos[i].copy())
+                data["motion_id"].append(int(motion_ids[i]))
+                data["motion_time_step"].append(int(motion_time_steps[i]))
+                data["motion_time_s"].append(float(motion_times_s[i]))
+            for name, values in tracking_metrics.items():
+                data["tracking_metrics"].setdefault(name, []).append(np.asarray(values[i]).copy())
+            if contact_force_norm is not None:
+                data["robot_contact_force_w"].append(contact_force_w[i].copy())
+                data["robot_contact_force_norm_w"].append(contact_force_norm[i].copy())
+                data["max_nonfoot_contact_force_n"].append(float(max_nonfoot_contact_force[i]))
+                data["left_foot_contact_force_n"].append(
+                    float(left_foot_contact_force[i])
+                    if left_foot_contact_force is not None
+                    else 0.0
+                )
+            if left_foot_ground_contact_force_w is not None:
+                data["left_foot_ground_contact_force_w"].append(
+                    left_foot_ground_contact_force_w[i].copy()
+                )
+            if right_foot_ground_contact_force_w is not None:
+                data["right_foot_ground_contact_force_w"].append(
+                    right_foot_ground_contact_force_w[i].copy()
+                )
+                data["right_foot_contact_force_n"].append(
+                    float(right_foot_contact_force[i])
+                    if right_foot_contact_force is not None
+                    else 0.0
+                )
 
             # Object state
             if self._has_object:
                 obj = self.env.scene["object"]
                 obj_pos = obj.data.root_pos_w[i].cpu().numpy().copy()
-                obj_pos_rel = obj_pos - env_origins[i].cpu().numpy()
+                obj_pos_rel = obj_pos - env_origins[i]
                 obj_quat = obj.data.root_quat_w[i].cpu().numpy().copy()
                 self._frame_data[i]["object_pos_w"].append(obj_pos_rel)
                 self._frame_data[i]["object_quat_w"].append(obj_quat)
@@ -298,7 +482,7 @@ class TrajectoryRecorderTerm(recorder_manager.RecorderTerm):
             if self._has_table:
                 table = self.env.scene["table"]
                 table_pos = table.data.root_pos_w[i].cpu().numpy().copy()
-                table_pos_rel = table_pos - env_origins[i].cpu().numpy()
+                table_pos_rel = table_pos - env_origins[i]
                 table_quat = table.data.root_quat_w[i].cpu().numpy().copy()
                 self._frame_data[i]["table_pos_w"].append(table_pos_rel)
                 self._frame_data[i]["table_quat_w"].append(table_quat)
@@ -326,14 +510,68 @@ class TrajectoryRecorderTerm(recorder_manager.RecorderTerm):
 
             # Stack frame arrays
             trajectory = {
+                "schema_version": 2,
+                "kind": "sonic_physics_trajectory",
                 "dof_pos": np.array(data["dof_pos"]),
+                "dof_vel": np.array(data["dof_vel"]),
                 "root_pos_w": np.array(data["root_pos_w"]),
                 "root_quat_w": np.array(data["root_quat_w"]),
+                "root_lin_vel_w": np.array(data["root_lin_vel_w"]),
+                "root_ang_vel_w": np.array(data["root_ang_vel_w"]),
+                "projected_gravity_b": np.array(data["projected_gravity_b"]),
                 "quat_format": "wxyz",
                 "fps": effective_fps,
                 "num_joints": data["dof_pos"][0].shape[0],
                 "total_frames": len(data["dof_pos"]),
+                # RecorderManager calls this term after physics and observation
+                # updates, while the policy token was selected before the same
+                # step. Dataset export uses these declarations to perform the
+                # required one-frame causal shift.
+                "recording_phase": "post_physics_step",
+                "policy_action_phase": "pre_physics_step_policy_output",
+                # Isaac Articulation tensors and TrackingCommand.joint_pos both
+                # use the articulation's Isaac Lab order. The exporter must
+                # reorder these values before labeling them as MuJoCo/G1 data.
+                "dof_order": "isaaclab",
+                "dof_joint_names": self._dof_joint_names,
+                "reference_g1_qpos_dof_order": "isaaclab",
             }
+
+            for key in (
+                "applied_joint_action",
+                "action_motion_token",
+                "policy_meta_action",
+                "reference_g1_qpos",
+                "motion_id",
+                "motion_time_step",
+                "motion_time_s",
+                "robot_contact_force_norm_w",
+                "robot_contact_force_w",
+                "left_foot_ground_contact_force_w",
+                "right_foot_ground_contact_force_w",
+                "max_nonfoot_contact_force_n",
+                "left_foot_contact_force_n",
+                "right_foot_contact_force_n",
+            ):
+                if data[key]:
+                    trajectory[key] = np.asarray(data[key])
+            if "robot_contact_force_norm_w" in trajectory:
+                trajectory["contact_body_names"] = self._contact_body_names
+                trajectory["allowed_foot_contact_body_names"] = self._ALLOWED_FOOT_CONTACT_BODIES
+            if "left_foot_ground_contact_force_w" in trajectory:
+                trajectory["support_floor_prim_path"] = "/World/ground/terrain/Structure/Floor"
+            if data["tracking_metrics"]:
+                trajectory["tracking_metrics"] = {}
+                trajectory["partial_tracking_metrics"] = {}
+                for name, values in data["tracking_metrics"].items():
+                    destination = (
+                        trajectory["tracking_metrics"]
+                        if len(values) == trajectory["total_frames"]
+                        else trajectory["partial_tracking_metrics"]
+                    )
+                    destination[name] = np.asarray(values)
+                if not trajectory["partial_tracking_metrics"]:
+                    trajectory.pop("partial_tracking_metrics")
 
             if data.get("object_pos_w"):
                 trajectory["object_pos_w"] = np.array(data["object_pos_w"])
@@ -357,11 +595,24 @@ class TrajectoryRecorderTerm(recorder_manager.RecorderTerm):
 
             # Build metadata entry
             meta = {
+                "schema_version": trajectory["schema_version"],
                 "trajectory_file": f"{env_idx:06d}.trajectory.pkl",
                 "video_file": f"{env_idx:06d}.mp4",
                 "num_frames": trajectory["total_frames"],
                 "num_joints": trajectory["num_joints"],
                 "fps": effective_fps,
+                "has_motion_token": "action_motion_token" in trajectory,
+                "motion_token_dim": (
+                    int(trajectory["action_motion_token"].shape[-1])
+                    if "action_motion_token" in trajectory
+                    else None
+                ),
+                "has_reference_g1_qpos": "reference_g1_qpos" in trajectory,
+                "has_robot_contact_forces": "robot_contact_force_norm_w" in trajectory,
+                "has_pair_resolved_ground_contact": (
+                    "left_foot_ground_contact_force_w" in trajectory
+                    and "right_foot_ground_contact_force_w" in trajectory
+                ),
                 "has_object": trajectory["object_pos_w"] is not None,
                 "has_table": trajectory["table_pos_w"] is not None,
             }

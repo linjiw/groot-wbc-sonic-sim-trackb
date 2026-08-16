@@ -33,9 +33,25 @@ config:
   viewer_eye: [4.5, 0.0, 6.0]
   viewer_lookat: [0.0, 0.0, 2.0]
   render_results: false
+  render_ego: false
   save_rendering_dir: ${experiment_dir}/renderings_training
+  save_trajectory_dir: ${experiment_dir}/trajectories
   experiment_dir: ${experiment_dir}
-  terrain_type: plane # "0: plane" or "1: trimesh"
+  terrain_type: plane # plane | trimesh | scene_usd (scene_usd currently requires num_envs=1)
+  scene_usd_path: null
+
+  # Canonical G1 dataset ego camera. The camera prim is nested beneath
+  # torso_link in the imported robot USD, so a bare head_link does not resolve.
+  cameras:
+    camera_attached_link: torso_link/head_link
+    camera_pos_offset: [0.09, 0.0, 0.43]
+    camera_rot_offset: [1.0, 0.0, 0.0, 0.0]
+    camera_resolution: [480, 640]
+    camera_focal_length: 1.88
+    camera_focus_distance: 1.0
+    camera_horizontal_aperture: 2.6035
+    camera_vertical_aperture: 1.9526
+    camera_clipping_range: [0.05, 30.0]
 
   # Object mass override (kg). Set to override USD-defined mass.
   # Example: ++manager_env.config.object_mass=0.1

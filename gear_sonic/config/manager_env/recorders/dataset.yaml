@@ -1,0 +1,13 @@
+_target_: gear_sonic.envs.manager_env.mdp.recorders.RecordersCfg
+dataset_export_mode: 0  # custom files are authoritative; disable Isaac Lab HDF5 export
+
+render_envs:
+  _target_: gear_sonic.envs.manager_env.mdp.recorders.RenderEnvsRecorderCfg
+  video_save_path: ${manager_env.config.save_rendering_dir}
+  video_quality: 5
+  camera_name: ego_camera
+  track_root: false
+
+trajectory:
+  _target_: gear_sonic.envs.manager_env.mdp.recorders.TrajectoryRecorderCfg
+  save_path: ${manager_env.config.save_trajectory_dir}
