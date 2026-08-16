@@ -320,8 +320,67 @@ at peak swing, and the space the corridor gives back where the robot is slim doe
 pay for the space it correctly reclaims where the robot is wide. A motion with tucked arms
 would gain more.
 
-### 11.4 Next
+### 11.4 Item B -- vertical bands and cantilevered geometry (done)
 
-Item B (vertical bands and cantilevered geometry) is the natural follow-on: the swept volume
-is already 3D, and `swept_volume_clearance` takes boxes with `z` extents, so overhead and
-under-table geometry can now be checked properly rather than collapsed to a footprint.
+**Bands come from measurement, not assumption.** The recorded swept volume tops out at
+**1.317 m** (the torso; the G1 collision set has no head capsule) and bottoms at -0.001 m.
+The >= 1.4 m band was occupied on **0% of frames**, so a solid whose underside sits above
+that can hang directly over the corridor and be walked under.
+
+Catalog now carries `z_base` and a `band`:
+
+| Band | Archetypes | Rule enforced by test |
+|---|---|---|
+| floor | LowCrate, PetBowl | 0.05-0.30 m tall, never elevated -- a trip hazard, not a torso obstacle |
+| body | sofa, table, chair, shelf, counter, fridge ... | >= 0.3 m tall |
+| overhead | WallShelf, WallCabinet, CeilingLamp | underside >= 1.40 m, above the measured 1.317 m top |
+
+**Placement is now 3D.** `build_clutter_scene` accepts a `swept_cloud` and tests candidate
+boxes against the robot's actual collision volume via `box_clearance_to_cloud`, which agrees
+with the exact segment method to 0.0000 m at 2.8 ms per query. Cantilevered pieces do not
+reserve floor footprint, so furniture may stand underneath them, and the overlap test
+becomes 3D so two pieces may share a footprint at different heights.
+
+**The preflight is band-aware.** It previously treated any solid overlapping
+`[support_z, support_z + robot_height)` as a route blocker, which rejects a wall shelf on
+principle. Scenes may now declare `route_swept_height_m` -- the measured swept top plus a
+margin -- and only solids intruding below that block the route. Absent the field the old
+conservative behaviour is unchanged.
+
+**Result, validated in physics:**
+
+| | value |
+|---|---|
+| pieces | 34 (4 floor / 22 body / 8 overhead) |
+| floor occupancy | **38%** (was 24.9% in 2D) |
+| cantilevered pieces over the corridor | **4** |
+| preflight route clearance | **0.492 m** (was 0.75-0.80 m in the 2D packages) |
+| recorded lateral scene contact | **0.000 N** |
+| episode acceptance | accepted, 249 frames |
+
+Furniture is a third closer to the path than the 2D packages allowed, at a third higher
+density, with four pieces hanging over the walking corridor -- and the robot still records
+zero scene contact.
+
+### 11.5 Three bugs this work exposed
+
+Worth recording, because two of them were silently wrong before Item B forced a 3D check:
+
+1. **Swept cloud frame.** The cloud arrives in the trajectory's frame while the room is
+   built around a *recentred* path. Testing collisions in the wrong frame placed furniture
+   on top of the route; the preflight caught it.
+2. **Scene-start metric.** The manifest recorded `-centre` as the motion's scene start. That
+   is only correct when the caller already canonicalised the path, and silently put the
+   robot **outside the room** when it did not -- visible as a blank ego view and a top-down
+   path at x in [4.1, 7.6] in a room of +/-3.5 m. It is now the recentred first path point.
+3. **Floor containment precision.** The USDA writer emits the floor at `{:.3f}` while the
+   manifest carried full float precision, so walkable bounds could exceed the authored floor
+   by 0.036 mm and the package failed its own gate. Room dimensions are now rounded to the
+   writer's precision. This had made the whole `g1_clutter_curved` package invalid without
+   anyone noticing, because it had never been preflighted.
+
+### 11.6 Next
+
+Item F (density sweep) is now directly reachable: `sparse`/`moderate`/`dense`/`tight` become
+margin settings over the per-frame swept requirement. Item C (semantic catalog and placement
+grammar) is the larger remaining piece, and Item D still waits on Kimodo generation.

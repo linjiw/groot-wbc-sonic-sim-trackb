@@ -91,7 +91,7 @@ def main() -> int:
 
             # The motion was recentred on the room origin; record the offset so the
             # rollout can place the same motion with a matching scene-start.
-            offset = spec.metrics["path_offset_applied_xy"]
+            offset = spec.metrics["scene_start_xy"]
             placed = spec.path_xy
             (min_x, min_y), (max_x, max_y) = spec.walkable_bounds()
             scenes.append(

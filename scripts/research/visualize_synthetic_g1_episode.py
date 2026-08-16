@@ -127,7 +127,18 @@ def main() -> int:
     path_axis = figure.add_subplot(grid[1, :2])
     if scene_id:
         try:
-            obstacle_map = load_scene_obstacle_map(scene_id)
+            packages = sorted(
+                (REPO_ROOT / "gear_sonic/data/assets/scenes").glob("*/manifest.json")
+            )
+            obstacle_map = None
+            for package in packages:
+                try:
+                    obstacle_map = load_scene_obstacle_map(scene_id, package.parent)
+                    break
+                except ValueError:
+                    continue
+            if obstacle_map is None:
+                raise ValueError(f"scene {scene_id} not found in any package")
             for _, (min_x, min_y, max_x, max_y) in obstacle_map.obstacles:
                 path_axis.add_patch(
                     mpatches.Rectangle(

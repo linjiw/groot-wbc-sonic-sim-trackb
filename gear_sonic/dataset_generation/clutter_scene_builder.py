@@ -48,7 +48,7 @@ __all__ = [
 
 @dataclass(frozen=True)
 class FurnitureKind:
-    """A furniture archetype with plausible dimensions and colour."""
+    """A furniture archetype with plausible dimensions, height and colour."""
 
     name: str
     #: (x, y, z) extent ranges in metres.
@@ -57,6 +57,14 @@ class FurnitureKind:
     color: tuple[float, float, float]
     #: Whether the piece may be rotated 90 degrees about +Z (axis-aligned only).
     allow_rotation: bool = True
+    #: Height of the piece's underside. Non-zero means wall-mounted or suspended --
+    #: the piece is cantilevered, and its footprint may overlap the walking corridor
+    #: provided the robot passes underneath. Measured swept-volume top on a walking
+    #: rollout is 1.317 m, and the >=1.4 m band was occupied on 0% of frames.
+    z_base_min: float = 0.0
+    z_base_max: float = 0.0
+    #: Which occupancy band this archetype belongs to, for reporting.
+    band: str = "body"
 
 
 #: Household/office archetypes. Heights matter: anything reaching above ~0.3 m is a
@@ -75,6 +83,27 @@ FURNITURE_CATALOG: tuple[FurnitureKind, ...] = (
     FurnitureKind("StorageBox", (0.4, 0.4, 0.35), (0.7, 0.6, 0.55), (0.58, 0.45, 0.28)),
     FurnitureKind("PlantPot", (0.35, 0.35, 0.8), (0.5, 0.5, 1.2), (0.24, 0.36, 0.24)),
     FurnitureKind("FloorLamp", (0.3, 0.3, 1.4), (0.4, 0.4, 1.7), (0.30, 0.30, 0.33)),
+    # Floor band: low enough to trip a foot, too low to register as a torso obstacle.
+    FurnitureKind(
+        "LowCrate", (0.45, 0.35, 0.18), (0.7, 0.5, 0.24), (0.52, 0.40, 0.26), band="floor"
+    ),
+    FurnitureKind(
+        "PetBowl", (0.24, 0.24, 0.08), (0.34, 0.34, 0.12), (0.30, 0.45, 0.55), band="floor"
+    ),
+    # Overhead band: cantilevered. The footprint may sit over the corridor because the
+    # underside clears the robot; this is the case a 2D footprint model cannot express.
+    FurnitureKind(
+        "WallShelf", (0.9, 0.30, 0.06), (1.6, 0.40, 0.10), (0.46, 0.34, 0.22),
+        z_base_min=1.50, z_base_max=1.75, band="overhead",
+    ),
+    FurnitureKind(
+        "WallCabinet", (0.8, 0.34, 0.55), (1.3, 0.42, 0.70), (0.60, 0.55, 0.48),
+        z_base_min=1.45, z_base_max=1.60, band="overhead",
+    ),
+    FurnitureKind(
+        "CeilingLamp", (0.35, 0.35, 0.25), (0.55, 0.55, 0.40), (0.85, 0.82, 0.60),
+        z_base_min=1.85, z_base_max=2.05, band="overhead",
+    ),
 )
 
 
@@ -87,6 +116,19 @@ class FurniturePiece:
     center_xy: tuple[float, float]
     size: tuple[float, float, float]
     color: tuple[float, float, float]
+    #: Height of the underside. Non-zero pieces are cantilevered over the floor.
+    z_base: float = 0.0
+    band: str = "body"
+
+    @property
+    def box(self) -> tuple[float, float, float, float, float, float]:
+        """Axis-aligned bounds ``(min_x, min_y, min_z, max_x, max_y, max_z)``."""
+        min_x, min_y, max_x, max_y = self.rect
+        return (min_x, min_y, self.z_base, max_x, max_y, self.z_base + self.size[2])
+
+    @property
+    def is_cantilevered(self) -> bool:
+        return self.z_base > 0.0
 
     @property
     def rect(self) -> tuple[float, float, float, float]:
@@ -184,6 +226,18 @@ def _rect_to_path_distance(rect: tuple[float, float, float, float], path: np.nda
     return best
 
 
+def _boxes_overlap(
+    a: tuple[float, float, float, float, float, float],
+    b: tuple[float, float, float, float, float, float],
+    gap: float,
+) -> bool:
+    """Axis-aligned 3D overlap. Two pieces may share a footprint at different heights."""
+    for axis in range(3):
+        if a[axis + 3] + gap <= b[axis] or b[axis + 3] + gap <= a[axis]:
+            return False
+    return True
+
+
 def _rects_overlap(
     a: tuple[float, float, float, float], b: tuple[float, float, float, float], gap: float
 ) -> bool:
@@ -199,12 +253,14 @@ def build_clutter_scene(
     seed: int = 0,
     clearance_m: float = 0.75,
     per_point_clearance_m: np.ndarray | None = None,
+    swept_cloud: tuple[np.ndarray, np.ndarray] | None = None,
     room_margin_m: float = 1.5,
     min_room_size_m: tuple[float, float] = (7.0, 6.0),
     wall_height: float = 2.8,
     target_pieces: int = 22,
     max_distance_from_path_m: float = 3.0,
     piece_gap_m: float = 0.15,
+    margin_m: float = 0.30,
     attempts_per_piece: int = 400,
     catalog: Sequence[FurnitureKind] = FURNITURE_CATALOG,
 ) -> ClutterSceneSpec:
@@ -228,8 +284,11 @@ def build_clutter_scene(
 
     centre = (path.max(axis=0) + path.min(axis=0)) / 2.0
     span = path.max(axis=0) - path.min(axis=0)
-    room_x = max(float(span[0]) + 2.0 * room_margin_m, min_room_size_m[0])
-    room_y = max(float(span[1]) + 2.0 * room_margin_m, min_room_size_m[1])
+    # Rounded to the precision the USDA writer emits. Without this the manifest's
+    # walkable bounds can exceed the authored floor by a fraction of a millimetre and
+    # the scene preflight rejects the package for a floor that does not contain it.
+    room_x = round(max(float(span[0]) + 2.0 * room_margin_m, min_room_size_m[0]), 3)
+    room_y = round(max(float(span[1]) + 2.0 * room_margin_m, min_room_size_m[1]), 3)
     # Work in a scene frame centred on the path so the room is symmetric about it.
     path = path - centre
     half_x, half_y = room_x / 2.0, room_y / 2.0
@@ -248,6 +307,22 @@ def build_clutter_scene(
         if not np.all(required_per_point > 0):
             raise ValueError("per_point_clearance_m must be positive")
 
+    # With a swept cloud the clearance test becomes fully 3D, which is what allows a
+    # shelf to hang over the corridor: its footprint overlaps, its underside does not.
+    #
+    # The cloud arrives in the trajectory's own frame while the room is built around a
+    # recentred path, so it must be shifted by the same offset. Getting this wrong puts
+    # the collision test in a different frame from the geometry, which silently places
+    # furniture on top of the route.
+    if swept_cloud is None:
+        cloud_points, cloud_radii = None, None
+    else:
+        raw_points, cloud_radii = swept_cloud
+        cloud_points = np.asarray(raw_points, dtype=np.float64).copy()
+        if cloud_points.ndim != 2 or cloud_points.shape[1] != 3:
+            raise ValueError(f"swept cloud points must be (N, 3); got {cloud_points.shape}")
+        cloud_points[:, :2] -= centre
+
     rng = np.random.default_rng(seed)
     wall_rects = [
         (-half_x - 0.2, -half_y - 0.2, -half_x, half_y + 0.2),
@@ -257,6 +332,7 @@ def build_clutter_scene(
     ]
     placed: list[FurniturePiece] = []
     placed_rects: list[tuple[float, float, float, float]] = list(wall_rects)
+    placed_boxes: list[tuple[float, float, float, float, float, float]] = []
 
     for index in range(target_pieces):
         kind = catalog[int(rng.integers(len(catalog)))]
@@ -276,12 +352,19 @@ def build_clutter_scene(
                 float(anchor[0] + radius * math.cos(angle)),
                 float(anchor[1] + radius * math.sin(angle)),
             )
+            z_base = (
+                float(rng.uniform(kind.z_base_min, kind.z_base_max))
+                if kind.z_base_max > 0.0
+                else 0.0
+            )
             candidate = FurniturePiece(
                 name=f"{kind.name}_{index:02d}",
                 kind=kind.name,
                 center_xy=centre_xy,
                 size=size,  # type: ignore[arg-type]
                 color=kind.color,
+                z_base=z_base,
+                band=kind.band,
             )
             rect = candidate.rect
             if not (
@@ -291,12 +374,28 @@ def build_clutter_scene(
                 and rect[3] <= half_y - 0.05
             ):
                 continue
-            if _rect_to_path_clearance_deficit(rect, path, required_per_point) < 0.0:
+            if cloud_points is not None:
+                # 3D: the piece only has to clear the robot's actual collision volume.
+                from gear_sonic.dataset_generation.swept_volume import box_clearance_to_cloud
+
+                if box_clearance_to_cloud(cloud_points, cloud_radii, candidate.box) < margin_m:
+                    continue
+            elif _rect_to_path_clearance_deficit(rect, path, required_per_point) < 0.0:
                 continue
-            if any(_rects_overlap(rect, other, piece_gap_m) for other in placed_rects):
+            if any(
+                _rects_overlap(rect, other, piece_gap_m) for other in placed_rects
+            ) and not candidate.is_cantilevered:
+                continue
+            if candidate.is_cantilevered and any(
+                _boxes_overlap(candidate.box, other, piece_gap_m) for other in placed_boxes
+            ):
                 continue
             placed.append(candidate)
-            placed_rects.append(rect)
+            placed_boxes.append(candidate.box)
+            # A cantilevered piece deliberately does not reserve floor footprint, so
+            # furniture may stand underneath it.
+            if not candidate.is_cantilevered:
+                placed_rects.append(rect)
             break
 
     distances = [_rect_to_path_distance(piece.rect, path) for piece in placed]
@@ -319,8 +418,27 @@ def build_clutter_scene(
             "floor_area_m2": floor_area,
             "occupied_area_m2": occupied,
             "clutter_occupancy": occupied / floor_area if floor_area else 0.0,
+            "pieces_by_band": {
+                band: sum(1 for piece in placed if piece.band == band)
+                for band in ("floor", "body", "overhead")
+            },
+            "cantilevered_pieces": sum(1 for piece in placed if piece.is_cantilevered),
+            # Pieces whose 2D footprint overlaps the corridor but which the robot passes
+            # under. A footprint-only model could not have placed these at all.
+            "cantilevered_over_corridor": sum(
+                1
+                for piece in placed
+                if piece.is_cantilevered
+                and _rect_to_path_distance(piece.rect, path) < clearance_m
+            ),
             "path_length_m": float(np.linalg.norm(np.diff(path, axis=0), axis=1).sum()),
             "path_offset_applied_xy": [float(-centre[0]), float(-centre[1])],
+            # Where the motion must start in scene coordinates. This is the recentred
+            # FIRST path point, not the negated centre: the adapter canonicalises a clip
+            # so its first sample is the origin, then adds scene_start. Using -centre is
+            # only correct when the caller already canonicalised the path, and silently
+            # places the robot outside the room when it did not.
+            "scene_start_xy": [float(path[0][0]), float(path[0][1])],
         },
     )
     return spec
@@ -403,7 +521,7 @@ def Xform "World" (
             _cube(
                 piece.name,
                 "clutter",
-                (piece.center_xy[0], piece.center_xy[1], piece.size[2] / 2.0),
+                (piece.center_xy[0], piece.center_xy[1], piece.z_base + piece.size[2] / 2.0),
                 piece.size,
                 piece.color,
             )

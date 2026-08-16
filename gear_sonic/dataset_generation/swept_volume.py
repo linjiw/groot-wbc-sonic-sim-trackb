@@ -49,6 +49,8 @@ import numpy as np
 __all__ = [
     "G1_COLLISION_CAPSULES",
     "swept_half_width_per_frame",
+    "swept_point_cloud",
+    "box_clearance_to_cloud",
     "CollisionCapsule",
     "SweptVolumeReport",
     "body_capsules_world",
@@ -314,3 +316,50 @@ def swept_half_width_per_frame(
     padded = np.concatenate([radii, radii])
     distance = np.linalg.norm(points[:, :, :2] - reference[:, None, :], axis=-1) + padded[None, :]
     return distance.max(axis=1)
+
+
+def swept_point_cloud(
+    body_pos: np.ndarray,
+    body_quat: np.ndarray,
+    body_names: Sequence[str],
+    *,
+    samples_per_capsule: int = 7,
+    capsules: Mapping[str, Sequence[CollisionCapsule]] = G1_COLLISION_CAPSULES,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Flatten the whole swept volume into points with radii, for fast box queries.
+
+    Placement search evaluates tens of thousands of candidate boxes against the same
+    trajectory, so the pose-dependent work is done once here and each query becomes a
+    single vectorised distance over the cloud.
+
+    Sampling along each capsule (rather than solving segment-to-box) can only place
+    sample points *on* the capsule axis, so the reported distance is never smaller
+    than the true one -- errors are conservative in the direction that matters, and
+    shrink as ``samples_per_capsule`` grows.
+
+    Returns:
+        ``(points (N, 3), radii (N,))`` over all frames and capsules.
+    """
+    starts, ends, radii, _ = body_capsules_world(
+        body_pos, body_quat, body_names, capsules=capsules
+    )
+    ts = np.linspace(0.0, 1.0, samples_per_capsule).reshape(1, 1, samples_per_capsule, 1)
+    points = starts[:, :, None, :] * (1 - ts) + ends[:, :, None, :] * ts
+    cloud = points.reshape(-1, 3)
+    padded = np.repeat(np.tile(radii, starts.shape[0]), samples_per_capsule)
+    return cloud, padded
+
+
+def box_clearance_to_cloud(
+    points: np.ndarray,
+    radii: np.ndarray,
+    box: tuple[float, float, float, float, float, float],
+) -> float:
+    """Minimum surface distance from a swept-volume cloud to one axis-aligned box.
+
+    Negative means the box intrudes into the robot's collision volume.
+    """
+    lower = np.asarray(box[:3], dtype=np.float64)
+    upper = np.asarray(box[3:], dtype=np.float64)
+    delta = np.maximum(np.maximum(lower - points, 0.0), points - upper)
+    return float((np.linalg.norm(delta, axis=-1) - radii).min())

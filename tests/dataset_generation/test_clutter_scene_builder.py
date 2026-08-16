@@ -50,13 +50,14 @@ def test_no_piece_ever_intrudes_on_the_motion_corridor(path):
             assert math.hypot(dx, dy) >= CLEARANCE - 1e-9
 
 
-def test_pieces_do_not_overlap_each_other():
+def test_pieces_do_not_overlap_each_other_in_3d():
+    """Footprints MAY overlap now -- a shelf hangs over a crate -- but volumes may not."""
     spec = build_clutter_scene(_straight(), scene_id="unit", seed=5, clearance_m=CLEARANCE)
-    rects = [piece.rect for piece in spec.pieces]
-    for i, a in enumerate(rects):
-        for b in rects[i + 1 :]:
-            overlap = not (a[2] <= b[0] or b[2] <= a[0] or a[3] <= b[1] or b[3] <= a[1])
-            assert not overlap
+    boxes = [piece.box for piece in spec.pieces]
+    for i, a in enumerate(boxes):
+        for b in boxes[i + 1 :]:
+            separated = any(a[k + 3] <= b[k] or b[k + 3] <= a[k] for k in range(3))
+            assert separated, f"volumes intersect: {a} vs {b}"
 
 
 def test_pieces_stay_inside_the_room():
@@ -162,7 +163,29 @@ def test_rendered_usda_declares_collision_on_every_solid():
     assert 'upAxis = "Z"' in usda and "metersPerUnit = 1" in usda
 
 
-def test_catalog_pieces_are_tall_enough_to_matter():
-    """A solid shorter than the robot's step is not an obstacle worth recording."""
+def test_catalog_pieces_are_meaningful_for_their_band():
+    """Each band has a different bar for 'this is an obstacle worth recording'."""
     for kind in FURNITURE_CATALOG:
-        assert kind.size_min[2] >= 0.3, f"{kind.name} is too low to obstruct a walking G1"
+        if kind.band == "floor":
+            # Deliberately low: a trip hazard for the foot, not a torso obstacle. The
+            # measured swept-volume bottom is -0.001 m, so anything above a few
+            # centimetres is in the foot's way.
+            assert 0.05 <= kind.size_min[2] < 0.30, f"{kind.name} is not a floor-band solid"
+            assert kind.z_base_max == 0.0, f"{kind.name} is floor band but elevated"
+        elif kind.band == "overhead":
+            # Must clear the measured 1.317 m swept-volume top with margin, or it is
+            # not something the robot can pass under.
+            assert kind.z_base_min >= 1.40, f"{kind.name} hangs too low to walk under"
+        else:
+            assert kind.size_min[2] >= 0.3, f"{kind.name} is too low to obstruct a walking G1"
+
+
+def test_cantilevered_pieces_clear_the_measured_swept_volume_top():
+    """1.317 m was the measured top of the walking swept volume."""
+    measured_top = 1.317
+    for kind in FURNITURE_CATALOG:
+        if kind.z_base_min > 0.0:
+            assert kind.z_base_min > measured_top, (
+                f"{kind.name} underside {kind.z_base_min} m is below the measured "
+                f"swept-volume top {measured_top} m"
+            )

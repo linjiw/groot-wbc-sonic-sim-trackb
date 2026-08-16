@@ -452,13 +452,27 @@ def _validate_route(
 
     if len(route) < 2 or robot_height is None:
         return clearance, None
+
+    # A solid entirely above the robot is not a route blocker, however much of the
+    # corridor its footprint covers -- a wall shelf is walked under, not around. The
+    # cut-off is the *measured* swept-volume top for this route plus a margin, declared
+    # per scene as route_swept_height_m; without it the conservative full-body height is
+    # used, which is the previous behaviour.
+    swept_height = _finite_number(scene_config.get("route_swept_height_m"))
+    blocking_height = swept_height if swept_height is not None else robot_height
+    if swept_height is not None and swept_height > robot_height:
+        errors.append(
+            f"route_swept_height_m {swept_height:.3f} exceeds robot_clearance_height_m "
+            f"{robot_height:.3f}; the declared envelope cannot be taller than the robot"
+        )
+
     obstacles = []
     for cube in cubes:
         if cube.path == floor_path or not cube.collision_enabled:
             continue
         minimum = cube.min_corner
         maximum = cube.max_corner
-        if maximum[2] <= support_z or minimum[2] >= support_z + robot_height:
+        if maximum[2] <= support_z or minimum[2] >= support_z + blocking_height:
             continue
         obstacles.append((cube.path, (minimum[0], minimum[1], maximum[0], maximum[1])))
 
