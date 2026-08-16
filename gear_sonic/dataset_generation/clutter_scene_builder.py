@@ -38,6 +38,8 @@ from typing import Any, Sequence
 import numpy as np
 
 __all__ = [
+    "DENSITY_PRESETS",
+    "DensityPreset",
     "FURNITURE_CATALOG",
     "ClutterSceneSpec",
     "FurniturePiece",
@@ -105,6 +107,37 @@ FURNITURE_CATALOG: tuple[FurnitureKind, ...] = (
         z_base_min=1.85, z_base_max=2.05, band="overhead",
     ),
 )
+
+
+@dataclass(frozen=True)
+class DensityPreset:
+    """One rung of the clutter-density ladder.
+
+    Density is a measured axis, not an adjective. Each preset fixes the safety margin
+    on top of the robot's per-frame swept half-width, how many pieces to attempt, and
+    how close to the corridor they may be sampled; the achieved occupancy and minimum
+    corridor width are reported per scene rather than assumed.
+    """
+
+    name: str
+    #: Extra clearance beyond the swept volume. Smaller means tighter passages.
+    margin_m: float
+    target_pieces: int
+    max_distance_from_path_m: float
+    #: Occupancy this preset is expected to land near, for a sanity check only.
+    expected_occupancy: tuple[float, float]
+
+
+#: The 0.30 m margin is the measured executed-vs-reference deviation (p95 path error
+#: 0.22-0.23 m), so `moderate` is the level that reproduces the validated scenes.
+#: `tight` goes below that deviation and is only safe because clearance is checked
+#: against the real swept volume rather than a nominal radius.
+DENSITY_PRESETS: dict[str, DensityPreset] = {
+    "sparse": DensityPreset("sparse", 0.60, 12, 4.0, (0.05, 0.18)),
+    "moderate": DensityPreset("moderate", 0.30, 26, 3.0, (0.15, 0.32)),
+    "dense": DensityPreset("dense", 0.20, 40, 2.5, (0.25, 0.45)),
+    "tight": DensityPreset("tight", 0.12, 56, 2.0, (0.32, 0.60)),
+}
 
 
 @dataclass(frozen=True)
@@ -423,6 +456,7 @@ def build_clutter_scene(
                 for band in ("floor", "body", "overhead")
             },
             "cantilevered_pieces": sum(1 for piece in placed if piece.is_cantilevered),
+            "margin_m": float(margin_m),
             # Pieces whose 2D footprint overlaps the corridor but which the robot passes
             # under. A footprint-only model could not have placed these at all.
             "cantilevered_over_corridor": sum(

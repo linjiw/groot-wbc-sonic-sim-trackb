@@ -379,8 +379,76 @@ Worth recording, because two of them were silently wrong before Item B forced a 
    writer's precision. This had made the whole `g1_clutter_curved` package invalid without
    anyone noticing, because it had never been preflighted.
 
-### 11.6 Next
+### 11.6 Item F -- density sweep (done, validated in physics)
 
-Item F (density sweep) is now directly reachable: `sparse`/`moderate`/`dense`/`tight` become
-margin settings over the per-frame swept requirement. Item C (semantic catalog and placement
-grammar) is the larger remaining piece, and Item D still waits on Kimodo generation.
+`DENSITY_PRESETS` turns clutter density into a measured axis. Each preset fixes the safety
+margin over the robot's per-frame swept half-width, the number of pieces to attempt, and how
+close to the corridor they may be sampled. Achieved occupancy and clearance are reported per
+scene rather than assumed.
+
+Same motion, same seed, four levels, each rolled out under physics:
+
+| preset | margin | pieces | occupancy | 2D route clearance | min 3D clearance | lateral scene contact | accepted |
+|---|---|---|---|---|---|---|---|
+| sparse | 0.60 m | 12 | 13% | 0.986 m | 0.664 m | **0.000 N** | yes |
+| moderate | 0.30 m | 26 | 28% | 0.673 m | 0.379 m | **0.000 N** | yes |
+| dense | 0.20 m | 31 | 31% | 0.463 m | 0.209 m | **0.000 N** | yes |
+| tight | 0.12 m | 33 | 34% | 0.287 m | 0.124 m | **0.000 N** | yes |
+
+**4/4 accepted with zero scene contact**, including `tight` at a 0.12 m margin -- which is
+*below* the measured p95 path error of 0.22-0.23 m. That is not luck, and the reason is worth
+stating because it is the load-bearing idea behind the whole clutter approach: the scene is
+generated against the **executed** swept volume, not the reference. The robot deterministically
+reproduces that trajectory, so tracking error is already baked into the geometry the clutter
+was built around. The margin only has to absorb simulation nondeterminism, which is evidently
+far smaller than the tracking error.
+
+**One honest consequence.** At `tight` the 2D route clearance (0.287 m) falls below a nominal
+0.45 m body radius, and the preflight rejected the scene until the declared
+`route_clearance_radius_m` was changed from a nominal cylinder to the **measured minimum swept
+half-width** for that route (0.273 m), with `route_clearance_model: swept_volume_per_frame`
+recorded alongside. For such scenes the 2D route check is a necessary backstop only; the
+authoritative checks are the per-frame 3D test at generation and recorded physics.
+
+### 11.7 Item E -- multi-view capture (partly done)
+
+Isaac's recorder writes one camera per run, so each view is a separate pass over the same
+deterministic motion; frames line up because the physics is identical.
+[`render_multiview.sh`](../scripts/research/render_multiview.sh) drives them.
+
+| view | status |
+|---|---|
+| ego (head, 640x480 @ 50 Hz) | works -- this is the trained observation |
+| chase (third person, 1280x720) | works, with a caveat below |
+| overhead (top-down render) | **broken**, see below |
+| wrist (left/right) | cameras added to the env config; render pass not yet verified |
+
+**Chase camera clips into furniture.** At the default `eval_camera_offset` of `[2, 2, 1]` it
+ends up inside a solid in a dense room and the video goes blank part-way. Raising it to
+`[3, 3, 2.5]` helped but did not fix it; a dense-scene chase camera needs collision-aware
+placement, not a fixed offset.
+
+**Overhead render is broken and I could not fix it.** `overview_camera` produces 249 frames of
+uniform grey (pixel std 0.00). It is authored at `pos=(0, 0, 50)` with an identity rotation,
+which points it away from the scene; rotating it to look down and lowering it to room height
+did not help, so the cause is elsewhere -- most likely that `/World/OverviewCamera` is a global
+prim outside the env namespace and is not driven by the recorder's `group_camera` path. I
+reverted the speculative change rather than ship an unverified fix, and left a note at the
+definition. **The matplotlib top-down plots are the working overhead review path** and are
+arguably better for this purpose: they draw obstacle footprints, the executed and reference
+paths, and start/end markers to scale.
+
+**Wrist cameras** are now configurable (`cameras.wrist_cameras: true`, attached to
+`left/right_wrist_yaw_link`) and are deliberately *not* added to the trained observation set --
+changing the registered `synthetic_g1` modality is a separate decision from being able to
+record the imagery. The render pass has not been verified end to end.
+
+Also fixed while here: the ego camera was authored with `debug_vis=True`, which draws a frustum
+marker. It is now off by default for the same reason `motion.debug_vis` must be off when
+recording -- viewport decoration has no business in a training observation.
+
+### 11.8 Next
+
+Item C (semantic catalog and placement grammar) is the largest remaining piece and is
+unblocked. Item D still waits on Kimodo generation. Item G (photorealistic assets) waits on a
+USD-native geometry gate to replace the primitive-subset preflight.

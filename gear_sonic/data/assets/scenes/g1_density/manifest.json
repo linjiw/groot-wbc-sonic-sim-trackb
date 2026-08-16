@@ -1,0 +1,377 @@
+{
+  "description": "Clutter density ladder (sparse/moderate/dense/tight) over one motion, generated against its recorded swept volume.",
+  "license": {
+    "redistribution_allowed": true,
+    "source": "../../../../../LICENSE",
+    "spdx": "Apache-2.0"
+  },
+  "package_id": "g1_density_sweep",
+  "provenance": {
+    "description": "Generated from axis-aligned USD Cube proxies and a Plane floor against a recorded swept volume.",
+    "kind": "repo_generated_primitive_geometry",
+    "third_party_assets": []
+  },
+  "scenes": [
+    {
+      "default_prim": "/World",
+      "file": "density_sparse.usda",
+      "generation": {
+        "cantilevered_over_corridor": 1,
+        "clearance_note": "2D route clearance is a necessary backstop only; the authoritative check is the per-frame 3D swept-volume test applied at generation, and ultimately recorded physics.",
+        "clutter_occupancy": 0.12634604482590753,
+        "density_preset": "sparse",
+        "margin_m": 0.6,
+        "min_distance_to_path_m": 0.21801810562343427,
+        "min_swept_half_width_m": 0.273,
+        "pieces_by_band": {
+          "body": 6,
+          "floor": 2,
+          "overhead": 4
+        },
+        "placed_pieces": 12,
+        "scene_start_xy": [
+          -1.7309085130691528,
+          -0.2651732563972473
+        ],
+        "seed": 7
+      },
+      "license_spdx": "Apache-2.0",
+      "meters_per_unit": 1.0,
+      "minimum_collision_prims": 16,
+      "provenance": "repo_generated_primitive_geometry",
+      "redistribution_allowed": true,
+      "robot_clearance_height_m": 1.9,
+      "route_clearance_model": "swept_volume_per_frame",
+      "route_clearance_radius_m": 0.273,
+      "route_swept_height_m": 1.417,
+      "route_xy": [
+        [
+          -1.7309085130691528,
+          -0.2651732563972473
+        ],
+        [
+          -1.529257893562317,
+          -0.2855956554412842
+        ],
+        [
+          -1.0637060403823853,
+          -0.30038654804229736
+        ],
+        [
+          -0.20014536380767822,
+          -0.05424898862838745
+        ],
+        [
+          0.543807864189148,
+          0.10967224836349487
+        ],
+        [
+          1.009752631187439,
+          0.22293978929519653
+        ],
+        [
+          1.4046803712844849,
+          0.22589796781539917
+        ],
+        [
+          1.6696079969406128,
+          0.2495208978652954
+        ],
+        [
+          1.7253068685531616,
+          0.33067786693573
+        ]
+      ],
+      "scene_family": "household_density",
+      "scene_id": "density_sparse",
+      "sha256": "sha256:6a1a41f675defc71df4f420a11163c9885ba9fc573d5cdda5c5406801de5cd1e",
+      "size_bytes": 9532,
+      "source_motion": "01_single_text_prompt",
+      "split_group": "density_sparse_layout_v1",
+      "support_floor_prim": "/World/Structure/Floor",
+      "support_z_m": 0.0,
+      "up_axis": "Z",
+      "walkable_bounds_xy": {
+        "max": [
+          3.5,
+          3.0
+        ],
+        "min": [
+          -3.5,
+          -3.0
+        ]
+      }
+    },
+    {
+      "default_prim": "/World",
+      "file": "density_moderate.usda",
+      "generation": {
+        "cantilevered_over_corridor": 5,
+        "clearance_note": "2D route clearance is a necessary backstop only; the authoritative check is the per-frame 3D swept-volume test applied at generation, and ultimately recorded physics.",
+        "clutter_occupancy": 0.27524103870234423,
+        "density_preset": "moderate",
+        "margin_m": 0.3,
+        "min_distance_to_path_m": 0.0,
+        "min_swept_half_width_m": 0.273,
+        "pieces_by_band": {
+          "body": 16,
+          "floor": 2,
+          "overhead": 8
+        },
+        "placed_pieces": 26,
+        "scene_start_xy": [
+          -1.7309085130691528,
+          -0.2651732563972473
+        ],
+        "seed": 7
+      },
+      "license_spdx": "Apache-2.0",
+      "meters_per_unit": 1.0,
+      "minimum_collision_prims": 30,
+      "provenance": "repo_generated_primitive_geometry",
+      "redistribution_allowed": true,
+      "robot_clearance_height_m": 1.9,
+      "route_clearance_model": "swept_volume_per_frame",
+      "route_clearance_radius_m": 0.273,
+      "route_swept_height_m": 1.417,
+      "route_xy": [
+        [
+          -1.7309085130691528,
+          -0.2651732563972473
+        ],
+        [
+          -1.529257893562317,
+          -0.2855956554412842
+        ],
+        [
+          -1.0637060403823853,
+          -0.30038654804229736
+        ],
+        [
+          -0.20014536380767822,
+          -0.05424898862838745
+        ],
+        [
+          0.543807864189148,
+          0.10967224836349487
+        ],
+        [
+          1.009752631187439,
+          0.22293978929519653
+        ],
+        [
+          1.4046803712844849,
+          0.22589796781539917
+        ],
+        [
+          1.6696079969406128,
+          0.2495208978652954
+        ],
+        [
+          1.7253068685531616,
+          0.33067786693573
+        ]
+      ],
+      "scene_family": "household_density",
+      "scene_id": "density_moderate",
+      "sha256": "sha256:53ed37d766ce815061bdd97e81eb24b7a6d642bbaf8d21b7c54fd7d7d0243611",
+      "size_bytes": 16920,
+      "source_motion": "01_single_text_prompt",
+      "split_group": "density_moderate_layout_v1",
+      "support_floor_prim": "/World/Structure/Floor",
+      "support_z_m": 0.0,
+      "up_axis": "Z",
+      "walkable_bounds_xy": {
+        "max": [
+          3.5,
+          3.0
+        ],
+        "min": [
+          -3.5,
+          -3.0
+        ]
+      }
+    },
+    {
+      "default_prim": "/World",
+      "file": "density_dense.usda",
+      "generation": {
+        "cantilevered_over_corridor": 6,
+        "clearance_note": "2D route clearance is a necessary backstop only; the authoritative check is the per-frame 3D swept-volume test applied at generation, and ultimately recorded physics.",
+        "clutter_occupancy": 0.30717838358074523,
+        "density_preset": "dense",
+        "margin_m": 0.2,
+        "min_distance_to_path_m": 0.0,
+        "min_swept_half_width_m": 0.273,
+        "pieces_by_band": {
+          "body": 17,
+          "floor": 6,
+          "overhead": 8
+        },
+        "placed_pieces": 31,
+        "scene_start_xy": [
+          -1.7309085130691528,
+          -0.2651732563972473
+        ],
+        "seed": 7
+      },
+      "license_spdx": "Apache-2.0",
+      "meters_per_unit": 1.0,
+      "minimum_collision_prims": 35,
+      "provenance": "repo_generated_primitive_geometry",
+      "redistribution_allowed": true,
+      "robot_clearance_height_m": 1.9,
+      "route_clearance_model": "swept_volume_per_frame",
+      "route_clearance_radius_m": 0.273,
+      "route_swept_height_m": 1.417,
+      "route_xy": [
+        [
+          -1.7309085130691528,
+          -0.2651732563972473
+        ],
+        [
+          -1.529257893562317,
+          -0.2855956554412842
+        ],
+        [
+          -1.0637060403823853,
+          -0.30038654804229736
+        ],
+        [
+          -0.20014536380767822,
+          -0.05424898862838745
+        ],
+        [
+          0.543807864189148,
+          0.10967224836349487
+        ],
+        [
+          1.009752631187439,
+          0.22293978929519653
+        ],
+        [
+          1.4046803712844849,
+          0.22589796781539917
+        ],
+        [
+          1.6696079969406128,
+          0.2495208978652954
+        ],
+        [
+          1.7253068685531616,
+          0.33067786693573
+        ]
+      ],
+      "scene_family": "household_density",
+      "scene_id": "density_dense",
+      "sha256": "sha256:7483610fc38e5bbf1b7bcab3fb65f4b3f50fba986da8ed2323e5b00598effc39",
+      "size_bytes": 19550,
+      "source_motion": "01_single_text_prompt",
+      "split_group": "density_dense_layout_v1",
+      "support_floor_prim": "/World/Structure/Floor",
+      "support_z_m": 0.0,
+      "up_axis": "Z",
+      "walkable_bounds_xy": {
+        "max": [
+          3.5,
+          3.0
+        ],
+        "min": [
+          -3.5,
+          -3.0
+        ]
+      }
+    },
+    {
+      "default_prim": "/World",
+      "file": "density_tight.usda",
+      "generation": {
+        "cantilevered_over_corridor": 6,
+        "clearance_note": "2D route clearance is a necessary backstop only; the authoritative check is the per-frame 3D swept-volume test applied at generation, and ultimately recorded physics.",
+        "clutter_occupancy": 0.3432124801668818,
+        "density_preset": "tight",
+        "margin_m": 0.12,
+        "min_distance_to_path_m": 0.0,
+        "min_swept_half_width_m": 0.273,
+        "pieces_by_band": {
+          "body": 19,
+          "floor": 4,
+          "overhead": 10
+        },
+        "placed_pieces": 33,
+        "scene_start_xy": [
+          -1.7309085130691528,
+          -0.2651732563972473
+        ],
+        "seed": 7
+      },
+      "license_spdx": "Apache-2.0",
+      "meters_per_unit": 1.0,
+      "minimum_collision_prims": 37,
+      "provenance": "repo_generated_primitive_geometry",
+      "redistribution_allowed": true,
+      "robot_clearance_height_m": 1.9,
+      "route_clearance_model": "swept_volume_per_frame",
+      "route_clearance_radius_m": 0.273,
+      "route_swept_height_m": 1.417,
+      "route_xy": [
+        [
+          -1.7309085130691528,
+          -0.2651732563972473
+        ],
+        [
+          -1.529257893562317,
+          -0.2855956554412842
+        ],
+        [
+          -1.0637060403823853,
+          -0.30038654804229736
+        ],
+        [
+          -0.20014536380767822,
+          -0.05424898862838745
+        ],
+        [
+          0.543807864189148,
+          0.10967224836349487
+        ],
+        [
+          1.009752631187439,
+          0.22293978929519653
+        ],
+        [
+          1.4046803712844849,
+          0.22589796781539917
+        ],
+        [
+          1.6696079969406128,
+          0.2495208978652954
+        ],
+        [
+          1.7253068685531616,
+          0.33067786693573
+        ]
+      ],
+      "scene_family": "household_density",
+      "scene_id": "density_tight",
+      "sha256": "sha256:e51a6c9b0d4f3e2f9d00d11b78785a31ede4aa56d9288acd7477923a18da9a65",
+      "size_bytes": 20607,
+      "source_motion": "01_single_text_prompt",
+      "split_group": "density_tight_layout_v1",
+      "support_floor_prim": "/World/Structure/Floor",
+      "support_z_m": 0.0,
+      "up_axis": "Z",
+      "walkable_bounds_xy": {
+        "max": [
+          3.5,
+          3.0
+        ],
+        "min": [
+          -3.5,
+          -3.0
+        ]
+      }
+    }
+  ],
+  "schema_version": 1
+}

@@ -1,0 +1,19 @@
+# Capture every available view in one physics pass.
+#
+# The dataset itself trains on the ego view. These extra views exist so a human can
+# judge whether an episode is any good, and so a later manipulation phase has wrist
+# imagery available -- adding them to the trained observation set is a separate
+# decision from being able to record them.
+_target_: gear_sonic.envs.manager_env.mdp.recorders.RecordersCfg
+dataset_export_mode: 0  # custom files are authoritative; disable Isaac Lab HDF5 export
+
+render_envs:
+  _target_: gear_sonic.envs.manager_env.mdp.recorders.RenderEnvsRecorderCfg
+  video_save_path: ${manager_env.config.save_rendering_dir}
+  video_quality: 5
+  camera_name: ego_camera
+  track_root: false
+
+trajectory:
+  _target_: gear_sonic.envs.manager_env.mdp.recorders.TrajectoryRecorderCfg
+  save_path: ${manager_env.config.save_trajectory_dir}

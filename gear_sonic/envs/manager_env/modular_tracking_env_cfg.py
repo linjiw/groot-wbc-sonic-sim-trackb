@@ -303,6 +303,12 @@ class MySceneCfg(InteractiveSceneCfg):
         if config.get("overview_camera", False):
             self.overview_camera = CameraCfg(
                 prim_path="/World/OverviewCamera",
+                # NOTE: this camera currently renders blank frames. Rotating it to look
+                # down (0, 1, 0, 0) and lowering it to room height did not fix it, so the
+                # cause is elsewhere -- likely that /World/OverviewCamera is a global prim
+                # outside the env namespace and is not being driven by the recorder's
+                # group_camera path. Left as authored rather than shipping an unverified
+                # change; use the matplotlib top-down plots for overhead review instead.
                 offset=CameraCfg.OffsetCfg(pos=(0, 0, 50), rot=(1, 0, 0, 0), convention="world"),
                 data_types=["rgb"],
                 spawn=sim_utils.PinholeCameraCfg(
@@ -914,6 +920,41 @@ class MySceneCfg(InteractiveSceneCfg):
             # Camera resolution [H, W]
             camera_resolution = cameras_cfg.get("camera_resolution", [108, 192])
 
+            # Optional wrist cameras. The dataset's ego view shows where the robot is
+            # going; a manipulation phase also needs to see what the hands are doing.
+            # These are review/annotation views for now -- adding them to the trained
+            # observation set would change the registered synthetic_g1 modality, which
+            # is a separate decision from being able to record them.
+            self.left_wrist_camera = None
+            self.right_wrist_camera = None
+            if cameras_cfg.get("wrist_cameras", False):
+                wrist_resolution = cameras_cfg.get("wrist_camera_resolution", camera_resolution)
+                wrist_offset = tuple(cameras_cfg.get("wrist_camera_pos_offset", [0.05, 0.0, 0.0]))
+                wrist_rot = tuple(
+                    cameras_cfg.get("wrist_camera_rot_offset", [1.0, 0.0, 0.0, 0.0])
+                )
+                for side in ("left", "right"):
+                    link = cameras_cfg.get(
+                        f"{side}_wrist_camera_link", f"{side}_wrist_yaw_link"
+                    )
+                    setattr(
+                        self,
+                        f"{side}_wrist_camera",
+                        TiledCameraCfg(
+                            prim_path=f"{{ENV_REGEX_NS}}/Robot/{link}/{side}_wrist_camera",
+                            offset=TiledCameraCfg.OffsetCfg(
+                                pos=wrist_offset, rot=wrist_rot, convention="world"
+                            ),
+                            data_types=camera_data_types,
+                            spawn=camera_spawn_cfg,
+                            height=wrist_resolution[0],
+                            width=wrist_resolution[1],
+                            debug_vis=False,
+                            update_period=0.0,
+                            update_latest_camera_pose=True,
+                        ),
+                    )
+
             self.ego_camera = TiledCameraCfg(
                 prim_path=camera_prim_path,
                 offset=TiledCameraCfg.OffsetCfg(
@@ -923,7 +964,9 @@ class MySceneCfg(InteractiveSceneCfg):
                 spawn=camera_spawn_cfg,
                 height=camera_resolution[0],
                 width=camera_resolution[1],
-                debug_vis=True,
+                # Frustum markers are viewport decoration; keep them out of recordings
+                # by default, for the same reason motion.debug_vis must be off.
+                debug_vis=cameras_cfg.get("camera_debug_vis", False),
                 update_period=0.0,
                 update_latest_camera_pose=True,
             )
