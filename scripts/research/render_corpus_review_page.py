@@ -413,6 +413,35 @@ def main() -> int:
     parts += ["</tbody></table></div>", "</section>"]
 
     # ---- limits ----
+    # Derived, not written. An earlier version of this page stated "two accepted episodes
+    # carry non-zero lateral scene contact, one at 2.8 N" as prose. It was true of a
+    # 40-episode snapshot and false by the time the page shipped -- the 2.8 N episode is
+    # rejected -- so the page contradicted its own stat box while promising that recomputed
+    # numbers could not disagree with the data. Any claim carrying a number is computed here
+    # or not made.
+    contaminated = [r for r in accepted if r["lateral_scene_contact_n"] > 0.0]
+    touched = [
+        r for r in records
+        if r["outcome"] == "rejected" and r["lateral_scene_contact_n"] > 0.0
+    ]
+    if contaminated:
+        worst = max(r["lateral_scene_contact_n"] for r in contaminated)
+        contact_claim = (
+            f"<p><strong>{len(contaminated)} accepted episode(s) carry non-zero lateral "
+            f"scene contact</strong>, the worst at "
+            f'<span class="num">{worst:.1f} N</span>. That should not happen and is '
+            "<strong>not understood</strong>.</p>"
+        )
+    else:
+        contact_claim = (
+            "<p><strong>No accepted episode touches the scene.</strong> Lateral scene "
+            f'contact is <span class="num">0.000 N</span> across all {len(accepted)} of '
+            f"them; the {len(touched)} episodes that did touch something were all rejected "
+            "for it. The clutter is built around the corridor the robot actually walked, so "
+            "this is traversability by construction rather than by luck — and it is the one "
+            "guarantee here that does not weaken as behaviours diversify.</p>"
+        )
+
     parts += [
         "<section>",
         "<h2>Before you trust any of this</h2>",
@@ -428,10 +457,7 @@ def main() -> int:
         "blanking part of the frame, and <strong>the overhead camera renders blank</strong>. "
         "Both are review-tooling defects, not data defects; the overhead one is unfixed and was "
         "reverted rather than shipped with a speculative fix.</p>",
-        "<p><strong>Two accepted episodes carry non-zero lateral scene contact.</strong> One is "
-        "2.8 N, marginal against a 1.0 N threshold and <strong>not understood</strong>. The "
-        "obvious explanation — too little clearance — was tested and refuted: the episodes with "
-        "contact had the lowest clearance requirement in their batch.</p>",
+        contact_claim,
         "<p><strong>Squat-to-pick-up fails outright, 0 of 3.</strong> The G1's waist pitch "
         "cannot fold as far as the reference asks, so the joint clamps and the thigh ends up "
         "through the pelvis. That is a robot limit, not a tracker failure, and the prompt "

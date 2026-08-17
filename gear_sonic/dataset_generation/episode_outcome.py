@@ -26,6 +26,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from .gate_policy import SCENE_AROUND_MOTION, GatePolicy, GatePolicyError, apply_policy
 from .trajectory_acceptance import evaluate_locomotion_trajectory
 from .trajectory_segments import SegmentError, best_evaluable_payload
 
@@ -47,6 +48,11 @@ class EpisodeOutcome:
     errors: tuple[str, ...] = ()
     #: True when a reset-spanning capture was split and one pass recovered.
     recovered_from_split: bool = False
+    #: Which gate policy graded this episode, since the verdict depends on it.
+    policy: str = SCENE_AROUND_MOTION.name
+    #: Gate failures the policy demoted to diagnostics. Kept so provenance still records
+    #: that the episode departed from its reference, even where that was not disqualifying.
+    demoted_failures: tuple[str, ...] = ()
     frames: int = 0
     diagnostics: dict = field(default_factory=dict)
 
@@ -60,8 +66,21 @@ class EpisodeOutcome:
         return self.outcome in (ACCEPTED, REJECTED)
 
 
-def classify_episode(episode_id: str, payload: dict, *, min_frames: int = 40) -> EpisodeOutcome:
-    """Evaluate one capture, recovering a single pass from a reset-spanning one."""
+def classify_episode(
+    episode_id: str,
+    payload: dict,
+    *,
+    min_frames: int = 40,
+    policy: GatePolicy = SCENE_AROUND_MOTION,
+    planned_goal_xy=None,
+) -> EpisodeOutcome:
+    """Evaluate one capture, recovering a single pass from a reset-spanning one.
+
+    ``policy`` decides which gates bind, because that depends on what the episode's label
+    is: for scene-around-motion the room was built around the executed corridor, so the
+    reference is a diagnostic; for scene-first the planned route is the label. See
+    ``gate_policy``.
+    """
     recovered = False
     try:
         payload, recovered = best_evaluable_payload(payload, min_frames=min_frames)
@@ -86,13 +105,32 @@ def classify_episode(episode_id: str, payload: dict, *, min_frames: int = 40) ->
             frames=frames,
         )
 
+    try:
+        graded = apply_policy(
+            tuple(report.rejection_reasons), payload, policy,
+            planned_goal_xy=planned_goal_xy,
+        )
+    except (GatePolicyError, KeyError) as error:
+        return EpisodeOutcome(
+            episode_id=episode_id,
+            outcome=UNEVALUABLE,
+            errors=(f"{type(error).__name__}: {error}",),
+            recovered_from_split=recovered,
+            frames=frames,
+            policy=policy.name,
+        )
+
+    diagnostics = dict(report.diagnostics or {})
+    diagnostics.update(graded.diagnostics)
     return EpisodeOutcome(
         episode_id=episode_id,
-        outcome=ACCEPTED if report.accepted else REJECTED,
-        rejection_reasons=tuple(report.rejection_reasons),
+        outcome=ACCEPTED if graded.accepted else REJECTED,
+        rejection_reasons=graded.rejection_reasons,
         recovered_from_split=recovered,
         frames=frames,
-        diagnostics=dict(report.diagnostics or {}),
+        diagnostics=diagnostics,
+        policy=policy.name,
+        demoted_failures=graded.demoted_failures,
     )
 
 

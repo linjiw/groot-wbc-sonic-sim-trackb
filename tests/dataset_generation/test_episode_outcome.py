@@ -19,10 +19,16 @@ from gear_sonic.dataset_generation.episode_outcome import (
 
 
 def payload(times: list[float]) -> dict:
+    """A minimal capture that still satisfies the real payload contract.
+
+    `reference_g1_qpos` is not optional: the gate policy measures drift against it, and an
+    episode without a reference genuinely cannot be assessed for stability.
+    """
     frames = len(times)
     return {
         "motion_time_s": np.asarray(times, dtype=np.float64),
         "root_pos_w": np.zeros((frames, 3)),
+        "reference_g1_qpos": np.zeros((frames, 36)),
         "total_frames": frames,
         "fps": 50.0,
     }
