@@ -68,8 +68,12 @@ from gear_sonic.dataset_generation.trajectory_segments import (  # noqa: E402
 PYTHON = Path.home() / "miniconda3/envs/env_isaaclab/bin/python"
 SCENES_ROOT = REPO_ROOT / "gear_sonic/data/assets/scenes"
 
-#: Room large enough to hold a 4 s walk with margin on every side.
-ROOM_SIZE_XY = (10.0, 6.0)
+#: Clearance kept between the furthest point either motion reaches and the wall, in metres.
+#: The measured body half-width is 0.664 m; the rest is margin for tracking drift.
+WALL_MARGIN_M = 1.2
+
+#: Floor under which a room is not built, in metres, so a short motion still gets a room.
+MIN_ROOM_SIZE_XY = (8.0, 5.0)
 WALL_HEIGHT = 2.8
 SHELF_SIZE = (0.5, 3.0, 0.10)
 
@@ -115,7 +119,29 @@ def executed_bodies(rollout_dir: Path):
     return payload
 
 
-def write_scene(scene_id: str, path_xy: np.ndarray, shelf_z_base: float, start_xy) -> Path:
+def room_size_for(paths: list[np.ndarray]) -> tuple[float, float]:
+    """A room that holds every motion in the family, not just the nominal one.
+
+    Sizing from the nominal path alone put the adapted motion into the far wall: it
+    travelled 4.85 m against the nominal's 4.08 m, and a 10 m room centred on the shorter
+    one leaves its wall at 5.0 m. The result was 710.9 N of leg-against-wall contact in
+    *both* scenes -- identical in each, which is what gave it away as unrelated to the shelf.
+    """
+    extent_x = max(float(np.abs(p[:, 0]).max()) for p in paths)
+    extent_y = max(float(np.abs(p[:, 1]).max()) for p in paths)
+    return (
+        max(2 * (extent_x + WALL_MARGIN_M), MIN_ROOM_SIZE_XY[0]),
+        max(2 * (extent_y + WALL_MARGIN_M), MIN_ROOM_SIZE_XY[1]),
+    )
+
+
+def write_scene(
+    scene_id: str,
+    path_xy: np.ndarray,
+    shelf_z_base: float,
+    start_xy,
+    room_size_xy: tuple[float, float],
+) -> Path:
     """A bare room whose only furniture is one shelf spanning the corridor."""
     mid = path_xy[len(path_xy) // 2]
     piece = FurniturePiece(
@@ -130,7 +156,7 @@ def write_scene(scene_id: str, path_xy: np.ndarray, shelf_z_base: float, start_x
     spec = ClutterSceneSpec(
         scene_id=scene_id,
         split_group=f"{scene_id}_family_v1",
-        room_size_xy=ROOM_SIZE_XY,
+        room_size_xy=room_size_xy,
         wall_height=WALL_HEIGHT,
         pieces=[piece],
         path_xy=path_xy,
@@ -228,10 +254,17 @@ def main() -> int:
     print(f"  hard scene shelf underside {hard_z:.3f} m")
 
     # --- 3. build both scenes and run the 2x2 ---------------------------------------------
+    # Both motions must fit: the room is sized from whichever travels furthest.
+    executed_paths = [
+        np.asarray(probes[label]["root_pos_w"])[:, :2] for label in ("nominal", "adapted")
+    ]
+    room = room_size_for([path_xy, *executed_paths])
+    print(f"room sized {room[0]:.1f} x {room[1]:.1f} m to hold both motions")
+
     scenes = {}
     for label, z_base in (("easy", easy_z), ("hard", hard_z)):
         scene_id = f"{family.family_id}_{label}"
-        write_scene(scene_id, path_xy, z_base, start_xy)
+        write_scene(scene_id, path_xy, z_base, start_xy, room)
         scenes[label] = scene_id
     print(f"\nwrote scenes: {', '.join(scenes.values())}")
 
