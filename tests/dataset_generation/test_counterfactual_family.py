@@ -10,6 +10,7 @@ from gear_sonic.dataset_generation.counterfactual_family import (
     CounterfactualError,
     ObstacleSpec,
     build_family,
+    build_paired_family,
     find_collision_boundary,
     swept_clearance_to_box,
 )
@@ -182,3 +183,60 @@ def test_obstacle_box_moves_with_the_parameter():
     low = spec.box_at(0.5)
     assert low[2] == pytest.approx(high[2] - 0.5)
     assert low[0] == pytest.approx(high[0])
+
+
+# ---- paired construction -----------------------------------------------------------------
+
+def test_paired_family_places_the_hard_scene_between_two_boundaries():
+    """Comparing clearances at one obstacle position cannot build a family.
+
+    The clearance saturates at -radius once a capsule is engulfed, so two colliding motions
+    read the same number. Measured on real probes, a walk and a duck both returned exactly
+    -0.0680 m -- the torso capsule's radius -- at the same shelf height.
+    """
+    tall_pos, tall_quat = straight_walk(torso_z=1.10)
+    ducked_pos, ducked_quat = straight_walk(torso_z=0.80)
+    family = build_paired_family(
+        "f0",
+        (tall_pos, tall_quat, BODY_NAMES),
+        (ducked_pos, ducked_quat, BODY_NAMES),
+        shelf(3.0), search_high=2.4, capsules=TEST_CAPSULES,
+    )
+    assert family.separated
+    assert family.window_m > 0.0
+    assert (
+        family.nominal_boundary.parameter
+        < family.hard_parameter
+        < family.adapted_boundary.parameter
+    )
+    assert family.easy_parameter < family.nominal_boundary.parameter
+
+
+def test_a_pair_that_does_not_separate_is_refused():
+    """The adapted motion must actually clear something the nominal one does not.
+
+    Measured: a 'ducks down low' reference whose executed torso drops 0.061 m against a
+    plain walk's 0.063 m gave a 0.006 m window -- no family. The predicate that grades duck
+    depth is what selects a motion that does separate.
+    """
+    pos, quat = straight_walk(torso_z=1.0)
+    with pytest.raises(CounterfactualError, match="does not separate"):
+        build_paired_family(
+            "f0", (pos, quat, BODY_NAMES), (pos, quat, BODY_NAMES),
+            shelf(3.0), search_high=2.4, capsules=TEST_CAPSULES,
+        )
+
+
+def test_the_window_is_the_family_content():
+    tall_pos, tall_quat = straight_walk(torso_z=1.10)
+    ducked_pos, ducked_quat = straight_walk(torso_z=0.75)
+    wide = build_paired_family(
+        "wide", (tall_pos, tall_quat, BODY_NAMES), (ducked_pos, ducked_quat, BODY_NAMES),
+        shelf(3.0), search_high=2.4, capsules=TEST_CAPSULES,
+    )
+    shallow_pos, shallow_quat = straight_walk(torso_z=1.05)
+    narrow = build_paired_family(
+        "narrow", (tall_pos, tall_quat, BODY_NAMES), (shallow_pos, shallow_quat, BODY_NAMES),
+        shelf(3.0), search_high=2.4, capsules=TEST_CAPSULES,
+    )
+    assert wide.window_m > narrow.window_m

@@ -141,6 +141,14 @@ def swept_clearance_to_box(
     distance has no short closed form, and at these sizes a few samples per capsule is both
     accurate to well under the search tolerance and fast enough to sit inside a binary
     search over hundreds of frames.
+
+    **The negative branch saturates.** A capsule wholly inside the box has point-to-box
+    distance zero, so the clearance reads exactly ``-radius`` however deeply it is engulfed.
+    That is harmless for a boundary search, which only needs the zero crossing, and it makes
+    the value useless for ranking two motions at a *fixed* obstacle position: two bodies both
+    engulfed return the same number. Compare boundaries instead -- see
+    ``build_paired_family``, which exists because this was learned the hard way, with two
+    different motions both reading -0.0680 m, the torso capsule's radius.
     """
     starts, ends, radii, _ = body_capsules_world(
         body_pos, body_quat, body_names, capsules=capsules
@@ -263,3 +271,84 @@ def build_family(
             "negative this is two easy scenes with different pixels, not a counterfactual."
         )
     return family
+
+
+@dataclass(frozen=True)
+class PairedFamily:
+    """A family built from two motions' own boundaries, rather than one clearance value."""
+
+    family_id: str
+    regime: str
+    obstacle: ObstacleSpec
+    nominal_boundary: BoundaryResult
+    adapted_boundary: BoundaryResult
+    easy_parameter: float
+    hard_parameter: float
+
+    @property
+    def window_m(self) -> float:
+        """How much obstacle travel separates the two motions. The family's whole content."""
+        return self.adapted_boundary.parameter - self.nominal_boundary.parameter
+
+    @property
+    def separated(self) -> bool:
+        return self.window_m > 0.0
+
+
+def build_paired_family(
+    family_id: str,
+    nominal: tuple[np.ndarray, np.ndarray, Sequence[str]],
+    adapted: tuple[np.ndarray, np.ndarray, Sequence[str]],
+    obstacle: ObstacleSpec,
+    *,
+    search_low: float = 0.0,
+    search_high: float = 1.5,
+    tolerance_m: float = DEFAULT_SEARCH_TOLERANCE_M,
+    capsules=G1_COLLISION_CAPSULES,
+) -> PairedFamily:
+    """Place the hard scene *between* two motions' collision boundaries.
+
+    Each motion is searched for the obstacle position at which it first interferes. The hard
+    scene then sits strictly between them, so the nominal motion collides and the adapted one
+    does not -- which is the counterfactual, stated as a property of the construction rather
+    than hoped for after the fact.
+
+    Comparing clearances at a single obstacle position cannot do this, because the clearance
+    saturates at ``-radius`` once a capsule is engulfed and two colliding motions become
+    indistinguishable.
+    """
+    if obstacle.regime not in GEOMETRY_REGIMES:
+        raise CounterfactualError(
+            f"unknown geometry regime {obstacle.regime!r}; known: {list(GEOMETRY_REGIMES)}"
+        )
+
+    def boundary_for(bodies) -> BoundaryResult:
+        pos, quat, names = bodies
+        return find_collision_boundary(
+            lambda parameter: swept_clearance_to_box(
+                pos, quat, names, obstacle.box_at(parameter), capsules=capsules
+            ),
+            search_low, search_high, tolerance_m=tolerance_m,
+        )
+
+    nominal_boundary = boundary_for(nominal)
+    adapted_boundary = boundary_for(adapted)
+    window = adapted_boundary.parameter - nominal_boundary.parameter
+    if window <= 0.0:
+        raise CounterfactualError(
+            f"{family_id}: the adapted motion interferes no later than the nominal one "
+            f"(boundaries {adapted_boundary.parameter:.3f} m and "
+            f"{nominal_boundary.parameter:.3f} m). This pair does not separate: the adapted "
+            "motion is not actually clearing anything the nominal one does not."
+        )
+
+    return PairedFamily(
+        family_id=family_id,
+        regime=obstacle.regime,
+        obstacle=obstacle,
+        nominal_boundary=nominal_boundary,
+        adapted_boundary=adapted_boundary,
+        # Easy sits clear of both; hard sits between them.
+        easy_parameter=nominal_boundary.parameter - 0.5 * window,
+        hard_parameter=0.5 * (nominal_boundary.parameter + adapted_boundary.parameter),
+    )

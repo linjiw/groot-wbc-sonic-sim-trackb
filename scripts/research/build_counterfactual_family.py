@@ -57,8 +57,7 @@ from gear_sonic.dataset_generation.clutter_scene_builder import (  # noqa: E402
 from gear_sonic.dataset_generation.counterfactual_family import (  # noqa: E402
     CounterfactualError,
     ObstacleSpec,
-    build_family,
-    swept_clearance_to_box,
+    build_paired_family,
 )
 from gear_sonic.dataset_generation.episode_outcome import classify_episode  # noqa: E402
 from gear_sonic.dataset_generation.route_placement import canonical_path_xy  # noqa: E402
@@ -137,7 +136,17 @@ def write_scene(scene_id: str, path_xy: np.ndarray, shelf_z_base: float, start_x
         path_xy=path_xy,
         clearance_m=0.0,
         seed=0,
-        metrics={"scene_start_xy": [float(start_xy[0]), float(start_xy[1])], "placed_pieces": 1},
+        metrics={
+            "scene_start_xy": [float(start_xy[0]), float(start_xy[1])],
+            "placed_pieces": 1,
+            # render_scene_usda writes these into the file's provenance header, so they are
+            # required even for a scene whose only furniture is a single shelf.
+            "clutter_occupancy": 0.0,
+            "min_distance_to_path_m": 0.0,
+            "path_length_m": float(
+                np.linalg.norm(np.diff(path_xy, axis=0), axis=1).sum()
+            ),
+        },
     )
     directory = SCENES_ROOT / "g1_counterfactual"
     directory.mkdir(parents=True, exist_ok=True)
@@ -191,32 +200,32 @@ def main() -> int:
         base_center=(float(mid[0]), float(mid[1]), 2.30),
         axis=(0.0, 0.0, -1.0), regime="overhead",
     )
-    nominal = probes["nominal"]
+    def bodies(label):
+        payload = probes[label]
+        return (
+            np.asarray(payload["body_pos_w"]),
+            np.asarray(payload["body_quat_w"]),
+            list(payload["body_names"]),
+        )
+
     try:
-        family = build_family(
+        family = build_paired_family(
             f"cf_{args.nominal}_{args.adapted}",
-            np.asarray(nominal["body_pos_w"]), np.asarray(nominal["body_quat_w"]),
-            list(nominal["body_names"]), shelf,
-            search_low=0.0, search_high=1.5, margin_m=args.margin,
+            bodies("nominal"), bodies("adapted"), shelf, search_high=1.6,
         )
     except CounterfactualError as error:
-        raise SystemExit(f"no boundary for this pair: {error}") from error
+        raise SystemExit(f"no family for this pair: {error}") from error
 
-    adapted = probes["adapted"]
-    adapted_hard, _ = swept_clearance_to_box(
-        np.asarray(adapted["body_pos_w"]), np.asarray(adapted["body_quat_w"]),
-        list(adapted["body_names"]), shelf.box_at(family.hard_parameter),
-    )
     easy_z = shelf.box_at(family.easy_parameter)[2]
     hard_z = shelf.box_at(family.hard_parameter)[2]
-    print(f"\nboundary at {family.boundary.parameter:.3f} m of lowering "
-          f"({family.boundary.iterations} iterations)")
-    print(f"  easy shelf underside {easy_z:.3f} m   nominal clearance {family.easy_clearance_m:+.4f}")
-    print(f"  hard shelf underside {hard_z:.3f} m   nominal clearance {family.hard_clearance_m:+.4f}"
-          f"   adapted clearance {adapted_hard:+.4f}")
-    if adapted_hard <= 0:
-        print("  NOTE: the adapted motion also interferes at this height, so the pair does not "
-              "separate geometrically. The 2x2 below will say what physics makes of it.")
+    nominal_z = shelf.box_at(family.nominal_boundary.parameter)[2]
+    adapted_z = shelf.box_at(family.adapted_boundary.parameter)[2]
+    print(f"\nnominal clears a shelf down to {nominal_z:.3f} m")
+    print(f"adapted clears a shelf down to {adapted_z:.3f} m")
+    print(f"WINDOW {family.window_m:.3f} m -- a shelf between those heights should stop the "
+          "nominal motion and pass the adapted one")
+    print(f"  easy scene shelf underside {easy_z:.3f} m")
+    print(f"  hard scene shelf underside {hard_z:.3f} m")
 
     # --- 3. build both scenes and run the 2x2 ---------------------------------------------
     scenes = {}
@@ -282,12 +291,13 @@ def main() -> int:
                 "regime": family.regime,
                 "nominal_motion": nominal_csv.name,
                 "adapted_motion": adapted_csv.name,
-                "boundary_parameter": family.boundary.parameter,
+                "nominal_boundary_parameter": family.nominal_boundary.parameter,
+                "adapted_boundary_parameter": family.adapted_boundary.parameter,
+                "window_m": family.window_m,
+                "nominal_clears_to_m": nominal_z,
+                "adapted_clears_to_m": adapted_z,
                 "easy_shelf_underside_m": easy_z,
                 "hard_shelf_underside_m": hard_z,
-                "nominal_easy_clearance_m": family.easy_clearance_m,
-                "nominal_hard_clearance_m": family.hard_clearance_m,
-                "adapted_hard_clearance_m": adapted_hard,
                 "results": results,
                 "counterfactual_established": separated,
             },
