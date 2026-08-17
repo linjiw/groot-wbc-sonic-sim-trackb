@@ -115,8 +115,12 @@ library = joblib.load(sys.argv[1])
 entry = next(iter(library.values()))
 frames = len(entry["root_trans_offset"])
 source_fps = float(entry["fps"])
-# The environment steps at 50 Hz regardless of the source motion's frame rate.
-print(int(round(frames / source_fps * 50)) + 1)
+# The environment steps at 50 Hz regardless of the source motion's frame rate, and the
+# recorder writes max_render_steps - 1 frames. Asking for exactly the pass length therefore
+# stops one frame short of the end rather than one frame past it -- which matters, because
+# one frame past is the first frame of the *next* pass, and every capture then contains a
+# reset that has to be split back out.
+print(int(round(frames / source_fps * 50)))
 PY
   ) || { echo "ERROR: could not read motion length from $MOTION" >&2; exit 2; }
   echo "max_steps=auto -> $MAX_STEPS (one full pass)"
