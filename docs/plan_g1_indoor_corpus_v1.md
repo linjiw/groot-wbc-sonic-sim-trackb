@@ -47,6 +47,39 @@ m/s** and heading changes to **6.721 rad**, against a corpus that turns essentia
    today. The calibration pilot (C1) should therefore run *after* Phase B diversity populates
    the gaps, and should target episodes near a threshold rather than a random 100.
 
+### Round two: what running 40 varied motions broke
+
+Full write-up in `docs/round2_diversity_findings.md`. Five problems, all invisible with two
+motions, and one hypothesis that was wrong.
+
+5. **Every capture was truncated at 59% of its motion**, cutting the second clause off every
+   composite behaviour the taxonomy exists to produce. Fixed: the step count is read from the
+   motion library.
+6. **"Unevaluable" was indistinguishable from "rejected".** One episode reported
+   `accepted=False` with an *empty* reason tuple while carrying 1776 N of scene contact no
+   gate had seen. Fixed: reset-spanning captures are split and recovered, and the outcome is
+   now three-way with the acceptance rate divided by *evaluated*.
+7. **The body radius described the pelvis, not the robot** — 0.45 m against a measured
+   0.434–0.664 m swept half-width, exceeded on 98% of episodes. Corrected, along with the
+   route clearance.
+8. **Episode length is a hidden parameter of every acceptance rate.** Grading the same
+   episodes at increasing horizons gives 83% at 1.2 s falling to 64% at 4.8 s, while p95 path
+   error grows 0.098 → 0.248 m. **The usable horizon of SONIC on novel motions is about 4–5 s
+   at the current threshold** — a controller property worth reporting on its own. Generation
+   now defaults to 4.0 s, chosen off that curve.
+9. **The clearance budget did not explain the collisions.** The two episodes with scene
+   contact had the *lowest* clearance requirement; the three that exceeded the budget had
+   none. Recorded so it is not retried.
+
+**C3 delivered:** eval-eligible scenes went from 2 to 14. Rooms are cleared against the
+*commanded* path plus a measured drift allowance, and each is certified to admit routes other
+than the reference before it ships. The cost is stated: eval rooms run 9.5–21.1% occupancy
+against training rooms' 20–38%.
+
+**Throughput is dominated by contention, not by our code.** The identical 150-motion sweep
+took 1984 s with six other GPU processes and 290 s with two — a 7× swing. No throughput
+number from this machine means anything without the contention it was measured under.
+
 ---
 
 ## 1. The story: replicable by construction, verified by measurement
