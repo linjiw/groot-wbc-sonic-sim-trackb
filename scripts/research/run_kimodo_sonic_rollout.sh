@@ -18,7 +18,7 @@ Usage:
     --out /abs/path/output_dir \
     [--checkpoint /abs/path/last.pt] \
     [--python /abs/path/python] \
-    [--max-steps 200] \
+    [--max-steps auto|<int>] \
     [--task "natural language instruction"]
 
 Writes <out>/trajectories, <out>/renders, <out>/rollout.log and requires the
@@ -32,7 +32,7 @@ MOTION=""
 OUT=""
 CHECKPOINT="${REPO_ROOT}/sonic_release/last.pt"
 PYTHON_BIN="${PYTHON:-${HOME}/miniconda3/envs/env_isaaclab/bin/python}"
-MAX_STEPS=200
+MAX_STEPS=auto
 # Bound at capture time, not at export time: the export binding gate cross-checks the
 # exported task string against the runtime manifest, so the language annotation a VLA
 # will train on has to be decided here.
@@ -97,6 +97,30 @@ done
 
 mkdir -p "$OUT/trajectories" "$OUT/renders"
 LOG="$OUT/rollout.log"
+
+# Capture one full pass of *this* motion, not a fixed number of steps. A constant was
+# inherited from a corpus whose two motions were the same length; with a varied library it
+# silently truncates. Measured on a 40-episode batch, a hard-coded 149 captured 2.94 s of
+# every 5.00 s motion -- 59% -- cutting off exactly the distinctive second half of the
+# composite behaviours ("walks, then squats to pick up", "walks, pauses and looks around,
+# then continues"). One extra step past the pass gives the exporter the single complete
+# pass it requires without starting a second one.
+if [[ "$MAX_STEPS" == "auto" ]]; then
+  MAX_STEPS=$(env PYTHONPATH="$REPO_ROOT" "$PYTHON_BIN" - "$MOTION" <<'PY'
+import sys
+
+import joblib
+
+library = joblib.load(sys.argv[1])
+entry = next(iter(library.values()))
+frames = len(entry["root_trans_offset"])
+source_fps = float(entry["fps"])
+# The environment steps at 50 Hz regardless of the source motion's frame rate.
+print(int(round(frames / source_fps * 50)) + 1)
+PY
+  ) || { echo "ERROR: could not read motion length from $MOTION" >&2; exit 2; }
+  echo "max_steps=auto -> $MAX_STEPS (one full pass)"
+fi
 
 echo "scene=$SCENE"
 echo "scene_usd=$SCENE_USD"

@@ -42,11 +42,25 @@ from gear_sonic.dataset_generation.clutter_scene_builder import (  # noqa: E402
     render_scene_usda,
 )
 from gear_sonic.dataset_generation.route_placement import (  # noqa: E402
-    DEFAULT_TRACKING_MARGIN_M,
     canonical_path_xy,
 )
 
-BODY_RADIUS_M = 0.45
+# Measured, not assumed. Across 48 episodes carrying per-body pose, the swept half-width
+# reaches 0.434-0.664 m (median 0.500). The previous value of 0.45 m was exceeded on 98% of
+# them: it described the pelvis, not the robot, and the arms are what a room has to clear.
+BODY_RADIUS_M = 0.664
+
+# What the room must actually leave free is the swept half-width *plus* how far the executed
+# path drifts from the reference the furniture was placed against. Measured per frame over a
+# 40-episode diverse batch, that sum ranged 0.482-0.819 m (median 0.582). The default below
+# covers the observed maximum with a little room; the previous 0.75 m (0.45 body + 0.30
+# margin) left only 0.086 m of real margin once the body radius is measured honestly, and
+# three of those 40 episodes needed more than it provided.
+#
+# Note the two terms are not independent -- the widest swept volume and the largest path
+# deviation rarely coincide -- which is why this is 0.85 rather than the 0.96 m that naively
+# adding the two maxima would suggest.
+DEFAULT_ROUTE_CLEARANCE_M = 0.85
 ROBOT_CLEARANCE_HEIGHT_M = 1.9
 
 
@@ -60,8 +74,8 @@ def main() -> int:
     parser.add_argument(
         "--clearance-m",
         type=float,
-        default=BODY_RADIUS_M + DEFAULT_TRACKING_MARGIN_M,
-        help="minimum distance from any solid to the path (body radius + tracking margin)",
+        default=DEFAULT_ROUTE_CLEARANCE_M,
+        help="minimum distance from any solid to the path (measured swept half-width + path drift)",
     )
     parser.add_argument("--max-distance-m", type=float, default=3.0)
     args = parser.parse_args()
