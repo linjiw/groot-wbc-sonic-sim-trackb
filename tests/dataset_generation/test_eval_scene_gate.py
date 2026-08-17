@@ -106,3 +106,27 @@ def test_missing_provenance_is_treated_as_generated_when_a_source_motion_is_name
     """Absence of a provenance string must not be a way past the gate."""
     verdict = classify_scene({"scene_id": "x", "source_motion": "some_motion"})
     assert not verdict.eligible
+
+
+REFERENCE_CLEARED = {
+    "scene_id": "eval_000",
+    "provenance": "repo_generated_reference_clearance_geometry",
+    "source_motion": None,
+}
+
+
+def test_reference_cleared_scenes_are_eligible_and_labelled_distinctly():
+    """Generated from the commanded path, so no executed trajectory enters the geometry.
+
+    Labelling these "authored" would misdescribe how they were made to anyone reading a
+    split report, so they get their own origin.
+    """
+    verdict = classify_scene(REFERENCE_CLEARED, independent_routes=3)
+    assert verdict.geometry_origin == "reference_clearance"
+    assert verdict.eligible
+    assert not verdict.is_policy_specific
+
+
+def test_a_reference_cleared_scene_still_needs_routes():
+    verdict = classify_scene(REFERENCE_CLEARED, independent_routes=0)
+    assert not verdict.eligible

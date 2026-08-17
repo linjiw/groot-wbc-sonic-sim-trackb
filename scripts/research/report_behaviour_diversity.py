@@ -29,8 +29,12 @@ from gear_sonic.dataset_generation.behaviour_diversity import (  # noqa: E402
     build_diversity_report,
     summarise_episode,
 )
-from gear_sonic.dataset_generation.trajectory_acceptance import (  # noqa: E402
-    evaluate_locomotion_trajectory,
+from gear_sonic.dataset_generation.episode_outcome import (  # noqa: E402
+    OutcomeTally,
+    classify_episode,
+)
+from gear_sonic.dataset_generation.trajectory_segments import (  # noqa: E402
+    best_evaluable_payload,
 )
 
 
@@ -53,6 +57,7 @@ def main() -> int:
         raise SystemExit(f"no trajectories under {args.root}")
 
     episodes, actions, skipped = [], [], 0
+    tally = OutcomeTally()
     for path in paths:
         try:
             with path.open("rb") as handle:
@@ -61,9 +66,15 @@ def main() -> int:
             print(f"  skip {path.parent.parent.name}: {type(error).__name__}: {error}")
             skipped += 1
             continue
-        if args.accepted_only and not evaluate_locomotion_trajectory(payload).accepted:
-            continue
         episode_id = path.parent.parent.name
+        outcome = classify_episode(episode_id, payload)
+        tally.add(outcome)
+        if args.accepted_only and not outcome.accepted:
+            continue
+        # A reset-spanning capture holds two passes; measuring diversity over the stitched
+        # file would sum a teleport into the path length. Use the recovered pass.
+        if outcome.recovered_from_split:
+            payload, _ = best_evaluable_payload(payload)
         episodes.append(summarise_episode(episode_id, payload))
         actions.append(np.asarray(payload["action_motion_token"], dtype=np.float64))
 
@@ -71,6 +82,7 @@ def main() -> int:
         raise SystemExit("no episodes matched the filter")
 
     report = build_diversity_report(episodes, actions)
+    print(f"outcomes: {tally.summary()}")
     for line in report.summary_lines():
         print(line)
     if skipped:
@@ -84,6 +96,13 @@ def main() -> int:
             "between_episode_rank": report.between_episode_rank,
             "within_episode_rank_mean": report.within_episode_rank_mean,
             "accepted_only": bool(args.accepted_only),
+            "outcomes": {
+                "accepted": tally.accepted,
+                "rejected": tally.rejected,
+                "unevaluable": tally.unevaluable,
+                "recovered_from_split": tally.recovered_from_split,
+                "acceptance_rate_of_evaluated": tally.acceptance_rate,
+            },
             "spreads": report.spreads,
             "episodes": [
                 {

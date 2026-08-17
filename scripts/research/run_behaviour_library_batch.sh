@@ -26,7 +26,7 @@ LIMIT=0
 SEEDS=0
 PYTHON_BIN="${PYTHON_BIN:-$HOME/miniconda3/envs/env_isaaclab/bin/python}"
 MJCF="${MJCF:-$HOME/kimodo/kimodo/assets/skeletons/g1skel34/xml/g1.xml}"
-MAX_STEPS=149
+MAX_STEPS=auto
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -35,6 +35,7 @@ while [[ $# -gt 0 ]]; do
     --limit) LIMIT="$2"; shift 2 ;;
     --seeds) SEEDS="$2"; shift 2 ;;
     --max-steps) MAX_STEPS="$2"; shift 2 ;;
+    --scene-package) SCENES_DIR="$2"; shift 2 ;;
     --python) PYTHON_BIN="$2"; shift 2 ;;
     -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
@@ -46,7 +47,7 @@ done
 [[ -d "$MOTIONS" ]] || { echo "ERROR: no such directory: $MOTIONS" >&2; exit 2; }
 
 mkdir -p "$WORK"/{csv,motions,rollouts,logs}
-SCENES_DIR="$REPO_ROOT/gear_sonic/data/assets/scenes/g1_library"
+SCENES_DIR="${SCENES_DIR:-$REPO_ROOT/gear_sonic/data/assets/scenes/g1_library}"
 
 echo "=== stage 1: screen ==="
 "$PYTHON_BIN" "$REPO_ROOT/scripts/research/screen_kimodo_motions.py" \

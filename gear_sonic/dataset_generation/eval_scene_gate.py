@@ -32,6 +32,12 @@ from typing import Iterable, Sequence
 #: Manifests that were hand-authored rather than fitted to any trajectory.
 AUTHORED_PROVENANCE = "repo_authored_primitive_geometry"
 
+#: Generated, but budgeted from the *commanded* path plus an allowance for policy drift, so
+#: no executed trajectory enters the geometry. Eligible, and labelled distinctly from
+#: hand-authored: calling a generated room "authored" would misdescribe how it was made to
+#: anyone reading a split report.
+REFERENCE_CLEARANCE_PROVENANCE = "repo_generated_reference_clearance_geometry"
+
 
 class EvalSceneGateError(ValueError):
     """Raised when a scene set violates the evaluation-geometry rule."""
@@ -63,7 +69,9 @@ def classify_scene(
     source_motion = scene_entry.get("source_motion")
     provenance = scene_entry.get("provenance", "")
 
-    if provenance == AUTHORED_PROVENANCE or source_motion is None:
+    if provenance == REFERENCE_CLEARANCE_PROVENANCE:
+        origin = "reference_clearance"
+    elif provenance == AUTHORED_PROVENANCE or source_motion is None:
         origin = "authored"
     else:
         origin = "executed_swept_volume"
