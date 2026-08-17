@@ -1,7 +1,7 @@
 # What the first diverse batch broke
 
 The corpus ran on two motions for its whole life. Forty varied ones went through the same
-pipeline and broke four things that two motions could never have exposed. This records what
+pipeline and broke five things that two motions could never have exposed. This records what
 broke, the measurement that found it, and what changed — including one hypothesis that was
 wrong.
 
@@ -100,9 +100,10 @@ still unexplained by geometry alone.
 
 ## What this cost, and what it bought
 
-Acceptance over the batch was **34/40 (85%)** on genuinely varied behaviour, against 46%
-over the older corpus. Rejections, all now with reasons: three `reference_path_tracking_error`
-(all brisk curving motions, the hardest to track), two `disallowed_robot_contact`, one
+Acceptance over the batch was **34/40 (85%) at the 2.94 s horizon** — and that horizon is
+load-bearing, as §5 shows: the same pipeline over full-length captures accepts 5/12 (42%).
+Rejections, all now carrying reasons: three `reference_path_tracking_error` (all brisk
+curving motions, the hardest to track), two `disallowed_robot_contact`, one
 `excessive_self_contact`.
 
 Diversity moved where it was supposed to. Between-episode effective rank, the measure that
