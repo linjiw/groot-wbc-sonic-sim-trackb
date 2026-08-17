@@ -12,10 +12,19 @@ than difficulty.
 
 The fix follows from asking what the label is, which depends on how the episode was made:
 
-* **scene-around-motion.** The room is built around the corridor the robot *executed*, so
-  the scene explains the path the robot actually took. The reference was a means of
-  producing behaviour, not the label. Path-versus-reference error is a tracking-quality
-  diagnostic here, not a verdict.
+* **scene-around-motion.** The room is built around the *reference* corridor plus a
+  measured margin -- the executed corridor does not exist before a rollout, so it cannot be
+  an input. The reference is therefore a means of producing behaviour and of placing
+  furniture, but it is not the episode's label: what the robot did is. Path-versus-reference
+  error is a tracking-quality diagnostic here, not a verdict.
+
+  This argument does **not** rest on traversability by construction, and an earlier version
+  of this docstring wrongly claimed it did. It rests on measurement: episodes whose scene was
+  built around their own motion touch the scene at a 4% rate (4 of 97), against 21% (14 of
+  67) for motions *placed into* fixed hand-authored geometry -- and three of those four are
+  one broken squat reference whose self-intersection pushes limbs outside the envelope the
+  margin was sized for. The contact gate, which still binds under every policy, is what
+  guarantees collision-freedom per episode. The construction only makes it likely.
 * **scene-first.** The route was planned through fixed geometry and *is* the label, so
   reaching the planned goal is the thing being tested. Corridor-hugging p95 over a whole
   episode is still the wrong instrument; goal-region success plus stability is right.

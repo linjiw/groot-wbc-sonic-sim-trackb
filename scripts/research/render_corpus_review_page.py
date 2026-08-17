@@ -476,8 +476,9 @@ def main() -> int:
             f'contact is <span class="num">0.000 N</span> across all {len(accepted)} of '
             f"them; the {len(touched)} episodes that did touch something were all rejected "
             "for it. The clutter is built around the corridor the robot actually walked, so "
-            "this is traversability by construction rather than by luck — and it is the one "
-            "guarantee here that does not weaken as behaviours diversify.</p>"
+            "The contact gate is what guarantees that per episode; the scene construction only "
+            "makes it likely, since a room is built around the <em>reference</em> corridor "
+            "and the robot drifts from it.</p>"
         )
 
     reasons: dict[str, int] = {}
