@@ -110,6 +110,39 @@ answers "how many distinct behaviours are here", went from **1.16 to 6.31**. Spe
 0.205–1.816 m/s against the old corpus's 0.653–1.278, and heading change spans −6.86 to
 +4.01 rad against essentially zero.
 
+## 5. Episode length is a hidden parameter of every acceptance rate
+
+**Found by:** grading the same episodes at increasing horizons, which isolates the effect —
+no difference in scene, motion, or seed, only in how much of the trajectory the gates see.
+
+| Horizon | Acceptance | Median p95 path error |
+|---|---|---|
+| 1.2 s | 83% | 0.098 m |
+| 2.0 s | 75% | 0.138 m |
+| 3.0 s | 67% | 0.151 m |
+| 3.5 s | 67% | 0.180 m |
+| 4.8 s | 64% | 0.248 m |
+
+The tracker starts on its reference and drifts, so a longer episode is a harder one, and the
+p95 path error crosses the 0.25 m threshold near 5 s. **The usable horizon of the SONIC
+tracker on novel motions is about 4-5 s at the current threshold** — a property of the
+controller, not of the corpus, and worth reporting as such.
+
+The practical consequence: an acceptance rate quoted without its horizon is not comparable
+to another one. Over the full 5 s pass the batch accepted 5/12 (42%); over the first 59% it
+would have reported 73%.
+
+**Acted on:** generation now defaults to **4.0 s**, chosen off the curve rather than
+inherited — on the plateau before the decline steepens, still ~3.6 m of travel at a steady
+pace against the old corpus's 3.5 m average, and long enough for a composite behaviour to
+finish. This is not the same as capturing 4 s of a 5 s motion: Kimodo fits a *complete*
+behaviour into the duration it is given, so truncating a 5 s "walk then squat" cuts
+mid-squat while generating at 4 s produces a whole one.
+
+`analyze_horizon_acceptance.py` restricts itself to horizons every episode can reach, because
+a horizon that silently drops the shorter episodes compares a different population at each
+row — which an earlier ad-hoc version of this table did.
+
 ## Still open after this round
 
 - **The 2.8 N contact on `clutter_033`** is unexplained. It is marginal against a 1.0 N

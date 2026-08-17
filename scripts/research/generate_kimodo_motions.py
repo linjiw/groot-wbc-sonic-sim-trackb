@@ -82,7 +82,18 @@ def main() -> int:
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--model", default="kimodo-g1-rp")
-    parser.add_argument("--duration", type=float, default=5.0, help="seconds, max 10")
+    # 4.0 s, chosen from the acceptance-versus-horizon curve rather than inherited. Grading
+    # the same episodes at increasing horizons (analyze_horizon_acceptance.py) shows
+    # acceptance falling 83% at 1.2 s to 67% at 3.5 s and 64% at 4.8 s, while median p95
+    # path error grows 0.098 -> 0.248 m: the tracker starts on its reference and drifts, so
+    # a longer episode is a harder one. 4 s sits on the plateau before the decline steepens,
+    # still covers ~3.6 m at a steady pace (the old corpus averaged 3.5 m), and leaves room
+    # for a composite behaviour to complete.
+    #
+    # Note this is not the same as capturing 4 s of a 5 s motion: Kimodo fits a *complete*
+    # behaviour into the duration it is given, so truncating a 5 s "walk then squat" cuts
+    # mid-squat, while generating at 4 s produces a whole one.
+    parser.add_argument("--duration", type=float, default=4.0, help="seconds, max 10")
     parser.add_argument("--seeds", type=int, default=1, help="samples per prompt")
     parser.add_argument("--seed-base", type=int, default=1000)
     parser.add_argument("--steps", type=int, default=100, help="DDIM denoising steps")
