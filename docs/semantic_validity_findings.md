@@ -20,11 +20,34 @@ Over the 132 accepted episodes in `g1_motionbank_v0.4`:
 | `duck_under` | **3/7** | the four failures drop the torso only 0.042–0.053 m |
 | `walk_pause` | **0/7** | genuinely mislabelled |
 | `walk_to_stop` | **0/2** | genuinely mislabelled |
-| 6 other families | — | **102 accepted episodes have no predicate at all** |
+| `step_over` | **0/7** | genuinely mislabelled |
+| 5 other families | — | **95 accepted episodes have no predicate at all** |
 
-**17 of 30 semantically valid where a predicate exists**, against an 85% acceptance rate.
+**17 of 37 semantically valid where a predicate exists**, against an 85% acceptance rate.
 
-## The two families that are genuinely mislabelled
+## The pattern: the generator returns a walk
+
+Three families ask for a composite behaviour and receive plain walking. A fourth is partial.
+This is upstream of the controller and of every gate — physics accepts them because a walk is
+safe, and nothing downstream was positioned to ask whether it was the *right* walk.
+
+| Prompt asked for | What came back |
+|---|---|
+| "stops and stands still for a moment, then walks on" | continuous walking, minimum speed 0.024–1.410 m/s |
+| "comes to a stop" | never slows: 0.879–0.909 m/s minimum, 1.15–1.54 m/s at the end |
+| "lifts a leg high to step over something low" | trailing foot apex indistinguishable from walking |
+| "ducks down low to pass under an obstacle" | 3 of 7 duck; the rest drop 0.042–0.053 m |
+
+The `step_over` result is the cleanest, because it is **threshold-free**. Over accepted
+episodes the trailing foot's swing apex is 0.125–0.153 m for a plain walk (n = 14, median
+0.136) and 0.131–0.145 m for episodes labelled `step_over` (n = 7, median 0.138).
+Mann-Whitney **p = 0.632**. The verdict does not depend on where any threshold sits.
+
+That control is the check I failed to run on `stand_to_walk`, where an uncalibrated absolute
+threshold produced a confident wrong answer. Running it first is the difference between a
+finding and a bug.
+
+## The families that are genuinely mislabelled
 
 `walk_to_stop` never slows down. Minimum root speed across its accepted episodes is
 0.879–0.909 m/s and they are still moving at 1.15–1.54 m/s in the final 0.4 s. The prompt
