@@ -69,6 +69,12 @@ def main() -> int:
         episode_id = path.parent.parent.name
         outcome = classify_episode(episode_id, payload)
         tally.add(outcome)
+        # An unevaluable capture has no valid trajectory to measure. Including one poisons
+        # every corpus-level statistic: a capture that reset 22 times in 199 frames read as
+        # 10.16 m of path with 0.25 m of displacement, -106.9 rad of heading change and a
+        # tortuosity of 41, which would have been reported as diversity.
+        if not outcome.evaluated:
+            continue
         if args.accepted_only and not outcome.accepted:
             continue
         # A reset-spanning capture holds two passes; measuring diversity over the stitched

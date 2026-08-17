@@ -153,3 +153,29 @@ def test_summary_omits_clean_categories():
     summary = tally.summary()
     assert "unevaluable" not in summary
     assert "recovered" not in summary
+
+
+def test_a_capture_that_resets_constantly_is_unevaluable_not_a_diverse_episode(monkeypatch):
+    """A real capture reset 22 times in 199 frames, every 0.18 s.
+
+    Stitched, it read as 10.16 m of path with 0.25 m of displacement, -106.9 rad of heading
+    change and a tortuosity of 41 -- numbers that were reported as diversity until the
+    exclusion was added. No segment is long enough to evaluate, so the outcome must be
+    unevaluable and every downstream statistic must skip it.
+    """
+    times: list[float] = []
+    for _ in range(22):
+        times.extend(ramp(9))
+    outcome = classify_episode("thrashing", payload(times))
+    assert outcome.outcome == UNEVALUABLE
+    assert not outcome.evaluated
+    assert "SegmentError" in outcome.errors[0]
+
+
+def test_evaluated_is_the_flag_downstream_statistics_must_gate_on():
+    """`accepted` alone is not enough: a rejected episode has a valid trajectory to
+    measure, while an unevaluable one does not."""
+    rejected = EpisodeOutcome("r", REJECTED, rejection_reasons=("path_error",))
+    unevaluable = EpisodeOutcome("u", UNEVALUABLE, errors=("no gates ran",))
+    assert rejected.evaluated and not rejected.accepted
+    assert not unevaluable.evaluated

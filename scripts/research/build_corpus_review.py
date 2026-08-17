@@ -388,7 +388,12 @@ def main() -> int:
 
         outcome = classify_episode(episode_id, raw)
         tally.add(outcome)
-        payload, _ = best_evaluable_payload(raw) if outcome.evaluated else (raw, False)
+        if not outcome.evaluated:
+            # No valid trajectory to summarise. Counting one would report a capture that
+            # reset every 0.18 s as 10 m of highly tortuous path -- as diversity.
+            print(f"  unevaluable, excluded from statistics: {episode_id}")
+            continue
+        payload, _ = best_evaluable_payload(raw)
 
         behaviour, speed = infer_behaviour(episode_id, specs)
         try:
