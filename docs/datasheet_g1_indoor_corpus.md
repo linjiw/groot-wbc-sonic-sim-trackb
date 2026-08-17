@@ -103,18 +103,37 @@ This is the corpus's real limitation and it should be read before anyone plans t
 | Quantity | min | median | max | spread |
 |---|---|---|---|---|
 | Path length | 3.241 m | 3.697 m | 3.706 m | **14%** |
-| Net displacement | 3.044 m | 3.495 m | 3.509 m | 15% |
+| Net displacement | 3.044 m | 3.509 m | 3.509 m | 15% |
 | Mean speed | 0.653 m/s | 0.745 m/s | 0.747 m/s | **14%** |
-| Action effective rank | 3.28 | 4.70 | 4.71 | of 64 dimensions |
 
-Every accepted episode is a **~3.5 m forward walk at ~0.7 m/s**. The 64-dimensional latent has a
-participation ratio of roughly **4** — the action manifold the corpus actually covers is about
-four-dimensional, not sixty-four.
+Every accepted episode is a **~3.5 m forward walk at ~0.7 m/s**.
 
-The cause is direct: **only two source motions are usable**, because no motion has ever been
-generated from a new prompt (§6.1). The scene generator multiplies contexts, not behaviours.
-Twelve of the fifteen exported episodes are the same two motions under different placements and
-layouts.
+**Correction — effective rank was measured the wrong way.** An earlier version of this
+datasheet quoted an action effective rank of "about 4" as the corpus's coverage. That figure was
+the *within-episode* rank: the average over each episode's own action covariance. It answers
+"how varied is one episode?", not "how much of the action space does the corpus occupy" — a
+corpus of a hundred completely different behaviours, each individually smooth, would score the
+same. Measuring coverage requires pooling across episodes. Three numbers, over the accepted set:
+
+| Rank measure | Value (of 64) | The question it answers |
+|---|---|---|
+| Pooled over every frame of every episode | **5.22** | how much of the action space the corpus occupies |
+| Between-episode, over per-episode mean actions | **1.16** | how many distinct behaviours there are |
+| Within-episode, averaged | 4.10 | how varied a single episode is |
+
+The correction sharpens the finding rather than softening it. **The between-episode rank of 1.16
+is the damning number**: the mean action vectors of the accepted episodes span essentially a
+single direction. The corpus contains one behaviour, observed repeatedly.
+
+The cause is direct: **only two source motions were usable** for everything measured above,
+because until 2026-08-16 no motion had ever been generated from a new prompt (§6.1). The scene
+generator multiplies contexts, not behaviours. Twelve of the fifteen exported episodes are the
+same two motions under different placements and layouts.
+
+Generation is now unblocked, and the first new-prompt episodes are already moving these numbers:
+one accepted brisk walk at **1.278 m/s** widens the accepted speed range from 0.653–0.747 to
+0.653–1.278 m/s and lifts the speed spread from 3.7% to 13.6%. That is three episodes against
+thirty-nine, so it is a direction of travel, not a fix.
 
 **What that means in practice.** The corpus supports questions of the form *"does visual context
 change what the policy should do?"* It does **not** yet support *"can the policy produce a

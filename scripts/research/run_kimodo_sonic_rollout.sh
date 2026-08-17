@@ -130,6 +130,14 @@ if [[ "$RESOLVED" != "$REPO_ROOT/gear_sonic/__init__.py" ]]; then
 fi
 echo "gear_sonic resolves to: $RESOLVED"
 
+# Hydra reads an unquoted comma in an override value as a list separator, so a natural
+# task string ("crouch down low, then stand up and walk forward") aborts the run with
+# "Ambiguous value for argument". Shell quoting does not help -- the quotes must survive
+# into the argument Hydra itself parses. Single quotes inside the value are escaped for
+# the same reason. Almost every task-language string has a comma in it, so this is the
+# normal case rather than an edge one.
+TASK_OVERRIDE="'${TASK//\'/\\\'}'"
+
 env PYTHONPATH="$REPO_ROOT" "$PYTHON_BIN" gear_sonic/eval_agent_trl.py \
   +checkpoint="$CHECKPOINT" \
   +headless=True \
@@ -142,7 +150,7 @@ env PYTHONPATH="$REPO_ROOT" "$PYTHON_BIN" gear_sonic/eval_agent_trl.py \
   ++manager_env.config.render_frame_skip=1 \
   ++manager_env.commands.motion.debug_vis=False \
   ++dataset_scene_id="$SCENE" \
-  ++dataset_task="$TASK" \
+  ++dataset_task="$TASK_OVERRIDE" \
   +use_encoder=g1 \
   ++max_render_steps="$MAX_STEPS" \
   +success_manifest="$OUT/success_manifest.json" \
