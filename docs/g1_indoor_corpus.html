@@ -413,6 +413,62 @@
 </section>
 
 <section>
+  <h2>Distribution</h2>
+  <h3>Wide in scene, narrow in motion</h3>
+  <p>
+    Every number below comes from the same pass that assembled the gallery, so the footage and
+    the statistics cannot drift apart. Twenty of twenty-four analysed rollouts pass the gates,
+    which is <span class="num">100&nbsp;s</span> of accepted walking across
+    <span class="num">18</span> scenes.
+  </p>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>Accepted episodes</th><th>Min</th><th>Median</th><th>Max</th><th>Spread</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="name">Path length</td><td class="n">3.241</td><td class="n">3.697</td><td class="n">3.706</td><td class="n">0.465&nbsp;m</td></tr>
+        <tr><td class="name">Net displacement</td><td class="n">3.044</td><td class="n">3.495</td><td class="n">3.509</td><td class="n">0.465&nbsp;m</td></tr>
+        <tr><td class="name">Mean speed</td><td class="n">0.653</td><td class="n">0.745</td><td class="n">0.747</td><td class="n">0.094&nbsp;m/s</td></tr>
+        <tr><td class="name">Endpoint error</td><td class="n">0.130</td><td class="n">0.203</td><td class="n">0.221</td><td class="n">0.091&nbsp;m</td></tr>
+        <tr><td class="name">Path error p95</td><td class="n">0.136</td><td class="n">0.228</td><td class="n">0.234</td><td class="n">0.098&nbsp;m</td></tr>
+        <tr><td class="name">Foot support fraction</td><td class="n">0.984</td><td class="n">0.988</td><td class="n">1.000</td><td class="n">0.016</td></tr>
+        <tr><td class="name">Self-contact peak</td><td class="n">36.0</td><td class="n">282.8</td><td class="n">316.8</td><td class="n">280.8&nbsp;N</td></tr>
+        <tr><td class="name">Lateral scene contact</td><td class="n">0.000</td><td class="n">0.000</td><td class="n">0.000</td><td class="n">0&nbsp;N</td></tr>
+        <tr><td class="name">Action effective rank</td><td class="n">3.28</td><td class="n">4.70</td><td class="n">4.71</td><td class="n">of 64</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <dl class="readout">
+    <div><dt>Scenes</dt><dd>18<small>5 packages</small></dd></div>
+    <div><dt>Furniture solids</dt><dd>169<small>523 prims</small></dd></div>
+    <div><dt>Over the corridor</dt><dd>24<small>cantilevered</small></dd></div>
+    <div><dt>Floor occupancy</dt><dd>13&ndash;38<small>%</small></dd></div>
+  </dl>
+  <p>
+    The scene axis is genuinely varied: solids split
+    <span class="num">101</span> body-height, <span class="num">45</span> overhead and
+    <span class="num">23</span> floor-level, and the density ladder walks the same motion
+    through clearances from <span class="num">0.60&nbsp;m</span> down to
+    <span class="num">0.12&nbsp;m</span> without a single lateral contact.
+  </p>
+  <div class="note">
+    <p>
+      <strong>The motion axis is nearly degenerate, and that is the honest headline.</strong>
+      Path length varies by 0.465&nbsp;m and speed by 0.094&nbsp;m/s across the whole accepted
+      set. The 64-dimensional latent carries an effective rank near 4. Every accepted episode is
+      the same thing: a ~3.5&nbsp;m forward walk at ~0.7&nbsp;m/s.
+    </p>
+    <p>
+      The cause is upstream, not in the generator. Only two source motions are currently usable
+      while Kimodo generation is blocked, so the scene builder multiplies contexts rather than
+      behaviours. Read this corpus as a validated pipeline with a thin behaviour library, not as
+      a training set &mdash; a policy fit to it would learn one gait against many backdrops.
+    </p>
+  </div>
+</section>
+
+<section>
   <h2>Open</h2>
   <h3>What is not done, and what is blocked</h3>
   <div class="claims">
