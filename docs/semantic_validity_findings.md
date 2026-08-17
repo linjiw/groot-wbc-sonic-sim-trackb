@@ -5,8 +5,9 @@ the robot did the thing its label claims. Those are different questions, and the
 only ever asked the first.
 
 Turning the review page's own captions into predicates answered the second for the first
-time. The result splits three ways, and two of the three were errors in the predicates
-rather than in the data — which is what a calibration pass is for.
+time. The result splits three ways: behaviours that are present, behaviours the generator
+never produced, and two cases where the *predicate* was wrong rather than the data — which is
+what a calibration pass is for.
 
 ## Where the corpus stands
 
@@ -89,8 +90,8 @@ verdict.
 - **"No predicate" is not a pass.** `check_behaviour` returns `None` for an unchecked
   behaviour, and callers must distinguish that from a verdict — the same distinction the
   accepted/unevaluable split makes elsewhere.
-- **The prompt taxonomy needs a feedback loop.** Two of its body modes do not produce their
-  behaviour. Whether that is fixable by rephrasing, by longer clips, or not at all is the
+- **The prompt taxonomy needs a feedback loop.** Three of its body modes do not produce
+  their behaviour and a fourth does so half the time. Whether that is fixable by rephrasing, by longer clips, or not at all is the
   next thing to measure, and it is cheap: the predicates now grade generated references
   without a rollout.
 - **Per-family acceptance rates should be reported alongside semantic validity.** A family at
