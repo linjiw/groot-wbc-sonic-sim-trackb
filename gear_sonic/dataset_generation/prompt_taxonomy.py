@@ -56,7 +56,12 @@ BODY_MODES: dict[str, str] = {
     "walk": "A person walks {speed} {turn}",
     "walk_pause": "A person walks {speed} {turn}, stops and stands still for a moment, then walks on",
     "walk_look": "A person walks {speed} {turn}, pauses and looks around, then continues walking",
-    "crouch_walk": "A person crouches down low and moves forward {speed} while staying crouched",
+    # "crouches down low" was screened out 3/3, limited by waist_pitch_joint: Kimodo folds
+    # a human at the waist further than the G1's range allows, the joint clamps, and the
+    # thigh ends up through the pelvis. Asking for a shallower crouch is the fix -- a
+    # crouch the robot can hold is worth more to the corpus than one it cannot.
+    "crouch_walk": "A person bends the knees and lowers slightly, then moves forward {speed} staying low",
+    "crouch_deep": "A person crouches down low and moves forward {speed} while staying crouched",
     "duck_under": "A person walks {speed} {turn} and ducks down low to pass under an obstacle",
     "side_step": "A person steps sideways {speed} while facing forward",
     "backward": "A person walks backwards {speed} {turn}",
@@ -71,7 +76,9 @@ BODY_MODES: dict[str, str] = {
 
 #: Body modes whose phrasing already fixes the heading, so pairing them with a turn style
 #: produces contradictory text ("steps sideways, then turns sharply left and continues").
-_TURN_INCOMPATIBLE = frozenset({"side_step", "turn_in_place", "crouch_walk", "squat_pick"})
+_TURN_INCOMPATIBLE = frozenset(
+    {"side_step", "turn_in_place", "crouch_walk", "crouch_deep", "squat_pick"}
+)
 
 #: Modes whose text ends on a terminal action. A gentle curve still applies during the
 #: walk that precedes it, but a sharp turn clause appended afterwards describes a third
@@ -84,6 +91,7 @@ _SHARP_TURN_INCOMPATIBLE = frozenset({"walk_to_stop", "reach_walk"})
 NON_WALK_MODES = frozenset(
     {
         "crouch_walk",
+        "crouch_deep",
         "duck_under",
         "side_step",
         "backward",
