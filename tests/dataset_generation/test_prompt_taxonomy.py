@@ -95,3 +95,16 @@ def test_by_axis_groups_every_spec():
     taxonomy = build_taxonomy()
     grouped = taxonomy.by_axis("speed")
     assert sum(len(v) for v in grouped.values()) == len(taxonomy.specs)
+
+
+def test_speed_bands_are_the_measured_ones_and_do_not_overlap():
+    """Bands come from 114 generated motions, not from a guess.
+
+    An earlier version declared (0.2, 0.5) / (0.5, 0.9) / (0.9, 1.4); the generator ran
+    faster than every one of those labels. The measured interquartile bands separate.
+    """
+    slow = SPEED_STYLES["slow"][1]
+    steady = SPEED_STYLES["steady"][1]
+    brisk = SPEED_STYLES["brisk"][1]
+    assert slow[1] < steady[0] < steady[1] < brisk[0]
+    assert slow[0] > 0.5, "the old guessed band started at 0.2 m/s"

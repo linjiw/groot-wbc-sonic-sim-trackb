@@ -26,13 +26,19 @@ from dataclasses import dataclass, field
 import itertools
 from typing import Iterable, Sequence
 
-#: Locomotion speed. The corpus currently occupies one narrow band around 0.7 m/s; these
-#: phrasings are what the generator responds to, with the band each is expected to land
-#: in recorded so the achieved speed can be checked against the intent.
+#: Locomotion speed. The bands are the **measured** interquartile range of achieved speed
+#: over 114 generated motions, not a guess: an earlier version declared (0.2, 0.5) /
+#: (0.5, 0.9) / (0.9, 1.4) and the generator ran faster than every one of those labels.
+#:
+#: The medians separate cleanly (0.68 / 0.93 / 1.26 m/s) and the interquartile bands do not
+#: overlap, so the axis works. The full ranges overlap heavily -- "slow" reaches 1.25 m/s
+#: and "brisk" descends to 0.77 -- so a speed style shifts the distribution rather than
+#: fixing the speed. Treat these as where the mass lands, never as a guarantee about any
+#: single sample.
 SPEED_STYLES: dict[str, tuple[str, tuple[float, float]]] = {
-    "slow": ("slowly", (0.2, 0.5)),
-    "steady": ("at a steady pace", (0.5, 0.9)),
-    "brisk": ("briskly", (0.9, 1.4)),
+    "slow": ("slowly", (0.59, 0.75)),
+    "steady": ("at a steady pace", (0.83, 1.06)),
+    "brisk": ("briskly", (1.09, 1.39)),
 }
 
 #: Heading change over the clip. "straight" is the corpus's entire current coverage.
