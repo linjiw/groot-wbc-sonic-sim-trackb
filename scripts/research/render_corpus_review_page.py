@@ -310,9 +310,6 @@ def main() -> int:
         clip, outcome = pick_clip(args.review / "videos", behaviour)
         label = html.escape(BEHAVIOUR_LABELS.get(behaviour, behaviour))
         note = html.escape(BEHAVIOUR_NOTES.get(behaviour, ""))
-        colour = {"accepted": "var(--pass)", "rejected": "var(--fail)"}.get(
-            outcome, "var(--unknown)"
-        )
         parts.append('<article class="card">')
         parts.append("<header>")
         parts.append(
