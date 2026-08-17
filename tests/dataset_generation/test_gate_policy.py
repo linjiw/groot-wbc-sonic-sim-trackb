@@ -10,6 +10,7 @@ from gear_sonic.dataset_generation.gate_policy import (
     REFERENCE_GATES,
     SCENE_AROUND_MOTION,
     SCENE_FIRST,
+    SETTLING_TIME_S,
     GatePolicyError,
     apply_policy,
     drift_rate_mps,
@@ -59,8 +60,12 @@ def test_a_constant_offset_is_not_drift():
 
 
 def test_drift_rate_is_independent_of_episode_length():
-    """The whole point: the metric must not punish a prompt for being long."""
-    short = payload(drift_per_second=0.2, frames=100)
+    """The whole point: the metric must not punish a prompt for being long.
+
+    Both clips must clear the settling window plus the minimum fit window, which is why
+    the shorter one is 3 s rather than 2 s.
+    """
+    short = payload(drift_per_second=0.2, frames=150)
     long = payload(drift_per_second=0.2, frames=400)
     rate_short = drift_rate_mps(short["root_pos_w"][:, :2], short["reference_g1_qpos"][:, :2], FPS)
     rate_long = drift_rate_mps(long["root_pos_w"][:, :2], long["reference_g1_qpos"][:, :2], FPS)
@@ -68,8 +73,26 @@ def test_drift_rate_is_independent_of_episode_length():
 
 
 def test_too_short_to_fit_is_an_error_not_a_zero():
-    with pytest.raises(GatePolicyError, match="at least 20 frames"):
-        drift_rate_mps(np.zeros((5, 2)), np.zeros((5, 2)), FPS)
+    """A 1 s clip has no post-settling window, so there is nothing to fit."""
+    with pytest.raises(GatePolicyError, match="settling window"):
+        drift_rate_mps(np.zeros((50, 2)), np.zeros((50, 2)), FPS)
+
+
+def test_the_fit_starts_after_the_measured_settling_time():
+    """Error that grows only during settling and then holds is stable, not drifting.
+
+    Fitting from the midpoint instead reported drift here, which is how the gate acquired
+    a short-episode penalty of its own.
+    """
+    frames = 300
+    seconds = np.arange(frames) / FPS
+    executed = np.zeros((frames, 3))
+    executed[:, 0] = seconds * 0.8
+    executed[:, 1] = np.minimum(seconds, SETTLING_TIME_S) * 0.2  # ramps, then flat
+    reference = np.zeros((frames, 36))
+    reference[:, 0] = seconds * 0.8
+    rate = drift_rate_mps(executed[:, :2], reference[:, :2], FPS)
+    assert rate == pytest.approx(0.0, abs=1e-6)
 
 
 def test_bad_fps_is_rejected():
@@ -121,12 +144,22 @@ def test_the_backstop_admits_everything_the_corpus_measured_as_clean():
     assert apply_policy([], payload(drift_per_second=0.139), SCENE_AROUND_MOTION).accepted
 
 
-def test_an_unmeasurable_drift_rate_is_not_treated_as_stable():
-    """An episode that cannot be assessed must not be certified."""
-    short = payload(frames=10)
-    outcome = apply_policy([], short, SCENE_AROUND_MOTION)
+def test_a_clip_too_short_to_assess_abstains_rather_than_rejecting():
+    """Rejecting a 1 s clip for instability it has not had time to show would reintroduce
+    exactly the length dependence this policy exists to remove.
+
+    Measured: the midpoint-fit version rejected 49 episodes at a 1.2 s horizon, inverting
+    the duration bias instead of removing it. Safety gates still apply to short clips.
+    """
+    outcome = apply_policy([], payload(frames=50), SCENE_AROUND_MOTION)
+    assert outcome.accepted
+    assert "drift_rate_not_assessable" in outcome.diagnostics
+    assert "drift_rate_mps" not in outcome.diagnostics
+
+
+def test_a_short_clip_is_still_subject_to_safety_gates():
+    outcome = apply_policy(["disallowed_robot_contact"], payload(frames=50), SCENE_AROUND_MOTION)
     assert not outcome.accepted
-    assert "drift_rate_unmeasurable" in outcome.rejection_reasons
 
 
 def test_scene_first_grades_against_the_planned_goal():

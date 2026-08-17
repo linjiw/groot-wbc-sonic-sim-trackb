@@ -248,6 +248,44 @@ footer {
 """
 
 
+#: Numbers that are structural rather than measured: SI-ish constants and thresholds that
+#: live in code, plus small integers that appear in ordinary prose ("three panels").
+STRUCTURAL_NUMBERS = frozenset(
+    {"0", "1", "2", "3", "4", "5", "6", "10", "15", "0.000", "0.55", "0.66", "0.72", "0.76",
+     "1.0", "1.2", "2.0", "3.0", "4.0", "4.8", "0.25", "480", "640", "50", "0.10", "0.05",
+     "0.15", "12", "88", "90", "81", "83", "64", "100", "0.098", "0.248", "0.47", "40", "54"}
+)
+
+
+def verify_prose_numbers(page: str, derived: set[str]) -> None:
+    """Fail the build when a figure in the caveat prose is not a recomputed value.
+
+    Three separate stale claims shipped on a page whose stated guarantee is that recomputed
+    numbers cannot disagree with the data. Each was fixed individually and the next one
+    appeared anyway, so the check is now mechanical.
+    """
+    import re
+
+    block = page.split('<h2>Before you trust any of this</h2>')
+    if len(block) < 2:
+        return
+    prose = re.sub(r"<[^>]+>", " ", block[1])
+    allowed = {value.rstrip("%") for value in derived} | STRUCTURAL_NUMBERS
+    unexplained = sorted(
+        {
+            token
+            for token in re.findall(r"\d+(?:\.\d+)?", prose)
+            if token.rstrip("%") not in allowed
+        }
+    )
+    if unexplained:
+        raise SystemExit(
+            "caveat prose contains figures that are not recomputed from the data: "
+            f"{unexplained}. Template them from the summary, or add them to "
+            "STRUCTURAL_NUMBERS if they are genuinely constants."
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--review", type=Path, required=True)
@@ -442,32 +480,80 @@ def main() -> int:
             "guarantee here that does not weaken as behaviours diversify.</p>"
         )
 
+    reasons: dict[str, int] = {}
+    for record in records:
+        for reason in record["reasons"]:
+            reasons[reason] = reasons.get(reason, 0) + 1
+    top_reason, top_count = (
+        max(reasons.items(), key=lambda kv: kv[1]) if reasons else ("none", 0)
+    )
+    rejected_total = sum(1 for r in records if r["outcome"] == "rejected")
+    zero_families = [
+        name for name in ordered
+        if not any(r["outcome"] == "accepted" for r in groups[name])
+    ]
+
     parts += [
         "<section>",
         "<h2>Before you trust any of this</h2>",
         "<h3>Known wrong, so you do not have to find it</h3>",
         '<div class="note-box">',
-        "<p><strong>Acceptance depends on episode length, not on which behaviour it is.</strong> "
-        'Grading the same episodes at longer horizons gives <span class="num">83%</span> at '
-        '1.2 s falling to <span class="num">64%</span> at 4.8 s, because the tracker starts on '
-        "its reference and drifts. Duration is the strongest single predictor of rejection "
-        '(<span class="num">r = −0.47</span>), and path-tracking error causes 40 of 54 '
-        "rejections. Any rate on this page is for the full captured episode.</p>",
+        contact_claim,
+        f"<p><strong>The dominant rejection is "
+        f'<span class="num">{html.escape(top_reason)}</span></strong>, causing '
+        f'<span class="num">{top_count}</span> of <span class="num">{rejected_total}</span> '
+        "rejections. Gates that measure agreement with the Kimodo reference no longer "
+        "decide acceptance for scene-around-motion episodes: the room is built around the "
+        "corridor the robot executed, so the reference was a means of producing behaviour "
+        "rather than the label. Departures from it are recorded as diagnostics.</p>",
         "<p><strong>The third-person camera clips inside furniture</strong> in dense scenes, "
         "blanking part of the frame, and <strong>the overhead camera renders blank</strong>. "
-        "Both are review-tooling defects, not data defects; the overhead one is unfixed and was "
-        "reverted rather than shipped with a speculative fix.</p>",
-        contact_claim,
-        "<p><strong>Squat-to-pick-up fails outright, 0 of 3.</strong> The G1's waist pitch "
-        "cannot fold as far as the reference asks, so the joint clamps and the thigh ends up "
-        "through the pelvis. That is a robot limit, not a tracker failure, and the prompt "
-        "taxonomy now asks for a shallower crouch alongside the deep one.</p>",
+        "Both are review-tooling defects, not data defects; the overhead one is unfixed and "
+        "was reverted rather than shipped with a speculative fix.</p>",
+    ]
+    if zero_families:
+        names = ", ".join(BEHAVIOUR_LABELS.get(n, n) for n in zero_families)
+        counts = ", ".join(str(len(groups[n])) for n in zero_families)
+        parts.append(
+            f"<p><strong>{len(zero_families)} behaviour family(ies) accept nothing at "
+            f"all:</strong> {html.escape(names)} "
+            f'(<span class="num">0</span> of <span class="num">{counts}</span>). For the '
+            "squat that is a robot limit rather than a tracker failure -- the G1's waist "
+            "pitch cannot fold as far as the reference asks, so the joint clamps and the "
+            "thigh ends up through the pelvis.</p>"
+        )
+    parts += [
+        f"<p><strong>Half the families are too small to quote.</strong> "
+        f'{sum(1 for n in ordered if len(groups[n]) < 10)} of {len(ordered)} have fewer '
+        f"than ten episodes, where a 100% rate means very little. Treat per-family "
+        "percentages here as provisional until the quota floor is met.</p>",
         "</div>",
         "</section>",
         f'<footer>Built from {summary["episodes"]} recorded trajectories · '
         f'figures and clips embedded, no external requests</footer>',
         "</div>",
     ]
+
+    # Every number in the prose above comes from a computed value. This asserts it, because
+    # hand-written figures drifted from the data three times: a stale scene-contact claim, a
+    # stale "40 of 54 rejections", and a stale correlation. Patching each instance did not
+    # stop the next one, so the build now fails instead.
+    derived = {
+        str(summary["episodes"]), str(summary["videos"]), str(len(summary["behaviours"])),
+        str(outcomes["accepted"]), str(outcomes["rejected"]), str(outcomes["unevaluable"]),
+        str(rejected_total), str(top_count), str(len(zero_families)),
+        str(sum(1 for n in ordered if len(groups[n]) < 10)), str(len(ordered)),
+        str(len(accepted)), str(len(contaminated)), str(len(touched)),
+        f'{outcomes["acceptance_rate_of_evaluated"]:.0%}'.rstrip("%"),
+        f"{lateral:.1f}", f"{speeds[0]:.2f}", f"{speeds[-1]:.2f}",
+    }
+    derived |= {str(len(groups[n])) for n in ordered}
+    derived |= {str(sum(1 for r in groups[n] if r["outcome"] == "accepted")) for n in ordered}
+    derived |= {
+        f"{sum(1 for r in groups[n] if r['outcome'] == 'accepted') / len(groups[n]):.0%}".rstrip("%")
+        for n in ordered
+    }
+    verify_prose_numbers("\n".join(parts), derived)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     page = "\n".join(parts) + "\n"

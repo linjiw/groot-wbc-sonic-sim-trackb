@@ -48,15 +48,31 @@ REFERENCE_GATES = frozenset(
     {"reference_path_tracking_error", "reference_endpoint_tracking_error"}
 )
 
-#: Divergence of the reference-tracking error over the episode's second half, in m/s. The
-#: second half is used because the first contains a settling transient that says nothing
-#: about stability. Measured: episodes that are otherwise clean reach at most 0.139 m/s,
-#: while episodes rejected for safety reasons reach 0.638 m/s.
+#: Divergence of the reference-tracking error after settling, in m/s. Measured: episodes
+#: that are otherwise clean reach at most 0.139 m/s, while episodes rejected for safety
+#: reasons reach 0.638 m/s.
 #:
 #: Set as a **backstop, not a discriminator**. On the current corpus it rejects nothing that
 #: the safety gates do not already catch; it exists for the failure mode where a robot walks
 #: away stably in the wrong direction and every other gate stays happy.
 DEFAULT_MAX_DRIFT_RATE_MPS = 0.15
+
+#: How long the tracker takes to settle onto a new reference, in seconds. Measured over 80
+#: accepted episodes: the mean error slope peaks at +0.163 m/s in the 0.5-1.0 s window, drops
+#: to +0.043 m/s by 1.0-1.5 s, and oscillates around zero thereafter while the error plateaus
+#: near 0.18 m.
+#:
+#: This replaces fitting over "the second half", which sounded principled and was not: on a
+#: short clip the second half is *still transient*, so the measured drift rate rose as the
+#: horizon fell (median 0.031 m/s at 2.96 s against 0.064 m/s at 1.20 s) and the gate
+#: rejected 49 episodes at the shortest horizon. A gate meant to remove length dependence had
+#: acquired its own, pointing the other way.
+SETTLING_TIME_S = 1.5
+
+#: The shortest post-settling window a drift rate may be fitted over. Below this the episode
+#: is not certified as stable *or* rejected as unstable -- stability is simply not assessable
+#: in the time available, and saying so is more honest than either verdict.
+MIN_DRIFT_WINDOW_S = 1.0
 
 #: How close the executed endpoint must land to a planned goal, for scene-first episodes
 #: where the planned route is the label. Provisional -- no scene-first episode has been
@@ -114,29 +130,45 @@ class PolicyOutcome:
 
 
 def drift_rate_mps(
-    executed_xy: np.ndarray, reference_xy: np.ndarray, fps: float
+    executed_xy: np.ndarray,
+    reference_xy: np.ndarray,
+    fps: float,
+    *,
+    settling_time_s: float = SETTLING_TIME_S,
+    min_window_s: float = MIN_DRIFT_WINDOW_S,
 ) -> float:
-    """Divergence of tracking error over the episode's second half, in m/s.
+    """Divergence of tracking error after settling, in m/s.
 
     Chosen over the whole-episode slope after comparing candidates on 164 episodes: the
     whole-episode slope is nearly length-independent (r = +0.04 with duration, against
     +0.29 for absolute p95) but separates poorly, because an episode that fails early with a
-    large constant offset has a small slope. Restricting to the second half skips the
-    settling transient and gives the largest median separation of any candidate tried --
-    0.0029 m/s for accepted episodes against 0.0574 m/s for those rejected on safety.
+    large constant offset has a small slope.
+
+    The window starts at a *measured* settling time rather than at the midpoint. Skipping
+    "the first half" is only equivalent when episodes are long: on a 1.2 s clip the second
+    half is still transient, which is why that version of the metric rose as the horizon fell
+    and rejected 49 short episodes for instability they did not have.
+
+    Raises when the post-settling window is shorter than ``min_window_s``. The caller should
+    treat that as "not assessable" rather than as a failure -- see ``apply_policy``.
     """
     executed = np.asarray(executed_xy, dtype=np.float64).reshape(-1, 2)
     reference = np.asarray(reference_xy, dtype=np.float64).reshape(-1, 2)
     frames = min(len(executed), len(reference))
-    if frames < 20:
-        raise GatePolicyError(f"need at least 20 frames to fit a drift rate, got {frames}")
     if not np.isfinite(fps) or fps <= 0:
         raise GatePolicyError(f"fps must be positive and finite, got {fps}")
 
+    start = int(round(settling_time_s * fps))
+    available_s = (frames - start) / float(fps)
+    if available_s < min_window_s:
+        raise GatePolicyError(
+            f"only {max(available_s, 0.0):.2f} s remains after the {settling_time_s:.2f} s "
+            f"settling window; {min_window_s:.2f} s is needed to fit a drift rate"
+        )
+
     error = np.linalg.norm(executed[:frames] - reference[:frames], axis=1)
     seconds = np.arange(frames) / float(fps)
-    half = frames // 2
-    slope, _ = np.polyfit(seconds[half:], error[half:], 1)
+    slope, _ = np.polyfit(seconds[start:], error[start:], 1)
     return float(slope)
 
 
@@ -176,10 +208,11 @@ def apply_policy(
         if rate > policy.max_drift_rate_mps:
             reasons.append("unstable_reference_drift")
     except GatePolicyError as error:
-        # Too short to fit a rate. That is not a pass: an episode that cannot be assessed
-        # for stability should not be certified as stable.
-        diagnostics["drift_rate_error"] = str(error)
-        reasons.append("drift_rate_unmeasurable")
+        # Too short to fit a rate after settling. The gate **abstains**: an episode of 1.2 s
+        # has not had time to demonstrate instability, and rejecting it for that would
+        # reintroduce exactly the length dependence this policy exists to remove. Safety and
+        # validity gates still apply, so an actually-broken short episode is still caught.
+        diagnostics["drift_rate_not_assessable"] = str(error)
 
     if policy.reference_is_label:
         if planned_goal_xy is None:
