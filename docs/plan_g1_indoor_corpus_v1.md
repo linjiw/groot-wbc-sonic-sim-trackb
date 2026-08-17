@@ -5,6 +5,50 @@ Baseline: dataset_v2 as of 2026-08-16 — 15 episodes / 3,720 rows, 18 scenes in
 
 ---
 
+## Progress against this plan (updated 2026-08-16)
+
+**Phase A closed except the throughput benchmark.**
+
+- **A1 Kimodo unblocked.** Both existing envs carried `torch 2.5.1+cu124`, arch list ending at
+  `sm_90`. New cu128 env at `/data/robotixx/envs/kimodo_sm120`
+  (`install_scripts/install_kimodo_sm120.sh`). Generation costs **13.5 s per 5 s motion at
+  ~2 GB**. The 15 GB LLM2Vec encoder is now a separate CPU stage writing a prompt cache
+  (3.8 s/prompt), so it never competes with the GPU.
+- **A2 First new-prompt motions rolled out.** 2 of 3 accepted; the third was correctly
+  rejected (see below). One walks at **1.278 m/s** against the corpus's entire 0.653–0.747
+  band.
+- **A3 GR00T loader smoke passes for real** at `ab88b50c`, against the official
+  `ShardedSingleStepDataset` rather than the fake. Env `/data/robotixx/envs/groot_loader`.
+- **A5 Licensing settled — we can release the motions.** NVIDIA Open Model License; an output
+  is explicitly not a Derivative Model. Details and the one open item (Llama-3 gating for
+  reproducers) in `docs/kimodo_output_licensing.md`.
+
+**Phase B underway.** Taxonomy of 150 prompts across 14 body modes × 3 speeds × 5 turn styles
+(B1); scene-first route sampler (B2); goal-object and task-language derivation (B3); diversity
+dashboard (B4). Measured over 114 generated references, the library already spans **0.301–1.739
+m/s** and heading changes to **6.721 rad**, against a corpus that turns essentially not at all.
+
+### Four findings that change the plan
+
+1. **Effective rank was being measured the wrong way.** The datasheet's "≈4" was the
+   *within-episode* rank. Corrected: pooled **5.22**, between-episode **1.16**, within-episode
+   4.10. The between-episode figure is the damning one — the accepted episodes' mean actions
+   span essentially one direction.
+2. **Not every generated motion is trackable, and it is predictable.** A deep crouch produced
+   9686 N of hip-into-pelvis force from an unreachable reference. Joint-limit saturation
+   predicts peak self-contact at **r = 0.933** over 11 motions and screens it out before any
+   GPU time (`docs/motion_prefilter_validation.md`).
+3. **Only 2 of 21 scenes can grade a policy.** Every generated scene encodes the tracking error
+   of the motion it was built around. `density_dense` and `density_tight` admit *no* independent
+   route at all. This makes eval-scene generation (C3) blocking for the Phase D baselines,
+   earlier than this plan assumed.
+4. **No acceptance gate is marginal — but nine have never fired.** Every threshold that fires
+   sits in an empty gap wider than the passing range, so its exact value changes no outcome
+   today. The calibration pilot (C1) should therefore run *after* Phase B diversity populates
+   the gaps, and should target episodes near a threshold rather than a random 100.
+
+---
+
 ## 1. The story: replicable by construction, verified by measurement
 
 Your strongest asset is one nobody else in synthetic humanoid data can claim, and it is currently framed as a weakness. The scenes are primitive Plane-and-Cube geometry — which means **every scene manifest is a build sheet**. Axis-aligned boxes with recorded dimensions, positions, and clearances can be reproduced on a lab floor with foam blocks, tables, and tape in an afternoon. Combine that with two facts you have already measured: the exported `action.motion_token` is byte-comparable with the `token_state` the C++ deployment runtime consumes (26/26 rollouts, residual RMS 0), and you own a real G1 plus a motion-tracking pipeline.
