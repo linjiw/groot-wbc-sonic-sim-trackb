@@ -15,6 +15,7 @@ from gear_sonic.dataset_generation.behaviour_predicates import (
     check_pause,
     check_side_step,
     check_stand_to_walk,
+    check_step_over,
     check_turn_in_place,
     check_walk_to_stop,
     coverage,
@@ -244,3 +245,52 @@ def test_coverage_reports_which_behaviours_are_still_on_the_honour_system():
 def test_every_registered_predicate_is_callable():
     for behaviour, predicate in PREDICATES.items():
         assert callable(predicate), behaviour
+
+
+# ---- step over ---------------------------------------------------------------------------
+
+def stepping(frames: int, left_apex: float, right_apex: float) -> dict:
+    """Two feet, each swinging once to its own apex, while the body walks forward."""
+    payload = episode(walk(frames))
+    payload["body_names"] = ["pelvis", "left_ankle_roll_link", "right_ankle_roll_link"]
+    bodies = np.zeros((frames, 3, 3))
+    bodies[:, :, 0] = payload["root_pos_w"][:, [0]]
+    swing = np.sin(np.linspace(0, math.pi, frames)) ** 2
+    bodies[:, 1, 2] = 0.035 + left_apex * swing
+    bodies[:, 2, 2] = 0.035 + right_apex * swing
+    payload["body_pos_w"] = bodies
+    return payload
+
+
+def test_both_feet_lifting_high_satisfies_step_over():
+    assert check_step_over(stepping(120, 0.25, 0.24)).satisfied
+
+
+def test_a_dragged_trailing_foot_fails_even_when_the_leading_one_clears():
+    """The review card's exact warning: watch the trailing foot, not the leading one.
+
+    Checking the maximum across both feet would pass this, because the leading foot's apex
+    is the maximum.
+    """
+    result = check_step_over(stepping(120, 0.30, 0.06))
+    assert not result.satisfied
+    assert "only rose" in result.reason
+    assert result.measurements["apex_left_ankle_roll_link_m"] > 0.25
+
+
+def test_a_known_obstacle_turns_the_apex_into_a_clearance_test():
+    payload = stepping(120, 0.30, 0.28)
+    high = check_step_over(payload, obstacle_x=0.96, obstacle_top_z=0.20)
+    assert high.satisfied
+    assert "clearance_left_ankle_roll_link_m" in high.measurements
+    low = check_step_over(payload, obstacle_x=0.96, obstacle_top_z=0.60)
+    assert not low.satisfied
+    assert "below the obstacle top" in low.reason
+
+
+def test_a_recording_without_two_feet_cannot_be_assessed():
+    payload = episode(walk(60))
+    payload["body_names"] = ["pelvis"]
+    payload["body_pos_w"] = np.zeros((60, 1, 3))
+    with pytest.raises(PredicateError, match="ankle_roll"):
+        check_step_over(payload)

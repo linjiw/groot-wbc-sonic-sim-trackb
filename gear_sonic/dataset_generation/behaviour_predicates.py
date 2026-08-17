@@ -57,6 +57,17 @@ MAX_SIDESTEP_HEADING_RAD = math.radians(45)
 #: height. Relative rather than absolute because the G1's standing height varies with gait.
 MIN_DUCK_DROP_M = 0.08
 
+#: Swing apex a foot must reach above its own stance height to count as stepping *over*
+#: something rather than walking past it.
+#:
+#: Calibrated against a control, which is the check that matters: over accepted episodes the
+#: trailing foot's apex is 0.125-0.153 m for a plain walk (n=14, median 0.136) and
+#: 0.131-0.145 m for episodes labelled step_over (n=7, median 0.138). Mann-Whitney
+#: p = 0.632 -- the labelled step-overs are statistically indistinguishable from walking.
+#: The threshold sits above the walking population's maximum, so a motion that clears it is
+#: doing something walking does not.
+MIN_STEP_APEX_M = 0.18
+
 #: Provisional. No reviewed sample has calibrated these yet; they are first estimates chosen
 #: to be permissive, so a false reject is less likely than a false accept.
 PROVISIONAL = frozenset({"walk_to_stop", "walk_and_reach", "carry"})
@@ -281,6 +292,66 @@ def check_stand_to_walk(payload: dict) -> PredicateResult:
     )
 
 
+def _foot_heights(payload: dict) -> dict[str, np.ndarray]:
+    names = list(payload["body_names"])
+    feet = {n: i for i, n in enumerate(names) if "ankle_roll" in n}
+    if len(feet) < 2:
+        raise PredicateError(f"expected two ankle_roll links, found {sorted(feet)}")
+    bodies = np.asarray(payload["body_pos_w"], dtype=np.float64)
+    return {name: bodies[:, index, 2] for name, index in feet.items()}
+
+
+def check_step_over(
+    payload: dict, *, obstacle_x: float | None = None, obstacle_top_z: float | None = None
+) -> PredicateResult:
+    """Both feet must clear, and the trailing one is the one that fails.
+
+    The review card is explicit about this: *watch the trailing foot, not the leading one*.
+    A motion that lifts the leading foot high and drags the trailing one is the characteristic
+    failure, and checking only the maximum over both feet would pass it, because the leading
+    foot's apex is the maximum.
+
+    With the obstacle's position the check becomes a real clearance test at the crossing
+    frame. Without it, the predicate can only confirm that both feet swung high, and says
+    which of the two it did.
+    """
+    feet = _foot_heights(payload)
+    stance = {name: float(np.percentile(height, 10)) for name, height in feet.items()}
+    apex = {name: float(height.max()) - stance[name] for name, height in feet.items()}
+    lowest_apex_foot = min(apex, key=apex.get)
+    lowest_apex = apex[lowest_apex_foot]
+
+    measurements = {f"apex_{name}_m": value for name, value in apex.items()}
+    satisfied = lowest_apex >= MIN_STEP_APEX_M
+    reason = (
+        "both feet cleared" if satisfied
+        else f"{lowest_apex_foot} only rose {lowest_apex:.3f} m (need {MIN_STEP_APEX_M})"
+    )
+
+    if obstacle_x is not None and obstacle_top_z is not None:
+        bodies = np.asarray(payload["body_pos_w"], dtype=np.float64)
+        names = list(payload["body_names"])
+        for name in feet:
+            xs = bodies[:, names.index(name), 0]
+            crossings = np.flatnonzero(np.diff(np.sign(xs - obstacle_x)))
+            if crossings.size == 0:
+                satisfied = False
+                reason = f"{name} never crossed the obstacle at x={obstacle_x:.2f}"
+                break
+            frame = int(crossings[0])
+            clearance = float(feet[name][frame] - obstacle_top_z)
+            measurements[f"clearance_{name}_m"] = clearance
+            if clearance < 0.0:
+                satisfied = False
+                reason = f"{name} passed {abs(clearance):.3f} m below the obstacle top"
+                break
+        else:
+            if satisfied:
+                reason = "both feet cleared the obstacle"
+
+    return PredicateResult("step_over", satisfied, reason, measurements)
+
+
 #: Behaviours with a predicate, and the callable that checks them. A behaviour absent here
 #: has no semantic check yet, which is reported rather than silently passed.
 PREDICATES: dict[str, Callable[[dict], PredicateResult]] = {
@@ -295,6 +366,7 @@ PREDICATES: dict[str, Callable[[dict], PredicateResult]] = {
     "duck_under": check_duck_under,
     "walk_to_stop": check_walk_to_stop,
     "stand_to_walk": check_stand_to_walk,
+    "step_over": check_step_over,
 }
 
 
