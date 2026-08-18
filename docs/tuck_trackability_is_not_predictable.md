@@ -108,6 +108,23 @@ pure reference drift with *zero* external contact, and x002's and x003's were ac
 external contact, so no obstacle was ever involved. The finding that self-contact magnitude is not
 severity also stands, since it compares cells within the same scene.
 
-**What it changes about method.** A trackability screen must run in a genuinely empty scene. Screening
-in a furnished room cannot separate "the controller cannot hold this clip" from "this clip does not
-fit this room", and those demand opposite responses — discard the motion, or resize the room.
+**How far the damage goes: two cells of forty-seven.** Auditing every graded rollout for how close
+its root came to a wall bounds this precisely.
+
+| wall gap | outcome | cell |
+|---|---|---|
+| **0.20 m** | rejected | `x001_tuck` |
+| **0.21 m** | rejected | `x001_nominal` |
+| 0.42 m | accepted | `x002_nominal` |
+| 0.44 m | rejected | `x002_tuck` |
+| ≥1.18 m | accepted | every `mf_005_c08` cell |
+
+Only x001's two cells come within 0.35 m, and **no verified family is affected** — every family cell
+sits at least 0.54 m clear. So the correction is confined to one motion, and the arm tuck's
+denominator is the only number in doubt.
+
+**What it changes about method.** A trackability screen must run in a genuinely empty scene.
+Screening in a furnished room cannot separate "the controller cannot hold this clip" from "this clip
+does not fit this room", and those demand opposite responses — discard the motion, or resize the
+room. `scripts/research/audit_wall_proximity.py` now runs this check on demand and exits non-zero
+when any cell is too close, so a yield number can be quoted only after it passes.
