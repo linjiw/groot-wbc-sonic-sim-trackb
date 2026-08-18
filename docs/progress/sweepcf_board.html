@@ -130,6 +130,47 @@ a { color:var(--accent); }
 </section>
 
 <section>
+  <h2>A second contribution: the controller is an evaluation instrument</h2>
+  <p>Synthetic humanoid datasets report a <em>success rate</em>. It is almost always four different
+  questions collapsed into one, with different answers and different costs. The honest headline for
+  a corpus is the <strong>smallest</strong> of them, not the largest.</p>
+  <div class="scroll"><table>
+    <tr><th>label</th><th>question</th><th>cost</th><th>measured</th></tr>
+    <tr><td class="k">embodiment_feasible</td><td>can the body reach the pose?</td>
+        <td>CPU, ms</td><td class="n done">96%</td></tr>
+    <tr><td class="k">controller_trackable</td><td>can the controller execute it?</td>
+        <td>1 rollout</td><td class="n done">96%</td></tr>
+    <tr><td class="k">semantically_valid</td><td>does the <em>execution</em> contain the behaviour?</td>
+        <td>predicate</td><td class="n never">32%</td></tr>
+    <tr><td class="k">scene_compatible</td><td>does it succeed in <em>this</em> room?</td>
+        <td>1 rollout per scene</td><td>the counterfactual itself</td></tr>
+  </table></div>
+  <div class="note">
+    <h3>Generated motion fails exactly where the dataset needs it</h3>
+    <div class="scroll"><table>
+      <tr><th>behaviour</th><th>generated</th><th>feasible</th><th>tracked</th></tr>
+      <tr><td>crouch</td><td class="n">9</td><td class="n never">4 &middot; 44%</td><td class="n">2</td></tr>
+      <tr><td>side / narrow</td><td class="n">3</td><td class="n block">2 &middot; 67%</td><td class="n">2</td></tr>
+      <tr><td>turn</td><td class="n">67</td><td class="n done">67 &middot; 100%</td><td class="n">33</td></tr>
+      <tr><td>walk</td><td class="n">42</td><td class="n done">42 &middot; 100%</td><td class="n">2 of 4</td></tr>
+    </table></div>
+    <p>Crouch is the <strong>only</strong> behaviour with a kinematic failure rate, and every
+    rejection is joint saturation: the generator lowers the torso by folding a waist the G1 cannot
+    fold that far. Meanwhile 73% of the corpus is unconstrained locomotion &mdash; the diversity
+    that does not help. This is the quantitative case for building adapted motions with a local
+    operator on an already-accepted walk.</p>
+  </div>
+  <div class="note" style="border-left-color:var(--pass)">
+    <h3>Holding the controller fixed makes the learning question clean</h3>
+    <p>The selector chooses among prescribed motions; SONIC executes whichever is chosen, does not
+    learn, and is deterministic under a fixed configuration. So any difference in outcome is
+    attributable to <strong>the choice</strong>, not to control. A policy that both perceives and
+    controls improves for reasons its authors cannot decompose; here the control is held constant by
+    construction.</p>
+  </div>
+</section>
+
+<section>
   <h2>The claim ladder</h2>
   <div class="scroll"><table>
   <tr><th>#</th><th>claim</th><th>status</th></tr>
