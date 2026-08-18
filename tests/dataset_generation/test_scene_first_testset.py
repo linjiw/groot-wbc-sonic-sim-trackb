@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-MANIFEST = Path(__file__).resolve().parents[2] / "data/splits/scene_first_v1.json"
+MANIFEST = Path(__file__).resolve().parents[2] / "gear_sonic/data/splits/scene_first_v1.json"
 
 pytestmark = pytest.mark.skipif(not MANIFEST.exists(), reason="test set not frozen yet")
 

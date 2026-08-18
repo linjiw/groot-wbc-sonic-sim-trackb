@@ -25,7 +25,7 @@ task, in which most geometry is uninformative and the model has to notice which 
 
 Usage::
 
-    python scripts/research/freeze_scene_first_testset.py --out data/splits/scene_first_v1.json
+    python scripts/research/freeze_scene_first_testset.py --out gear_sonic/data/splits/scene_first_v1.json
 """
 
 from __future__ import annotations
