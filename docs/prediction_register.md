@@ -8,45 +8,51 @@ quietly becomes a "finding we always suspected".
 
 *(none)*
 
-## P5, partly confirmed and partly refuted
+## P5, confirmed — after I got the intermediate reading wrong twice
 
-Registered before the two pending cells returned. The **correlation** held; the **causal** reading
-did not, and the causal reading is the one that mattered.
+The registered claim was that knee excursion governs crouch trackability. It does. Getting there
+took two wrong intermediate readings, both recorded here because the sequence is the lesson.
 
-| excursion | motion | outcome | \|drift\| |
+**Reading 1 (too strong).** Four clips across three motions gave a monotone drift-versus-excursion
+table with the boundary between 0.994 and 1.000 rad, and I reported trackability as predictable from
+the clip.
+
+**Reading 2 (too weak).** Rebuilding the failing clip at 0.980 rad left it rejected with drift 0.223
+against 0.224 — twenty mrad changed nothing — so I withdrew the causal claim and said excursion
+correlates across motions without controlling within one.
+
+**Reading 3, from a wider within-motion sweep.** Excursion *does* control it. My 0.980 probe was
+simply still inside x000's failure region, because that motion's threshold is nowhere near 0.99:
+
+| excursion | drop | outcome | drift |
 |---|---|---|---|
-| 0.929 rad | x002 | accepted | 0.015 m/s |
-| 0.936 rad | x003 | accepted | 0.025 m/s |
-| 0.994 rad | 005 | accepted | 0.100 m/s |
-| 1.000 rad | x000 | **rejected** | 0.225 m/s |
+| 0.619 rad | 30.0 mm | **accepted** | 0.140 m/s |
+| 0.980 rad | 69.6 mm | rejected | 0.223 m/s |
+| 1.000 rad | 72.2 mm | rejected | 0.224 m/s |
 
-Drift magnitude does rise monotonically with knee excursion across those four clips. But the four
-clips come from **three different motions**, so that table mixes between-motion and within-motion
-variation — and the within-motion test refutes the causal claim:
+So the threshold is real and **motion-specific**: x000's sits in (0.619, 0.980) where motion 005
+holds at 0.994. A 20 mrad step was far too small to find it, and reading 2 mistook "no effect over
+this range" for "no effect".
 
-| excursion | motion | outcome | \|drift\| |
-|---|---|---|---|
-| 1.000 rad | x000 | rejected | 0.224 m/s |
-| **0.980 rad** | x000 | **rejected** | **0.223 m/s** |
+### What this means operationally, which is the useful part
 
-Cutting 20 mrad on the motion that failed moved its drift by 0.001 m/s. **So excursion correlates
-with trackability across motions but does not control it within one**, at least over this range, and
-"crouch trackability is predictable from knee excursion" is too strong. x000 is a harder motion to
-crouch, and the monotone table was largely reading motion identity.
+x000 is not a failure of the operator. It is caught in a **two-sided squeeze**, and the two sides
+are measured in different currencies:
 
-What survives: the crouch fails by drift with zero contact where the tuck fails by collision, and
-the crouch's yield is **2 of 3** valid nominals against the tuck's 1 of 3. What does not: that the
-clip alone tells you which.
+| excursion | predicted window | trackable? |
+|---|---|---|
+| 0.619 rad | 43.1 mm | **yes** |
+| 0.980 rad | 92.3 mm | no |
+| 1.000 rad | 95.6 mm | no |
 
-Two far weaker crouches on x000 — 0.619 rad for a 30 mm drop and 0.420 rad for 15 mm — are running
-to settle whether it is crouchable at any strength. If both drift, x000 is simply not crouchable and
-the yield stays 2 of 3. If one holds, the threshold is motion-specific and no single global cap can
-express it.
+The strengths that buy a usable window are untrackable, and the strength that tracks buys a window
+too narrow to trust — 43 mm predicted is 10 to 35 mm real, given that measured windows run 23–82% of
+predicted, against 82–98 mm for the three families that work.
 
-`MAX_CROUCH_EXCURSION_RAD` was tightened from 1.00 to 0.98 on the strength of this prediction. The
-bound is still defensible — a cap should sit below every excursion observed to fail — but the benefit
-claimed for it, that it would turn an untrackable clip into a trackable one, **is false**, and the
-commit message asserting it is wrong.
+**So the crouch's yield is set by whether a motion's trackability threshold sits above the excursion
+its window needs.** That is a screen worth one rollout per motion rather than a bisection: compute
+the excursion a 60 mm window requires (CPU only), then test trackability at exactly that excursion.
+Motions where the two do not overlap are dropped before any family is attempted.
 
 ### The original registration, unedited
 
