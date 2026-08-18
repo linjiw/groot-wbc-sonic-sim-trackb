@@ -323,6 +323,35 @@ matched to its nominal by construction rather than paired after the fact.
 only part of the corpus has been rolled out. This closes an engineering path under a tested
 protocol; it is not a claim about what the generator can do.*
 
+## Scene difficulty is a design parameter, not a search outcome
+
+Every scene here was originally built by lowering a shelf until something touched. That finds a
+boundary but cannot say *what* is being tested, and a full-height shelf can only bind the tallest
+capsule — `torso_link`, on 199 of 199 frames of a walk. Every overhead scene tested the same part.
+
+Because the executed trajectory gives every collision capsule's pose per frame, an obstacle confined
+to a height *band* binds whatever passes through that band. On one verified nominal:
+
+| band | binding part | reach | relieved by |
+|---|---|---|---|
+| overhead 1.15–1.60 m | `torso_link` | 0.079–0.097 m | `local_crouch` |
+| chest 0.85–1.15 m | `elbow_link` | 0.235–0.252 m | `local_arm_tuck` |
+| waist 0.55–0.85 m | `wrist_yaw_link` | 0.284–0.327 m | `local_arm_tuck` |
+| knee 0.25–0.55 m | `wrist_yaw_link` | 0.283–0.304 m | `local_arm_tuck` |
+| floor 0.00–0.25 m | `ankle_roll_link` | 0.245 m | **none** |
+
+Four distinct body parts from one walk, and **eight of ten configurations have an operator that can
+answer them**. Left and right reaches differ by up to 43 mm because the arms swing out of phase, so
+the two sides pose genuinely different problems rather than mirrored ones.
+
+Difficulty then follows from `obstacle face = reach + margin`, so a margin ladder on one
+configuration yields a graded series — clear, near-threshold, marginal, infeasible — all with the
+same binding part, and therefore comparable. This also changes the cost of scale: 24–30 families is
+not 24–30 motion pairs but roughly four screened nominals at eight configurations each.
+
+A binding part is **not** a counterfactual. Nothing relieves the ankle, so floor obstacles produce a
+negative with no matching positive; the map marks that before rollouts are spent rather than after.
+
 ## The decisive experiment (not yet run)
 
 Three datasets, identical in motions, scene count, rendering budget, learner and training
