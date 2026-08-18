@@ -40,6 +40,7 @@ import glob
 import json
 from pathlib import Path
 import pickle
+import re
 import subprocess
 import sys
 
@@ -60,6 +61,7 @@ from gear_sonic.dataset_generation.motion_envelope import (  # noqa: E402
 from gear_sonic.dataset_generation.counterfactual_family import (  # noqa: E402
     CounterfactualError,
     ObstacleSpec,
+    swept_clearance_to_box,
     build_paired_family,
 )
 from gear_sonic.dataset_generation.episode_outcome import classify_episode  # noqa: E402
@@ -144,9 +146,18 @@ def write_scene(
     shelf_z_base: float,
     start_xy,
     room_size_xy: tuple[float, float],
+    shelf_center_xy,
 ) -> Path:
-    """A bare room whose only furniture is one shelf spanning the corridor."""
-    mid = path_xy[len(path_xy) // 2]
+    """A bare room whose only furniture is one shelf spanning the corridor.
+
+    ``shelf_center_xy`` is required rather than recomputed. It used to be derived here as the
+    path midpoint, which silently disagreed with the position the boundary search had
+    optimised: the search placed its obstacle at the station where the two motions differ
+    most, and the scene then rendered a shelf half a metre away where the duck had not begun.
+    Both motions hit it, and a 0.178 m window produced no family at all. One shelf position
+    must reach both the search and the renderer, so it is passed in.
+    """
+    mid = shelf_center_xy
     piece = FurniturePiece(
         name="LowShelf_00",
         kind="WallShelf",
@@ -182,6 +193,25 @@ def write_scene(
     destination = directory / f"{scene_id}.usda"
     destination.write_text(render_scene_usda(spec), encoding="utf-8")
     return destination
+
+
+def rendered_shelf_box(usda: Path) -> tuple[float, ...]:
+    """The shelf's world box, read back out of the file physics will load.
+
+    Recomputing it from the builder's own variables would only confirm the builder agrees
+    with itself, which is exactly what was true while the bug was live.
+    """
+    text = usda.read_text(encoding="utf-8")
+    block = text[text.index("LowShelf_00"):]
+    size = [float(v) for v in
+            re.search(r"double3 xformOp:scale = \(([^)]+)\)", block).group(1).split(",")]
+    trans = [float(v) for v in
+             re.search(r"double3 xformOp:translate = \(([^)]+)\)", block).group(1).split(",")]
+    half = [s / 2.0 for s in size]
+    return (
+        trans[0] - half[0], trans[1] - half[1], trans[2] - half[2],
+        trans[0] + half[0], trans[1] + half[1], trans[2] + half[2],
+    )
 
 
 def main() -> int:
@@ -283,9 +313,38 @@ def main() -> int:
     scenes = {}
     for label, z_base in (("easy", easy_z), ("hard", hard_z)):
         scene_id = f"{family.family_id}_{label}"
-        write_scene(scene_id, path_xy, z_base, start_xy, room)
+        write_scene(scene_id, path_xy, z_base, start_xy, room, mid)
         scenes[label] = scene_id
     print(f"\nwrote scenes: {', '.join(scenes.values())}")
+
+    # --- 3a. check the scenes actually implement the family, before spending rollouts -----
+    # The search reasons about an ObstacleSpec; the renderer writes a USD prim. Nothing used
+    # to check the two agreed, and they silently did not: the shelf was rendered at the path
+    # midpoint while the search had placed it at the station where the motions differ. Both
+    # motions hit it and a 0.178 m window produced no family. Reading the geometry back out
+    # of the file that physics will load is the only way to know what was really built.
+    expectations = {
+        ("nominal", "easy"): +1, ("nominal", "hard"): -1,
+        ("adapted", "easy"): +1, ("adapted", "hard"): +1,
+    }
+    disagreements = []
+    for (motion_label, scene_label), expected_sign in expectations.items():
+        box = rendered_shelf_box(SCENES_ROOT / "g1_counterfactual" /
+                                 f"{scenes[scene_label]}.usda")
+        clearance, _ = swept_clearance_to_box(*bodies(motion_label), box)
+        if np.sign(clearance) != expected_sign:
+            disagreements.append(
+                f"{motion_label}/{scene_label}: rendered clearance {clearance:+.4f} m, "
+                f"expected {'clear' if expected_sign > 0 else 'interference'}"
+            )
+    if disagreements:
+        print("\nthe scenes do not implement the family the search found:")
+        for line in disagreements:
+            print(f"  {line}")
+        raise SystemExit(
+            "refusing to roll out: the rendered geometry disagrees with the search"
+        )
+    print("scenes verified against the search: all four clearances have the intended sign")
 
     results: dict[str, dict] = {}
     for motion_label, csv in (("nominal", nominal_csv), ("adapted", adapted_csv)):
