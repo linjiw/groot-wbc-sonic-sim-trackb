@@ -43,6 +43,15 @@ from .self_intersection import DEFAULT_G1_MJCF
 #: clips from 0.0098 saturation to exactly zero, against a screen threshold of 0.009.
 DEFAULT_RANGE_KEEP = 0.97
 
+#: How far to straighten the legs back toward standing, as a fraction. The generated crouch
+#: is deep enough that the thighs interpenetrate the pelvis by 1.6 mm in the reference, which
+#: the self-intersection screen tolerates because its threshold is 100 mm. Executed, tracking
+#: error turns that into 931.5 N of hip-against-pelvis self-contact across 88 frames and the
+#: episode is rejected. Straightening the legs 30% removes the interpenetration entirely and
+#: still leaves the silhouette 198 mm below a plain walk -- more separation than the best
+#: available duck gives at a single station, and along the whole route rather than at one.
+DEFAULT_LEG_RELAX = 0.30
+
 #: Waist pitch as a fraction of its limit. Zero stands the torso fully upright and costs
 #: 50 mm of silhouette; half keeps the lean that helps a deep squat balance while leaving the
 #: joint 50% headroom.
@@ -69,6 +78,11 @@ class RetargetReport:
     max_foot_tilt_change_rad: float
     waist_fraction: float
     range_keep: float
+    leg_relax: float
+    #: Deepest pelvis-against-hip interpenetration left in the retargeted clip, in metres.
+    #: Positive means the bodies overlap. The screen tolerates 100 mm, which is why a 1.6 mm
+    #: overlap passed and then became 931.5 N of self-contact once tracked.
+    pelvis_hip_interpenetration_m: float
 
 
 def retarget_crouch(
@@ -76,6 +90,7 @@ def retarget_crouch(
     *,
     waist_fraction: float = DEFAULT_WAIST_FRACTION,
     range_keep: float = DEFAULT_RANGE_KEEP,
+    leg_relax: float = DEFAULT_LEG_RELAX,
     mjcf_path: str | Path = DEFAULT_G1_MJCF,
     epsilon: float = 1e-3,
 ) -> tuple[np.ndarray, RetargetReport]:
@@ -87,6 +102,8 @@ def retarget_crouch(
         raise ValueError(f"range_keep must be in [0, 1]; got {range_keep}")
     if not -1.0 <= waist_fraction <= 1.0:
         raise ValueError(f"waist_fraction must be in [-1, 1]; got {waist_fraction}")
+    if not 0.0 <= leg_relax < 1.0:
+        raise ValueError(f"leg_relax must be in [0, 1); got {leg_relax}")
 
     names, limits = load_joint_limits(mjcf_path)
     out = qpos.copy()
@@ -107,9 +124,37 @@ def retarget_crouch(
             edge = upper[index] if sign > 0 else lower[index]
             out[:, 7 + index] = waist_fraction * edge
 
+    # Straighten the legs, then move the root so the feet stay where they were. The root is
+    # a floating base, so scaling leg flexion without following it up leaves the robot
+    # hovering or buried -- the same trap as trying to raise the pelvis directly.
+    if leg_relax > 0.0:
+        legs = [
+            i for i, name in enumerate(names[:count])
+            if any(key in name for key in ("hip_pitch", "knee", "ankle_pitch"))
+        ]
+        if legs:
+            out[:, 7 + np.asarray(legs)] *= 1.0 - leg_relax
+
     centre = 0.5 * (lower + upper)
     half = 0.5 * (upper - lower) * range_keep
     out[:, 7 : 7 + count] = np.clip(out[:, 7 : 7 + count], centre - half, centre + half)
+
+    # The root follows the joints, and it must do so *after* every joint edit. Compensating
+    # before the range clamp left the clamp free to move the feet again with nothing to
+    # correct it, which drifted them 14.6 mm on a clip whose joints all sat at limits.
+    if leg_relax > 0.0:
+        from .reference_payload import payload_from_reference as _fk
+
+        def lowest_foot(clip: np.ndarray) -> np.ndarray:
+            payload = _fk(clip, mjcf_path=mjcf_path)
+            body_names = list(payload["body_names"])
+            ankles = [i for i, n in enumerate(body_names) if "ankle_roll" in n]
+            return np.asarray(payload["body_pos_w"])[:, ankles, 2].min(axis=1)
+
+        try:
+            out[:, 2] += lowest_foot(qpos) - lowest_foot(out)
+        except (ValueError, OSError):
+            pass
 
     after = out[:, 7 : 7 + count]
     at_limit_after = (np.abs(after - lower) < epsilon) | (np.abs(after - upper) < epsilon)
@@ -151,8 +196,19 @@ def retarget_crouch(
         shift = float("nan")
         tilt_change = float("nan")
 
+    from .self_intersection import check_reference_self_intersection
+
+    try:
+        interpenetration = float(
+            check_reference_self_intersection(out, mjcf_path=mjcf_path).pelvis_hip_depth_m
+        )
+    except (ValueError, OSError):
+        interpenetration = float("nan")
+
     return out, RetargetReport(
         frames=len(qpos),
+        leg_relax=leg_relax,
+        pelvis_hip_interpenetration_m=interpenetration,
         relieved_joints=relieved,
         max_joint_change_rad=float(np.abs(after - before).max()),
         foot_height_shift_m=shift,

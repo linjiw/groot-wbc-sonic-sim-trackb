@@ -11,6 +11,7 @@ from gear_sonic.dataset_generation.motion_prefilter import (
     load_joint_limits,
     screen_reference_motion,
 )
+from gear_sonic.dataset_generation.reference_payload import payload_from_reference
 from gear_sonic.dataset_generation.retarget_reference import (
     DEFAULT_RANGE_KEEP,
     retarget_crouch,
@@ -93,12 +94,49 @@ def test_an_upright_waist_is_available_and_differs_from_a_leaning_one(limits):
     assert np.allclose(upright[:, 7 + index], 0.0)
 
 
-def test_the_root_is_never_moved(limits):
-    """Raising the pelvis looks like a shallower squat and is really a robot hovering: the
-    root is a floating base, so moving it changes no joint and no contact."""
+def test_the_root_is_never_moved_on_its_own(limits):
+    """Raising the pelvis by itself looks like a shallower squat and is really a robot
+    hovering: the root is a floating base, so moving it changes no joint and no contact."""
     source = pinned_at_limits(40, limits)
-    retargeted, _ = retarget_crouch(source)
+    retargeted, _ = retarget_crouch(source, leg_relax=0.0)
     assert np.array_equal(retargeted[:, :7], source[:, :7])
+
+
+def test_relaxing_the_legs_moves_the_root_to_keep_the_feet_planted(limits):
+    """The root must follow the legs, and only the legs.
+
+    Straightening the knees without moving the root leaves the robot buried in the floor;
+    that is the same floating-base trap as trying to raise the pelvis directly, in the other
+    direction.
+    """
+    source = pinned_at_limits(40, limits)
+    relaxed, _ = retarget_crouch(source, leg_relax=0.3)
+    assert not np.array_equal(relaxed[:, 2], source[:, 2])
+    assert np.array_equal(relaxed[:, :2], source[:, :2]), "only height may change"
+    assert np.array_equal(relaxed[:, 3:7], source[:, 3:7]), "orientation must not change"
+
+    def lowest_foot(clip):
+        payload = payload_from_reference(clip)
+        names = list(payload["body_names"])
+        ankles = [i for i, n in enumerate(names) if "ankle_roll" in n]
+        return np.asarray(payload["body_pos_w"])[:, ankles, 2].min(axis=1)
+
+    assert np.allclose(lowest_foot(relaxed), lowest_foot(source), atol=1e-6)
+
+
+def test_relaxing_the_legs_removes_the_self_interpenetration(limits):
+    """The failure this exists for. The generated crouch overlaps the thighs into the pelvis
+    by 1.6 mm, which the screen tolerates because its threshold is 100 mm; executed, that
+    became 931.5 N of self-contact over 88 frames and the episode was rejected."""
+    source = pinned_at_limits(40, limits)
+    _, deep = retarget_crouch(source, leg_relax=0.0)
+    _, relaxed = retarget_crouch(source, leg_relax=0.3)
+    assert relaxed.pelvis_hip_interpenetration_m <= deep.pelvis_hip_interpenetration_m
+
+
+def test_an_out_of_range_relax_is_refused():
+    with pytest.raises(ValueError, match="leg_relax"):
+        retarget_crouch(clip(), leg_relax=1.0)
 
 
 def test_the_report_names_which_joints_were_relieved(limits):
