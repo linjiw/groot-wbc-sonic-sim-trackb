@@ -66,12 +66,22 @@ class EnvelopeSignature:
     net_displacement_m: float
     heading_change_rad: float
     mean_speed_mps: float
-    #: Lowest the robot's highest collision point ever gets -- the overhead discriminator.
+    #: **World-frame z of the topmost point of the robot's collision geometry, minimised
+    #: over frames.** Per frame it is ``max`` over all 29 collision capsules of
+    #: ``max(start_z, end_z) + radius``; the signature keeps the smallest such value over the
+    #: clip. It is not a link origin and not the head, torso or pelvis height -- it is the
+    #: silhouette's ceiling, which is what an overhead obstacle actually meets. Whichever
+    #: capsule is highest may change from frame to frame, and during a duck it does.
     min_silhouette_peak_m: float
-    #: Narrowest half-width across the direction of travel -- the lateral discriminator.
+    #: **Half-width across the heading, minimised over frames, in metres.** Per frame it is
+    #: ``max`` over collision capsules of ``|offset from root, projected on the lateral
+    #: axis| + radius``; the lateral axis is perpendicular to the root's yaw, not the world y
+    #: axis, so a motion travelling along +y is not reported as two metres wide.
     min_half_width_m: float
-    #: Swing apex of the *lower* foot -- the floor discriminator. The trailing foot is what
-    #: a bar catches; the leading one clearing says nothing.
+    #: **World-frame z of the ankle-roll link origin at its highest, for whichever foot
+    #: peaks lower, in metres.** The trailing foot is what a bar catches; the leading one
+    #: clearing says nothing. This is a link origin rather than a capsule top, so it is not
+    #: comparable to the two fields above.
     min_foot_apex_m: float
 
 

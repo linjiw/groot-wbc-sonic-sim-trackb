@@ -93,6 +93,46 @@ def shelf_box(usda: Path) -> tuple[float, ...]:
     )
 
 
+def contact_profile(payload: dict) -> dict:
+    """The four separate things "contact force" can mean, named apart.
+
+    Reporting one number for a collision reads as a contradiction the moment a second one
+    appears: this family's failing cell is 55.4 N at first contact and 137.2 N at its peak,
+    both true and neither interchangeable. Severity also behaves differently from occurrence
+    under perturbation -- peak force ranged 95.5 to 658.3 N across three start-pose jitters
+    while the verdict never moved -- so a number that is quoted as a property of the family
+    has to say which number it is.
+    """
+    decomposition = decompose_payload_contacts(payload)
+    lateral = decomposition.external_lateral_by_frame
+    fps = float(payload.get("fps", 50.0)) or 50.0
+    active = lateral > CONTACT_THRESHOLD_N
+    hits = np.argwhere(active)
+    if hits.size == 0:
+        return {
+            "first_contact_frame": None, "first_contact_body": "",
+            "first_contact_force_n": 0.0, "peak_contact_force_n": 0.0,
+            "peak_contact_frame": None, "contact_impulse_ns": 0.0,
+            "contact_duration_s": 0.0,
+        }
+    frame = int(hits[0, 0])
+    forces = np.asarray(payload["robot_contact_force_w"], dtype=np.float64)[frame]
+    names = list(payload["contact_body_names"])
+    external = set(decomposition.external_contact_bodies)
+    horizontal = np.linalg.norm(forces[:, :2], axis=1)
+    candidates = [i for i, n in enumerate(names) if n in external]
+    body = names[max(candidates, key=lambda i: horizontal[i])] if candidates else ""
+    return {
+        "first_contact_frame": frame,
+        "first_contact_body": body,
+        "first_contact_force_n": float(lateral[frame]),
+        "peak_contact_force_n": float(lateral.max()),
+        "peak_contact_frame": int(np.argmax(lateral)),
+        "contact_impulse_ns": float(lateral[active].sum() / fps),
+        "contact_duration_s": float(active.sum() / fps),
+    }
+
+
 def first_contact(payload: dict) -> tuple[int | None, str, float]:
     """Earliest frame carrying a *lateral* external contact, and the body carrying it.
 
@@ -186,7 +226,10 @@ def analyse(family_dir: Path, scenes_root: Path) -> dict:
             key = f"{motion}_{difficulty}"
             payload = load(family_dir / key)
             outcome = classify_episode(key, payload)
-            frame, body, force = first_contact(payload)
+            contact = contact_profile(payload)
+            frame = contact["first_contact_frame"]
+            body = contact["first_contact_body"]
+            force = contact["first_contact_force_n"]
             onset = drift_onset(payload)
             clearance, pframe, pdeep = predicted_frame(probes[motion], boxes[difficulty])
             expect_fail = motion == "nominal" and difficulty == "hard"
@@ -215,9 +258,8 @@ def analyse(family_dir: Path, scenes_root: Path) -> dict:
                 "outcome": outcome.outcome,
                 "rejection_reasons": list(outcome.rejection_reasons),
                 "frames": int(payload["total_frames"]),
-                "first_contact_frame": frame,
-                "first_contact_body": body,
-                "first_contact_force_n": round(force, 2),
+                **{k: (round(v, 3) if isinstance(v, float) else v)
+                   for k, v in contact.items()},
                 "drift_onset_frame": onset,
                 "predicted_clearance_m": round(clearance, 4),
                 "predicted_first_interference_frame": pframe,
@@ -276,10 +318,16 @@ def render(report: dict) -> str:
     lines.append("")
     depth = report.get("nominal_penetration_depth_m")
     if depth is not None:
-        force = report["cells"].get("nominal_hard", {}).get("first_contact_force_n", 0.0)
+        cell = report["cells"].get("nominal_hard", {})
         lines.append(
             f"intended failure: the shelf sits {depth * 1000:.0f} mm below the height that "
-            f"would clear the nominal motion, and produced {force:.1f} N"
+            f"would clear the nominal motion"
+        )
+        lines.append(
+            f"  first contact {cell.get('first_contact_force_n', 0.0):.1f} N, "
+            f"peak {cell.get('peak_contact_force_n', 0.0):.1f} N, "
+            f"impulse {cell.get('contact_impulse_ns', 0.0):.1f} N*s, "
+            f"duration {cell.get('contact_duration_s', 0.0):.2f} s"
         )
         lines.append(
             "  (clearance saturates at -0.068 m once the torso capsule is engulfed; this "

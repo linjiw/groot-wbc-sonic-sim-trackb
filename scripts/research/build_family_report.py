@@ -16,7 +16,7 @@ So the page carries what a reviewer needs to disbelieve it:
 * ego keyframes either side of the contact frame
 * the claim level, which is never asserted -- it is read from the artefacts that exist
 
-That last point matters. A family is "perturbation robust" only if robustness.json says so,
+That last point matters. A family is "start-pose outcome-robust" only if robustness.json says so,
 and absent that file the page says "nominally physics verified" rather than leaving the
 stronger claim implied.
 
@@ -154,7 +154,7 @@ def claim_level(family_dir: Path) -> tuple[str, str]:
     if robustness.exists():
         report = json.loads(robustness.read_text())
         if report.get("perturbation_robust"):
-            return "perturbation robust", "strong"
+            return "start-pose outcome-robust", "strong"
         return (
             "nominally physics verified (perturbation test ran and did not hold)", "weak"
         )

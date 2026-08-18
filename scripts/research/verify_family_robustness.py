@@ -17,7 +17,14 @@ The three claim levels this separates:
 
 * **geometrically predicted** -- the swept volumes say a window exists
 * **nominally physics verified** -- the unperturbed 2x2 came out as predicted
-* **perturbation robust** -- and it still does when the start pose is jittered
+* **start-pose outcome-robust** -- and it still does when the start pose is jittered
+
+The third level is narrower than the word "robust" suggests, and the difference matters. What
+is established is that the *outcome* survives a start-pose jitter. Severity does not: peak
+contact force on the failing cell ranged 95.5 to 658.3 N across three jitters against 137.2 N
+unperturbed. Whether the torso meets the shelf is stable; how hard it meets it is not. This
+also says nothing about robustness to dynamics, mass, friction or actuation noise, none of
+which are varied here.
 
 Usage::
 
@@ -192,7 +199,7 @@ def main() -> int:
                       ("nominal_easy", "nominal_hard", "adapted_easy", "adapted_hard"))
             + f"{str(holds[name]):>8s}"
         )
-    print(f"\nperturbation robust: {robust}")
+    print(f"\nstart-pose outcome-robust: {robust}")
 
     report = {
         "family_id": family["family_id"],
@@ -203,7 +210,7 @@ def main() -> int:
         "outcomes": table,
         "holds": holds,
         "perturbation_robust": robust,
-        "claim_level": "perturbation robust" if robust else "nominally physics verified",
+        "claim_level": "start-pose outcome-robust" if robust else "nominally physics verified",
     }
     destination = args.family / "robustness.json"
     destination.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")

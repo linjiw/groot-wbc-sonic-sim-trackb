@@ -48,8 +48,23 @@ def test_only_a_passing_robustness_file_earns_the_strong_claim(tmp_path):
     write(tmp_path, "attribution.json", {"attribution_pure": True})
     write(tmp_path, "robustness.json", {"perturbation_robust": True})
     level, strength = claim_level(tmp_path)
-    assert level == "perturbation robust"
     assert strength == "strong"
+    assert level == "start-pose outcome-robust"
+
+
+def test_the_strong_claim_names_what_was_varied_and_what_survived(tmp_path):
+    """"Robust" alone overclaims twice over, so the wording is pinned.
+
+    Only the start pose was varied -- not dynamics, mass, friction or actuation noise -- and
+    only the *outcome* survived it. Severity did not: peak contact force on the failing cell
+    ranged 95.5 to 658.3 N across three jitters against 137.2 N unperturbed. Whether the
+    torso meets the shelf is stable; how hard it meets it is not.
+    """
+    write(tmp_path, "robustness.json", {"perturbation_robust": True})
+    level, _ = claim_level(tmp_path)
+    assert "start-pose" in level, "must name what was varied"
+    assert "outcome" in level, "must name what survived"
+    assert level != "robust"
 
 
 def test_a_failed_perturbation_says_so_rather_than_going_quiet(tmp_path):

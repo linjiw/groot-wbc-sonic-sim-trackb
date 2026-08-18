@@ -9,10 +9,9 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from pathlib import Path
+import re
 from typing import Any
-
 
 _ALL_MPJPE_RE = re.compile(r"^All:\s+.*\bmpjpe_(?:g|l|pa)\b", re.IGNORECASE)
 _ANY_MPJPE_RE = re.compile(r"\bmpjpe(?:_[a-z0-9_]+)?\b", re.IGNORECASE)

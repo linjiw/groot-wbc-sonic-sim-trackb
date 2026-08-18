@@ -4,8 +4,8 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict, dataclass
 import dataclasses
+from dataclasses import dataclass
 import json
 import math
 from pathlib import Path
