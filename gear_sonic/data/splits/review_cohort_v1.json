@@ -1,0 +1,1142 @@
+{
+  "seed": 20260818,
+  "target": 100,
+  "selected": 100,
+  "scanned_episodes": 243,
+  "fingerprint_sha256": "b72d0c40958eb4e72011776033c1336e267a851ade3ee72b347bce744b82e51c",
+  "strata_available": {
+    "accepted_adapted_hard": 7,
+    "accepted_easy": 109,
+    "high_self_contact": 61,
+    "lateral_contact": 20,
+    "near_boundary": 8,
+    "nominal_hard_negative": 7,
+    "other_rejected": 17,
+    "overhead_contact": 2,
+    "tracking_drift_failure": 1,
+    "unevaluable": 14
+  },
+  "strata_rationale": {
+    "accepted_easy": "the common case; a false accept here would be systematic",
+    "accepted_adapted_hard": "the cells a family's claim rests on",
+    "nominal_hard_negative": "the matched negatives; the whole counterfactual turns on these",
+    "near_boundary": "outcome decided by a small margin, where the gate is least reliable",
+    "tracking_drift_failure": "rejected with no contact at all -- is it really a failure?",
+    "overhead_contact": "the collision type the gate could not see until it was fixed",
+    "lateral_contact": "the other collision type, for comparison",
+    "high_self_contact": "large paired forces that are correctly *not* disqualifying",
+    "unevaluable": "episodes no gate could grade; are they recoverable?",
+    "other_rejected": "everything else rejected, so no failure mode is excluded by design"
+  },
+  "short_strata": [
+    {
+      "stratum": "accepted_adapted_hard",
+      "available": 7,
+      "wanted": 12
+    },
+    {
+      "stratum": "nominal_hard_negative",
+      "available": 7,
+      "wanted": 12
+    },
+    {
+      "stratum": "near_boundary",
+      "available": 8,
+      "wanted": 12
+    },
+    {
+      "stratum": "tracking_drift_failure",
+      "available": 1,
+      "wanted": 10
+    },
+    {
+      "stratum": "overhead_contact",
+      "available": 2,
+      "wanted": 10
+    }
+  ],
+  "episodes": [
+    {
+      "cell": "01_single_text_prompt__factory_aisle__p0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/clean/rollouts/01_single_text_prompt__factory_aisle__p0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0001,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 305.4
+    },
+    {
+      "cell": "01_single_text_prompt__factory_aisle__p1",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/clean/rollouts/01_single_text_prompt__factory_aisle__p1/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": -0.0018,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 316.8
+    },
+    {
+      "cell": "01_single_text_prompt__household_room__p2",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/clean/rollouts/01_single_text_prompt__household_room__p2/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": -0.0004,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 308.0
+    },
+    {
+      "cell": "03_full_body_keyframes__factory_aisle__p1",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/clean/rollouts/03_full_body_keyframes__factory_aisle__p1/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0377,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 282.7
+    },
+    {
+      "cell": "03_full_body_keyframes__household_room__p0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/clean/rollouts/03_full_body_keyframes__household_room__p0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0373,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 282.7
+    },
+    {
+      "cell": "03_full_body_keyframes__household_room__p1",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/clean/rollouts/03_full_body_keyframes__household_room__p1/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.031,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 282.8
+    },
+    {
+      "cell": "clutter_05_root_path_s1",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/clutter_rollouts/clutter_05_root_path_s1/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": -0.0364,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 90.8
+    },
+    {
+      "cell": "clutter_06_root_waypoints_s1",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/clutter_rollouts/clutter_06_root_waypoints_s1/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0019,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 25.7
+    },
+    {
+      "cell": "probe_nominal",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_000/probe_nominal/trajectories/000000.trajectory.pkl",
+      "outcome": "unevaluable",
+      "reasons": [],
+      "drift_mps": 0.0,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 0.0
+    },
+    {
+      "cell": "nominal_hard",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_001/nominal_hard/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact",
+        "unstable_reference_drift"
+      ],
+      "drift_mps": 0.1674,
+      "overhead_n": 409.3,
+      "lateral_n": 3.0,
+      "self_n": 57.7
+    },
+    {
+      "cell": "adapted_easy",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_002/adapted_easy/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0788,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 237.4
+    },
+    {
+      "cell": "adapted_hard",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_002/adapted_hard/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0788,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 237.4
+    },
+    {
+      "cell": "nominal_hard",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_002/nominal_hard/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact",
+        "unstable_reference_drift"
+      ],
+      "drift_mps": 0.1674,
+      "overhead_n": 409.3,
+      "lateral_n": 3.0,
+      "self_n": 57.7
+    },
+    {
+      "cell": "probe_adapted",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_002/probe_adapted/trajectories/000000.trajectory.pkl",
+      "outcome": "unevaluable",
+      "reasons": [],
+      "drift_mps": 0.0,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 0.0
+    },
+    {
+      "cell": "probe_nominal",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_002/probe_nominal/trajectories/000000.trajectory.pkl",
+      "outcome": "unevaluable",
+      "reasons": [],
+      "drift_mps": 0.0,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 0.0
+    },
+    {
+      "cell": "adapted_hard",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/adapted_hard/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0788,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 237.4
+    },
+    {
+      "cell": "nominal_easy",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/nominal_easy/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0468,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 85.1
+    },
+    {
+      "cell": "nominal_hard",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/nominal_hard/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact",
+        "unstable_reference_drift"
+      ],
+      "drift_mps": 0.5581,
+      "overhead_n": 470.5,
+      "lateral_n": 137.2,
+      "self_n": 57.7
+    },
+    {
+      "cell": "probe_adapted",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/probe_adapted/trajectories/000000.trajectory.pkl",
+      "outcome": "unevaluable",
+      "reasons": [],
+      "drift_mps": 0.0,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 0.0
+    },
+    {
+      "cell": "probe_nominal",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/probe_nominal/trajectories/000000.trajectory.pkl",
+      "outcome": "unevaluable",
+      "reasons": [],
+      "drift_mps": 0.0,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 0.0
+    },
+    {
+      "cell": "adapted_hard",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/robustness/p1/adapted_hard/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0796,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 237.4
+    },
+    {
+      "cell": "nominal_hard",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/robustness/p1/nominal_hard/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact",
+        "unstable_reference_drift"
+      ],
+      "drift_mps": 0.6195,
+      "overhead_n": 494.2,
+      "lateral_n": 126.8,
+      "self_n": 57.7
+    },
+    {
+      "cell": "adapted_hard",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/robustness/p2/adapted_hard/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0765,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 237.4
+    },
+    {
+      "cell": "nominal_hard",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/robustness/p2/nominal_hard/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact",
+        "unstable_reference_drift"
+      ],
+      "drift_mps": 0.5214,
+      "overhead_n": 668.5,
+      "lateral_n": 658.3,
+      "self_n": 76.8
+    },
+    {
+      "cell": "adapted_hard",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/robustness/p3/adapted_hard/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0769,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 237.4
+    },
+    {
+      "cell": "nominal_easy",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/robustness/p3/nominal_easy/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0456,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 72.1
+    },
+    {
+      "cell": "nominal_hard",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/robustness/p3/nominal_hard/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact",
+        "unstable_reference_drift"
+      ],
+      "drift_mps": 0.5401,
+      "overhead_n": 626.5,
+      "lateral_n": 95.5,
+      "self_n": 57.8
+    },
+    {
+      "cell": "density_moderate",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/density_rollouts/density_moderate/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0018,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 310.1
+    },
+    {
+      "cell": "density_tight",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/density_rollouts/density_tight/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0018,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 310.1
+    },
+    {
+      "cell": "w_crouch08_hard",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/matched/mf_005_c08/w_crouch08_hard/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0999,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 81.0
+    },
+    {
+      "cell": "w_crouch08_z1215",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/matched/mf_005_c08/w_crouch08_z1215/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact",
+        "unstable_reference_drift"
+      ],
+      "drift_mps": 0.1873,
+      "overhead_n": 1017.4,
+      "lateral_n": 0.0,
+      "self_n": 81.0
+    },
+    {
+      "cell": "w_nominal_hard",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/matched/mf_005_c08/w_nominal_hard/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact",
+        "unstable_reference_drift"
+      ],
+      "drift_mps": 0.3438,
+      "overhead_n": 2758.2,
+      "lateral_n": 1725.6,
+      "self_n": 67.3
+    },
+    {
+      "cell": "w_nominal_z1280",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/matched/mf_005_c08/w_nominal_z1280/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact"
+      ],
+      "drift_mps": 0.1255,
+      "overhead_n": 85.0,
+      "lateral_n": 0.0,
+      "self_n": 62.6
+    },
+    {
+      "cell": "x002_crouch_hard",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/matched/mf_x002_c08/x002_crouch_hard/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.015,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 79.1
+    },
+    {
+      "cell": "x000_crouch",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/crossmotion_rollouts/x000_crouch/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "unstable_reference_drift"
+      ],
+      "drift_mps": 0.2245,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 61.5
+    },
+    {
+      "cell": "x000_crouch030",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/crossmotion_rollouts/x000_crouch030/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.1396,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 61.3
+    },
+    {
+      "cell": "x000_crouch098",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/crossmotion_rollouts/x000_crouch098/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "unstable_reference_drift"
+      ],
+      "drift_mps": 0.223,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 61.2
+    },
+    {
+      "cell": "x000_tuck",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/crossmotion_rollouts/x000_tuck/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact"
+      ],
+      "drift_mps": 0.0505,
+      "overhead_n": 31.0,
+      "lateral_n": 32.6,
+      "self_n": 76.0
+    },
+    {
+      "cell": "x001_tuck",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/crossmotion_rollouts/x001_tuck/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact",
+        "disallowed_foot_non_ground_contact"
+      ],
+      "drift_mps": 0.0298,
+      "overhead_n": 0.0,
+      "lateral_n": 138.1,
+      "self_n": 71.4
+    },
+    {
+      "cell": "x002_tuck",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/crossmotion_rollouts/x002_tuck/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact"
+      ],
+      "drift_mps": 0.0034,
+      "overhead_n": 9.6,
+      "lateral_n": 24.4,
+      "self_n": 152.5
+    },
+    {
+      "cell": "lc005_crouch18",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/local_rollouts/lc005_crouch18/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 44.0
+    },
+    {
+      "cell": "lc005_nominal",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/local_rollouts/lc005_nominal/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0465,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 81.2
+    },
+    {
+      "cell": "rl000_a_person_ben",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/relaxed_rollouts/rl000_a_person_ben/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "excessive_self_contact",
+        "unstable_reference_drift"
+      ],
+      "drift_mps": 0.2099,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 626.2
+    },
+    {
+      "cell": "rt000_a_person_ben",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/rollouts/rt000_a_person_ben/trajectories/000000.trajectory.pkl",
+      "outcome": "unevaluable",
+      "reasons": [],
+      "drift_mps": 0.0,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 0.0
+    },
+    {
+      "cell": "s_crouch",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/sentinel_rollouts/s_crouch/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "unstable_reference_drift"
+      ],
+      "drift_mps": 0.31,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 59.5
+    },
+    {
+      "cell": "w_combo09",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/sweep_rollouts/w_combo09/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0921,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 80.3
+    },
+    {
+      "cell": "w_crouch11",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/sweep_rollouts/w_crouch11/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "unstable_reference_drift"
+      ],
+      "drift_mps": 0.1525,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 79.6
+    },
+    {
+      "cell": "w_nominal",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/sweep_rollouts/w_nominal/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0465,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 81.2
+    },
+    {
+      "cell": "w_tuck10win30",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/sweep_rollouts/w_tuck10win30/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact"
+      ],
+      "drift_mps": 0.0,
+      "overhead_n": 54.8,
+      "lateral_n": 297.0,
+      "self_n": 62.0
+    },
+    {
+      "cell": "w_tuck14win18",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/sweep_rollouts/w_tuck14win18/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact"
+      ],
+      "drift_mps": 0.0,
+      "overhead_n": 23.5,
+      "lateral_n": 312.3,
+      "self_n": 187.9
+    },
+    {
+      "cell": "w_tuckcap30",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/sweep_rollouts/w_tuckcap30/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact"
+      ],
+      "drift_mps": 0.0302,
+      "overhead_n": 18.1,
+      "lateral_n": 31.9,
+      "self_n": 103.5
+    },
+    {
+      "cell": "w_tuckcap40",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/modebank/sweep_rollouts/w_tuckcap40/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact"
+      ],
+      "drift_mps": 0.0253,
+      "overhead_n": 34.3,
+      "lateral_n": 21.0,
+      "self_n": 52.3
+    },
+    {
+      "cell": "clutter_np_crouchwalk_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/newprompt/rollouts/clutter_np_crouchwalk_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "excessive_self_contact"
+      ],
+      "drift_mps": 0.0674,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 9686.2
+    },
+    {
+      "cell": "01_single_text_prompt__factory_aisle__p2",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/01_single_text_prompt__factory_aisle__p2/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.004,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 42.2
+    },
+    {
+      "cell": "01_single_text_prompt__household_room__p2",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/01_single_text_prompt__household_room__p2/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": -0.0004,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 308.0
+    },
+    {
+      "cell": "02_multi_text_ee_constraint__factory_aisle__p0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/02_multi_text_ee_constraint__factory_aisle__p0/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "excessive_self_contact"
+      ],
+      "drift_mps": 0.0341,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 712.1
+    },
+    {
+      "cell": "02_multi_text_ee_constraint__factory_aisle__p1",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/02_multi_text_ee_constraint__factory_aisle__p1/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "excessive_self_contact"
+      ],
+      "drift_mps": 0.0345,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 684.6
+    },
+    {
+      "cell": "02_multi_text_ee_constraint__factory_aisle__p2",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/02_multi_text_ee_constraint__factory_aisle__p2/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "excessive_self_contact"
+      ],
+      "drift_mps": 0.0339,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 668.0
+    },
+    {
+      "cell": "02_multi_text_ee_constraint__household_room__p0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/02_multi_text_ee_constraint__household_room__p0/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "excessive_self_contact"
+      ],
+      "drift_mps": 0.0344,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 659.5
+    },
+    {
+      "cell": "02_multi_text_ee_constraint__household_room__p1",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/02_multi_text_ee_constraint__household_room__p1/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "excessive_self_contact"
+      ],
+      "drift_mps": 0.0342,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 689.9
+    },
+    {
+      "cell": "02_multi_text_ee_constraint__household_room__p2",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/02_multi_text_ee_constraint__household_room__p2/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "excessive_self_contact"
+      ],
+      "drift_mps": 0.0358,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 697.8
+    },
+    {
+      "cell": "03_full_body_keyframes__factory_aisle__p2",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/03_full_body_keyframes__factory_aisle__p2/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0299,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 282.6
+    },
+    {
+      "cell": "03_full_body_keyframes__household_room__p1",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/03_full_body_keyframes__household_room__p1/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.031,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 282.8
+    },
+    {
+      "cell": "03_full_body_keyframes__household_room__p2",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/03_full_body_keyframes__household_room__p2/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0359,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 282.7
+    },
+    {
+      "cell": "04_ee_constraint__factory_aisle__p1",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/04_ee_constraint__factory_aisle__p1/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0884,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 60.7
+    },
+    {
+      "cell": "04_ee_constraint__factory_aisle__p2",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/04_ee_constraint__factory_aisle__p2/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact"
+      ],
+      "drift_mps": 0.0949,
+      "overhead_n": 1.4,
+      "lateral_n": 46.7,
+      "self_n": 55.3
+    },
+    {
+      "cell": "04_ee_constraint__household_room__p2",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/04_ee_constraint__household_room__p2/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0928,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 58.5
+    },
+    {
+      "cell": "05_root_path__factory_aisle__p0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/05_root_path__factory_aisle__p0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": -0.0331,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 91.6
+    },
+    {
+      "cell": "05_root_path__household_room__p0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/05_root_path__household_room__p0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": -0.0365,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 91.6
+    },
+    {
+      "cell": "06_root_waypoints__factory_aisle__p2",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/06_root_waypoints__factory_aisle__p2/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0014,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 8.0
+    },
+    {
+      "cell": "06_root_waypoints__household_room__p1",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/06_root_waypoints__household_room__p1/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0005,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 12.4
+    },
+    {
+      "cell": "06_root_waypoints__household_room__p2",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/placed/rollouts/06_root_waypoints__household_room__p2/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0008,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 15.9
+    },
+    {
+      "cell": "plane_control",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/rollouts/plane_control/trajectories/000000.trajectory.pkl",
+      "outcome": "unevaluable",
+      "reasons": [],
+      "drift_mps": 0.0,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 0.0
+    },
+    {
+      "cell": "01_single_text_prompt__factory_aisle",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/rollouts_batch/01_single_text_prompt__factory_aisle/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": -0.0003,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 33.8
+    },
+    {
+      "cell": "01_single_text_prompt__household_room",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/rollouts_batch/01_single_text_prompt__household_room/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0061,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 268.8
+    },
+    {
+      "cell": "02_multi_text_ee_constraint__factory_aisle",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/rollouts_batch/02_multi_text_ee_constraint__factory_aisle/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "excessive_self_contact"
+      ],
+      "drift_mps": 0.0382,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 710.6
+    },
+    {
+      "cell": "02_multi_text_ee_constraint__household_room",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/rollouts_batch/02_multi_text_ee_constraint__household_room/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "excessive_self_contact"
+      ],
+      "drift_mps": 0.0367,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 669.3
+    },
+    {
+      "cell": "05_root_path__factory_aisle",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/rollouts_batch/05_root_path__factory_aisle/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "insufficient_executed_motion",
+        "disallowed_robot_contact",
+        "unstable_reference_drift"
+      ],
+      "drift_mps": 0.716,
+      "overhead_n": 88.5,
+      "lateral_n": 1849.9,
+      "self_n": 91.6
+    },
+    {
+      "cell": "07_text_terrain__factory_aisle",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/rollouts_batch/07_text_terrain__factory_aisle/trajectories/000000.trajectory.pkl",
+      "note": "unreadable"
+    },
+    {
+      "cell": "08_text_object__factory_aisle",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/rollouts_batch/08_text_object__factory_aisle/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "not_locomotion",
+        "insufficient_executed_motion",
+        "excessive_self_contact"
+      ],
+      "drift_mps": -0.0175,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 911.0
+    },
+    {
+      "cell": "08_text_object__household_room",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/rollouts_batch/08_text_object__household_room/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "not_locomotion",
+        "insufficient_executed_motion",
+        "excessive_self_contact"
+      ],
+      "drift_mps": -0.0163,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 893.0
+    },
+    {
+      "cell": "clutter_011_a_person_walks_briskly_curving_gently_to_the_lef_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch/rollouts/clutter_011_a_person_walks_briskly_curving_gently_to_the_lef_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": -0.0251,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 28.6
+    },
+    {
+      "cell": "clutter_033_a_person_walks_slowly_pauses_and_looks_around_th_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch/rollouts/clutter_033_a_person_walks_slowly_pauses_and_looks_around_th_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact"
+      ],
+      "drift_mps": 0.0201,
+      "overhead_n": 3.0,
+      "lateral_n": 2.8,
+      "self_n": 85.3
+    },
+    {
+      "cell": "clutter_042_a_person_walks_briskly_curving_gently_to_the_rig_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch/rollouts/clutter_042_a_person_walks_briskly_curving_gently_to_the_rig_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": -0.0054,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 93.6
+    },
+    {
+      "cell": "clutter_061_a_person_walks_briskly_and_ducks_down_low_to_pas_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch/rollouts/clutter_061_a_person_walks_briskly_and_ducks_down_low_to_pas_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.1375,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 235.6
+    },
+    {
+      "cell": "clutter_070_a_person_walks_backwards_slowly_then_turns_sharp_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch/rollouts/clutter_070_a_person_walks_backwards_slowly_then_turns_sharp_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0344,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 126.1
+    },
+    {
+      "cell": "clutter_072_a_person_walks_backwards_at_a_steady_pace_curvin_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch/rollouts/clutter_072_a_person_walks_backwards_at_a_steady_pace_curvin_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0209,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 51.7
+    },
+    {
+      "cell": "clutter_092_a_person_stands_still_then_begins_walking_briskl_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch/rollouts/clutter_092_a_person_stands_still_then_begins_walking_briskl_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": -0.011,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 65.4
+    },
+    {
+      "cell": "clutter_147_a_person_walks_slowly_forward_squats_down_to_pic_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch/rollouts/clutter_147_a_person_walks_slowly_forward_squats_down_to_pic_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact"
+      ],
+      "drift_mps": 0.0,
+      "overhead_n": 206.1,
+      "lateral_n": 1776.6,
+      "self_n": 87.1
+    },
+    {
+      "cell": "clutter_042_a_person_walks_briskly_curving_gently_to_the_rig_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch_4s/rollouts/clutter_042_a_person_walks_briskly_curving_gently_to_the_rig_s0_s0/trajectories/000000.trajectory.pkl",
+      "note": "unreadable"
+    },
+    {
+      "cell": "clutter_065_a_person_steps_sideways_briskly_while_facing_for_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch_4s/rollouts/clutter_065_a_person_steps_sideways_briskly_while_facing_for_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0639,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 82.2
+    },
+    {
+      "cell": "clutter_092_a_person_stands_still_then_begins_walking_briskl_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch_4s/rollouts/clutter_092_a_person_stands_still_then_begins_walking_briskl_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0479,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 30.7
+    },
+    {
+      "cell": "clutter_111_a_person_walks_at_a_steady_pace_curving_gently_t_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch_4s/rollouts/clutter_111_a_person_walks_at_a_steady_pace_curving_gently_t_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": -0.0002,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 47.7
+    },
+    {
+      "cell": "clutter_135_a_person_walks_briskly_curving_gently_to_the_rig_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch_4s/rollouts/clutter_135_a_person_walks_briskly_curving_gently_to_the_rig_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.054,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 110.6
+    },
+    {
+      "cell": "clutter_011_a_person_walks_briskly_curving_gently_to_the_lef_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch_v2/rollouts/clutter_011_a_person_walks_briskly_curving_gently_to_the_lef_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0207,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 54.5
+    },
+    {
+      "cell": "clutter_056_a_person_walks_at_a_steady_pace_and_ducks_down_l_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch_v2/rollouts/clutter_056_a_person_walks_at_a_steady_pace_and_ducks_down_l_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "excessive_self_contact"
+      ],
+      "drift_mps": 0.0871,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 945.3
+    },
+    {
+      "cell": "clutter_061_a_person_walks_briskly_and_ducks_down_low_to_pas_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch_v2/rollouts/clutter_061_a_person_walks_briskly_and_ducks_down_low_to_pas_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0318,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 235.6
+    },
+    {
+      "cell": "clutter_073_a_person_walks_backwards_at_a_steady_pace_curvin_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch_v2/rollouts/clutter_073_a_person_walks_backwards_at_a_steady_pace_curvin_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0111,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 95.2
+    },
+    {
+      "cell": "clutter_135_a_person_walks_briskly_curving_gently_to_the_rig_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch_v2/rollouts/clutter_135_a_person_walks_briskly_curving_gently_to_the_rig_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "accepted",
+      "reasons": [],
+      "drift_mps": 0.0739,
+      "overhead_n": 0.0,
+      "lateral_n": 0.0,
+      "self_n": 173.0
+    },
+    {
+      "cell": "clutter_147_a_person_walks_slowly_forward_squats_down_to_pic_s0_s0",
+      "path": "/data/robotixx/groot-wbc-kimodo-m0/taxonomy/batch_v2/rollouts/clutter_147_a_person_walks_slowly_forward_squats_down_to_pic_s0_s0/trajectories/000000.trajectory.pkl",
+      "outcome": "rejected",
+      "reasons": [
+        "disallowed_robot_contact"
+      ],
+      "drift_mps": 0.0439,
+      "overhead_n": 206.1,
+      "lateral_n": 1776.6,
+      "self_n": 87.1
+    }
+  ]
+}
