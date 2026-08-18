@@ -86,6 +86,16 @@ class ContactDecomposition:
     external_lateral_by_frame: np.ndarray
     #: (T,) max unpaired non-foot *upward* force -- support load on a non-foot body.
     external_support_by_frame: np.ndarray
+    #: (T,) max unpaired non-foot *downward* force -- something above pressing the robot down.
+    #:
+    #: This channel exists because the lateral test alone cannot see an overhead collision. A
+    #: crouch squeezing under a shelf was pushed down on ``torso_link`` at 1017.4 N with a
+    #: horizontal component of exactly 0.0, so ``disallowed_robot_contact`` stayed silent and the
+    #: episode was rejected only for the drift that followed. A milder jam would have been
+    #: accepted outright -- a false positive in precisely the overhead regime the corpus is built
+    #: to supply. Sign is what separates this from the reason the lateral test existed: the floor
+    #: holding up a knee pushes +z, an obstacle overhead pushes -z.
+    external_overhead_by_frame: np.ndarray
     #: Body-name pairs observed in self-contact, ordered and de-duplicated.
     self_contact_pairs: tuple[tuple[str, str], ...]
     #: Body names carrying unpaired non-foot force above the pairing tolerance.
@@ -110,6 +120,20 @@ class ContactDecomposition:
         if not self.self_contact_by_frame.size:
             return 0
         return int(np.argmax(self.self_contact_by_frame))
+
+    @property
+    def max_overhead_contact(self) -> float:
+        return (
+            float(self.external_overhead_by_frame.max())
+            if self.external_overhead_by_frame.size
+            else 0.0
+        )
+
+    @property
+    def max_overhead_contact_frame(self) -> int:
+        if not self.external_overhead_by_frame.size:
+            return 0
+        return int(np.argmax(self.external_overhead_by_frame))
 
     @property
     def max_lateral_contact(self) -> float:
@@ -147,6 +171,8 @@ class ContactDecomposition:
             "max_external_contact_frame": self.max_external_contact_frame,
             "max_lateral_contact_force_n": self.max_lateral_contact,
             "max_lateral_contact_frame": self.max_lateral_contact_frame,
+            "max_overhead_contact_force_n": self.max_overhead_contact,
+            "max_overhead_contact_frame": self.max_overhead_contact_frame,
             "max_support_contact_force_n": self.max_support_contact,
             "self_contact_pairs": [list(pair) for pair in self.self_contact_pairs],
             "external_contact_bodies": list(self.external_contact_bodies),
@@ -190,6 +216,7 @@ def decompose_contact_forces(
     self_by_frame = np.zeros(frame_count, dtype=np.float64)
     external_by_frame = np.zeros(frame_count, dtype=np.float64)
     lateral_by_frame = np.zeros(frame_count, dtype=np.float64)
+    overhead_by_frame = np.zeros(frame_count, dtype=np.float64)
     support_by_frame = np.zeros(frame_count, dtype=np.float64)
     pairs: set[tuple[str, str]] = set()
     external_bodies: set[str] = set()
@@ -222,12 +249,16 @@ def decompose_contact_forces(
             magnitude = float(magnitudes[frame, body])
             vector = frame_forces[body]
             lateral = float(math.hypot(vector[0], vector[1]))
+            overhead = float(max(-vector[2], 0.0))
             external_by_frame[frame] = max(external_by_frame[frame], magnitude)
             lateral_by_frame[frame] = max(lateral_by_frame[frame], lateral)
             support_by_frame[frame] = max(support_by_frame[frame], float(max(vector[2], 0.0)))
-            # Only a lateral push marks a body as having struck the scene; a purely
-            # upward reaction is the floor holding a knee or hand up.
-            if lateral > pair_atol:
+            overhead_by_frame[frame] = max(overhead_by_frame[frame], overhead)
+            # A lateral push or a downward push marks a body as having struck the scene. A purely
+            # *upward* reaction is the floor holding a knee or hand up, which is why the sign
+            # matters: excluding all vertical force to exclude the settling load also excluded
+            # every overhead collision.
+            if lateral > pair_atol or overhead > pair_atol:
                 external_bodies.add(names[body])
 
     return ContactDecomposition(
@@ -235,6 +266,7 @@ def decompose_contact_forces(
         external_contact_by_frame=external_by_frame,
         external_lateral_by_frame=lateral_by_frame,
         external_support_by_frame=support_by_frame,
+        external_overhead_by_frame=overhead_by_frame,
         self_contact_pairs=tuple(sorted(pairs)),
         external_contact_bodies=tuple(sorted(external_bodies)),
         self_contact_events=events,

@@ -397,3 +397,56 @@ def test_near_horizontal_torso_is_a_fall_even_if_commanded():
 
     assert not report.accepted
     assert "fall_root_tilt" in report.rejection_reasons
+
+
+# ---- overhead collisions -------------------------------------------------------------------
+
+def test_a_downward_push_on_a_nonfoot_body_is_a_collision():
+    """The defect this channel was added for.
+
+    A crouch squeezing under a shelf was pushed down on ``torso_link`` at 1017.4 N with a
+    horizontal component of exactly 0.0. The lateral test could not see it, so the episode was
+    rejected only for the drift that followed -- meaning a milder jam would have been accepted, in
+    exactly the overhead regime the corpus exists to supply.
+    """
+    names = ("torso_link", "left_ankle_roll_link")
+    forces = np.zeros((3, 2, 3))
+    forces[1, 0, 2] = -1017.4          # shelf pressing the torso down
+    forces[1, 1, 2] = 409.8            # floor holding the foot up
+
+    result = decompose_contact_forces(
+        forces, names, foot_body_names=("left_ankle_roll_link",)
+    )
+    assert result.max_overhead_contact == pytest.approx(1017.4)
+    assert result.max_overhead_contact_frame == 1
+    assert result.max_lateral_contact == pytest.approx(0.0)
+    assert "torso_link" in result.external_contact_bodies
+
+
+def test_the_floor_holding_a_knee_up_is_still_not_a_collision():
+    """The reason the lateral-only test existed, which the fix must not undo.
+
+    Dropping the robot into a scene puts a large *upward* load on the hips. Sign is what keeps
+    these two apart, so an upward push must leave the overhead channel at zero.
+    """
+    names = ("right_hip_roll_link",)
+    forces = np.zeros((2, 1, 3))
+    forces[0, 0, 2] = 237.4            # settling load, upward
+
+    result = decompose_contact_forces(forces, names, foot_body_names=())
+    assert result.max_overhead_contact == pytest.approx(0.0)
+    assert result.max_support_contact == pytest.approx(237.4)
+    assert result.external_contact_bodies == ()
+
+
+def test_self_contact_is_not_read_as_an_overhead_collision():
+    """Two bodies pressing on each other cancel by Newton's third law, including vertically."""
+    names = ("left_wrist_yaw_link", "left_hip_roll_link")
+    forces = np.zeros((1, 2, 3))
+    forces[0, 0] = (0.0, 0.0, -300.0)
+    forces[0, 1] = (0.0, 0.0, 300.0)
+
+    result = decompose_contact_forces(forces, names, foot_body_names=())
+    assert result.max_overhead_contact == pytest.approx(0.0)
+    assert result.max_self_contact == pytest.approx(300.0)
+    assert result.external_contact_bodies == ()

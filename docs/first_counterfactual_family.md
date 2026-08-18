@@ -29,15 +29,23 @@ The midpoint is a guess and it was the wrong one: it caught the leading edge of 
 rather than the duck. Placing the obstacle where the two motions actually differ tripled the
 window and turned a 3 N graze into a firm collision. The "negative is marginal by
 construction" caveat recorded against the first family was a property of that placement, not
-of the method.
+of the method — and, as the correction below records, it was also wrong on its own terms: the
+"marginal" cell was pressing the torso down at 409.3 N, which the gate was not yet measuring.
 
 **Penetration depth, not clearance, is the number to tune against.** Clearance saturates at
 −0.068 m — the torso capsule's radius — the moment the capsule is engulfed, so it cannot say
 how deep a collision is. The height the shelf would have to rise to stop touching does not
-saturate, and it tracks force: 27 mm gave 3.0 N, 89 mm gave 137.2 N. A 3.3× penetration
-bought an 18× force, so the boundary margin is a real knob and it trades a negative that is
-too weak to be convincing against one violent enough to be a crash rather than a failure.
-89 mm sits in a good place — decisive, and the robot does not fall.
+saturate, which is why it is the quantity to place families against.
+
+> **Correction (2026-08-18).** This section previously claimed penetration *tracks* force —
+> "27 mm gave 3.0 N, 89 mm gave 137.2 N, a 3.3× penetration bought an 18× force" — and built a
+> graze-versus-crash tuning story on it. Both are withdrawn. Those figures are the **lateral**
+> component only, and for an obstacle *above* the robot the dominant force is vertical: the shelf
+> presses the torso down. Measured on the overhead component, the same two families read
+> **409.3 N and 470.5 N** — a 3.3× penetration buying **1.15×** force. Force is close to
+> insensitive to penetration in this range, so the boundary margin is not the knob this section
+> described. The gate could not see the overhead component at all until it was added; see
+> `contact_decomposition.py`.
 
 ## What is and is not being claimed
 
@@ -69,11 +77,15 @@ hold.**
 | p2 | −12 mm, +18 mm, −0.8° | holds |
 | p3 | +8 mm, −15 mm, +1.0° | holds |
 
-One number moves a great deal and is worth reporting for that reason: the contact force on
-the failing cell reads 126.8, 658.3 and 95.5 N across the three jitters, against 137.2 N
-unperturbed. A centimetre of placement decides *how hard* the torso meets the shelf. It does
-not decide *whether* it does — the verdict is identical in every case. That is what makes the
-family robust and also why the force should never be quoted as a property of the family.
+The verdict is identical in every case, which is what makes the family robust.
+
+The **lateral** force on the failing cell reads 126.8, 658.3 and 95.5 N across the three jitters
+against 137.2 N unperturbed — a 6.9× spread that this document once presented as "a centimetre of
+placement decides how hard the torso meets the shelf". On the **overhead** component, which is the
+dominant one for a shelf above the robot, the same four cells read 494.2, 668.5, 626.5 and
+470.5 N: a 1.35× spread. The force is far steadier than the lateral figure suggested, and the
+original reading was largely an artifact of measuring the smaller component. Force still should
+not be quoted as a property of the family, but not for the reason given before.
 
 Beyond all three sits a claim this work does **not** make: that the robot *perceives* the
 scene and *chooses* to duck. Both motions here are prescribed references. What changes is
@@ -86,7 +98,7 @@ scenes in which the same task requires different whole-body behaviours.*
 
 In both families the walking robot's torso meets the shelf, is knocked off its reference, and
 is rejected for `disallowed_robot_contact` and `unstable_reference_drift`. Every other cell
-records **no lateral contact at all** — not a small force, no contacting bodies.
+records **no external contact at all** — neither lateral nor overhead, and no contacting bodies.
 
 ## The rejection is attributable to the shelf
 
@@ -98,6 +110,7 @@ counted:
 | Question | `duck_002` | `duck_003` |
 |---|---|---|
 | First lateral contact | `torso_link`, frame 94, 3.0 N | `torso_link`, frame 113, 55.4 N |
+| Peak overhead push | `torso_link`, frame 106, 409.3 N | `torso_link`, frame 155, 470.5 N |
 | Frame geometry predicted the interference | 92 | 112 |
 | Is the body in the overhead regime's group | yes | yes |
 | Drift onset in the **easy** scene | frame 175 | frame 175 |

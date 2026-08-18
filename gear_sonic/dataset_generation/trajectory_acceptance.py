@@ -346,10 +346,18 @@ def evaluate_locomotion_trajectory(
         contact_body_names,
         foot_body_names=G1_FOOT_CONTACT_BODY_NAMES,
     )
-    # Collision is the *horizontal* push; a purely upward reaction is the floor
-    # supporting a knee or hand during a crouch, which is behaviour, not a crash.
-    max_nonfoot_frame = decomposition.max_lateral_contact_frame
-    max_nonfoot_force = decomposition.max_lateral_contact
+    # Collision is a horizontal push *or* a downward one. A purely upward reaction is the floor
+    # supporting a knee or hand during a crouch, which is behaviour, not a crash -- but excluding
+    # all vertical force to exclude that also excluded every overhead collision. A crouch jammed
+    # under a shelf was pushed down on torso_link at 1017.4 N with a horizontal component of
+    # exactly 0.0, and this gate stayed silent; the episode was caught only by the drift that
+    # followed, so a milder jam would have been accepted. Sign separates the two cases.
+    if decomposition.max_overhead_contact > decomposition.max_lateral_contact:
+        max_nonfoot_frame = decomposition.max_overhead_contact_frame
+        max_nonfoot_force = decomposition.max_overhead_contact
+    else:
+        max_nonfoot_frame = decomposition.max_lateral_contact_frame
+        max_nonfoot_force = decomposition.max_lateral_contact
     max_support_force = decomposition.max_support_contact
     max_self_contact_force = decomposition.max_self_contact
     max_self_contact_frame = decomposition.max_self_contact_frame
