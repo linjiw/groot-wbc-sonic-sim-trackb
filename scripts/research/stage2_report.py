@@ -94,7 +94,6 @@ def report(
     regime: str = "overhead",
 ) -> dict:
     from gear_sonic.dataset_generation.local_adaptation import _half_width
-    from gear_sonic.dataset_generation.reference_payload import payload_from_reference
 
     progress = route_progress(nominal_ref[:, :2])
     core = np.abs(progress - station) <= half_window
