@@ -38,9 +38,18 @@ import numpy as np
 from .motion_prefilter import load_joint_limits
 from .self_intersection import DEFAULT_G1_MJCF
 
-#: Joints the crouch is allowed to use. The waist is deliberately absent: folding at the waist
-#: is how the generator produced its crouches, and it is the one motion the G1 cannot hold.
+#: Leg joints the crouch drives, through the squat coupling.
 CROUCH_JOINTS = ("hip_pitch", "knee", "ankle_pitch")
+
+#: Fraction of waist_pitch's range the adapted clip may end at. The waist is the most
+#: efficient lever on the silhouette -- 109 mm per radian against the squat's 64 at the same
+#: excursion, because the capsule that sets the peak is torso_link and there is no neck joint
+#: to pitch instead -- and it was excluded from earlier versions for a reason that does not
+#: survive inspection: the *generated* crouches rode its limit, holding +0.521 rad against a
+#: +0.520 bound on every frame. Riding a limit is the problem, not using the joint. The bound
+#: here is therefore on the resulting *value*, not on the change: a clip already at +0.294 rad
+#: gets only the headroom that remains.
+WAIST_USE_FRACTION = 0.85
 
 #: Fraction of each joint's half-range the adapted motion may occupy. Leaving headroom is not
 #: cosmetic -- a reference that rides a limit is what the saturation screen rejects, and a
@@ -204,6 +213,12 @@ def local_crouch(
     # Scaling the existing angles instead of adding to them was the earlier mistake: it ties
     # the depth to gait phase, so the drop oscillated between 0.033 m and 0.157 m inside a
     # window where the profile was fully active, and the obstacle sat at an extended moment.
+    waist_index = names.index("waist_pitch_joint") if "waist_pitch_joint" in names else None
+    waist_headroom = 0.0
+    if waist_index is not None and waist_index < count:
+        ceiling_value = WAIST_USE_FRACTION * upper[waist_index]
+        waist_headroom = max(0.0, ceiling_value - float(qpos[:, 7 + waist_index].max()))
+
     coupling = {"hip_pitch": -1.0, "knee": +2.0, "ankle_pitch": -1.0}
     leg_gain = np.zeros(len(legs))
     for position, joint in enumerate(legs):
@@ -218,6 +233,12 @@ def local_crouch(
         out[:, 7 + np.asarray(legs)] = (
             qpos[:, 7 + np.asarray(legs)] + alpha[:, None] * scale * leg_gain[None, :]
         )
+        # Spend the waist's remaining headroom first, since it buys more silhouette per
+        # radian than the legs do, and it costs the legs nothing.
+        if waist_index is not None and waist_headroom > 0.0:
+            out[:, 7 + waist_index] = qpos[:, 7 + waist_index] + alpha * min(
+                waist_headroom, scale * 2.0
+            )
         out[:, 7 : 7 + count] = np.clip(out[:, 7 : 7 + count], centre - half, centre + half)
         # The root follows the legs, per frame, so the feet stay where the nominal put them.
         out[:, 2] += nominal_soles - _sole_height(out, mjcf_path)
