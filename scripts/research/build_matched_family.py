@@ -149,11 +149,17 @@ def main() -> int:
     # over a fixed slice of route progress. The adaptation ramps in and out, so a wider window
     # takes its maximum from the edges where the adapted clip is barely crouched -- which
     # reported a 0.014 m window from a 0.180 m drop.
-    inside = np.abs(nominal[:, 0] - station_x) <= SHELF_DEPTH_M / 2
-    if not inside.any():
-        inside = np.abs(progress - args.station) <= 0.05
+    # The window is where the adaptation is *fully active*, found from the clips themselves.
+    # A fixed slice of route progress takes its maximum from the ramp edges, where the
+    # adaptation has barely begun -- that reported a 14 mm window for a 180 mm adaptation.
+    departure = np.abs(adapted[:, 7:] - nominal[:, 7:]).max(axis=1)
+    active = np.flatnonzero(departure > 0.5 * departure.max())
+    margin = int(len(active) * 0.2)
+    inside = np.zeros(len(nominal), dtype=bool)
+    inside[active[margin:len(active) - margin] if margin else active] = True
     nominal_peak = float(_silhouette(nominal, DEFAULT_G1_MJCF)[inside].max())
     adapted_peak = float(_silhouette(adapted, DEFAULT_G1_MJCF)[inside].max())
+    station_x = float(nominal[inside, 0].mean())
     easy_z = nominal_peak + BOUNDARY_MARGIN_M
     hard_z = adapted_peak + BOUNDARY_MARGIN_M
 
