@@ -35,7 +35,6 @@ from pathlib import Path
 import pickle
 import subprocess
 import sys
-import time
 
 import numpy as np
 
@@ -44,6 +43,10 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from gear_sonic.dataset_generation.episode_outcome import classify_episode  # noqa: E402
+from gear_sonic.dataset_generation.gpu_capacity import (  # noqa: E402
+    GpuUnavailable,
+    wait_for_gpu,
+)
 from gear_sonic.dataset_generation.route_placement import canonical_path_xy  # noqa: E402
 
 PYTHON = Path.home() / "miniconda3/envs/env_isaaclab/bin/python"
@@ -90,40 +93,12 @@ class InfrastructureError(RuntimeError):
     """A rollout did not run. This is never a scientific result.
 
     The first attempt at this verification hit PhysX GPU out-of-memory on a shared card --
-    ``PxgCudaDeviceMemoryAllocator failed to allocate 268435456 bytes`` while another job
-    held 21 GB -- and every one of the twelve cells would have come back empty. Reported as
-    outcomes, that reads as ``perturbation_robust: false``: the family disowned because a
-    neighbour was using the GPU. Isaac also exits zero after printing a fatal traceback, so
-    the exit code cannot be trusted either. An absent rollout must stop the run.
+    a 256 MiB allocation refused while another job held 21 GB -- and every one of the twelve
+    cells would have come back empty. Reported as outcomes, that reads as
+    ``perturbation_robust: false``: the family disowned because a neighbour was using the
+    GPU. Isaac also exits zero after printing a fatal traceback, so the exit code cannot be
+    trusted either. An absent rollout must stop the run.
     """
-
-
-def free_gpu_mib() -> int:
-    """Free memory on the card, or -1 if it cannot be read."""
-    try:
-        result = subprocess.run(
-            ["nvidia-smi", "--query-gpu=memory.free", "--format=csv,noheader,nounits"],
-            capture_output=True, text=True, check=True,
-        )
-        return int(result.stdout.strip().splitlines()[0])
-    except (OSError, ValueError, subprocess.CalledProcessError):
-        return -1
-
-
-def wait_for_gpu(required_mib: int, *, timeout_s: float = 3600.0) -> None:
-    """Block until the card has room, rather than burning cells against a full GPU."""
-    deadline = time.monotonic() + timeout_s
-    while True:
-        free = free_gpu_mib()
-        if free < 0 or free >= required_mib:
-            return
-        if time.monotonic() > deadline:
-            raise InfrastructureError(
-                f"only {free} MiB free after waiting {timeout_s / 60:.0f} min; "
-                f"need {required_mib} MiB"
-            )
-        print(f"    waiting for GPU: {free} MiB free, need {required_mib} MiB")
-        time.sleep(60)
 
 
 def rollout(scene: str, motion: Path, out: Path, log: Path) -> bool:
@@ -239,7 +214,7 @@ def main() -> int:
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
-    except InfrastructureError as error:
+    except (InfrastructureError, GpuUnavailable) as error:
         print(f"\nINFRASTRUCTURE FAILURE: {error}")
         print("No verdict written -- this says nothing about the family.")
         raise SystemExit(2) from error
