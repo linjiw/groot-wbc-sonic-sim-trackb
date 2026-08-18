@@ -15,9 +15,7 @@ from gear_sonic.dataset_generation.local_adaptation import (
 )
 from gear_sonic.dataset_generation.self_intersection import DEFAULT_G1_MJCF
 
-pytestmark = pytest.mark.skipif(
-    not Path(DEFAULT_G1_MJCF).exists(), reason="G1 MJCF not present"
-)
+pytestmark = pytest.mark.skipif(not Path(DEFAULT_G1_MJCF).exists(), reason="G1 MJCF not present")
 
 
 def walk(frames: int = 90) -> np.ndarray:
@@ -27,7 +25,7 @@ def walk(frames: int = 90) -> np.ndarray:
     qpos[:, 2] = 0.74
     qpos[:, 3] = 1.0
     phase = np.linspace(0.0, 6 * np.pi, frames)
-    qpos[:, 7] = 0.25 * np.sin(phase)          # left hip pitch
+    qpos[:, 7] = 0.25 * np.sin(phase)  # left hip pitch
     qpos[:, 10] = 0.30 + 0.20 * np.sin(phase)  # left knee
     qpos[:, 13] = 0.25 * np.sin(phase + np.pi)
     qpos[:, 16] = 0.30 + 0.20 * np.sin(phase + np.pi)
@@ -36,12 +34,13 @@ def walk(frames: int = 90) -> np.ndarray:
 
 # ---- route progress and the profile -------------------------------------------------------
 
+
 def test_progress_is_path_length_not_frame_index():
     """An obstacle sits at a place. Two motions of equal duration reach it at different
     frames, so a frame-indexed window would centre the adaptation somewhere else."""
     xy = np.zeros((100, 2))
-    xy[:50, 0] = np.linspace(0.0, 0.5, 50)      # slow first half
-    xy[50:, 0] = np.linspace(0.5, 4.0, 50)      # fast second half
+    xy[:50, 0] = np.linspace(0.0, 0.5, 50)  # slow first half
+    xy[50:, 0] = np.linspace(0.5, 4.0, 50)  # fast second half
     progress = route_progress(xy)
     assert progress[0] == pytest.approx(0.0)
     assert progress[-1] == pytest.approx(1.0)
@@ -76,6 +75,7 @@ def test_the_adaptation_is_local_rather_than_whole_route():
 
 
 # ---- what must not change -----------------------------------------------------------------
+
 
 def test_the_root_path_and_heading_are_untouched():
     """Both motions must walk the same line, or the scene separated two journeys rather than
@@ -118,6 +118,7 @@ def test_frames_outside_the_window_are_bit_identical_to_the_nominal():
 
 # ---- what it achieves ----------------------------------------------------------------------
 
+
 def test_a_deeper_target_produces_a_deeper_crouch_until_the_cap_binds():
     """Below the excursion cap the target is honoured; above it the clip is capped and says
     so, rather than reaching the target through a motion the robot cannot hold on to its
@@ -155,9 +156,9 @@ def test_the_silhouette_is_a_capsule_surface_and_not_a_joint_centre():
     _, report = local_crouch(nominal, 0.55, target_drop_m=0.15)
     payload = payload_from_reference(nominal)
     highest_link = float(np.asarray(payload["body_pos_w"])[:, :, 2].max())
-    assert report.nominal_silhouette_m > highest_link, (
-        "the silhouette must clear the highest link origin by a capsule radius"
-    )
+    assert (
+        report.nominal_silhouette_m > highest_link
+    ), "the silhouette must clear the highest link origin by a capsule radius"
 
 
 def test_bad_arguments_are_refused():
@@ -171,11 +172,13 @@ def test_bad_arguments_are_refused():
 
 # ---- arm tuck ------------------------------------------------------------------------------
 
+
 def swinging_arms(frames: int = 90) -> np.ndarray:
     """A walk whose arms swing out to the sides, so there is width to take in."""
     qpos = walk(frames)
     phase = np.linspace(0.0, 6 * np.pi, frames)
     from gear_sonic.dataset_generation.motion_prefilter import load_joint_limits
+
     names, _ = load_joint_limits(DEFAULT_G1_MJCF)
     for index, name in enumerate(names[:29]):
         if "shoulder_roll" in name:
@@ -279,3 +282,87 @@ def test_the_crouch_leaves_the_waist_alone_unless_asked():
 
     _, spent = local_crouch(clip, 0.55, target_drop_m=0.08, waist_use_fraction=0.85)
     assert spent.waist_change_rad > 0.0
+
+
+# ---- critical-side arm tuck ----------------------------------------------------------------
+
+
+def test_a_one_sided_tuck_moves_only_that_side():
+    """A lateral obstacle is usually one-sided, so tucking both arms pays twice for one clearance."""
+    from gear_sonic.dataset_generation.local_adaptation import load_joint_limits, local_arm_tuck
+
+    clip = asymmetric_walk()
+    names, _ = load_joint_limits(DEFAULT_G1_MJCF)
+    adapted, _ = local_arm_tuck(clip, 0.55, target_reduction_m=0.04, side="left")
+
+    changed = np.abs(adapted[:, 7:] - clip[:, 7:]).max(axis=0) > 1e-9
+    for index in np.flatnonzero(changed):
+        if index < len(names):
+            assert not names[index].startswith("right_"), names[index]
+
+
+def test_the_one_sided_tuck_is_a_smaller_edit_for_the_same_reduction():
+    """Measured on three real nominals: half the joints, up to 47% less excursion, same
+    reduction. If a bilateral tuck ever became the smaller edit, the operator would be wrong."""
+    from gear_sonic.dataset_generation.local_adaptation import local_arm_tuck
+
+    clip = asymmetric_walk()
+    _, both = local_arm_tuck(clip, 0.55, target_reduction_m=0.04, side="both")
+    _, one = local_arm_tuck(clip, 0.55, target_reduction_m=0.04, side="left")
+    assert one.max_joint_change_rad <= both.max_joint_change_rad + 1e-9
+
+
+def asymmetric_walk(frames: int = 90) -> np.ndarray:
+    """A walk whose arms swing out of phase, so the two sides are genuinely different.
+
+    ``walk()`` leaves the arms at their default pose, which is left/right symmetric -- on that clip
+    the signed and symmetric half-widths agree and a side-specific test proves nothing.
+    """
+    qpos = walk(frames)
+    phase = np.linspace(0.0, 6 * np.pi, frames)
+    names, _ = _limits_names()
+    for index, name in enumerate(names):
+        # Only the left arm abducts. Rolling both shoulders outward -- even with opposite signs,
+        # since the joint axes mirror -- leaves the robot symmetric, and the signed and symmetric
+        # half-widths then agree on every frame.
+        if "shoulder_roll" in name and name.startswith("left_"):
+            qpos[:, 7 + index] += 0.45 + 0.25 * np.sin(phase)
+    return qpos
+
+
+def _limits_names():
+    from gear_sonic.dataset_generation.local_adaptation import load_joint_limits
+
+    return load_joint_limits(DEFAULT_G1_MJCF)
+
+
+def test_a_one_sided_tuck_is_scored_on_its_own_side():
+    """Scored symmetrically, a left-side reduction vanishes whenever the right arm is the wider
+    one -- which is half the gait cycle, so the operator would bisect against noise."""
+    from gear_sonic.dataset_generation.local_adaptation import (
+        _half_width,
+        _signed_half_widths,
+        local_arm_tuck,
+    )
+
+    # The tuck is applied to the *narrower* side here, which is the only case where the two
+    # measures can disagree: when the left arm is the widest body, the left extent and the
+    # symmetric maximum are the same number by construction, so a left-side test proves nothing.
+    # An obstacle on the right is cleared by the right extent, and dilution by the swinging left
+    # arm is exactly what the symmetric measure would introduce.
+    clip = asymmetric_walk()
+    adapted, report = local_arm_tuck(clip, 0.55, target_reduction_m=0.02, side="right")
+    _, right_nominal = _signed_half_widths(clip, DEFAULT_G1_MJCF)
+    _, right_adapted = _signed_half_widths(adapted, DEFAULT_G1_MJCF)
+
+    assert report.nominal_half_width_m == pytest.approx(float(right_nominal.max()), abs=1e-9)
+    assert report.adapted_half_width_m == pytest.approx(float(right_adapted.max()), abs=1e-9)
+    symmetric = _half_width(clip, DEFAULT_G1_MJCF)
+    assert float(right_nominal.max()) < float(symmetric.max()) - 1e-3
+
+
+def test_an_unknown_side_is_refused():
+    from gear_sonic.dataset_generation.local_adaptation import local_arm_tuck
+
+    with pytest.raises(ValueError, match="side must be"):
+        local_arm_tuck(walk(), 0.55, target_reduction_m=0.04, side="port")

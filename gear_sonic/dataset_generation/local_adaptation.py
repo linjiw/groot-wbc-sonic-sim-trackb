@@ -397,6 +397,41 @@ def _half_width(qpos: np.ndarray, mjcf_path) -> np.ndarray:
     return (np.abs(np.einsum("tcd,td->tc", offsets, lateral)) + radii[None, :]).max(axis=1)
 
 
+def _signed_half_widths(qpos: np.ndarray, mjcf_path) -> tuple[np.ndarray, np.ndarray]:
+    """Per-frame extent to the robot's left and right of its heading, separately.
+
+    The symmetric figure takes a maximum over both sides and discards which side produced it.
+    Arms swing out of phase, so at any station one side is wide while the other is not, and the
+    symmetric number reports the wide one for both -- which dilutes a genuinely one-sided
+    reduction to nothing. A one-sided obstacle is the right shape for an arm tuck, so the tuck
+    needs the sides kept apart.
+
+    Returns ``(left, right)``, both positive.
+    """
+    from .reference_payload import payload_from_reference
+    from .swept_volume import G1_COLLISION_CAPSULES, body_capsules_world
+
+    payload = payload_from_reference(qpos, mjcf_path=mjcf_path)
+    root = np.asarray(payload["root_pos_w"], dtype=np.float64)
+    quat = np.asarray(payload["root_quat_w"], dtype=np.float64)
+    w, x, y, z = (quat[:, i] for i in range(4))
+    yaw = np.arctan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
+    lateral = np.stack([-np.sin(yaw), np.cos(yaw)], axis=1)
+
+    starts, ends, radii, _ = body_capsules_world(
+        np.asarray(payload["body_pos_w"], dtype=np.float64),
+        np.asarray(payload["body_quat_w"], dtype=np.float64),
+        list(payload["body_names"]),
+        capsules=G1_COLLISION_CAPSULES,
+    )
+    centres = 0.5 * (starts + ends)
+    offsets = centres[:, :, :2] - root[:, None, :2]
+    signed = np.einsum("tcd,td->tc", offsets, lateral)
+    left = (signed + radii[None, :]).max(axis=1)
+    right = (-signed + radii[None, :]).max(axis=1)
+    return np.maximum(left, 0.0), np.maximum(right, 0.0)
+
+
 def local_arm_tuck(
     nominal_qpos: np.ndarray,
     station_fraction: float,
@@ -406,9 +441,16 @@ def local_arm_tuck(
     ramp: float = DEFAULT_RAMP,
     range_keep: float = DEFAULT_RANGE_KEEP,
     max_excursion: float = MAX_TUCK_EXCURSION_RAD,
+    side: str = "both",
     mjcf_path: str | Path = DEFAULT_G1_MJCF,
 ) -> tuple[np.ndarray, LocalTuckReport]:
     """Draw the arms in toward the torso locally, narrowing the silhouette.
+
+    ``side`` selects which arm moves: ``"both"``, ``"left"`` or ``"right"``. A lateral obstacle is
+    usually one-sided -- a rack, a cabinet edge, a wall protrusion -- so tucking only the arm
+    facing it is the smaller edit: fewer joints leave their reference, the other arm keeps its
+    natural swing, and the measurement matches, since a one-sided obstacle is cleared by the
+    signed half-width on its own side rather than by the symmetric maximum over both.
 
     The lateral counterpart to :func:`local_crouch`, and a deliberately easier operator: the
     root, the legs and the contact schedule are untouched, so the only thing a tracker has to
@@ -429,15 +471,32 @@ def local_arm_tuck(
 
     names, limits = load_joint_limits(mjcf_path)
     count = min(qpos.shape[1] - 7, limits.shape[0])
-    arms = [i for i, name in enumerate(names[:count]) if any(key in name for key in TUCK_JOINTS)]
+    if side not in ("both", "left", "right"):
+        raise ValueError(f"side must be 'both', 'left' or 'right'; got {side!r}")
+    arms = [
+        i
+        for i, name in enumerate(names[:count])
+        if any(key in name for key in TUCK_JOINTS)
+        and (side == "both" or name.startswith(f"{side}_"))
+    ]
     legs = [i for i, name in enumerate(names[:count]) if any(key in name for key in CROUCH_JOINTS)]
     if not arms:
-        raise ValueError("no arm joints found in the model")
+        raise ValueError(f"no arm joints found for side={side!r}")
 
     alpha = adaptation_profile(
         route_progress(qpos[:, :2]), station_fraction, window=window, ramp=ramp
     )
-    nominal_width = _half_width(qpos, mjcf_path)
+
+    # A one-sided tuck must be judged on its own side. Scored symmetrically, a reduction on the
+    # left is hidden whenever the right arm happens to be the wider one at that station, which is
+    # half the gait cycle.
+    def width_of(clip: np.ndarray) -> np.ndarray:
+        if side == "both":
+            return _half_width(clip, mjcf_path)
+        left, right = _signed_half_widths(clip, mjcf_path)
+        return left if side == "left" else right
+
+    nominal_width = width_of(qpos)
     lower, upper = limits[:count, 0], limits[:count, 1]
     centre = 0.5 * (lower + upper)
     half = 0.5 * (upper - lower) * range_keep
@@ -480,7 +539,7 @@ def local_arm_tuck(
                 trial[:, 7 + joint] = np.clip(
                     trial[:, 7 + joint] + sign * probe_step, lower[joint], upper[joint]
                 )
-            reduction = baseline - float(_half_width(trial, mjcf_path)[active].mean())
+            reduction = baseline - float(width_of(trial)[active].mean())
             if reduction > best_delta:
                 best_delta, best_signs = reduction, list(signs)
         for sign, position in zip(best_signs, members):
@@ -498,14 +557,14 @@ def local_arm_tuck(
     low, high = 0.0, min(1.5, ceiling)
     for _ in range(10):
         middle = 0.5 * (low + high)
-        reduction = float((nominal_width - _half_width(build(middle), mjcf_path)).max())
+        reduction = float((nominal_width - width_of(build(middle))).max())
         if reduction < target_reduction_m:
             low = middle
         else:
             high = middle
     scale = 0.5 * (low + high)
     adapted = build(scale)
-    adapted_width = _half_width(adapted, mjcf_path)
+    adapted_width = width_of(adapted)
 
     return adapted, LocalTuckReport(
         frames=len(qpos),
