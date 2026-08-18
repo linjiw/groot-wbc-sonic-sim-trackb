@@ -224,5 +224,21 @@ gear_sonic_deploy/local_env.sh
 
 # Frozen evaluation splits are version-controlled on purpose: a test set that lives
 # only on a scratch filesystem cannot be shown to be unchanged.
+# Git will not descend into an excluded directory, so a bare "!gear_sonic/data/splits/" after
+# "data/" above cannot re-include anything -- these paths are tracked because they were force-added
+# once, and the negations only keep them from being re-ignored. Un-excluding each parent in turn is
+# what actually makes the rule work, so that is what the lines below do.
+!gear_sonic/data/
+gear_sonic/data/*
 !gear_sonic/data/splits/
 !gear_sonic/data/splits/**
+!gear_sonic/data/assets/
+gear_sonic/data/assets/*
+!gear_sonic/data/assets/scenes/
+gear_sonic/data/assets/scenes/*
+# Counterfactual scenes are version-controlled deliberately. Each family's claim is a claim about
+# one shelf height in one room, and that geometry lives in the USDA physics loads, not in the
+# manifest describing it. Untracked, every verified family was unreproducible off this machine.
+# 15 scenes, 64 KB of plain text.
+!gear_sonic/data/assets/scenes/g1_counterfactual/
+!gear_sonic/data/assets/scenes/g1_counterfactual/**
