@@ -221,3 +221,8 @@ models/
 # Local deployment/environment overrides
 .env.groot.local
 gear_sonic_deploy/local_env.sh
+
+# Frozen evaluation splits are version-controlled on purpose: a test set that lives
+# only on a scratch filesystem cannot be shown to be unchanged.
+!gear_sonic/data/splits/
+!gear_sonic/data/splits/**
