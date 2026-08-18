@@ -65,6 +65,70 @@ without any rollout, so testing whether a rephrased prompt produces a real duck 
 rather than the six GPU rollouts a family costs. Measuring which phrasings work should come
 before spending rollouts on families the corpus cannot yet support.
 
-The lateral regime has not been mined yet and may be in better shape — `side_step` scored 6/6
-on semantic validity, the only family that did. That makes lateral, not floor, the right
-second regime to attempt.
+## Mining all three regimes: three disjoint families exist, against a target of fifteen
+
+| Regime | Viable pairs | Distinct adapted | **Mutually disjoint families** |
+|---|---|---|---|
+| overhead | 5 | 2 | **2** |
+| lateral | 3 | 3 | **1** |
+| floor | 0 | 0 | **0** |
+
+Disjoint is the number that counts. The overhead pairs reuse one adapted motion four times
+and the lateral pairs reuse one nominal motion three times, so counting pairs overstates the
+corpus by more than double. **Three independent families exist in total**, against a plan
+target of five per regime.
+
+## `side_step` does not serve the lateral regime, and that was a wrong assumption of mine
+
+It was reasonable to expect lateral to be the healthy regime: `side_step` is the one
+behaviour that scored 6/6 on semantic validity. It contributes nothing. Pairing each of the
+six side-steps against each plain walk and counting why the pair is refused puts the reason
+beyond doubt — the dominant rejection, 60 of them, is `min_half_width_m spread`.
+
+Side-stepping is lateral *translation*. Passing a narrow gap requires width *reduction* —
+tucking the arms, rotating the torso, turning a shoulder into the gap. A robot side-stepping
+through a doorway is exactly as wide as one walking through it. The behaviour label and the
+geometry regime look like they match and do not.
+
+## The taxonomy has no mode that narrows the robot
+
+Reading the 14 body modes against the three regimes explains every number above:
+
+| Regime | Modes that target it | Disjoint families |
+|---|---|---|
+| overhead | `duck_under`, `crouch_walk`, `crouch_deep` | 2 |
+| lateral | **none** | 1, and accidental |
+| floor | `step_over` (0/7 semantically valid) | 0 |
+
+Not one of the fourteen asks the robot to make itself narrower. `carry_walk` does the
+opposite — it *widens* the silhouette, which is why `clutter_126`, a carry motion, is the
+nominal in all three lateral pairs. The single lateral family that exists is an accident: a
+duck and a pause-walk happen to be narrower than someone carrying a box, not because either
+was asked to squeeze through anything.
+
+So the taxonomy was built around behaviour names while the counterfactual method needs
+motions that differ along a named geometric axis. Those are different design targets, and
+the second one was never stated when the taxonomy was written.
+
+## What this changes in the plan
+
+The prompt-taxonomy feedback loop was ranked P1 as a corpus-quality improvement. It is
+actually the **binding constraint on family scaling**, and it needs two distinct things:
+
+1. **Fidelity** — make the existing modes produce their behaviour. `duck_under` is 3/7 and
+   `step_over` is 0/7; the overhead ceiling of 2 and the floor ceiling of 0 are those two
+   numbers.
+2. **Coverage** — add modes that target a geometric axis the taxonomy does not reach. An
+   arm-tuck or shoulder-turn mode is the entire lateral regime, and there is currently no
+   prompt for it.
+
+Both are cheap to test. The predicates and the envelope both grade a *generated reference*
+with no rollout at all, so trying a rephrasing or a new mode costs seconds against the six
+GPU rollouts a family costs. Measuring which phrasings produce a real duck, a real step-over
+and a real arm-tuck should come before spending rollouts on families the corpus cannot yet
+support.
+
+The station refinement is what makes this measurable, and it is not a small correction. The
+optimistic screen overestimated the one measured overhead window by 3.7x, and on one lateral
+pair it reported +0.044 m where refinement returned **−0.020 m** — the wrong sign, not merely
+the wrong magnitude.

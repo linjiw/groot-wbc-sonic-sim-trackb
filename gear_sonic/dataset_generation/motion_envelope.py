@@ -327,3 +327,76 @@ def best_overhead_station(
         return float("nan"), 0.0
     best = int(np.nanargmax(spread))
     return float(stations[best]), float(spread[best])
+
+
+def half_width_at_stations(
+    payload: Mapping,
+    stations: np.ndarray,
+    *,
+    span: float = DEFAULT_STATION_SPAN_M,
+    capsules: Mapping[str, Sequence] = G1_COLLISION_CAPSULES,
+) -> np.ndarray:
+    """Widest the robot gets, across its direction of travel, inside each station's slab.
+
+    The lateral analogue of :func:`silhouette_at_stations`, and it needs to be a separate
+    measurement for the same reason: a motion that tucks its arms halfway along its route is
+    no narrower than a full arm swing at the station where the gap actually is.
+
+    Width is measured about the root and across the heading, not about the world y axis. The
+    G1's measured half-width runs from 0.273 m with arms tucked to 0.664 m at peak arm
+    swing, so which frame and which axis are used decides the answer.
+    """
+    root = np.asarray(payload["root_pos_w"], dtype=np.float64)
+    yaw = _heading(np.asarray(payload["root_quat_w"], dtype=np.float64))
+    starts, ends, radii, _ = body_capsules_world(
+        np.asarray(payload["body_pos_w"], dtype=np.float64),
+        np.asarray(payload["body_quat_w"], dtype=np.float64),
+        list(payload["body_names"]),
+        capsules=capsules,
+    )
+    centres = 0.5 * (starts + ends)
+    lateral_axis = np.stack([-np.sin(yaw), np.cos(yaw)], axis=1)
+    offsets = centres[:, :, :2] - root[:, None, :2]
+    widths = np.abs(np.einsum("tcd,td->tc", offsets, lateral_axis)) + radii[None, :]
+    per_frame = widths.max(axis=1)
+
+    peaks = np.full(stations.shape, np.nan)
+    for index, station in enumerate(stations):
+        inside = np.abs(root[:, 0] - station) <= span / 2.0
+        if inside.any():
+            peaks[index] = float(per_frame[inside].max())
+    return peaks
+
+
+def best_lateral_station(
+    nominal_payload: Mapping,
+    adapted_payload: Mapping,
+    *,
+    span: float = DEFAULT_STATION_SPAN_M,
+    resolution_m: float = 0.05,
+    capsules: Mapping[str, Sequence] = G1_COLLISION_CAPSULES,
+) -> tuple[float, float]:
+    """Where along the shared route the lateral window is widest, and how wide."""
+    def route_x(payload):
+        root = np.asarray(payload["root_pos_w"], dtype=np.float64)
+        return float(root[:, 0].min()), float(root[:, 0].max())
+
+    nominal_range, adapted_range = route_x(nominal_payload), route_x(adapted_payload)
+    low = max(nominal_range[0], adapted_range[0])
+    high = min(nominal_range[1], adapted_range[1])
+    if high <= low:
+        return float("nan"), 0.0
+
+    stations = np.arange(low, high + resolution_m, resolution_m)
+    nominal_widths = half_width_at_stations(
+        nominal_payload, stations, span=span, capsules=capsules
+    )
+    adapted_widths = half_width_at_stations(
+        adapted_payload, stations, span=span, capsules=capsules
+    )
+    # The nominal motion must be the wider one for a gap to separate them.
+    spread = nominal_widths - adapted_widths
+    if not np.isfinite(spread).any():
+        return float("nan"), 0.0
+    best = int(np.nanargmax(spread))
+    return float(stations[best]), float(spread[best])

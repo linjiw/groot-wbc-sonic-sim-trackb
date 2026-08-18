@@ -39,10 +39,18 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from gear_sonic.dataset_generation.motion_envelope import (  # noqa: E402
+    best_lateral_station,
     best_overhead_station,
     compute_envelope,
     mine_pairs,
 )
+
+#: Station refiners per regime. Floor has none yet, and says so rather than reporting the
+#: optimistic screen as though it were refined.
+STATION_REFINERS = {
+    "overhead": best_overhead_station,
+    "lateral": best_lateral_station,
+}
 from gear_sonic.dataset_generation.trajectory_segments import (  # noqa: E402
     SegmentError,
     best_evaluable_payload,
@@ -143,8 +151,9 @@ def main() -> int:
     rows = []
     for candidate in ranked:
         station, refined = (float("nan"), float("nan"))
-        if args.regime == "overhead":
-            station, refined = best_overhead_station(
+        refiner = STATION_REFINERS.get(args.regime)
+        if refiner is not None:
+            station, refined = refiner(
                 payloads[candidate.nominal], payloads[candidate.adapted]
             )
         rows.append({
@@ -159,7 +168,7 @@ def main() -> int:
         print(f"{candidate.nominal[:21]:22s}{candidate.adapted[:21]:22s}"
               f"{candidate.spread_m:9.3f}{station:9.2f}{refined:9.3f}")
 
-    if args.regime == "overhead":
+    if args.regime in STATION_REFINERS:
         usable = [row for row in rows if row["refined_window_m"] > 0.05]
         print(f"\n{len(usable)} of {len(rows)} survive station refinement above 0.05 m")
         print("  the screen is deliberately optimistic; this is the number that matters")
