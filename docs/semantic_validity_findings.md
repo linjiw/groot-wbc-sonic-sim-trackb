@@ -48,6 +48,37 @@ That control is the check I failed to run on `stand_to_walk`, where an uncalibra
 threshold produced a confident wrong answer. Running it first is the difference between a
 finding and a bug.
 
+## The absence is in the reference, not the tracking
+
+A natural objection to all of this: perhaps the generator *does* produce the behaviour and the
+controller loses it. Forward kinematics on the reference clips answers it directly, with no
+rollout, and for `step_over` the answer is no.
+
+| trailing-foot swing apex | reference | executed |
+|---|---|---|
+| `step_over` (n = 7) | 0.193–0.226 m, median 0.213 | 0.166–0.180 m, median 0.173 |
+| `walk` (n = 6) | 0.206–0.222 m, median 0.218 | 0.176–0.188 m, median 0.181 |
+| step_over higher than walk? | **p = 0.693** | **p = 0.989** |
+
+Indistinguishable in both domains. The behaviour is absent from what the generator produced,
+so this is a generation failure and not a tracking one, and no amount of controller work
+would recover it.
+
+Tracking does lower the foot — by 0.034 m for a plain walk and 0.039 m for a `step_over`. That
+the two are nearly equal is the point: the controller flattens *everything* by about 35 mm
+rather than failing step-overs selectively.
+
+**The screen is worth having, and it lies in a specific way.** Reference and executed grades
+agree on 16 of 20 episodes, and silhouette peak transfers closely (reference minus executed is
+−0.008 m mean, 0.034 m sd). Every disagreement was `step_over`, and every one was my own
+threshold: `MIN_STEP_APEX_M = 0.18` was calibrated on rollouts and sits *between* the two
+populations, so applied to references it passes nearly everything. For a while that looked
+like evidence the generator had produced a step-over the controller then lost.
+
+That is the same mistake as `stand_to_walk` and `walk_look`, for the third time: a threshold
+applied to a population it was not calibrated on. It is now chosen from the payload's own
+domain, and a reference clip declares itself as one.
+
 ## The families that are genuinely mislabelled
 
 `walk_to_stop` never slows down. Minimum root speed across its accepted episodes is
@@ -81,6 +112,43 @@ Both mistakes have the same shape as the corpus's earlier ones — a measurement
 principled, is applied to a population it was not calibrated on, and produces a confident
 wrong answer. The defence is the same too: check the distribution before believing the
 verdict.
+
+## The generator, not the controller: measured in both domains
+
+Every verdict above was taken from an executed rollout, which cannot separate two very
+different failures — the generator not producing the behaviour, and the controller not
+tracking it. Forward kinematics on the reference clip separates them, and it costs about a
+second per clip against minutes of contended GPU.
+
+For the trailing foot's swing apex, over the same episodes:
+
+| | n | reference (median) | executed (median) |
+|---|---|---|---|
+| `walk` | 6 | 0.206–0.222 m (0.218) | 0.176–0.188 m (0.181) |
+| `step_over` | 7 | 0.193–0.226 m (0.213) | 0.166–0.180 m (0.173) |
+
+**Reference p = 0.693. Executed p = 0.989.** The behaviour is absent in *both*, so
+`step_over` is a generation failure and not a tracking one. The floor geometry regime is
+blocked at the generator, and no amount of controller work reaches it.
+
+Tracking does lower the foot, by a nearly uniform amount: 0.034 m for a plain walk and
+0.039 m for a clip labelled `step_over`. The controller flattens everything; it does not
+single out step-overs.
+
+**That uniform shift nearly produced a false finding.** The executed threshold of 0.18 m
+sits between the two populations, so applied to reference clips it passed almost all of
+them — which read as the generator producing a step-over that the controller then lost.
+Running the walk control in the reference domain is what showed otherwise. The predicate now
+carries a separate, calibrated threshold for references, and the payload declares which
+domain it came from.
+
+It is the third time an absolute threshold applied to a population it was not calibrated on
+has produced a confident wrong answer here, after `stand_to_walk` and the drift gate. The
+defence has been the same every time: measure the control group before believing the verdict.
+
+For the overhead regime the reference screen transfers well — silhouette peak differs from
+executed by −0.008 m on average with a 0.034 m spread — so prompt iteration can be graded
+without rollouts there.
 
 ## What this changes
 
