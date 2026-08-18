@@ -469,6 +469,19 @@ class TrajectoryRecorderTerm(recorder_manager.RecorderTerm):
                     if left_foot_contact_force is not None
                     else 0.0
                 )
+                # Both feet are recorded here, under the contact-force guard. The right one
+                # used to sit inside the `right_foot_ground_contact_force_w` block below,
+                # so whenever the ground-contact sensor was absent -- which is the case for
+                # every bare-plane rollout -- the right foot's scalar was silently dropped
+                # while the left's was kept. Every such episode then failed evaluation with
+                # "missing required field: right_foot_contact_force_n" and was classified
+                # unevaluable, which reads as a recording failure rather than the asymmetry
+                # it was.
+                data["right_foot_contact_force_n"].append(
+                    float(right_foot_contact_force[i])
+                    if right_foot_contact_force is not None
+                    else 0.0
+                )
             if left_foot_ground_contact_force_w is not None:
                 data["left_foot_ground_contact_force_w"].append(
                     left_foot_ground_contact_force_w[i].copy()
@@ -476,11 +489,6 @@ class TrajectoryRecorderTerm(recorder_manager.RecorderTerm):
             if right_foot_ground_contact_force_w is not None:
                 data["right_foot_ground_contact_force_w"].append(
                     right_foot_ground_contact_force_w[i].copy()
-                )
-                data["right_foot_contact_force_n"].append(
-                    float(right_foot_contact_force[i])
-                    if right_foot_contact_force is not None
-                    else 0.0
                 )
 
             # Object state
