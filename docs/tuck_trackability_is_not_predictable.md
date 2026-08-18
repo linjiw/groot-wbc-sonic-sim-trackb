@@ -98,8 +98,18 @@ the robot back toward the room's centre. That is a **room-sizing artifact**, the
 already recorded against an earlier family whose room was sized from one motion while another
 travelled further. The controller tracked x001 perfectly well; the room was too narrow for its path.
 
-So describing x001 as a nominal "the controller could not hold" was wrong, and the arm tuck's yield
-of **1 of 3 valid nominals** rests on a denominator that may be 4.
+So describing x001 as a nominal "the controller could not hold" was wrong. **Re-screened on a
+gradeable empty scene it is accepted** — 0.0 N external contact, drift 0.021 m/s — so the arm
+tuck's denominator is **4, not 3**, and its own tuck has yet to be tested.
+
+That re-screen took two attempts. The first used `--scene plane`, the runner's documented
+obstacle-free control, and every cell came back *unevaluable*: a plane rollout carries no foot
+ground-contact force and no `support_floor_prim_path`, so the acceptance gate never runs. Plane is
+right for swept-volume probing, which needs no verdict; a screen needs one. The scene used now is a
+room with a real floor and the walls pushed 3 m clear of every reference path.
+
+`x002_tuck` was re-screened there too and is **still rejected**, at 26.2 N — that failure is the
+operator's, not the room's.
 
 **The two tuck rejections are not explained by the scene either.** `x000_tuck` contacts `pelvis` at
 44.7 N with the root under the shelf's x-span but at z = 0.75 m, far below the 1.39 m underside;
