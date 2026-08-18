@@ -192,8 +192,12 @@ The audit also corrected three earlier claims, all of which had read the smaller
 
 ### The two operators fail in different ways, and only one is predictable
 
-Cross-motion yield over nominals SONIC accepts on a bare plane — `x001` is excluded because its own
-nominal is rejected at 277.6 N on `left_knee_link`, so adapting it never tested an operator:
+Cross-motion yield over nominals SONIC accepts. One caveat travels with these numbers: the screen
+was run in a *furnished* room rather than on a bare plane, and `x001`'s nominal was excluded on the
+strength of a 277.6 N rejection that turns out to be a wall strike — its root passed 0.21 m from the
+wall face carrying a force of exactly (0.0, 277.6, 0.0) N. **So the tuck's denominator may be 4, and
+a re-screen on a true bare plane is running.** An audit of all 47 graded cells found only x001's two
+within 0.35 m of a wall, so no verified family is affected.
 
 | | crouch | arm tuck |
 |---|---|---|
@@ -226,8 +230,8 @@ line** — roughly three rollouts per usable lateral clip, plus one to screen ea
 The arm tuck is accepted on **1 of 3** valid nominals. Two cheap predictors of *which* one were
 built and both refuted: wrist-to-hip clearance (already negative on every nominal, and its change
 anti-correlates with the verdict at both extremes) and lateral CoM excursion (two cells 0.1 mm
-apart landing on opposite sides of the gate). On bare-plane rollouts the verdict is set entirely by
-**external** contact; self-contact magnitude is not severity — the accepted tuck carries the highest
+apart landing on opposite sides of the gate). The verdict is set entirely by **external** contact;
+self-contact magnitude is not severity — the accepted tuck carries the highest
 self-contact of eight cells, 192.1 N, and the rejected nominal the lowest, 10.9 N.
 
 So trackability is measured per clip, and the 1-in-3 yield is a budget line — roughly three

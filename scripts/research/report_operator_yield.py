@@ -3,7 +3,9 @@
 
 Three counts get conflated easily and mean different things:
 
-* **nominals screened** — how many bare-plane reference rollouts were graded
+* **nominals screened** — how many reference rollouts were graded, which must be on an
+  obstacle-free scene (``--scene plane``); a furnished one cannot separate an untrackable clip
+  from one that does not fit the room
 * **valid nominals** — how many SONIC accepts, and so can test an operator at all
 * **operator yield** — of those, how many the operator survives
 
