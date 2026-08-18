@@ -13,10 +13,10 @@ Produces, per cell: an mp4 of the side view, and a still at the frame the gate f
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 import pickle
 import re
 import sys
-from pathlib import Path
 
 import numpy as np
 
@@ -27,10 +27,9 @@ sys.path.insert(0, str(REPO_ROOT / "scripts" / "research"))
 import matplotlib  # noqa: E402
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-from matplotlib.patches import Circle, Polygon, Rectangle  # noqa: E402
-
 import build_counterfactual_family as cf  # noqa: E402
+from matplotlib.patches import Circle, Polygon, Rectangle  # noqa: E402
+import matplotlib.pyplot as plt  # noqa: E402
 
 from gear_sonic.dataset_generation.episode_outcome import classify_episode  # noqa: E402
 from gear_sonic.dataset_generation.swept_volume import (  # noqa: E402

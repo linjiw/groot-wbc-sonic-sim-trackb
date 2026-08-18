@@ -159,7 +159,7 @@ def main() -> int:
             f'<tr><td class="k">{family["family_id"]}</td>'
             f'<td class="n">{window * 1000:.1f}</td>'
             f'<td class="n">{len(family["scenes"])}</td>'
-            f'<td>{"<b class=ok>verified</b>" if is_verified(family) else "<span class=dim>not verified</span>"}</td>'
+            f"<td>{verified_label}</td>"
             f"<td>{shown}</td></tr>"
         )
 

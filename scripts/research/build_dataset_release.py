@@ -195,9 +195,9 @@ def main() -> int:
                         rendered.mkdir(parents=True, exist_ok=True)
                         shutil.copy2(source, rendered / f"{cell_name}__{label}.mp4")
 
-        verified = cells.get("w_nominal_easy", cells.get(f"{family_id[3:7]}_nominal_easy", {})).get(
-            "status"
-        )
+        # Whether the family is *verified* is decided by the release page's role mapping, which
+        # handles both cell-naming conventions; deciding it here from one convention was how a
+        # count of four survived beside a correct count of three.
         record = {
             "family_id": family_id,
             "geometry": {k: meta[k] for k in meta if k.endswith("_m") or k.endswith("_m_")},
