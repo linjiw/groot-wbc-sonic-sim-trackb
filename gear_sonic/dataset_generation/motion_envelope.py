@@ -410,3 +410,86 @@ def best_lateral_station(
         return float("nan"), 0.0
     best = int(np.nanargmax(spread))
     return float(stations[best]), float(spread[best])
+
+
+def signed_half_widths(
+    payload: Mapping,
+    *,
+    capsules: Mapping[str, Sequence] = G1_COLLISION_CAPSULES,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Per-frame extent to the robot's left and right, separately.
+
+    Symmetric half-width takes a maximum over both sides and throws away which side it came
+    from. Arms swing out of phase, so at any given station one side is typically wide and the
+    other is not, and the symmetric figure reports the wide one for both -- diluting a
+    genuinely one-sided reduction to nothing.
+
+    Returns ``(left, right)``, both positive, measured on capsule surfaces about the root and
+    across the heading.
+    """
+    root = np.asarray(payload["root_pos_w"], dtype=np.float64)
+    quat = np.asarray(payload["root_quat_w"], dtype=np.float64)
+    w, x, y, z = (quat[:, i] for i in range(4))
+    yaw = np.arctan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
+    lateral = np.stack([-np.sin(yaw), np.cos(yaw)], axis=1)
+
+    starts, ends, radii, _ = body_capsules_world(
+        np.asarray(payload["body_pos_w"], dtype=np.float64),
+        np.asarray(payload["body_quat_w"], dtype=np.float64),
+        list(payload["body_names"]), capsules=capsules,
+    )
+    centres = 0.5 * (starts + ends)
+    offsets = centres[:, :, :2] - root[:, None, :2]
+    signed = np.einsum("tcd,td->tc", offsets, lateral)
+    return (signed + radii[None, :]).max(axis=1), (-signed + radii[None, :]).max(axis=1)
+
+
+def best_one_sided_station(
+    nominal_payload: Mapping,
+    adapted_payload: Mapping,
+    *,
+    span: float = DEFAULT_STATION_SPAN_M,
+    resolution_m: float = 0.05,
+    capsules: Mapping[str, Sequence] = G1_COLLISION_CAPSULES,
+) -> tuple[float, str, float]:
+    """Jointly choose the station *and the side* an obstacle should sit on.
+
+    Returns ``(station_x, side, window_m)`` with ``side`` in ``{"left", "right"}``. A one-sided
+    obstacle -- a rack, a cabinet edge, a wall protrusion -- is the right shape for an arm
+    tuck, and searching only symmetric corridors gives up most of the available window before
+    the search begins.
+
+    The window is the *minimum* reduction over the frames inside the obstacle's span, not the
+    maximum: the obstacle has to be cleared on every frame the robot passes it.
+    """
+    def route_x(payload):
+        root = np.asarray(payload["root_pos_w"], dtype=np.float64)
+        return float(root[:, 0].min()), float(root[:, 0].max())
+
+    nominal_range, adapted_range = route_x(nominal_payload), route_x(adapted_payload)
+    low = max(nominal_range[0], adapted_range[0])
+    high = min(nominal_range[1], adapted_range[1])
+    if high - low < span:
+        return float("nan"), "", 0.0
+
+    nominal_left, nominal_right = signed_half_widths(nominal_payload, capsules=capsules)
+    adapted_left, adapted_right = signed_half_widths(adapted_payload, capsules=capsules)
+    nominal_x = np.asarray(nominal_payload["root_pos_w"], dtype=np.float64)[:, 0]
+    adapted_x = np.asarray(adapted_payload["root_pos_w"], dtype=np.float64)[:, 0]
+
+    best = (float("nan"), "", 0.0)
+    for station in np.arange(low, high, resolution_m):
+        inside_nominal = np.abs(nominal_x - station) <= span / 2
+        inside_adapted = np.abs(adapted_x - station) <= span / 2
+        if not inside_nominal.any() or not inside_adapted.any():
+            continue
+        for side, (n_side, a_side) in (
+            ("left", (nominal_left, adapted_left)),
+            ("right", (nominal_right, adapted_right)),
+        ):
+            # What an obstacle on this side sees: the widest the nominal gets against the
+            # widest the adapted gets, both over the frames spent beside it.
+            window = float(n_side[inside_nominal].max() - a_side[inside_adapted].max())
+            if window > best[2]:
+                best = (float(station), side, window)
+    return best

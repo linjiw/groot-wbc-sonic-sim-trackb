@@ -190,3 +190,84 @@ def test_the_regimes_carry_a_direction_each():
     for field, direction in REGIME_FIELD.values():
         assert field.startswith("min_")
         assert direction in (-1, +1)
+
+
+# ---- signed, one-sided envelopes -----------------------------------------------------------
+
+#: Capsules for the two-armed fixture below, keyed by the links it actually records.
+LATERAL_CAPSULES = {
+    "pelvis": (CollisionCapsule(start=(0.0, 0.0, 0.0), end=(0.0, 0.0, 0.0), radius=0.10),),
+    "left_wrist_yaw_link": (
+        CollisionCapsule(start=(0.0, 0.0, 0.0), end=(0.0, 0.0, 0.0), radius=0.04),
+    ),
+    "right_wrist_yaw_link": (
+        CollisionCapsule(start=(0.0, 0.0, 0.0), end=(0.0, 0.0, 0.0), radius=0.04),
+    ),
+}
+
+
+def leaning(frames: int = 60, left: float = 0.30, right: float = 0.10) -> dict:
+    """A body whose two sides are deliberately different widths."""
+    payload = traverse(frames)
+    payload["body_names"] = ["pelvis", "left_wrist_yaw_link", "right_wrist_yaw_link"]
+    bodies = np.zeros((frames, 3, 3))
+    bodies[:, :, 0] = payload["root_pos_w"][:, [0]]
+    bodies[:, 1, 1] = left
+    bodies[:, 2, 1] = -right
+    payload["body_pos_w"] = bodies
+    payload["body_quat_w"] = np.tile(np.array([1.0, 0, 0, 0]), (frames, 3, 1))
+    return payload
+
+
+def test_the_two_sides_are_reported_separately():
+    """The whole point: a symmetric maximum reports the wide side for both."""
+    from gear_sonic.dataset_generation.motion_envelope import signed_half_widths
+
+    left, right = signed_half_widths(leaning(), capsules=LATERAL_CAPSULES)
+    assert left.max() > right.max()
+
+
+def test_both_sides_are_positive_distances():
+    from gear_sonic.dataset_generation.motion_envelope import signed_half_widths
+
+    left, right = signed_half_widths(leaning(), capsules=LATERAL_CAPSULES)
+    assert (left > 0).all() and (right > 0).all()
+
+
+def test_a_one_sided_search_returns_which_side_to_put_the_obstacle_on():
+    from gear_sonic.dataset_generation.motion_envelope import best_one_sided_station
+
+    nominal = leaning(left=0.35, right=0.35)
+    adapted = leaning(left=0.35, right=0.15)      # narrowed on the right only
+    station, side, window = best_one_sided_station(
+        nominal, adapted, span=0.2, capsules=LATERAL_CAPSULES
+    )
+    assert side == "right"
+    assert window > 0.1
+
+
+def test_a_one_sided_reduction_is_invisible_to_the_symmetric_measure():
+    """Why the signed version exists. Narrowing one side leaves the symmetric maximum
+    untouched, so a real and usable reduction reports as zero."""
+    from gear_sonic.dataset_generation.motion_envelope import (
+        best_lateral_station,
+        best_one_sided_station,
+    )
+
+    nominal = leaning(left=0.35, right=0.35)
+    adapted = leaning(left=0.35, right=0.15)
+    _, symmetric = best_lateral_station(nominal, adapted, span=0.2, capsules=LATERAL_CAPSULES)
+    _, _, one_sided = best_one_sided_station(
+        nominal, adapted, span=0.2, capsules=LATERAL_CAPSULES
+    )
+    assert symmetric == pytest.approx(0.0, abs=1e-6)
+    assert one_sided > 0.15
+
+
+def test_routes_that_do_not_overlap_yield_no_station():
+    from gear_sonic.dataset_generation.motion_envelope import best_one_sided_station
+
+    far = leaning()
+    far["root_pos_w"] = far["root_pos_w"] + np.array([100.0, 0.0, 0.0])
+    station, side, window = best_one_sided_station(leaning(), far, capsules=LATERAL_CAPSULES)
+    assert np.isnan(station) and side == "" and window == 0.0
