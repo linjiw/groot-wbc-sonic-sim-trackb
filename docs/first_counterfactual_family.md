@@ -49,7 +49,31 @@ find immediately.
 |---|---|---|
 | 1 | The swept volumes of two executed motions separate, so a geometric window exists | **established** |
 | 2 | The same controller, in the same place, succeeds or fails as that geometry changes | **established, twice** |
-| 3 | The result survives a perturbed start pose rather than one deterministic replay | *being measured* |
+| 3 | The result survives a perturbed start pose rather than one deterministic replay | **established** |
+
+## It is not one deterministic replay
+
+The obvious objection to a family discovered from an executed trajectory is that an obstacle
+was placed on a recorded path and that path then replayed. SONIC rollouts *are* highly
+deterministic under a fixed configuration, which is what makes scene-around-motion generation
+work at all, so the objection deserves an answer rather than a denial.
+
+The 2×2 was re-run from three jittered start poses — 8 to 18 mm of translation and 0.5° to
+1.0° of yaw, small enough that the task is unchanged and large enough that bit-identical
+replay is impossible. **All twelve cells came out as predicted, and all three perturbations
+hold.**
+
+| | jitter | outcome |
+|---|---|---|
+| p1 | +15 mm, +10 mm, +0.5° | holds |
+| p2 | −12 mm, +18 mm, −0.8° | holds |
+| p3 | +8 mm, −15 mm, +1.0° | holds |
+
+One number moves a great deal and is worth reporting for that reason: the contact force on
+the failing cell reads 126.8, 658.3 and 95.5 N across the three jitters, against 137.2 N
+unperturbed. A centimetre of placement decides *how hard* the torso meets the shelf. It does
+not decide *whether* it does — the verdict is identical in every case. That is what makes the
+family robust and also why the force should never be quoted as a property of the family.
 
 Beyond all three sits a claim this work does **not** make: that the robot *perceives* the
 scene and *chooses* to duck. Both motions here are prescribed references. What changes is
