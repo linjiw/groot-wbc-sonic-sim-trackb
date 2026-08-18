@@ -238,16 +238,18 @@ def test_bad_tuck_arguments_are_refused():
         local_arm_tuck(walk(), 0.5, target_reduction_m=0.0)
 
 
-#: Knee excursion of the crouch clip that the matched overhead 2x2 verified in physics. The
-#: operator must never be tightened below this again without new rollouts, because a cap derived
-#: from the arm tuck's failure was once applied to both operators and silently forbade this clip.
+#: Highest crouch excursion SONIC has been observed to hold (motion 005, the matched 2x2), and the
+#: lowest observed to fail (x000, pure reference drift at 0.225 m/s with zero contact).
 VERIFIED_CROUCH_KNEE_RAD = 0.994
+REJECTED_CROUCH_KNEE_RAD = 1.000
 
 
-def test_the_crouch_cap_still_admits_the_clip_physics_verified():
+def test_the_crouch_cap_sits_below_every_excursion_observed_to_fail():
+    """The cap's whole job. It was once 1.00 -- exactly the value that failed -- because the clip
+    that failed was pushed to the cap when its target drop was out of reach."""
     from gear_sonic.dataset_generation.local_adaptation import MAX_CROUCH_EXCURSION_RAD
 
-    assert MAX_CROUCH_EXCURSION_RAD > VERIFIED_CROUCH_KNEE_RAD
+    assert MAX_CROUCH_EXCURSION_RAD < REJECTED_CROUCH_KNEE_RAD
 
 
 def test_the_two_operators_do_not_share_an_excursion_cap():

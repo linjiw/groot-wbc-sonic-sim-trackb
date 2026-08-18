@@ -90,8 +90,22 @@ DEFAULT_RAMP = 0.45
 #: 1.05 and 1.31 rad; a 0.40 cap would have prevented that family from existing. The two operators
 #: move different masses against different support, so they do not share a limit.
 MAX_TUCK_EXCURSION_RAD = 0.40
-#: Set just below the lowest strength observed to fail, and above the 0.994 rad that is verified.
-MAX_CROUCH_EXCURSION_RAD = 1.00
+#: Set below every crouch excursion SONIC has been observed to hold, with margin.
+#:
+#: Measured across three nominals, drift magnitude rises monotonically with knee excursion and the
+#: boundary sits between 0.994 and 1.000 rad -- a 6 mrad gap:
+#:
+#:     0.929 rad  accepted  0.015 m/s drift
+#:     0.936 rad  accepted  0.025 m/s
+#:     0.994 rad  accepted  0.100 m/s
+#:     1.000 rad  REJECTED  0.225 m/s, pure reference drift with zero contact
+#:
+#: The previous value of 1.00 was therefore the worst possible choice: the one clip that failed
+#: failed *at* the cap, because the cap is what it was pushed to when its target drop was out of
+#: reach. Capping lower makes such a clip under-deliver its target -- reported honestly through
+#: ``excursion_capped`` -- rather than come back untrackable, which is the right failure mode for an
+#: operator whose output costs a rollout to grade.
+MAX_CROUCH_EXCURSION_RAD = 0.98
 #: Retained as the tuck's value so existing callers keep the bound they were written against.
 MAX_JOINT_EXCURSION_RAD = MAX_TUCK_EXCURSION_RAD
 

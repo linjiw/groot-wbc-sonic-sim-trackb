@@ -6,6 +6,33 @@ quietly becomes a "finding we always suspected".
 
 ## Open
 
+*(none)*
+
+## P5, confirmed
+
+Registered before the two pending cells returned, and it held — the first of five to do so.
+
+| excursion | motion | outcome | \|drift\| |
+|---|---|---|---|
+| 0.929 rad | x002 | accepted | 0.015 m/s |
+| 0.936 rad | x003 | accepted | 0.025 m/s |
+| 0.994 rad | 005 | accepted | 0.100 m/s |
+| 1.000 rad | x000 | **rejected** | 0.225 m/s |
+
+Drift magnitude rises monotonically with knee excursion across four clips and three different
+nominals, and the boundary sits between 0.994 and 1.000 rad. The reason given in advance for
+expecting this — that the crouch fails by tracking drift where the tuck fails by collision, and
+excursion plausibly governs the former — is the reason it worked. **Crouch yield: 2 of 3 valid
+nominals; tuck: 1 of 3.**
+
+The immediate consequence is that `MAX_CROUCH_EXCURSION_RAD = 1.00` was the worst available choice:
+the single clip that failed failed *at* the cap, because the cap is what a clip gets pushed to when
+its target drop is out of reach. Tightened to 0.98, which costs x000 only 2.6 mm of its 72.2 mm drop
+and is being verified by rollout — 0.980 rad is just 20 mrad under the value that failed, so if x000
+is still rejected the boundary is motion-dependent and lower still.
+
+### The original registration, unedited
+
 **P5 — crouch trackability is set by knee excursion (registered 2026-08-18, 2 of 3 cells pending).**
 Motion 005's crouch at 0.994 rad is accepted; x000's at 1.000 rad — sitting exactly on the cap — is
 rejected for pure reference drift with zero contact, at 0.225 m/s against the accepted crouch's
