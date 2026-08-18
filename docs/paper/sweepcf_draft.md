@@ -255,6 +255,67 @@ rollouts per usable lateral clip, plus one to screen each nominal — not a defe
 This is the fourth time on this operator that an inferred quantity had to be withdrawn in favour of
 a rollout.
 
+## A tracking controller is a feasibility oracle, and that is a second contribution
+
+Synthetic humanoid datasets report a *success rate*. The number is almost always a conflation of
+four different questions, which have different answers, different costs, and different failure
+modes. Separating them is cheap, and the gaps between them are where a corpus overstates itself.
+
+| label | question | cost | measured here |
+|---|---|---|---|
+| `embodiment_feasible` | can the body reach this pose at all? | CPU, milliseconds | **96%** of 150 clips |
+| `controller_trackable` | can the controller execute it? | one rollout, empty scene | **96%** of 47 joined |
+| `semantically_valid` | does the executed motion contain the named behaviour? | predicate on the execution | **32%** of 75 |
+| `scene_compatible` | does it succeed in *this* room? | one rollout per scene | the counterfactual signal itself |
+
+The four are not interchangeable. A clip can be kinematically fine and untrackable; trackable and
+semantically empty; semantically correct and infeasible in the room it is needed for. Reporting one
+rate hides which surface a corpus is failing on, and the honest headline is the *smallest* of them —
+here 32%, not 96%.
+
+**The tracking controller is doing evaluation work, not just execution work.** SONIC answers
+"is this motion physically executable by this embodiment under closed-loop control", which is
+exactly the question a kinematic checker cannot answer and a human reviewer answers slowly and
+inconsistently. Used deliberately it is a *feasibility oracle*: cheap relative to human review,
+reproducible, and grounded in the same physics the dataset claims to be about.
+
+It also grades continuously, not just pass/fail. Reference-tracking drift rises monotonically with
+how far an adaptation moves a joint — measured within one motion at 0.048, 0.104, 0.140, 0.223 and
+0.224 m/s for knee excursions of 0.000, 0.420, 0.619, 0.980 and 1.000 rad — so drift is a graded
+difficulty score, not merely a threshold. That makes it usable for curriculum ordering and for
+reporting *how hard* a clip is rather than only whether it survived.
+
+## Generated motion is not free, and it fails where the dataset needs it most
+
+Joining the generator's own kinematic screen to the controller's verdicts on the same clips gives a
+pipeline that looks healthy: 96% embodiment-feasible, 96% of the joined subset trackable. Broken
+down by behaviour it is not.
+
+| behaviour | generated | embodiment-feasible | tracked |
+|---|---|---|---|
+| **crouch** | 9 | **4 (44%)** | 2 |
+| side / narrow | 3 | 2 (67%) | 2 |
+| arms | 6 | 6 (100%) | 1 |
+| turn | 67 | 67 (100%) | 33 |
+| stop / start | 23 | 23 (100%) | 5 |
+| walk | 42 | 42 (100%) | 2 of 4 |
+
+Crouch is the **only** behaviour with a kinematic failure rate at all — 44% against 100% everywhere
+else — and every rejection is joint saturation. The mechanism is specific: the generator lowers the
+torso by folding the waist, pinning `waist_pitch_joint` at its limit on 100% of frames, and the G1
+cannot fold that far. Meanwhile 73% of the corpus is unconstrained locomotion, 67 turn variants and
+42 plain walks, which is precisely the diversity that does not help. The behaviours a counterfactual
+needs are 12 of 150, and they are the ones that fail.
+
+This is the quantitative case for constructing adapted motions with a **local operator** rather than
+requesting them from a generator. An operator applied to an already-accepted walk inherits that
+walk's feasibility and changes only what one obstacle requires, which is why the adapted clip is
+matched to its nominal by construction rather than paired after the fact.
+
+*Scope: one checkpoint, one set of prompt templates, 4-second clips, 47 of 150 clips joined because
+only part of the corpus has been rolled out. This closes an engineering path under a tested
+protocol; it is not a claim about what the generator can do.*
+
 ## The decisive experiment (not yet run)
 
 Three datasets, identical in motions, scene count, rendering budget, learner and training
