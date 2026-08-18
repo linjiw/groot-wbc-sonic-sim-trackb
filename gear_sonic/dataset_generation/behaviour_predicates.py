@@ -68,6 +68,12 @@ MIN_DUCK_DROP_M = 0.08
 #: doing something walking does not.
 MIN_STEP_APEX_M = 0.18
 
+#: Metres the half-width must fall below the episode's own walking width for a narrowing to
+#: count. Relative, not absolute, for the reason stand_to_walk taught: the G1's half-width
+#: runs 0.273 m tucked to 0.664 m at peak arm swing, so a single absolute threshold would
+#: pass wide motions that never narrow and fail narrow ones that do.
+MIN_WIDTH_REDUCTION_M = 0.06
+
 #: Provisional. No reviewed sample has calibrated these yet; they are first estimates chosen
 #: to be permissive, so a false reject is less likely than a false accept.
 PROVISIONAL = frozenset({"walk_to_stop", "walk_and_reach", "carry"})
@@ -108,6 +114,24 @@ def _body_height(payload: dict, name: str = "torso_link") -> np.ndarray:
     if name not in names:
         raise PredicateError(f"{name!r} not among the recorded bodies")
     return np.asarray(payload["body_pos_w"], dtype=np.float64)[:, names.index(name), 2]
+
+
+def _half_width_series(payload: dict) -> np.ndarray:
+    """Half-width per frame, measured across the direction of travel.
+
+    Across the heading rather than the world y axis: a motion walking along +y is not two
+    metres wide, and using the world frame would report exactly that. Bodies are taken from
+    the recorded link origins rather than the collision capsules, which keeps this a cheap
+    check that any recording with body positions can answer.
+    """
+    if "body_pos_w" not in payload or payload["body_pos_w"] is None:
+        raise PredicateError("no per-body positions recorded, so width cannot be measured")
+    bodies = np.asarray(payload["body_pos_w"], dtype=np.float64)
+    root = np.asarray(payload["root_pos_w"], dtype=np.float64)
+    yaw = _heading(payload)
+    lateral_axis = np.stack([-np.sin(yaw), np.cos(yaw)], axis=1)
+    offsets = bodies[:, :, :2] - root[:, None, :2]
+    return np.abs(np.einsum("tbd,td->tb", offsets, lateral_axis)).max(axis=1)
 
 
 def check_pause(payload: dict) -> PredicateResult:
@@ -354,6 +378,66 @@ def check_step_over(
 
 #: Behaviours with a predicate, and the callable that checks them. A behaviour absent here
 #: has no semantic check yet, which is reported rather than silently passed.
+def check_narrow_pass(payload: dict, *, gap_half_width_m: float | None = None) -> PredicateResult:
+    """The silhouette must actually narrow, and open out again afterwards.
+
+    **The two modes answer different questions and must not be swapped.** Without
+    ``gap_half_width_m`` this asks whether a narrowing *happened* -- a semantic check on the
+    label. With one, it asks whether the robot got *inside a specific gap* -- a geometric
+    check on utility. A motion can pass the first and fail the second, and ``side_step`` is
+    exactly that motion: across the corpus its within-episode width reduction is far larger
+    than a plain walk's (median 0.189 m against 0.089 m, p = 0.007), and yet its absolute
+    narrowest half-width is *larger* (median 0.277 m against 0.227 m). It narrows sharply
+    from a wider stance and never gets below where a walk already sits.
+
+    So side-stepping is a real behaviour that is useless to the lateral geometry regime, and
+    a gap that stops a walk stops a side-step too. ``arm_tuck`` and ``shoulder_turn`` exist
+    to ask for the absolute width the regime needs.
+
+    Width is taken across the direction of travel, so a motion walking along +y is not
+    reported as two metres wide.
+    """
+    widths = _half_width_series(payload)
+    walking = float(np.percentile(widths, 90))
+    narrowest = float(widths.min())
+    reduction = walking - narrowest
+    narrowest_frame = int(np.argmin(widths))
+    recovered = bool(
+        narrowest_frame + 1 < len(widths)
+        and widths[narrowest_frame + 1:].max() >= walking - MIN_WIDTH_REDUCTION_M * 0.5
+    )
+
+    measurements = {
+        "width_reduction_m": reduction,
+        "narrowest_half_width_m": narrowest,
+        "walking_half_width_m": walking,
+    }
+    if gap_half_width_m is not None:
+        measurements["gap_clearance_m"] = gap_half_width_m - narrowest
+        satisfied = narrowest < gap_half_width_m and recovered
+        reason = (
+            "narrowed enough for the gap and opened out again" if satisfied
+            else f"narrowest half-width {narrowest:.3f} m never got inside the "
+                 f"{gap_half_width_m:.3f} m gap"
+            if narrowest >= gap_half_width_m else "fitted the gap but never opened out again"
+        )
+    else:
+        satisfied = reduction >= MIN_WIDTH_REDUCTION_M and recovered
+        reason = (
+            "narrowed and opened out again" if satisfied
+            else f"half-width fell only {reduction:.3f} m (need {MIN_WIDTH_REDUCTION_M})"
+            if reduction < MIN_WIDTH_REDUCTION_M else "narrowed but never opened out again"
+        )
+
+    return PredicateResult(
+        behaviour="narrow_pass",
+        satisfied=satisfied,
+        reason=reason,
+        measurements=measurements,
+        provisional=True,
+    )
+
+
 PREDICATES: dict[str, Callable[[dict], PredicateResult]] = {
     "walk_pause": check_pause,
     # "walk_look" deliberately has no entry. It was wired to check_pause, which reported
@@ -367,6 +451,8 @@ PREDICATES: dict[str, Callable[[dict], PredicateResult]] = {
     "walk_to_stop": check_walk_to_stop,
     "stand_to_walk": check_stand_to_walk,
     "step_over": check_step_over,
+    "arm_tuck": check_narrow_pass,
+    "shoulder_turn": check_narrow_pass,
 }
 
 

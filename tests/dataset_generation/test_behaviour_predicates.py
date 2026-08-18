@@ -12,6 +12,7 @@ from gear_sonic.dataset_generation.behaviour_predicates import (
     PredicateError,
     check_behaviour,
     check_duck_under,
+    check_narrow_pass,
     check_pause,
     check_side_step,
     check_stand_to_walk,
@@ -294,3 +295,95 @@ def test_a_recording_without_two_feet_cannot_be_assessed():
     payload["body_pos_w"] = np.zeros((60, 1, 3))
     with pytest.raises(PredicateError, match="ankle_roll"):
         check_step_over(payload)
+
+
+# ---- narrow pass -------------------------------------------------------------------------
+
+def widening(frames: int, widths: np.ndarray) -> dict:
+    """A body walking forward with two side links at a controllable half-width."""
+    payload = episode(walk(frames))
+    payload["body_names"] = ["pelvis", "left_wrist_yaw_link", "right_wrist_yaw_link"]
+    bodies = np.zeros((frames, 3, 3))
+    bodies[:, 0, 0] = payload["root_pos_w"][:, 0]
+    bodies[:, 1, 0] = payload["root_pos_w"][:, 0]
+    bodies[:, 2, 0] = payload["root_pos_w"][:, 0]
+    bodies[:, 1, 1] = widths
+    bodies[:, 2, 1] = -widths
+    payload["body_pos_w"] = bodies
+    return payload
+
+
+def tucking(frames: int = 120, walking: float = 0.55, tucked: float = 0.26) -> dict:
+    widths = np.full(frames, walking)
+    widths[frames // 3 : 2 * frames // 3] = tucked
+    return widening(frames, widths)
+
+
+def test_a_tuck_that_opens_out_again_satisfies_narrow_pass():
+    assert check_narrow_pass(tucking()).satisfied
+
+
+def test_a_constant_width_walk_does_not_narrow():
+    result = check_narrow_pass(widening(120, np.full(120, 0.55)))
+    assert not result.satisfied
+    assert "fell only" in result.reason
+
+
+def test_narrowing_without_opening_out_again_fails():
+    widths = np.full(120, 0.55)
+    widths[60:] = 0.26
+    result = check_narrow_pass(widening(120, widths))
+    assert not result.satisfied
+    assert "never opened out again" in result.reason
+
+
+def test_a_side_step_is_not_a_narrowing_which_is_the_whole_point():
+    """Translating sideways leaves the width untouched.
+
+    This is why side_step cannot serve the lateral geometry regime, and why arm_tuck and
+    shoulder_turn had to be added: mining the corpus refused every side_step/walk pair, and
+    60 of those refusals were that the half-width simply never differed.
+    """
+    frames = 120
+    payload = widening(frames, np.full(frames, 0.55))
+    payload["root_pos_w"][:, 1] = np.arange(frames) * 0.6 / FPS     # travel along +y
+    payload["body_pos_w"][:, :, 1] += payload["root_pos_w"][:, None, 1]
+    assert not check_narrow_pass(payload).satisfied
+
+
+def test_a_known_gap_turns_the_tuck_into_a_clearance_check():
+    payload = tucking(walking=0.55, tucked=0.26)
+    assert check_narrow_pass(payload, gap_half_width_m=0.30).satisfied
+    tight = check_narrow_pass(payload, gap_half_width_m=0.20)
+    assert not tight.satisfied
+    assert "never got inside" in tight.reason
+
+
+def test_width_is_measured_across_the_heading_not_the_world_axis():
+    """A motion walking along +y is not two metres wide."""
+    frames = 120
+    payload = tucking(frames)
+    rotated = tucking(frames)
+    yaw = math.pi / 2
+    rotated["root_quat_w"][:, 0] = math.cos(yaw / 2)
+    rotated["root_quat_w"][:, 3] = math.sin(yaw / 2)
+    rotated["root_pos_w"][:, 0] = 0.0
+    rotated["root_pos_w"][:, 1] = np.arange(frames) * 0.8 / FPS
+    offsets = payload["body_pos_w"][:, :, :2] - payload["root_pos_w"][:, None, :2]
+    rotated["body_pos_w"][:, :, 0] = rotated["root_pos_w"][:, None, 0] - offsets[:, :, 1]
+    rotated["body_pos_w"][:, :, 1] = rotated["root_pos_w"][:, None, 1] + offsets[:, :, 0]
+    assert check_narrow_pass(rotated).measurements["walking_half_width_m"] == pytest.approx(
+        check_narrow_pass(payload).measurements["walking_half_width_m"], abs=1e-6
+    )
+
+
+def test_a_recording_without_body_positions_cannot_be_assessed():
+    payload = episode(walk(60))
+    with pytest.raises(PredicateError, match="width cannot be measured"):
+        check_narrow_pass(payload)
+
+
+def test_both_new_lateral_modes_dispatch_to_the_width_predicate():
+    for behaviour in ("arm_tuck", "shoulder_turn"):
+        result = check_behaviour(behaviour, tucking())
+        assert result is not None and result.satisfied

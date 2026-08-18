@@ -78,21 +78,38 @@ and the lateral pairs reuse one nominal motion three times, so counting pairs ov
 corpus by more than double. **Three independent families exist in total**, against a plan
 target of five per regime.
 
-## `side_step` does not serve the lateral regime, and that was a wrong assumption of mine
+## `side_step` does not serve the lateral regime, and the reason is subtler than it looks
 
 It was reasonable to expect lateral to be the healthy regime: `side_step` is the one
-behaviour that scored 6/6 on semantic validity. It contributes nothing. Pairing each of the
-six side-steps against each plain walk and counting why the pair is refused puts the reason
-beyond doubt — the dominant rejection, 60 of them, is `min_half_width_m spread`.
+behaviour that scored 6/6 on semantic validity. It contributes nothing, and pairing each of
+the six side-steps against each plain walk shows why — the dominant refusal, 60 of them, is
+`min_half_width_m spread`.
 
-Side-stepping is lateral *translation*. Passing a narrow gap requires width *reduction* —
-tucking the arms, rotating the torso, turning a shoulder into the gap. A robot side-stepping
-through a doorway is exactly as wide as one walking through it. The behaviour label and the
-geometry regime look like they match and do not.
+The interesting part is that side-steps *do* narrow. Measured within each episode, their
+half-width reduction is far larger than a plain walk's:
+
+| | n | width reduction, median | absolute narrowest half-width, median |
+|---|---|---|---|
+| `walk` | 10–14 | 0.089 m | **0.227 m** |
+| `side_step` | 6 | **0.189 m** | **0.277 m** |
+
+The reduction is real and significant (Mann-Whitney p = 0.007). The absolute width is not:
+side-steps are *wider* at their narrowest than walks are, p = 1.000 against the hypothesis
+that they are narrower. A side-step narrows sharply from a wider stance and never reaches
+where a plain walk already sits.
+
+**"The behaviour happened" and "the behaviour helps" are different questions.** This is the
+physical-versus-behavioural validity distinction one level up: a semantic predicate can
+confirm a genuine narrowing while the motion remains useless to the geometry regime, because
+a gap tests the absolute width and not the change in it. A gap that stops a walk stops a
+side-step too.
+
+`check_narrow_pass` therefore has two modes and they must not be swapped — without a gap
+width it asks the semantic question, with one it asks the geometric question.
 
 ## The taxonomy has no mode that narrows the robot
 
-Reading the 14 body modes against the three regimes explains every number above:
+Reading the 15 body modes against the three regimes explains every number above:
 
 | Regime | Modes that target it | Disjoint families |
 |---|---|---|
@@ -100,7 +117,7 @@ Reading the 14 body modes against the three regimes explains every number above:
 | lateral | **none** | 1, and accidental |
 | floor | `step_over` (0/7 semantically valid) | 0 |
 
-Not one of the fourteen asks the robot to make itself narrower. `carry_walk` does the
+Not one of the fifteen asks the robot to make itself narrower. `carry_walk` does the
 opposite — it *widens* the silhouette, which is why `clutter_126`, a carry motion, is the
 nominal in all three lateral pairs. The single lateral family that exists is an accident: a
 duck and a pause-walk happen to be narrower than someone carrying a box, not because either

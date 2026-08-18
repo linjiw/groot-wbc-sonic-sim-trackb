@@ -64,6 +64,16 @@ BODY_MODES: dict[str, str] = {
     "crouch_deep": "A person crouches down low and moves forward {speed} while staying crouched",
     "duck_under": "A person walks {speed} {turn} and ducks down low to pass under an obstacle",
     "side_step": "A person steps sideways {speed} while facing forward",
+    # The lateral geometry regime had no mode at all until these two. side_step looks like
+    # it should serve it and does not: stepping sideways is translation, and a robot
+    # side-stepping through a doorway is exactly as wide as one walking through it. Mining
+    # the corpus made that concrete -- 60 of the refusals when pairing every side_step
+    # against every plain walk were "min_half_width_m spread", the width simply never
+    # changes. Passing a gap needs the silhouette to narrow, so these ask for that directly.
+    "arm_tuck": "A person walks {speed} {turn} holding both arms tight against the body to "
+                "fit through a narrow gap",
+    "shoulder_turn": "A person walks {speed} {turn}, turning one shoulder forward and "
+                     "twisting the torso sideways to slip through a narrow opening",
     "backward": "A person walks backwards {speed} {turn}",
     "stand_to_walk": "A person stands still, then begins walking {speed} {turn}",
     "walk_to_stop": "A person walks {speed} {turn} and comes to a stop",
@@ -94,6 +104,8 @@ NON_WALK_MODES = frozenset(
         "crouch_deep",
         "duck_under",
         "side_step",
+        "arm_tuck",
+        "shoulder_turn",
         "backward",
         "step_over",
         "turn_in_place",

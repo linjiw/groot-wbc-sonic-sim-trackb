@@ -194,6 +194,8 @@ _STYLE_PHRASES = {
     "crouch_deep": "crouch low and move forward",
     "duck_under": "walk forward, ducking low to pass underneath",
     "side_step": "step sideways",
+    "arm_tuck": "walk forward, arms held in close to squeeze through the gap",
+    "shoulder_turn": "walk forward, turning sideways to slip through the opening",
     "backward": "walk backwards",
     "stand_to_walk": "start walking from a standstill",
     "walk_to_stop": "walk forward and come to a stop",
