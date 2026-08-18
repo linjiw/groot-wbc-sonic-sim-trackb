@@ -150,6 +150,11 @@ def main() -> int:
             or '<span class="dim">no cells &mdash; rebuild pending</span>'
         )
         window = family.get("window_m")
+        verified_label = (
+            "<b class=ok>verified</b>"
+            if is_verified(family)
+            else "<span class=dim>not verified</span>"
+        )
         rows.append(
             f'<tr><td class="k">{family["family_id"]}</td>'
             f'<td class="n">{window * 1000:.1f}</td>'
