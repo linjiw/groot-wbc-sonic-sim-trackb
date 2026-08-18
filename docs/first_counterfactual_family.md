@@ -3,6 +3,27 @@
 Same task, same start, same goal, same corridor. One number changes — the underside of a
 shelf, by 53 mm — and the whole-body behaviour that succeeds changes with it.
 
+## What is and is not being claimed
+
+Three claims sit behind this result and only the first two are established. Keeping them
+apart is the difference between a defensible contribution and an overreach a reviewer will
+find immediately.
+
+| Level | Claim | Status |
+|---|---|---|
+| 1 | The swept volumes of two executed motions separate, so a geometric window exists | **established** |
+| 2 | The same controller, in the same place, succeeds or fails as that geometry changes | **established** |
+| 3 | The result survives a perturbed start pose rather than one deterministic replay | *being measured* |
+
+Beyond all three sits a claim this work does **not** make: that the robot *perceives* the
+scene and *chooses* to duck. Both motions here are prescribed references. What changes is
+which prescribed behaviour physics permits — that is the supervision signal a scene-conditioned
+policy would need, not evidence that one exists.
+
+The honest one-line statement of the method today: *we mine discriminative geometry intervals
+between physics-executable humanoid motions and use them to generate controlled counterfactual
+scenes in which the same task requires different whole-body behaviours.*
+
 | | easy scene (1.325 m) | hard scene (1.272 m) |
 |---|---|---|
 | **nominal walk** | accepted, 0.0 N | **rejected, 3.0 N** |
@@ -10,8 +31,39 @@ shelf, by 53 mm — and the whole-body behaviour that succeeds changes with it.
 
 The failing contact body is `torso_link`: the walking robot's torso meets the shelf, is
 knocked off its reference, and the episode is rejected for `disallowed_robot_contact` and
-`unstable_reference_drift`. Every other cell records **no external contact at all** — not a
+`unstable_reference_drift`. Every other cell records **no lateral contact at all** — not a
 small force, no contacting bodies.
+
+## The rejection is attributable to the shelf
+
+"Rejected" alone would not support the claim. A rejection arriving by another route — drift
+into a wall, a fall, tangled legs — produces the same table and means something else, which
+is exactly what happened on an earlier attempt. So the failure is attributed, not just
+counted:
+
+| Question | Answer |
+|---|---|
+| First lateral contact | `torso_link`, frame 94, 3.0 N |
+| Frame geometry predicted the interference | 92 |
+| Is the body in the overhead regime's group | yes |
+| Drift onset in the **easy** scene | frame 175 |
+| Drift onset in the **hard** scene | frame 105 |
+
+Two facts carry the attribution. The observed contact lands **two frames** — 40 ms — from
+where the swept-volume geometry said it would, which is a real validation of the predictor
+against physics rather than against itself. And the reference drift moves from frame 175 to
+frame 105 when the shelf is lowered, arriving *after* the contact at 94: the drift is the
+collision's downstream consequence, not a tracking failure that the shelf happened to
+coincide with.
+
+Getting this right needed two corrections. Reading the raw contact array flagged frame 0 of
+every cell — 237.4 N on `right_hip_roll_link`, in episodes with no collision at all — because
+the robot is dropped into the scene and its hips carry the settling load. The acceptance gate
+has always decomposed contact by Newton's third law, and a collision is the lateral part;
+reaching past that re-answers a question that was already answered correctly. Separately,
+comparing an observed *first* contact against a predicted *deepest* frame charged the
+predictor for the 0.5 m depth of the shelf, turning a 2-frame agreement into an apparent
+8-frame error.
 
 This is the supervision no scene-around-motion episode can provide. Those rooms are built so
 the motion fits, which produces positives efficiently and cannot show that geometry
