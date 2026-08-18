@@ -1,0 +1,307 @@
+<title>SweepCF Progress Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root { --paper:#f4f5f7; --card:#fff; --ink:#1b1f26; --muted:#656d78; --rule:#d8dce2;
+  --accent:#b06f24; --pass:#2f6b4f; --fail:#a33a2c; --warn:#8a6a1f; --dim:#8b929c; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper:#14171c; --card:#1b1f26; --ink:#e6e8ec; --muted:#98a0ab; --rule:#2e343d;
+  --accent:#d69a53; --pass:#7fc09a; --fail:#e2897b; --warn:#d9b26a; --dim:#79818c; } }
+:root[data-theme="dark"] { --paper:#14171c; --card:#1b1f26; --ink:#e6e8ec; --muted:#98a0ab;
+  --rule:#2e343d; --accent:#d69a53; --pass:#7fc09a; --fail:#e2897b; --warn:#d9b26a; --dim:#79818c; }
+* { box-sizing:border-box; }
+body { background:var(--paper); color:var(--ink); font:400 16px/1.65 "IBM Plex Sans",system-ui,sans-serif;
+  max-width:64rem; margin:0 auto; padding:3.5rem 1.5rem 5rem; display:flex; flex-direction:column; gap:2.6rem; }
+h1,h2,h3 { font-family:Spectral,Georgia,serif; font-weight:600; text-wrap:balance; margin:0; }
+h1 { font-size:2.2rem; line-height:1.15; }
+h2 { font-size:1.35rem; padding-bottom:.5rem; border-bottom:1px solid var(--rule); }
+h3 { font-size:1rem; }
+p { margin:0; max-width:66ch; }
+section { display:flex; flex-direction:column; gap:1rem; }
+.eyebrow { font:500 11.5px/1 "IBM Plex Mono",monospace; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--accent); }
+.lede { font-family:Spectral,Georgia,serif; font-size:1.15rem; color:var(--muted); max-width:58ch; }
+header { display:flex; flex-direction:column; gap:.6rem; }
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(8rem,1fr)); gap:.6rem; }
+.stat { background:var(--card); border:1px solid var(--rule); border-radius:3px; padding:.8rem 1rem;
+  display:flex; flex-direction:column; gap:.1rem; }
+.stat b { font:600 1.5rem/1.1 Spectral,serif; font-variant-numeric:tabular-nums; }
+.stat span { font:500 10.5px/1.3 "IBM Plex Mono",monospace; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--muted); }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; font-size:14px; min-width:30rem; }
+th,td { text-align:left; padding:.5rem .7rem; border-bottom:1px solid var(--rule); vertical-align:top; }
+th { font:500 11px "IBM Plex Mono",monospace; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--muted); white-space:nowrap; }
+td.k { font-family:"IBM Plex Mono",monospace; font-size:13px; }
+td.n { font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; text-align:right; }
+.done { color:var(--pass); font-weight:600; }
+.open { color:var(--muted); }
+.block { color:var(--warn); font-weight:600; }
+.never { color:var(--fail); font-weight:600; }
+.note { background:var(--card); border:1px solid var(--rule); border-left:3px solid var(--accent);
+  border-radius:3px; padding:1rem 1.1rem; display:flex; flex-direction:column; gap:.6rem; }
+ul { margin:0; padding-left:1.15rem; display:flex; flex-direction:column; gap:.4rem; max-width:66ch; }
+code { font-family:"IBM Plex Mono",monospace; font-size:.9em; }
+a { color:var(--accent); }
+.draft { display:flex; flex-direction:column; gap:1rem; padding:1.4rem 1.5rem;
+  background:var(--card); border:1px solid var(--rule); border-radius:3px; }
+.draft h3 { font-size:1.08rem; margin-top:.6rem; color:var(--accent); }
+.draft h3:first-child { margin-top:0; }
+.draft hr { border:0; border-top:1px solid var(--rule); width:100%; margin:.4rem 0; }
+.draft table { font-size:13.5px; }
+.draft p, .draft ul, .draft ol { max-width:68ch; }
+.draft { display:flex; flex-direction:column; gap:1rem; padding:1.4rem 1.5rem;
+  background:var(--card); border:1px solid var(--rule); border-radius:3px; }
+.draft h3 { font-size:1.08rem; margin-top:.6rem; color:var(--accent); }
+.draft h3:first-child { margin-top:0; }
+.draft hr { border:0; border-top:1px solid var(--rule); width:100%; margin:.4rem 0; }
+.draft table { font-size:13.5px; }
+.draft p, .draft ul, .draft ol { max-width:68ch; }
+</style>
+
+<header>
+  <p class="eyebrow">sweepcf &middot; 116 commits on research/cg-wbc-v0-golden-path &middot; 619 tests</p>
+  <h1>Counterfactual supervision, and what is left to prove</h1>
+  <p class="lede">A dataset can vary its scenes without varying anything a policy could learn
+  from. This is the state of repairing that, with the unproven parts marked.</p>
+</header>
+
+<section>
+  <div class="stats">
+    <div class="stat"><b>3</b><span>verified families</span></div>
+    <div class="stat"><b>1</b><span>outcome-robust</span></div>
+    <div class="stat"><b>2</b><span>adaptation operators</span></div>
+    <div class="stat"><b>30</b><span>frozen test scenes</span></div>
+    <div class="stat"><b>619</b><span>tests passing</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>The claim ladder</h2>
+  <div class="scroll"><table>
+  <tr><th>#</th><th>claim</th><th>status</th></tr>
+  <tr><td class="n">1</td><td>Two executable motions' swept volumes separate, so a window exists</td><td class="done">established</td></tr>
+  <tr><td class="n">2</td><td>The same controller succeeds or fails as that geometry changes</td><td class="done">established</td></tr>
+  <tr><td class="n">3</td><td>The 2&times;2 <em>outcome</em> survives a jittered start pose</td><td class="done">established &mdash; 12/12, 3/3</td></tr>
+  <tr><td class="n">4</td><td>The scene <em>reverses the preference</em> between two feasible behaviours</td><td class="block">partial &mdash; cost not calibrated</td></tr>
+  <tr><td class="n">5</td><td>A learner given this data uses geometry when it could ignore it</td><td class="open">not started &mdash; the decisive experiment</td></tr>
+  <tr><td class="n">6</td><td>That transfers to scenes never fitted to a trajectory</td><td class="open">not started</td></tr>
+  <tr><td class="n">&mdash;</td><td>The robot perceives the scene and chooses to duck</td><td class="never">not claimed</td></tr>
+  </table></div>
+  <p>Levels 5 and 6 are the paper. Everything below them is apparatus, and both motions in
+  every family so far are <em>prescribed references</em> &mdash; what changes is which one
+  physics permits.</p>
+</section>
+
+<section>
+  <h2>Where the bottleneck is</h2>
+  <div class="scroll"><table>
+  <tr><th>regime</th><th>viable pairs</th><th>distinct adapted</th><th>independent families</th></tr>
+  <tr><td class="k">overhead</td><td class="n">5</td><td class="n">2</td><td class="n">2</td></tr>
+  <tr><td class="k">lateral</td><td class="n">3</td><td class="n">3</td><td class="n">1</td></tr>
+  <tr><td class="k">floor</td><td class="n">0</td><td class="n">0</td><td class="n">0</td></tr>
+  </table></div>
+  <p><strong>Three independent families</strong>, and the ceiling is the supply of
+  semantically valid adapted motions rather than the method. Prompting did not lift it: every
+  phrasing that lowers the body pinned the waist at its limit on 100% of frames, and an
+  explicit arm-tuck request produced motions 64 mm <em>wider</em> than a walk. That closed an
+  engineering path under one set of templates and one checkpoint &mdash; it is not a claim
+  about what the generator can do.</p>
+</section>
+
+<section>
+  <h2>Two matched operators, built instead</h2>
+  <div class="scroll"><table>
+  <tr><th></th><th>local_crouch</th><th>local_arm_tuck</th></tr>
+  <tr><td>regime</td><td>overhead</td><td>lateral</td></tr>
+  <tr><td>touches</td><td>legs + root height</td><td>arms only</td></tr>
+  <tr><td>waist change</td><td class="n">0.000 rad</td><td>untouched</td></tr>
+  <tr><td>leg change</td><td>&mdash;</td><td class="n">0.000 rad</td></tr>
+  <tr><td>effect at the station</td><td class="n">1.305 &rarr; 1.207 m</td><td class="n">0.276 &rarr; 0.231 m</td></tr>
+  <tr><td>active window</td><td class="n">35%</td><td class="n">35%</td></tr>
+  <tr><td>stage 1 &mdash; kinematic</td><td class="done">6/6</td><td class="done">6/6</td></tr>
+  <tr><td>stage 2 &mdash; trackable</td><td class="done">yes</td><td class="open">1 of 3 nominals</td></tr>
+  <tr><td>stage 3 &mdash; matched 2&times;2</td><td class="done">verified</td><td class="block">needs a trackable clip</td></tr>
+  </table></div>
+  <p>Both start from an accepted nominal motion and change only what one obstacle requires,
+  only where it is &mdash; root path, duration, gait phase, start and goal all preserved. That
+  removes a fair objection to the current family: that a shelf separated two different
+  journeys rather than two behaviours.</p>
+  <div class="note" style="border-left-color:var(--good,#2f7d4f)">
+    <h3>The overhead operator cleared all three gates</h3>
+    <p>Family <code>mf_005_c08</code>. One journey, two behaviours &mdash; identical root XY frame
+    for frame, identical duration, differing in exactly six joints (knees 0.994 rad, hip and ankle
+    pitch 0.497 rad, waist 0.000 rad).</p>
+    <div class="scroll"><table>
+      <tr><th></th><th>easy &mdash; 1.355 m</th><th>hard &mdash; 1.257 m</th></tr>
+      <tr><td>nominal walk</td><td class="done">accepted, 0.0 N</td><td class="block">rejected, 3253.5 N</td></tr>
+      <tr><td>local crouch</td><td class="done">accepted, 0.0 N</td><td class="done">accepted, 0.0 N</td></tr>
+    </table></div>
+    <p>Contact on <code>torso_link</code> at frame 90, root-height deficit at 97 &mdash; the drift
+    follows the collision by 140 ms. The crouch drifts 0.100 m/s in <em>both</em> scenes, so the
+    shelf never reaches it.</p>
+    <p><strong>Two cautions.</strong> The negative is violent: 3253.5 N at 48 mm of penetration,
+    where an earlier family gave 137.2 N at 89 mm. Force does not follow penetration across
+    motions and must not be modelled as if it does. And the hard shelf sits at the centre of the
+    predicted window &mdash; the most robust placement and the least informative, since it cannot
+    locate the real boundary. Rungs 8 and 25 mm inside each predicted boundary are running now.</p>
+  </div>
+  <div class="note">
+    <h3>The lateral operator did not, and two predictors of why were refuted</h3>
+    <p>The arm tuck is accepted on 1 of 3 valid nominals. Wrist-to-hip clearance is already
+    negative on every nominal, and its change <em>anti</em>-correlates with the verdict at both
+    extremes; lateral CoM excursion puts two cells 0.1 mm apart on opposite sides of the gate.
+    On bare-plane rollouts only <strong>external</strong> contact decides, and self-contact
+    magnitude is not severity &mdash; the accepted tuck carries the highest self-contact of eight
+    cells, 192.1 N, the rejected nominal the lowest, 10.9 N.</p>
+    <p>So trackability is measured per clip and the 1-in-3 yield is a budget line, roughly three
+    rollouts per usable lateral clip plus one to screen each nominal. This is the fourth time on
+    this operator that an inferred quantity had to be withdrawn in favour of a rollout.</p>
+  </div>
+  <div class="note">
+    <h3>Why local, not whole-route</h3>
+    <p>A clip crouched from frame zero cannot demonstrate a decision made from what the robot
+    sees, because the obstacle is not visible when the crouch begins. Such a pair can only
+    support map-conditioned selection. The window is centred on the obstacle station in
+    route-progress coordinates, so onset is late enough to be a response.</p>
+  </div>
+</section>
+
+<section>
+  <h2>What the rest costs</h2>
+  <p>Measured on this card: one rollout is <strong>4.8 GB</strong> and <strong>~375 s</strong>
+  under contention, ~40 s on a quiet card. The wait threshold is 6 GB, because PhysX takes a
+  256 MB block up front and the scene and renderer follow it.</p>
+  <div class="scroll"><table>
+  <tr><th>step</th><th>rollouts</th><th>GPU-hours</th></tr>
+  <tr><td>Stage 2 &mdash; operator trackability</td><td class="n">3</td><td class="n">0.3</td></tr>
+  <tr><td>Matched family 2&times;2</td><td class="n">6</td><td class="n">0.6</td></tr>
+  <tr><td>&hellip; plus 3 start-pose jitters</td><td class="n">12</td><td class="n">1.3</td></tr>
+  <tr><td>Window calibration on existing pairs</td><td class="n">120</td><td class="n">12.5</td></tr>
+  <tr><td>Physics labels for the frozen test set</td><td class="n">120</td><td class="n">12.5</td></tr>
+  <tr><td>Selector training</td><td class="n">0</td><td class="n">~0</td></tr>
+  </table></div>
+  <p>About <strong>33 GPU-hours contended</strong>, 4 on a free card, never more than one
+  rollout resident. It is a scheduling problem, not a capacity one &mdash; and everything that
+  can be answered without a GPU already is: the reference gate, both operators, envelope
+  mining, the station ablation and the clearance measurement are all CPU, about a second a clip.</p>
+</section>
+
+<section>
+  <h2>The decisive experiment, specified and not run</h2>
+  <p>Three datasets, identical in motions, scene count, rendering budget, learner and training
+  steps. Only the construction differs: <strong>decorated</strong> (one trajectory, many
+  scenes), <strong>random obstacles</strong>, and <strong>SweepCF</strong> (geometry chosen so
+  the preferred feasible behaviour reverses). Train a small behaviour selector &mdash; not a
+  policy &mdash; and score it on the frozen scene-first set.</p>
+  <p>The metric that matters is not accuracy in the hard scene. It is
+  <strong>counterfactual choice accuracy</strong>: walking in the easy scene <em>and</em>
+  crouching in the hard one. A policy that always crouches is safe and has understood nothing,
+  which is why unnecessary-adaptation rate is reported beside it.</p>
+  <div class="note">
+    <h3>Go / no-go</h3>
+    <p>If SweepCF beats both baselines, scale the motion bank. If all three are equal, the
+    question becomes <em>when does counterfactual supervision add anything beyond geometric
+    collision reasoning</em> &mdash; still a paper, and a more interesting one. Either answer
+    is worth the 3 families already in hand; it needs contrast, not corpus size.</p>
+  </div>
+</section>
+
+
+<section>
+  <h2>The selector, and the controls that must collapse</h2>
+  <p>Built and validated on synthetic families, so no verified family is spent proving the
+  apparatus works. The model scores whether a candidate <em>survives</em> a scene &mdash; never
+  which scene it is looking at &mdash; and selects lexicographically: among candidates predicted
+  to survive, the cheapest. That avoids committing to adaptation-cost weights that are not
+  frozen.</p>
+  <div class="scroll"><table>
+    <tr><th>control</th><th>choice accuracy</th><th>reads as</th></tr>
+    <tr><td>none</td><td class="n done">0.963</td><td>against a 0.25 always-nominal baseline</td></tr>
+    <tr><td>no-scene</td><td class="n">0.126</td><td>collapses &mdash; geometry was the signal</td></tr>
+    <tr><td>scene-shuffle</td><td class="n">0.593</td><td>collapses</td></tr>
+    <tr><td>candidate-order</td><td class="n">0.963</td><td>bit-identical, as an order-invariant rule must be</td></tr>
+    <tr><td>nominal-motion holdout</td><td class="n">0.958</td><td>not memorising what each nominal needs</td></tr>
+  </table></div>
+  <p>One negative result from the validation is worth keeping. A linear model given only the four
+  geometric margins scored <strong>0.224</strong> &mdash; below the baseline, choosing a failing
+  candidate 47% of the time &mdash; because survival is an AND over margins and that is not
+  linearly separable. The limiting margin is therefore supplied explicitly, which is what makes
+  this model <em>privileged</em>, and bounds what an ego-depth model must recover from pixels.</p>
+  <p class="note" style="margin-top:.9rem">Tests verified by sabotage: making the no-scene control
+  a no-op fails exactly the two tests that assert the collapse.</p>
+</section>
+
+<section id="draft">
+  <h2>Paper draft</h2>
+  <p class="lede" style="font-size:.98rem">Rendered from <code>docs/paper/sweepcf_draft.md</code>. A draft of an argument, not of a paper &mdash; the status beside each claim is part of the content.</p>
+  <div class="draft"><p><strong>Status: a draft of an argument, not of a paper.</strong> Claim levels are marked throughout, and the central learning experiment has not been run. Nothing here should be quoted as a result without checking the status line beside it.</p>
+<hr>
+<h3>The thesis, in one sentence</h3>
+<p><strong>Counterfactual supervision is what turns scene variation into scene-conditioned behaviour.</strong></p>
+<p>A dataset can vary its scenes without varying anything a policy could learn from. The corpus this work started from does exactly that: the same motion, replayed through different clutter, yields different images and a bit-identical state trajectory. Scene appearance changed; behavioural supervision did not. A policy trained on it can ignore the scene entirely and lose nothing.</p>
+<p>The repair is not more scenes. It is that <strong>for the same task, geometry must change which executable whole-body behaviour is preferred.</strong></p>
+<h3>Claim ladder</h3>
+<div class="scroll"><table><tr><th>#</th><th>claim</th><th>status</th></tr><tr><td class="n">1</td><td class="">Two executable motions&#x27; full-body swept volumes separate, so a geometric window exists</td><td class=""><strong>established</strong></td></tr><tr><td class="n">2</td><td class="">The same controller succeeds or fails as that geometry changes</td><td class=""><strong>established</strong> (one family, verified)</td></tr><tr><td class="n">3</td><td class="">The 2×2 <em>outcome</em> survives a jittered start pose</td><td class=""><strong>established</strong> (12/12 cells, 3/3 jitters)</td></tr><tr><td class="n">4</td><td class="">The scene <em>reverses the preference</em> between two feasible behaviours</td><td class=""><strong>partial</strong> — the reversal is demonstrated; the cost defining &quot;preferred&quot; is not calibrated</td></tr><tr><td class="n">5</td><td class="">A learner given counterfactual data uses scene geometry when it could otherwise ignore it</td><td class=""><strong>not started — this is the decisive experiment</strong></td></tr><tr><td class="n">6</td><td class="">That behaviour generalises to scenes never fitted to a trajectory</td><td class=""><strong>not started</strong></td></tr></table></div>
+<p>Levels 5 and 6 are the paper. Everything below them is apparatus.</p>
+<h3>What is established</h3>
+<h4>The counterfactual, and its attribution</h4>
+<p>Same task, same start, same goal, same corridor. One shelf moves 179 mm.</p>
+<div class="scroll"><table><tr><th></th><th>easy (1.391 m)</th><th>hard (1.212 m)</th></tr><tr><td class="">nominal walk</td><td class="">accepted, 0.0 N</td><td class=""><strong>rejected</strong></td></tr><tr><td class="">adapted duck</td><td class="">accepted, 0.0 N</td><td class="">accepted, 0.0 N</td></tr></table></div>
+<p>The rejection is attributed, not merely counted. Contact is on <code>torso_link</code> at frame 113 against a swept-volume prediction of frame <strong>112</strong> — one frame, 20 ms. Reference drift begins at frame 120, <em>after</em> the contact, so the drift is the collision&#x27;s consequence rather than a tracking failure that coincided with it. Every other cell records no lateral contact at all.</p>
+<p>Forces are four separate quantities and are reported as such: 55.4 N at first contact, 137.2 N peak, 19.8 N·s impulse, 0.32 s duration. Under start-pose jitter the peak ranges 95.5–658.3 N while the verdict never moves, which is why the established claim is <strong>start-pose outcome robustness</strong> and not robustness in general.</p>
+<h4>Obstacle placement is part of the algorithm</h4>
+<p>Over every compatible pair in the corpus, with a 50 mm window as the usability bar:</p>
+<div class="scroll"><table><tr><th>overhead, 55 pairs</th><th>pairs ≥ 50 mm</th></tr><tr><td class="">random station</td><td class=""><strong>0 / 55</strong></td></tr><tr><td class="">route midpoint</td><td class=""><strong>0 / 55</strong></td></tr><tr><td class="">maximal envelope separation</td><td class=""><strong>5 / 55</strong></td></tr></table></div>
+<p>Lateral: 4 → 6 → <strong>25 of 88</strong>. In the overhead regime neither baseline yields a single family, so station selection is not an optimisation but the step that makes the method exist. The chosen station sits a median 0.50 m from the midpoint — further than a 0.5 m shelf is deep, so the two placements do not overlap.</p>
+<p><em>Caveat: this is geometric yield. A 50 mm window is necessary for a family, not sufficient, and the bar is calibrated on one family.</em></p>
+<h4>Physical validity is not behavioural validity</h4>
+<p>Over the frozen corpus, 132 of 156 evaluable episodes are accepted — the robot tracked its reference safely. Where a predicate exists to ask whether it did the thing its label claims, only <strong>17 of 37</strong> pass. Three body modes score zero and one scores 3/7.</p>
+<p>Graded on the references directly by forward kinematics, across all 150 prompts: <strong>24 of 75</strong> carry their behaviour, in the seven modes that have a predicate. The split is clean — whole-clip <em>styles</em> come back at 100%, <em>events at a specified moment</em> at 0%.</p>
+<h3>The bottleneck, and what it forced</h3>
+<p>Mining the corpus for pairs gives the number the plan needs, and it is not the pair count:</p>
+<div class="scroll"><table><tr><th>regime</th><th>viable pairs</th><th>distinct adapted motions</th><th><strong>independent families</strong></th></tr><tr><td class="">overhead</td><td class="n">5</td><td class="n">2</td><td class=""><strong>2</strong></td></tr><tr><td class="">lateral</td><td class="n">3</td><td class="n">3</td><td class=""><strong>1</strong></td></tr><tr><td class="">floor</td><td class="n">0</td><td class="n">0</td><td class=""><strong>0</strong></td></tr></table></div>
+<p>Three independent families. The ceiling is the supply of semantically valid adapted motions, not the method.</p>
+<p>Prompting did not lift it. Seven new modes at two seeds each: every phrasing that lowers the body pins the waist at its limit on 100% of frames, the one phrasing that does not is 8 mm <em>taller</em> than a walk, and an explicit arm-tuck request produced motions 64 mm <em>wider</em>. <em>Scope: one set of templates, one checkpoint, one sampling configuration. This closed an engineering path; it is not a claim about what the generator can do.</em></p>
+<h3>Matched adaptation operators</h3>
+<p>The fix is to construct the adapted motion from the nominal rather than pair two independently generated clips. That also removes a fair objection to the existing family — that a shelf separated two different journeys rather than two behaviours.</p>
+<p>Both operators preserve root XY and yaw, duration, gait phase, start and goal, and act only over a window in <strong>route-progress</strong> coordinates centred on the obstacle station:</p>
+<div class="scroll"><table><tr><th></th><th><code>local_crouch</code></th><th><code>local_arm_tuck</code></th></tr><tr><td class="">regime</td><td class="">overhead</td><td class="">lateral</td></tr><tr><td class="">touches</td><td class="">legs + root height</td><td class="">arms only</td></tr><tr><td class="">waist change</td><td class=""><strong>0.000 rad</strong></td><td class="">untouched</td></tr><tr><td class="">leg change</td><td class="">—</td><td class=""><strong>0.000 rad</strong></td></tr><tr><td class="">effect at the station</td><td class="n">1.305 → 1.207 m silhouette</td><td class="n">0.276 → 0.231 m half-width</td></tr><tr><td class="">active window</td><td class="n">35% of clip</td><td class="n">35% of clip</td></tr><tr><td class="">kinematic feasibility</td><td class=""><strong>6/6</strong></td><td class="n">6/6 reachable</td></tr><tr><td class="">SONIC accepts it</td><td class=""><strong>verified, matched 2×2</strong></td><td class="n">1 of 3 valid nominals</td></tr></table></div>
+<p>Locality is not tidiness. A clip crouched from frame zero cannot demonstrate a decision made from what the robot sees, because the obstacle is not visible when the crouch begins; such a pair can only support map-conditioned selection.</p>
+<h4>The overhead operator clears all three gates</h4>
+<p>Family <code>mf_005_c08</code>. One journey, two behaviours: the two clips have identical root XY frame for frame, identical duration, and differ in exactly six joints — knees 0.994 rad, hip and ankle pitch 0.497 rad each, waist 0.000 rad.</p>
+<div class="scroll"><table><tr><th></th><th>easy scene (1.355 m)</th><th>hard scene (1.257 m)</th></tr><tr><td class=""><strong>nominal walk</strong></td><td class="">accepted, 0.0 N</td><td class=""><strong>rejected, 3253.5 N</strong></td></tr><tr><td class=""><strong>local crouch</strong></td><td class="">accepted, 0.0 N</td><td class=""><strong>accepted, 0.0 N</strong></td></tr></table></div>
+<p>Attribution: contact on <code>torso_link</code> at frame 90, root-height deficit at frame 97 — the drift follows the collision by 140 ms. The crouch&#x27;s drift is 0.100 m/s in <em>both</em> scenes, so the shelf never reaches it.</p>
+<p>Two cautions belong in the paper next to this table. The negative is violent — 3253.5 N at 48 mm of penetration, where an earlier family produced 137.2 N at 89 mm, so <strong>force does not follow penetration across motions</strong> and cannot be modelled as if it does. And the hard shelf sits at the centre of the predicted window, the most robust placement and the least informative: it cannot locate the real boundary. Rungs 8 and 25 mm inside each predicted boundary probe that directly.</p>
+<h4>The lateral operator does not, and its yield is a measured cost</h4>
+<p>The arm tuck is accepted on <strong>1 of 3</strong> valid nominals. Two cheap predictors of <em>which</em> one were built and both refuted: wrist-to-hip clearance (already negative on every nominal, and its change anti-correlates with the verdict at both extremes) and lateral CoM excursion (two cells 0.1 mm apart landing on opposite sides of the gate). On bare-plane rollouts the verdict is set entirely by <strong>external</strong> contact; self-contact magnitude is not severity — the accepted tuck carries the highest self-contact of eight cells, 192.1 N, and the rejected nominal the lowest, 10.9 N.</p>
+<p>So trackability is measured per clip, and the 1-in-3 yield is a budget line — roughly three rollouts per usable lateral clip, plus one to screen each nominal — not a defect awaiting a fix. This is the fourth time on this operator that an inferred quantity had to be withdrawn in favour of a rollout.</p>
+<h3>The decisive experiment (not yet run)</h3>
+<p>Three datasets, identical in motions, scene count, rendering budget, learner and training steps. Only the <strong>construction</strong> differs:</p>
+<ul><li><strong>A, decorated</strong> — one trajectory through many scenes. The failure mode being repaired.</li><li><strong>B, random obstacles</strong> — more visual diversity, obstacles placed without regard to which</li></ul>
+<p>  behaviours they separate.</p>
+<ul><li><strong>C, SweepCF</strong> — same task, same start and goal, geometry chosen so the preferred feasible</li></ul>
+<p>  behaviour reverses.</p>
+<p>Train a small <strong>behaviour selector</strong>, not a policy — and score scene–motion <em>compatibility</em> rather than scene identity, so a model cannot pass by learning &quot;room 7 wants the crouch&quot;. Selection is the lexicographic rule: among candidates predicted to survive, take the cheapest.</p>
+<p>The harness and its controls are built and validated on synthetic families, so no verified family is spent proving the apparatus works. The privileged geometry model reaches 0.963 choice accuracy against a 0.25 always-nominal baseline; hiding the scene drops it to 0.126, pairing families with the wrong scene to 0.593, and permuting candidate order changes nothing at all, as an order-invariant rule must. Holding out nominal motions rather than families gives 0.958, so the model is not memorising what each nominal usually needs.</p>
+<p>One negative result from that validation is worth reporting: a linear model given only the four geometric margins scored 0.224 — <em>below</em> the baseline, choosing a failing candidate 47% of the time — because survival is an AND over margins and that is not linearly separable. The limiting margin is therefore supplied explicitly, which is what makes this model privileged and bounds what an ego-depth model must recover from pixels. Evaluate on the <strong>frozen scene-first test set</strong> — 30 scenes sampled independently of any motion, SHA-256 fingerprinted, frozen before either operator existed.</p>
+<p>Metrics: counterfactual choice accuracy (walk in the easy scene <em>and</em> crouch in the hard one), unsafe-choice rate, <strong>unnecessary-adaptation rate</strong>, and realised success minus adaptation cost.</p>
+<p>The last two matter because a policy that always crouches is safe and has understood nothing.</p>
+<p><strong>Go/no-go.</strong> If C beats A and B on counterfactual choice accuracy, scale the motion bank. If all three are equal, the question becomes <em>when does counterfactual supervision add anything beyond geometric collision reasoning</em> — which is still a paper, and a more interesting one.</p>
+<h3>What this draft deliberately leaves out</h3>
+<ul><li>The contact-attribution detail beyond the one number that ties geometry to physics</li></ul>
+<p>  (predicted 112, observed 113).</p>
+<ul><li>The prompt-generation audit as a headline; it belongs as a motion-source ablation.</li><li>The adaptation cost as a reportable ratio. It is a sign check until its weights are frozen,</li></ul>
+<p>  and an operator that minimises a cost cannot use that cost to prove it is minimal.</p>
+<ul><li>Any claim that the robot perceives the scene and chooses. Both motions are prescribed</li></ul>
+<p>  references; what changes is which one physics permits.</p>
+<h3>Figure 1, as intended</h3>
+<p>Left: three rooms, one trajectory — <em>scene changes, behaviour label does not.</em> Centre: the 2×2, with one cell failing. Right: success probability against shelf height for both behaviours, the counterfactual window between the two boundaries, and <code>b*(g)</code> stepping from walk to crouch.</p></div>
+</section>
+<section>
+  <h2>Recent work</h2>
+  <div class="scroll"><table><tr><th>commit</th><th>subject</th></tr><tr><td class="k">fb3c956</td><td>docs(paper): draft the argument around the supervision principle</td></tr><tr><td class="k">dc7299e</td><td>docs: measured GPU cost of every remaining step</td></tr><tr><td class="k">252eba7</td><td>feat(dataset): add the arm tuck, an upper-body-only operator for the lateral regime</td></tr><tr><td class="k">f68d613</td><td>feat(dataset): measure how close the robot comes to itself, not only when it touches</td></tr><tr><td class="k">3f08dfe</td><td>style(dataset): drop the unused bisection variable</td></tr><tr><td class="k">36da519</td><td>feat(dataset): bend one nominal motion locally instead of pairing two separate clips</td></tr><tr><td class="k">26fecd8</td><td>chore: stop ignoring the frozen evaluation splits</td></tr><tr><td class="k">935cf54</td><td>fix(splits): put the frozen test set under version control</td></tr><tr><td class="k">0260b7f</td><td>feat(splits): freeze the scene-first test set before anything can be tuned against it</td></tr><tr><td class="k">fdf9296</td><td>docs: scope the prompting result to the protocol that was tested</td></tr><tr><td class="k">239b35e</td><td>fix(dataset): relax the crouch's legs, because the reference was already self-intersecting</td></tr><tr><td class="k">b4d92ac</td><td>test(recorder): pin the foot-force symmetry that a bare-plane rollout depends on</td></tr></table></div>
+  <p class="lede" style="font-size:.95rem">HEAD: <code>fb3c956 docs(paper): draft the argument around the supervision principle</code></p>
+</section>
