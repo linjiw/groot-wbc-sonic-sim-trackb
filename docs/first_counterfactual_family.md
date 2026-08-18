@@ -1,7 +1,43 @@
 # The first counterfactual family, demonstrated in physics
 
 Same task, same start, same goal, same corridor. One number changes — the underside of a
-shelf, by 53 mm — and the whole-body behaviour that succeeds changes with it.
+shelf — and the whole-body behaviour that succeeds changes with it.
+
+| | easy scene (1.391 m) | hard scene (1.212 m) |
+|---|---|---|
+| **nominal walk** | accepted, 0.0 N | **rejected, 137.2 N** |
+| **adapted duck** | accepted, 0.0 N | **accepted, 0.0 N** |
+
+The failing contact is `torso_link` at frame **113**, against a swept-volume prediction of
+frame **112** — one frame, 20 ms. Window **0.178 m**. Reference drift begins at frame 120,
+*after* the contact, so it is the collision's consequence rather than its cause.
+
+## Two families, and what moving the obstacle bought
+
+`duck_003` supersedes `duck_002`. Same motion pair, same task, same room; the only difference
+is where the shelf sits.
+
+| | `duck_002` (path midpoint) | `duck_003` (station) |
+|---|---|---|
+| shelf position | x = 2.23 m | x = 2.67 m |
+| window | 0.053 m | **0.178 m** |
+| penetration at the hard shelf | 27 mm | **89 mm** |
+| force on the nominal motion | 3.0 N | **137.2 N** |
+| observed vs predicted contact frame | 94 vs 92 | **113 vs 112** |
+
+The midpoint is a guess and it was the wrong one: it caught the leading edge of the duck
+rather than the duck. Placing the obstacle where the two motions actually differ tripled the
+window and turned a 3 N graze into a firm collision. The "negative is marginal by
+construction" caveat recorded against the first family was a property of that placement, not
+of the method.
+
+**Penetration depth, not clearance, is the number to tune against.** Clearance saturates at
+−0.068 m — the torso capsule's radius — the moment the capsule is engulfed, so it cannot say
+how deep a collision is. The height the shelf would have to rise to stop touching does not
+saturate, and it tracks force: 27 mm gave 3.0 N, 89 mm gave 137.2 N. A 3.3× penetration
+bought an 18× force, so the boundary margin is a real knob and it trades a negative that is
+too weak to be convincing against one violent enough to be a crash rather than a failure.
+89 mm sits in a good place — decisive, and the robot does not fall.
 
 ## What is and is not being claimed
 
@@ -12,7 +48,7 @@ find immediately.
 | Level | Claim | Status |
 |---|---|---|
 | 1 | The swept volumes of two executed motions separate, so a geometric window exists | **established** |
-| 2 | The same controller, in the same place, succeeds or fails as that geometry changes | **established** |
+| 2 | The same controller, in the same place, succeeds or fails as that geometry changes | **established, twice** |
 | 3 | The result survives a perturbed start pose rather than one deterministic replay | *being measured* |
 
 Beyond all three sits a claim this work does **not** make: that the robot *perceives* the
@@ -24,15 +60,9 @@ The honest one-line statement of the method today: *we mine discriminative geome
 between physics-executable humanoid motions and use them to generate controlled counterfactual
 scenes in which the same task requires different whole-body behaviours.*
 
-| | easy scene (1.325 m) | hard scene (1.272 m) |
-|---|---|---|
-| **nominal walk** | accepted, 0.0 N | **rejected, 3.0 N** |
-| **adapted duck** | accepted, 0.0 N | **accepted, 0.0 N** |
-
-The failing contact body is `torso_link`: the walking robot's torso meets the shelf, is
-knocked off its reference, and the episode is rejected for `disallowed_robot_contact` and
-`unstable_reference_drift`. Every other cell records **no lateral contact at all** — not a
-small force, no contacting bodies.
+In both families the walking robot's torso meets the shelf, is knocked off its reference, and
+is rejected for `disallowed_robot_contact` and `unstable_reference_drift`. Every other cell
+records **no lateral contact at all** — not a small force, no contacting bodies.
 
 ## The rejection is attributable to the shelf
 
@@ -41,20 +71,20 @@ into a wall, a fall, tangled legs — produces the same table and means somethin
 is exactly what happened on an earlier attempt. So the failure is attributed, not just
 counted:
 
-| Question | Answer |
-|---|---|
-| First lateral contact | `torso_link`, frame 94, 3.0 N |
-| Frame geometry predicted the interference | 92 |
-| Is the body in the overhead regime's group | yes |
-| Drift onset in the **easy** scene | frame 175 |
-| Drift onset in the **hard** scene | frame 105 |
+| Question | `duck_002` | `duck_003` |
+|---|---|---|
+| First lateral contact | `torso_link`, frame 94, 3.0 N | `torso_link`, frame 113, 55.4 N |
+| Frame geometry predicted the interference | 92 | 112 |
+| Is the body in the overhead regime's group | yes | yes |
+| Drift onset in the **easy** scene | frame 175 | frame 175 |
+| Drift onset in the **hard** scene | frame 105 | frame 120 |
 
-Two facts carry the attribution. The observed contact lands **two frames** — 40 ms — from
-where the swept-volume geometry said it would, which is a real validation of the predictor
-against physics rather than against itself. And the reference drift moves from frame 175 to
-frame 105 when the shelf is lowered, arriving *after* the contact at 94: the drift is the
-collision's downstream consequence, not a tracking failure that the shelf happened to
-coincide with.
+Two facts carry the attribution, and they hold in both families. The observed contact lands
+**two frames** and then **one frame** — 40 ms, then 20 ms — from where the swept-volume
+geometry said it would, which is a real validation of the predictor against physics rather
+than against itself. And the reference drift moves later or earlier with the shelf, always
+arriving *after* the contact: the drift is the collision's downstream consequence, not a
+tracking failure that the shelf happened to coincide with.
 
 Getting this right needed two corrections. Reading the raw contact array flagged frame 0 of
 every cell — 237.4 N on `right_hip_roll_link`, in episodes with no collision at all — because
@@ -73,21 +103,20 @@ negative** — the same motion, in the same place, failing because the room chan
 
 ## How the pair was found
 
-The window is narrow and could not have been guessed. Each motion is rolled out on a bare
-plane, and its executed swept volume is binary-searched against a shelf lowered toward it
-until the first interference:
+The window could not have been guessed. Each motion is rolled out on a bare plane, and its
+executed swept volume is binary-searched against a shelf lowered toward it until the first
+interference. At the station where the duck is deepest:
 
-- the walk clears a shelf down to **1.298 m**
-- the duck clears one down to **1.245 m**
+- the walk clears a shelf down to **1.302 m**
+- the duck clears one down to **1.123 m**
 
-A **53 mm window**. The hard scene sits in the middle of it, at 1.272 m; the easy scene sits
-clear of both, at 1.325 m.
+A **178 mm window**. The hard scene sits at 1.212 m, the easy scene clear of both at 1.391 m.
 
-Only about 37% of the duck's torso drop converts into head clearance, because the torso
-pitches forward during a duck and the limiting capsule is the head at its top. That is why
-a motion whose torso descends 0.214 m buys only 53 mm of shelf.
+Only part of the duck's torso drop converts into head clearance, because the torso pitches
+forward during a duck and the limiting capsule is the head at its top: a motion whose torso
+descends 0.214 m buys 178 mm of shelf at the right station, and only 53 mm at the midpoint.
 
-## Three attempts, and what each one taught
+## Five attempts, and what each one taught
 
 **The clearance metric saturates.** The first run reported both motions at exactly
 −0.0680 m in the hard scene — the torso capsule's radius. A capsule wholly inside the
@@ -110,13 +139,35 @@ the legs at frame 187 with the root at x = 4.85 m, against a wall at 5.0 m — t
 been sized from the nominal path, and the adapted motion travels further. Rooms are now
 sized from every motion in the family.
 
+**The shelf position was not single-sourced.** Moving the obstacle to the station where the
+motions differ was applied to the boundary search and not to the renderer, which recomputed
+the position internally as the path midpoint. Physics loaded a shelf 0.44 m from the one the
+search had optimised, both motions hit it, and a 0.178 m window produced no family. The
+attribution report caught it by flagging `adapted_hard` as impure, rather than letting
+"counterfactual established: false" stand as a finding about the motions. The builder now
+reads the shelf box back out of the USDA that physics will load and checks all four
+clearances have their intended sign before spending a rollout — recomputing it from the
+builder's own variables would only confirm the builder agrees with itself, which was true
+throughout the bug.
+
+**Two runs over the same pair overwrote each other's scenes.** Same motion indices give the
+same `family_id`, so the second run's USDA replaced the first's silently. Re-running the
+earlier family's report then read the later family's geometry and reported clearances for
+scenes that had never been rolled out. Scene ids now carry the run directory.
+
+Four of the five failures were in the harness, not the geometry. That is worth stating
+plainly next to any yield number: counting them as method failures understates the method,
+and excluding them silently overstates it, so `report_family_yield` prints both rates and
+names every exclusion.
+
 ## What to be careful about when citing this
 
-**The negative is marginal by construction.** 3.0 N against a 1.0 N threshold is a graze, not
-a collision — the hard scene sits 26 mm below the nominal motion's boundary because the window
-is only 53 mm wide. That is arguably the most informative place for a negative to sit, since
-it is the discriminating case, but it is not a dramatic failure and should not be described
-as one.
+**The negative's severity is a choice, not a property of the method.** The boundary margin
+decides how far below the nominal motion's clearance the hard shelf sits, and that fixes the
+collision: 27 mm of penetration produced 3.0 N, a graze that barely clears the gate's 1.0 N
+threshold, while 89 mm produced 137.2 N without the robot falling. Report which was used.
+Anyone scaling this should tune the margin deliberately rather than inheriting it, because
+both ends are bad — a graze is unconvincing, and a crash stops being a behaviour failure.
 
 **One family is not a result.** This demonstrates the machinery end to end and gives a
 protocol that costs six rollouts. The claim that the corpus teaches scene-conditioned
