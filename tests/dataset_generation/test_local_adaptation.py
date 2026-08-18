@@ -118,16 +118,27 @@ def test_frames_outside_the_window_are_bit_identical_to_the_nominal():
 
 # ---- what it achieves ----------------------------------------------------------------------
 
-def test_a_deeper_target_produces_a_deeper_crouch():
-    _, shallow = local_crouch(walk(), 0.55, target_drop_m=0.10)
-    _, deep = local_crouch(walk(), 0.55, target_drop_m=0.20)
+def test_a_deeper_target_produces_a_deeper_crouch_until_the_cap_binds():
+    """Below the excursion cap the target is honoured; above it the clip is capped and says
+    so, rather than reaching the target through a motion the robot cannot hold on to its
+    route. Unbounded, this operator asked the knee for 1.629 rad -- 93 degrees beyond its
+    gait -- and the result lost 0.71 m of forward progress in execution."""
+    _, shallow = local_crouch(walk(), 0.55, target_drop_m=0.02, max_excursion=1.0)
+    _, deep = local_crouch(walk(), 0.55, target_drop_m=0.10, max_excursion=1.0)
     assert deep.silhouette_drop_m > shallow.silhouette_drop_m
-    assert deep.adapted_silhouette_m < shallow.adapted_silhouette_m
 
 
-def test_the_target_drop_is_hit_on_the_measured_silhouette():
-    _, report = local_crouch(walk(), 0.55, target_drop_m=0.15)
-    assert report.silhouette_drop_m == pytest.approx(0.15, abs=0.02)
+def test_a_target_beyond_the_cap_is_reported_rather_than_reached():
+    _, report = local_crouch(walk(), 0.55, target_drop_m=0.50, max_excursion=0.4)
+    assert report.excursion_capped
+    assert report.max_joint_change_rad <= 0.4 + 1e-6
+    assert report.silhouette_drop_m < 0.50
+
+
+def test_the_target_drop_is_hit_when_the_cap_allows_it():
+    _, report = local_crouch(walk(), 0.55, target_drop_m=0.05, max_excursion=1.2)
+    assert not report.excursion_capped
+    assert report.silhouette_drop_m == pytest.approx(0.05, abs=0.02)
 
 
 def test_the_silhouette_is_a_capsule_surface_and_not_a_joint_centre():

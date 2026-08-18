@@ -54,6 +54,14 @@ DEFAULT_WINDOW = 0.18
 #: Fraction of the window spent ramping in and out. Abrupt onsets are not trackable.
 DEFAULT_RAMP = 0.45
 
+#: Largest change any single joint may be given, in radians (~23 degrees). Without a cap the
+#: bisection will do anything to reach its geometric target: on one motion the arm tuck
+#: applied 1.300 rad -- 74 degrees of whole-arm rotation -- to hit a 100 mm width reduction,
+#: destabilised the robot and put it into a wall at 114 N. The motion that worked used
+#: 0.282 rad. A geometric objective with no bound on the means is not an operator, it is a
+#: search, and it will find something unusable.
+MAX_JOINT_EXCURSION_RAD = 0.40
+
 
 @dataclass(frozen=True)
 class LocalCrouchReport:
@@ -76,6 +84,12 @@ class LocalCrouchReport:
     active_fraction: float
     root_path_preserved: bool
     scale_applied: float
+    #: Largest change given to any joint, in radians.
+    max_joint_change_rad: float = 0.0
+    #: True when the excursion cap stopped the search short of the target. The clip achieves
+    #: less than was asked for, which is preferable to reaching the target through a motion the
+    #: robot cannot hold on to its route.
+    excursion_capped: bool = False
 
 
 def route_progress(root_xy: np.ndarray) -> np.ndarray:
@@ -143,6 +157,7 @@ def local_crouch(
     window: float = DEFAULT_WINDOW,
     ramp: float = DEFAULT_RAMP,
     range_keep: float = DEFAULT_RANGE_KEEP,
+    max_excursion: float = MAX_JOINT_EXCURSION_RAD,
     mjcf_path: str | Path = DEFAULT_G1_MJCF,
     max_scale: float = 3.0,
 ) -> tuple[np.ndarray, LocalCrouchReport]:
@@ -217,7 +232,12 @@ def local_crouch(
     if not core.any():
         core = alpha >= alpha.max() - 1e-9
 
-    low, high = 0.0, max_scale
+    # Bound the search by joint excursion as well as by the geometric target. Unbounded, the
+    # bisection asked the knee to move 1.629 rad -- 93 degrees beyond its gait -- to reach a
+    # 150 mm drop, and the resulting clip lost 0.71 m of forward progress in execution. The
+    # knee carries the largest coupling gain, so it sets the ceiling.
+    ceiling = max_excursion / max(float(np.abs(leg_gain).max()), 1e-9)
+    low, high = 0.0, min(max_scale, ceiling)
     for _ in range(12):
         middle = 0.5 * (low + high)
         drop = float(
@@ -227,8 +247,8 @@ def local_crouch(
             low = middle
         else:
             high = middle
-    adapted = build(0.5 * (low + high))
-
+    scale = 0.5 * (low + high)
+    adapted = build(scale)
     adapted_silhouette = _silhouette(adapted, mjcf_path)
     waist_index = names.index("waist_pitch_joint") if "waist_pitch_joint" in names else None
     waist_change = (
@@ -251,7 +271,11 @@ def local_crouch(
             np.array_equal(adapted[:, :2], qpos[:, :2])
             and np.array_equal(adapted[:, 3:7], qpos[:, 3:7])
         ),
-        scale_applied=float(0.5 * (low + high)),
+        scale_applied=float(scale),
+        max_joint_change_rad=float(np.abs(adapted[:, 7:] - qpos[:, 7:]).max()),
+        excursion_capped=bool(
+            np.abs(adapted[:, 7:] - qpos[:, 7:]).max() >= max_excursion * 0.999
+        ),
     )
 
 
@@ -283,6 +307,12 @@ class LocalTuckReport:
     active_fraction: float
     root_path_preserved: bool
     scale_applied: float
+    #: Largest change given to any joint, in radians.
+    max_joint_change_rad: float = 0.0
+    #: True when the excursion cap stopped the search before the target was reached. The clip
+    #: is still usable; it simply achieves less than was asked for, and that is preferable to
+    #: reaching the target through a motion the robot cannot hold.
+    excursion_capped: bool = False
 
 
 def _half_width(qpos: np.ndarray, mjcf_path) -> np.ndarray:
@@ -320,6 +350,7 @@ def local_arm_tuck(
     window: float = DEFAULT_WINDOW,
     ramp: float = DEFAULT_RAMP,
     range_keep: float = DEFAULT_RANGE_KEEP,
+    max_excursion: float = MAX_JOINT_EXCURSION_RAD,
     mjcf_path: str | Path = DEFAULT_G1_MJCF,
 ) -> tuple[np.ndarray, LocalTuckReport]:
     """Draw the arms in toward the torso locally, narrowing the silhouette.
@@ -413,7 +444,9 @@ def local_arm_tuck(
         out[:, 7 : 7 + count] = np.clip(out[:, 7 : 7 + count], centre - half, centre + half)
         return out
 
-    low, high = 0.0, 1.5
+    # Bound the search by how far any joint may move, not only by the geometric target.
+    ceiling = max_excursion / max(float(np.abs(direction).max()), 1e-9)
+    low, high = 0.0, min(1.5, ceiling)
     for _ in range(10):
         middle = 0.5 * (low + high)
         reduction = float((nominal_width - _half_width(build(middle), mjcf_path)).max())
@@ -421,7 +454,9 @@ def local_arm_tuck(
             low = middle
         else:
             high = middle
-    adapted = build(0.5 * (low + high))
+    scale = 0.5 * (low + high)
+    adapted = build(scale)
+    capped = scale >= ceiling - 1e-6
     adapted_width = _half_width(adapted, mjcf_path)
 
     return adapted, LocalTuckReport(
@@ -440,5 +475,9 @@ def local_arm_tuck(
             np.array_equal(adapted[:, :3], qpos[:, :3])
             and np.array_equal(adapted[:, 3:7], qpos[:, 3:7])
         ),
-        scale_applied=float(0.5 * (low + high)),
+        scale_applied=float(scale),
+        max_joint_change_rad=float(np.abs(adapted[:, 7:] - qpos[:, 7:]).max()),
+        excursion_capped=bool(
+            np.abs(adapted[:, 7:] - qpos[:, 7:]).max() >= max_excursion * 0.999
+        ),
     )
