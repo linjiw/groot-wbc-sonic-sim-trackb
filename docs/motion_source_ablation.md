@@ -1,4 +1,16 @@
-# Prompting cannot build the mode bank
+# Prompt-only generation, closed as an engineering path
+
+**Scope of this result, stated first because it is easy to overstate.** Seven modes at two
+seeds each, under one set of prompt templates, one generator checkpoint and one sampling
+configuration. That is enough to stop spending GPU on prompt search, which is a decision
+about where effort goes. It is *not* evidence that this generator cannot produce crouching,
+arm-tucking or high-stepping motions, and it must not be written as one. A universal claim
+would need a pre-registered sweep over templates and seeds that nobody has run.
+
+So: **the engineering question is closed; the scientific claim is not established.** In the
+paper this belongs as a motivating audit or a motion-source ablation answering *why naive
+text generation does not scale this pipeline* — not as a headline finding about generative
+models.
 
 The plan was to ask the generator for whole-route motion *styles* rather than mid-clip
 events, on the evidence that styles come back reliably and events never do. Seven new modes
@@ -18,7 +30,7 @@ Baseline for comparison, from the same batch: a plain walk reference has a silho
 | `shoulder_turn` | 2 / 2 | −18 mm | wider than a plain walk |
 | `high_knee` | 2 / 2 | +19 mm | lifts, but not enough to place a bar in |
 
-## The crouch is a clean dichotomy
+## Within this protocol, the crouch is a clean dichotomy
 
 Every prompt that actually lowers the body — by 371 to 405 mm, which is enormous — folds the
 waist past the G1's range on **every single frame**. The one phrasing that keeps the waist
@@ -28,10 +40,10 @@ This includes a prompt written specifically to forbid the failure: *"walks forwa
 down with the head low, keeping the back straight and never folding forward at the waist"*.
 It folds the waist on 100% of frames and reaches the deepest silhouette of the batch, 0.800 m.
 
-There is no third outcome in four attempts. The generator's crouch is a waist fold, and the
+There is no third outcome in the four phrasings tried. The generator's crouch is a waist fold, and the
 instruction not to fold at the waist removes the crouch rather than changing how it is made.
-**Prompting is exhausted here**, and the embodiment-aware retargeter is now required rather
-than a fallback — the honest reading of a knee-driven crouch is that it has to be constructed,
+**Prompt search is not worth more GPU here**, and the adaptation operator becomes the path
+forward rather than a fallback — the honest reading of a knee-driven crouch is that it has to be constructed,
 because it is not in the model's distribution to be asked for.
 
 ## Asking for tucked arms produced a wider robot
@@ -48,8 +60,8 @@ a geometric quantity, and the two are related only loosely.**
 
 ## What this changes
 
-- **The mode bank cannot be built from text alone.** Of the three regimes, prompting supplies
-  no adapted motion for any of them: overhead needs a crouch it cannot make reachable,
+- **The mode bank will not be built from text alone on this budget.** Under the tested
+  protocol, prompting supplied no adapted motion for any of the three regimes: overhead needs a crouch it cannot make reachable,
   lateral needs a narrowing it makes wider, floor needs a lift it makes too small.
 - **The retargeter moves onto the critical path.** Minimise FK deviation from the generated
   crouch subject to joint limits, a waist-pitch penalty, preserved root path and foot

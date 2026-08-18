@@ -12,6 +12,18 @@ Everything on the right of that is measured elsewhere. This module is the left: 
 says how far a motion departs from ordinary walking, so that a policy which crouches in an
 empty corridor can be scored as wrong even though nothing hits it.
 
+**This is a preference sanity check, not a reportable quantity.** The ratio it produces --
+1.41x for the crouch over the walk on the measured family -- depends on the weights, on how
+each component is normalised, on whether duration and tracking error are included, and on
+which motion is taken as nominal. None of those are frozen, so the number does not belong in
+an abstract or a headline result. What it is good for is confirming the *sign*: where both
+motions succeed, the walk should come out cheaper, and it does.
+
+A safer decision rule while the weights are unfrozen is lexicographic: require task success
+first, and among successful motions prefer the smallest deviation from nominal. There is also
+a circularity to avoid -- once an adaptation operator minimises a cost, that same cost cannot
+then be used to argue the operator produces minimal adaptation.
+
 **The weights are a stated convention, not a measurement.** No reviewed sample has calibrated
 them, and the ranking they produce should be checked against the one thing that is not a
 convention: whichever motion a person would call the obvious choice in an open room. Every
