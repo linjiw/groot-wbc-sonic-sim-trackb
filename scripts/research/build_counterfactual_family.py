@@ -310,9 +310,14 @@ def main() -> int:
     room = room_size_for([path_xy, *executed_paths])
     print(f"room sized {room[0]:.1f} x {room[1]:.1f} m to hold both motions")
 
+    # Scene ids carry the run directory, not just the motion pair. Two runs over the same
+    # pair produce the same family_id, and the second silently overwrote the first's USDA --
+    # after which the earlier run's attribution report was recomputed against the later
+    # run's geometry and reported clearances that had never been rolled out.
     scenes = {}
+    run_tag = args.work.name
     for label, z_base in (("easy", easy_z), ("hard", hard_z)):
-        scene_id = f"{family.family_id}_{label}"
+        scene_id = f"{family.family_id}_{run_tag}_{label}"
         write_scene(scene_id, path_xy, z_base, start_xy, room, mid)
         scenes[label] = scene_id
     print(f"\nwrote scenes: {', '.join(scenes.values())}")

@@ -162,10 +162,23 @@ def analyse(family_dir: Path, scenes_root: Path) -> dict:
         "nominal": load(family_dir / "probe_nominal"),
         "adapted": load(family_dir / "probe_adapted"),
     }
-    boxes = {
-        difficulty: shelf_box(scenes_root / f"{family['family_id']}_{difficulty}.usda")
-        for difficulty in ("easy", "hard")
-    }
+    # Prefer the run-tagged scene, falling back to the bare family_id for runs made before
+    # scenes were namespaced. A missing scene is an error rather than a silent skip: reading
+    # another run's geometry is exactly the failure this naming exists to prevent.
+    def scene_for(difficulty: str) -> Path:
+        candidates = [
+            scenes_root / f"{family['family_id']}_{family_dir.name}_{difficulty}.usda",
+            scenes_root / f"{family['family_id']}_{difficulty}.usda",
+        ]
+        for candidate in candidates:
+            if candidate.exists():
+                return candidate
+        raise SystemExit(
+            f"no scene file for {difficulty}; looked for "
+            + " and ".join(str(c) for c in candidates)
+        )
+
+    boxes = {difficulty: shelf_box(scene_for(difficulty)) for difficulty in ("easy", "hard")}
 
     cells = {}
     for motion in ("nominal", "adapted"):
@@ -212,8 +225,19 @@ def analyse(family_dir: Path, scenes_root: Path) -> dict:
                 "attribution_problems": problems,
             }
 
+    # Penetration depth, which the clearance metric cannot report. A capsule wholly inside
+    # the box has point-to-box distance zero, so clearance saturates at minus the capsule
+    # radius -- 0.068 m for the torso -- however far past the surface the body actually is.
+    # The boundary height does not saturate: the shelf would have to rise by exactly
+    # (boundary - underside) to stop touching. That is the number that tracks contact force,
+    # and it is what a margin has to be tuned against.
+    penetration = None
+    if family.get("nominal_clears_to_m") and family.get("hard_shelf_underside_m"):
+        penetration = family["nominal_clears_to_m"] - family["hard_shelf_underside_m"]
+
     pure = all(not cell["attribution_problems"] for cell in cells.values())
     return {
+        "nominal_penetration_depth_m": penetration,
         "family_id": family["family_id"],
         "regime": regime,
         "window_m": family.get("window_m"),
@@ -250,6 +274,17 @@ def render(report: dict) -> str:
         for problem in cell["attribution_problems"]:
             lines.append(f"  IMPURE  {key}: {problem}")
     lines.append("")
+    depth = report.get("nominal_penetration_depth_m")
+    if depth is not None:
+        force = report["cells"].get("nominal_hard", {}).get("first_contact_force_n", 0.0)
+        lines.append(
+            f"intended failure: the shelf sits {depth * 1000:.0f} mm below the height that "
+            f"would clear the nominal motion, and produced {force:.1f} N"
+        )
+        lines.append(
+            "  (clearance saturates at -0.068 m once the torso capsule is engulfed; this "
+            "does not)"
+        )
     lines.append(f"attribution pure: {report['attribution_pure']}")
     lines.append(f"claim level:      {report['claim_level']}")
     return "\n".join(lines)
