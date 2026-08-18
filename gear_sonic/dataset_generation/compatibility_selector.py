@@ -58,7 +58,9 @@ class Family:
         return min(viable, key=lambda c: (c.cost, c.motion_id)) if viable else None
 
 
-def features(scene: dict[str, float], motion: dict[str, float], *, blind: bool = False) -> np.ndarray:
+def features(
+    scene: dict[str, float], motion: dict[str, float], *, blind: bool = False
+) -> np.ndarray:
     """Feature vector for one (scene, candidate) pair.
 
     The margin terms are supplied explicitly. Handing the model `scene - motion` is a privileged
@@ -134,7 +136,8 @@ class SelectorMetrics:
 
     def to_dict(self) -> dict:
         return {
-            "control": self.control, "families": self.families,
+            "control": self.control,
+            "families": self.families,
             "choice_accuracy": round(self.choice_accuracy, 4),
             "false_safe_rate": round(self.false_safe_rate, 4),
             "unnecessary_adaptation_rate": round(self.unnecessary_adaptation_rate, 4),
@@ -202,7 +205,8 @@ def evaluate(
     for i, fam in enumerate(scored):
         order = rng.permutation(len(fam.candidates)) if control == "candidate-order" else None
         chosen = select(
-            model, fam,
+            model,
+            fam,
             blind=(control == "no-scene"),
             scene_override=shuffled[i] if shuffled else None,
             order=order,

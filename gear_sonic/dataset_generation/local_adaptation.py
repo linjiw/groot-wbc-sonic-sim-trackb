@@ -57,7 +57,16 @@ MIN_WRIST_HIP_CLEARANCE_M = 0.04
 #: +0.520 bound on every frame. Riding a limit is the problem, not using the joint. The bound
 #: here is therefore on the resulting *value*, not on the change: a clip already at +0.294 rad
 #: gets only the headroom that remains.
-WAIST_USE_FRACTION = 0.85
+#:
+#: Off by default, for two reasons. The guidance this operator was built to asks for a crouch that
+#: is knee-driven and holds torso pitch near nominal, penalising waist use heavily; and the crouch
+#: that the matched overhead 2x2 verified moves the waist by exactly 0.000 rad. Enabling this by
+#: default meant the operator in the repository no longer reproduced the clip physics had checked,
+#: which is the more expensive of the two problems. Measured contribution when enabled: 12.9 mm of
+#: a 31.7 mm drop, 41%. Pass ``waist_use_fraction`` explicitly to spend it.
+WAIST_USE_FRACTION = 0.0
+#: The value used when a caller opts in without naming one.
+WAIST_USE_FRACTION_WHEN_ENABLED = 0.85
 
 #: Fraction of each joint's half-range the adapted motion may occupy. Leaving headroom is not
 #: cosmetic -- a reference that rides a limit is what the saturation screen rejects, and a
@@ -71,13 +80,22 @@ DEFAULT_WINDOW = 0.18
 #: Fraction of the window spent ramping in and out. Abrupt onsets are not trackable.
 DEFAULT_RAMP = 0.45
 
-#: Largest change any single joint may be given, in radians (~23 degrees). Without a cap the
-#: bisection will do anything to reach its geometric target: on one motion the arm tuck
-#: applied 1.300 rad -- 74 degrees of whole-arm rotation -- to hit a 100 mm width reduction,
-#: destabilised the robot and put it into a wall at 114 N. The motion that worked used
-#: 0.282 rad. A geometric objective with no bound on the means is not an operator, it is a
-#: search, and it will find something unusable.
-MAX_JOINT_EXCURSION_RAD = 0.40
+#: Largest change any single joint may be given, in radians. Without a cap the bisection will do
+#: anything to reach its geometric target: on one motion the arm tuck applied 1.300 rad -- 74
+#: degrees of whole-arm rotation -- to hit a 100 mm width reduction, destabilised the robot and
+#: put it into a wall at 114 N. The motion that worked used 0.282 rad. A geometric objective with
+#: no bound on the means is not an operator, it is a search, and it will find something unusable.
+#:
+#: This bound is per operator, because one number derived from the tuck's failure was applied to
+#: both and silently forbade a crouch that works. The crouch verified by the matched overhead 2x2
+#: moves its knees 0.994 rad, and a strength sweep put the crouch's trackability boundary between
+#: 1.05 and 1.31 rad; a 0.40 cap would have prevented that family from existing. The two operators
+#: move different masses against different support, so they do not share a limit.
+MAX_TUCK_EXCURSION_RAD = 0.40
+#: Set just below the lowest strength observed to fail, and above the 0.994 rad that is verified.
+MAX_CROUCH_EXCURSION_RAD = 1.00
+#: Retained as the tuck's value so existing callers keep the bound they were written against.
+MAX_JOINT_EXCURSION_RAD = MAX_TUCK_EXCURSION_RAD
 
 
 @dataclass(frozen=True)
@@ -145,7 +163,8 @@ def _silhouette(qpos: np.ndarray, mjcf_path) -> np.ndarray:
     starts, ends, radii, _ = body_capsules_world(
         np.asarray(payload["body_pos_w"], dtype=np.float64),
         np.asarray(payload["body_quat_w"], dtype=np.float64),
-        list(payload["body_names"]), capsules=G1_COLLISION_CAPSULES,
+        list(payload["body_names"]),
+        capsules=G1_COLLISION_CAPSULES,
     )
     return (np.maximum(starts[:, :, 2], ends[:, :, 2]) + radii[None, :]).max(axis=1)
 
@@ -159,7 +178,8 @@ def _sole_height(qpos: np.ndarray, mjcf_path) -> np.ndarray:
     starts, ends, radii, owners = body_capsules_world(
         np.asarray(payload["body_pos_w"], dtype=np.float64),
         np.asarray(payload["body_quat_w"], dtype=np.float64),
-        list(payload["body_names"]), capsules=G1_COLLISION_CAPSULES,
+        list(payload["body_names"]),
+        capsules=G1_COLLISION_CAPSULES,
     )
     columns = [i for i, owner in enumerate(owners) if "ankle" in owner]
     lows = np.minimum(starts[:, columns, 2], ends[:, columns, 2]) - radii[None, columns]
@@ -174,7 +194,8 @@ def local_crouch(
     window: float = DEFAULT_WINDOW,
     ramp: float = DEFAULT_RAMP,
     range_keep: float = DEFAULT_RANGE_KEEP,
-    max_excursion: float = MAX_JOINT_EXCURSION_RAD,
+    max_excursion: float = MAX_CROUCH_EXCURSION_RAD,
+    waist_use_fraction: float = WAIST_USE_FRACTION,
     mjcf_path: str | Path = DEFAULT_G1_MJCF,
     max_scale: float = 3.0,
 ) -> tuple[np.ndarray, LocalCrouchReport]:
@@ -195,10 +216,7 @@ def local_crouch(
 
     names, limits = load_joint_limits(mjcf_path)
     count = min(qpos.shape[1] - 7, limits.shape[0])
-    legs = [
-        i for i, name in enumerate(names[:count])
-        if any(key in name for key in CROUCH_JOINTS)
-    ]
+    legs = [i for i, name in enumerate(names[:count]) if any(key in name for key in CROUCH_JOINTS)]
     if not legs:
         raise ValueError("no crouch joints found in the model")
 
@@ -223,8 +241,8 @@ def local_crouch(
     # window where the profile was fully active, and the obstacle sat at an extended moment.
     waist_index = names.index("waist_pitch_joint") if "waist_pitch_joint" in names else None
     waist_headroom = 0.0
-    if waist_index is not None and waist_index < count:
-        ceiling_value = WAIST_USE_FRACTION * upper[waist_index]
+    if waist_index is not None and waist_index < count and waist_use_fraction > 0.0:
+        ceiling_value = waist_use_fraction * upper[waist_index]
         waist_headroom = max(0.0, ceiling_value - float(qpos[:, 7 + waist_index].max()))
 
     coupling = {"hip_pitch": -1.0, "knee": +2.0, "ankle_pitch": -1.0}
@@ -269,9 +287,7 @@ def local_crouch(
     low, high = 0.0, min(max_scale, ceiling)
     for _ in range(12):
         middle = 0.5 * (low + high)
-        drop = float(
-            (nominal_silhouette - _silhouette(build(middle), mjcf_path))[core].min()
-        )
+        drop = float((nominal_silhouette - _silhouette(build(middle), mjcf_path))[core].min())
         if drop < target_drop_m:
             low = middle
         else:
@@ -282,7 +298,8 @@ def local_crouch(
     waist_index = names.index("waist_pitch_joint") if "waist_pitch_joint" in names else None
     waist_change = (
         float(np.abs(adapted[:, 7 + waist_index] - qpos[:, 7 + waist_index]).max())
-        if waist_index is not None and waist_index < count else 0.0
+        if waist_index is not None and waist_index < count
+        else 0.0
     )
 
     return adapted, LocalCrouchReport(
@@ -292,9 +309,7 @@ def local_crouch(
         nominal_silhouette_m=float(nominal_silhouette.min()),
         adapted_silhouette_m=float(adapted_silhouette.min()),
         waist_change_rad=waist_change,
-        foot_height_shift_m=float(
-            np.abs(_sole_height(adapted, mjcf_path) - nominal_soles).max()
-        ),
+        foot_height_shift_m=float(np.abs(_sole_height(adapted, mjcf_path) - nominal_soles).max()),
         active_fraction=float((alpha > 0.01).mean()),
         root_path_preserved=bool(
             np.array_equal(adapted[:, :2], qpos[:, :2])
@@ -302,9 +317,7 @@ def local_crouch(
         ),
         scale_applied=float(scale),
         max_joint_change_rad=float(np.abs(adapted[:, 7:] - qpos[:, 7:]).max()),
-        excursion_capped=bool(
-            np.abs(adapted[:, 7:] - qpos[:, 7:]).max() >= max_excursion * 0.999
-        ),
+        excursion_capped=bool(np.abs(adapted[:, 7:] - qpos[:, 7:]).max() >= max_excursion * 0.999),
     )
 
 
@@ -366,7 +379,8 @@ def _half_width(qpos: np.ndarray, mjcf_path) -> np.ndarray:
     starts, ends, radii, _ = body_capsules_world(
         np.asarray(payload["body_pos_w"], dtype=np.float64),
         np.asarray(payload["body_quat_w"], dtype=np.float64),
-        list(payload["body_names"]), capsules=G1_COLLISION_CAPSULES,
+        list(payload["body_names"]),
+        capsules=G1_COLLISION_CAPSULES,
     )
     centres = 0.5 * (starts + ends)
     offsets = centres[:, :, :2] - root[:, None, :2]
@@ -381,7 +395,7 @@ def local_arm_tuck(
     window: float = DEFAULT_WINDOW,
     ramp: float = DEFAULT_RAMP,
     range_keep: float = DEFAULT_RANGE_KEEP,
-    max_excursion: float = MAX_JOINT_EXCURSION_RAD,
+    max_excursion: float = MAX_TUCK_EXCURSION_RAD,
     mjcf_path: str | Path = DEFAULT_G1_MJCF,
 ) -> tuple[np.ndarray, LocalTuckReport]:
     """Draw the arms in toward the torso locally, narrowing the silhouette.
@@ -405,14 +419,8 @@ def local_arm_tuck(
 
     names, limits = load_joint_limits(mjcf_path)
     count = min(qpos.shape[1] - 7, limits.shape[0])
-    arms = [
-        i for i, name in enumerate(names[:count])
-        if any(key in name for key in TUCK_JOINTS)
-    ]
-    legs = [
-        i for i, name in enumerate(names[:count])
-        if any(key in name for key in CROUCH_JOINTS)
-    ]
+    arms = [i for i, name in enumerate(names[:count]) if any(key in name for key in TUCK_JOINTS)]
+    legs = [i for i, name in enumerate(names[:count]) if any(key in name for key in CROUCH_JOINTS)]
     if not arms:
         raise ValueError("no arm joints found in the model")
 
@@ -487,7 +495,6 @@ def local_arm_tuck(
             high = middle
     scale = 0.5 * (low + high)
     adapted = build(scale)
-    capped = scale >= ceiling - 1e-6
     adapted_width = _half_width(adapted, mjcf_path)
 
     return adapted, LocalTuckReport(
@@ -498,9 +505,11 @@ def local_arm_tuck(
         adapted_half_width_at_station_m=float(adapted_width[active].max()),
         nominal_half_width_m=float(nominal_width.max()),
         adapted_half_width_m=float(adapted_width.max()),
-        leg_change_rad=float(
-            np.abs(adapted[:, 7 + np.asarray(legs)] - qpos[:, 7 + np.asarray(legs)]).max()
-        ) if legs else 0.0,
+        leg_change_rad=(
+            float(np.abs(adapted[:, 7 + np.asarray(legs)] - qpos[:, 7 + np.asarray(legs)]).max())
+            if legs
+            else 0.0
+        ),
         active_fraction=float((alpha > 0.01).mean()),
         root_path_preserved=bool(
             np.array_equal(adapted[:, :3], qpos[:, :3])
@@ -508,10 +517,9 @@ def local_arm_tuck(
         ),
         scale_applied=float(scale),
         max_joint_change_rad=float(np.abs(adapted[:, 7:] - qpos[:, 7:]).max()),
-        excursion_capped=bool(
-            np.abs(adapted[:, 7:] - qpos[:, 7:]).max() >= max_excursion * 0.999
-        ),
+        excursion_capped=bool(np.abs(adapted[:, 7:] - qpos[:, 7:]).max() >= max_excursion * 0.999),
     )
+
 
 def wrist_hip_clearance(
     qpos: np.ndarray,
@@ -532,9 +540,7 @@ def wrist_hip_clearance(
     def geoms_of(fragment: str) -> list[int]:
         out = []
         for geom in range(model.ngeom):
-            name = mujoco.mj_id2name(
-                model, mujoco.mjtObj.mjOBJ_BODY, model.geom_bodyid[geom]
-            ) or ""
+            name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, model.geom_bodyid[geom]) or ""
             if fragment in name:
                 out.append(geom)
         return out
@@ -553,6 +559,7 @@ def wrist_hip_clearance(
         data.qpos[:] = qpos[index]
         mujoco.mj_forward(model, data)
         for first, second in pairs:
-            best = min(best, float(mujoco.mj_geomDistance(
-                model, data, first, second, 0.5, scratch)))
+            best = min(
+                best, float(mujoco.mj_geomDistance(model, data, first, second, 0.5, scratch))
+            )
     return best

@@ -18,8 +18,8 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
+import sys
 
 import numpy as np
 
@@ -38,12 +38,36 @@ from gear_sonic.dataset_generation.compatibility_selector import (  # noqa: E402
 #: Costs are ordinal placeholders -- the lexicographic rule needs only the ordering, and the
 #: weights are explicitly not frozen yet.
 BANK = (
-    ("nominal", 0.0, {"peak_height_m": 1.305, "half_width_left_m": 0.290,
-                      "half_width_right_m": 0.290, "foot_clearance_m": 0.120}),
-    ("crouch", 1.0, {"peak_height_m": 1.207, "half_width_left_m": 0.292,
-                     "half_width_right_m": 0.292, "foot_clearance_m": 0.118}),
-    ("tuck", 1.0, {"peak_height_m": 1.303, "half_width_left_m": 0.256,
-                   "half_width_right_m": 0.268, "foot_clearance_m": 0.120}),
+    (
+        "nominal",
+        0.0,
+        {
+            "peak_height_m": 1.305,
+            "half_width_left_m": 0.290,
+            "half_width_right_m": 0.290,
+            "foot_clearance_m": 0.120,
+        },
+    ),
+    (
+        "crouch",
+        1.0,
+        {
+            "peak_height_m": 1.207,
+            "half_width_left_m": 0.292,
+            "half_width_right_m": 0.292,
+            "foot_clearance_m": 0.118,
+        },
+    ),
+    (
+        "tuck",
+        1.0,
+        {
+            "peak_height_m": 1.303,
+            "half_width_left_m": 0.256,
+            "half_width_right_m": 0.268,
+            "foot_clearance_m": 0.120,
+        },
+    ),
 )
 
 
@@ -60,12 +84,19 @@ def synthetic_families(count: int, *, seed: int, nominals: int = 6) -> list[Fami
         regime = "overhead" if i % 2 == 0 else "lateral"
         jitter = rng.normal(0.0, 0.006, 4)
         if regime == "overhead":
-            scene = {"overhead_clearance_m": float(rng.uniform(1.19, 1.34)),
-                     "left_gap_m": 0.45, "right_gap_m": 0.45, "floor_height_m": 0.0}
+            scene = {
+                "overhead_clearance_m": float(rng.uniform(1.19, 1.34)),
+                "left_gap_m": 0.45,
+                "right_gap_m": 0.45,
+                "floor_height_m": 0.0,
+            }
         else:
-            scene = {"overhead_clearance_m": 1.60,
-                     "left_gap_m": float(rng.uniform(0.25, 0.30)),
-                     "right_gap_m": 0.45, "floor_height_m": 0.0}
+            scene = {
+                "overhead_clearance_m": 1.60,
+                "left_gap_m": float(rng.uniform(0.25, 0.30)),
+                "right_gap_m": 0.45,
+                "floor_height_m": 0.0,
+            }
         cands = []
         for name, cost, base in BANK:
             prof = {k: float(v + j) for (k, v), j in zip(base.items(), jitter)}
@@ -90,10 +121,14 @@ def main() -> int:
     fams = synthetic_families(args.families, seed=args.seed)
     scorable = [f for f in fams if f.optimum() is not None]
     needs = sum(1 for f in scorable if f.optimum().cost > 0.0)
-    print(f"synthetic families: {len(fams)}  scorable: {len(scorable)}  "
-          f"needing adaptation: {needs} ({needs / max(1, len(scorable)):.0%})")
-    print("  a selector that always answers 'nominal' scores "
-          f"{1 - needs / max(1, len(scorable)):.0%} -- that is the bar to beat\n")
+    print(
+        f"synthetic families: {len(fams)}  scorable: {len(scorable)}  "
+        f"needing adaptation: {needs} ({needs / max(1, len(scorable)):.0%})"
+    )
+    print(
+        "  a selector that always answers 'nominal' scores "
+        f"{1 - needs / max(1, len(scorable)):.0%} -- that is the bar to beat\n"
+    )
 
     report: dict = {"seed": args.seed, "families": len(fams), "splits": {}}
     for axis in ("family", "nominal"):
@@ -109,23 +144,36 @@ def main() -> int:
                 m = evaluate(model, test, control=control, seed=args.seed + fold)
                 if not m.families:
                     continue
-                acc.append(m.choice_accuracy); fs.append(m.false_safe_rate)
-                un.append(m.unnecessary_adaptation_rate); rg.append(m.cost_regret)
-                ab.append(m.abstention_rate); n += m.families
-            rows.append({"control": control, "folds": len(acc), "families": n,
-                         "choice_accuracy": round(float(np.mean(acc)), 4),
-                         "false_safe_rate": round(float(np.mean(fs)), 4),
-                         "unnecessary_adaptation_rate": round(float(np.mean(un)), 4),
-                         "cost_regret": round(float(np.mean(rg)), 4),
-                         "abstention_rate": round(float(np.mean(ab)), 4)})
+                acc.append(m.choice_accuracy)
+                fs.append(m.false_safe_rate)
+                un.append(m.unnecessary_adaptation_rate)
+                rg.append(m.cost_regret)
+                ab.append(m.abstention_rate)
+                n += m.families
+            rows.append(
+                {
+                    "control": control,
+                    "folds": len(acc),
+                    "families": n,
+                    "choice_accuracy": round(float(np.mean(acc)), 4),
+                    "false_safe_rate": round(float(np.mean(fs)), 4),
+                    "unnecessary_adaptation_rate": round(float(np.mean(un)), 4),
+                    "cost_regret": round(float(np.mean(rg)), 4),
+                    "abstention_rate": round(float(np.mean(ab)), 4),
+                }
+            )
         report["splits"][axis] = rows
         print(f"holdout by {axis}:")
-        print(f"  {'control':>16s}{'choice':>9s}{'false-safe':>12s}{'unnec.':>9s}"
-              f"{'regret':>9s}{'abstain':>9s}")
+        print(
+            f"  {'control':>16s}{'choice':>9s}{'false-safe':>12s}{'unnec.':>9s}"
+            f"{'regret':>9s}{'abstain':>9s}"
+        )
         for r in rows:
-            print(f"  {r['control']:>16s}{r['choice_accuracy']:9.3f}{r['false_safe_rate']:12.3f}"
-                  f"{r['unnecessary_adaptation_rate']:9.3f}{r['cost_regret']:9.3f}"
-                  f"{r['abstention_rate']:9.3f}")
+            print(
+                f"  {r['control']:>16s}{r['choice_accuracy']:9.3f}{r['false_safe_rate']:12.3f}"
+                f"{r['unnecessary_adaptation_rate']:9.3f}{r['cost_regret']:9.3f}"
+                f"{r['abstention_rate']:9.3f}"
+            )
         print()
 
     if args.json:

@@ -11,19 +11,20 @@ compared against the observed ones. Against the family's own scene each rung dif
 shelf's height and its scene id, with one exception worth recording: the room's walls move by
 0.2 mm, because the floor's width is stored to three decimals and re-deriving wall positions from
 it rounds. The walls stand 5.37 m from a shelf interaction at x = 2.23 m, so this cannot reach
-the result, but a reader comparing the files should not have to wonder. It also repairs the family manifest, which recorded the two
-shelf heights but not the executed root path or the room size, so the scenes it described could
-not be rebuilt from it.
+the result, but a reader comparing the files should not have to wonder.
+
+It also repairs the family manifest, which recorded the two shelf heights but neither the
+executed root path nor the room size, so the scenes it described could not be rebuilt from it.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import re
-import pickle
-import sys
 from pathlib import Path
+import pickle
+import re
+import sys
 
 import numpy as np
 
@@ -62,10 +63,12 @@ def main() -> int:
     ap.add_argument("--adapted-rollout", type=Path)
     ap.add_argument("--write-scenes", action="store_true")
     ap.add_argument(
-        "--match-scene", type=Path,
+        "--match-scene",
+        type=Path,
         help="An existing family scene whose room and shelf centre the ladder must reuse. "
-             "Read back out of the USDA physics loads rather than recomputed, because a room "
-             "resized between rungs would confound the ladder with a room change.")
+        "Read back out of the USDA physics loads rather than recomputed, because a room "
+        "resized between rungs would confound the ladder with a room change.",
+    )
     args = ap.parse_args()
 
     manifest = json.loads(args.manifest.read_text())
@@ -84,13 +87,17 @@ def main() -> int:
     start = tuple(float(v) for v in paths[0][0])
     if args.match_scene:
         text = args.match_scene.read_text(encoding="utf-8")
-        floor = text[text.index('Plane "Floor"'):]
-        room = (float(re.search(r"double width = ([\d.]+)", floor).group(1)),
-                float(re.search(r"double length = ([\d.]+)", floor).group(1)))
+        floor = text[text.index('Plane "Floor"') :]
+        room = (
+            float(re.search(r"double width = ([\d.]+)", floor).group(1)),
+            float(re.search(r"double length = ([\d.]+)", floor).group(1)),
+        )
         box = cf.rendered_shelf_box(args.match_scene)
         centre = ((box[0] + box[3]) / 2.0, (box[1] + box[4]) / 2.0)
-        print(f"matched {args.match_scene.name}: room {room[0]:.3f} x {room[1]:.3f} m, "
-              f"shelf centre x={centre[0]:.3f} y={centre[1]:.3f}, underside {box[2]:.4f} m")
+        print(
+            f"matched {args.match_scene.name}: room {room[0]:.3f} x {room[1]:.3f} m, "
+            f"shelf centre x={centre[0]:.3f} y={centre[1]:.3f}, underside {box[2]:.4f} m"
+        )
     else:
         span = path.max(0) - path.min(0)
         room = (float(span[0] + 2 * ROOM_MARGIN_M), float(max(span[1] + 2 * ROOM_MARGIN_M, 5.0)))
@@ -103,15 +110,21 @@ def main() -> int:
     rungs.sort(key=lambda r: -r[1])
 
     print(f"family {family}   predicted window {lo:.4f} -> {hi:.4f} m ({(hi - lo) * 1000:.1f} mm)")
-    print(f"room {room[0]:.1f} x {room[1]:.1f} m   shelf centre x={centre[0]:.3f} y={centre[1]:.3f}")
+    print(
+        f"room {room[0]:.1f} x {room[1]:.1f} m   shelf centre x={centre[0]:.3f} y={centre[1]:.3f}"
+    )
     print(f"\n{'rung':>14s}{'underside':>12s}  predicts")
     for kind, z in rungs:
-        pred = ("nominal fails, crouch clears" if lo < z < hi
-                else "both clear" if z >= hi else "both fail")
+        pred = (
+            "nominal fails, crouch clears"
+            if lo < z < hi
+            else "both clear" if z >= hi else "both fail"
+        )
         print(f"{kind:>14s}{z:12.4f}  {pred}")
         if args.write_scenes:
             scene = cf.write_scene(
-                f"{family}_z{int(round(z * 1000))}", path, z, start, room, centre)
+                f"{family}_z{int(round(z * 1000))}", path, z, start, room, centre
+            )
             print(f"{'':14s}{'':12s}  wrote {Path(scene).name}")
 
     manifest["path_xy"] = [[round(float(x), 5), round(float(y), 5)] for x, y in path[::5]]
@@ -120,8 +133,10 @@ def main() -> int:
     manifest["start_xy_m"] = list(start)
     manifest["ladder_heights_m"] = {k: z for k, z in rungs}
     args.manifest.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
-    print(f"\nrepaired {args.manifest.name}: it now records the path, room and shelf centre, so "
-          "these scenes can be rebuilt from it")
+    print(
+        f"\nrepaired {args.manifest.name}: it now records the path, room and shelf centre, so "
+        "these scenes can be rebuilt from it"
+    )
     return 0
 
 

@@ -236,3 +236,44 @@ def test_bad_tuck_arguments_are_refused():
         local_arm_tuck(walk(), 1.4)
     with pytest.raises(ValueError, match="target_reduction_m"):
         local_arm_tuck(walk(), 0.5, target_reduction_m=0.0)
+
+
+#: Knee excursion of the crouch clip that the matched overhead 2x2 verified in physics. The
+#: operator must never be tightened below this again without new rollouts, because a cap derived
+#: from the arm tuck's failure was once applied to both operators and silently forbade this clip.
+VERIFIED_CROUCH_KNEE_RAD = 0.994
+
+
+def test_the_crouch_cap_still_admits_the_clip_physics_verified():
+    from gear_sonic.dataset_generation.local_adaptation import MAX_CROUCH_EXCURSION_RAD
+
+    assert MAX_CROUCH_EXCURSION_RAD > VERIFIED_CROUCH_KNEE_RAD
+
+
+def test_the_two_operators_do_not_share_an_excursion_cap():
+    """One number for both is the defect this splits apart.
+
+    The tuck's bound comes from a 1.300 rad arm rotation that put the robot into a wall; the
+    crouch's comes from a strength sweep whose trackability boundary sat between 1.05 and 1.31
+    rad. Collapsing them again would re-forbid a verified family.
+    """
+    from gear_sonic.dataset_generation.local_adaptation import (
+        MAX_CROUCH_EXCURSION_RAD,
+        MAX_TUCK_EXCURSION_RAD,
+    )
+
+    assert MAX_TUCK_EXCURSION_RAD < MAX_CROUCH_EXCURSION_RAD
+
+
+def test_the_crouch_leaves_the_waist_alone_unless_asked():
+    """The guidance asks for a knee-driven crouch holding torso pitch near nominal, and the
+    verified clip moves the waist by exactly 0.000 rad. Enabling the waist by default made the
+    repository stop reproducing the clip physics had checked."""
+    from gear_sonic.dataset_generation.local_adaptation import local_crouch
+
+    clip = walk()
+    _, report = local_crouch(clip, 0.55, target_drop_m=0.08)
+    assert report.waist_change_rad == pytest.approx(0.0, abs=1e-9)
+
+    _, spent = local_crouch(clip, 0.55, target_drop_m=0.08, waist_use_fraction=0.85)
+    assert spent.waist_change_rad > 0.0

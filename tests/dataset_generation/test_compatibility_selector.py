@@ -6,8 +6,8 @@ of these tests are therefore inverted: they assert the model gets *worse*.
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
+import sys
 
 import numpy as np
 import pytest
@@ -99,14 +99,26 @@ def test_the_blind_feature_vector_keeps_its_width(synthetic):
 
 def test_selection_prefers_the_cheaper_of_two_viable_candidates():
     """The lexicographic rule, isolated from any model error."""
-    prof = {"peak_height_m": 1.0, "half_width_left_m": 0.2,
-            "half_width_right_m": 0.2, "foot_clearance_m": 0.2}
-    scene = {"overhead_clearance_m": 2.0, "left_gap_m": 0.5,
-             "right_gap_m": 0.5, "floor_height_m": 0.0}
-    fam = Family("f", scene, (
-        Candidate("adapted", "n0", prof, 1.0, True),
-        Candidate("nominal", "n0", prof, 0.0, True),
-    ))
+    prof = {
+        "peak_height_m": 1.0,
+        "half_width_left_m": 0.2,
+        "half_width_right_m": 0.2,
+        "foot_clearance_m": 0.2,
+    }
+    scene = {
+        "overhead_clearance_m": 2.0,
+        "left_gap_m": 0.5,
+        "right_gap_m": 0.5,
+        "floor_height_m": 0.0,
+    }
+    fam = Family(
+        "f",
+        scene,
+        (
+            Candidate("adapted", "n0", prof, 1.0, True),
+            Candidate("nominal", "n0", prof, 0.0, True),
+        ),
+    )
 
     class AlwaysViable(CompatibilityModel):
         def predict_proba(self, x):
@@ -119,10 +131,18 @@ def test_selection_prefers_the_cheaper_of_two_viable_candidates():
 def test_an_impassable_family_is_excluded_rather_than_scored(synthetic):
     """A scene no candidate survives cannot test a selector, and counting it as a miss would
     understate the selector while counting it as a hit would overstate it."""
-    prof = {"peak_height_m": 3.0, "half_width_left_m": 0.2,
-            "half_width_right_m": 0.2, "foot_clearance_m": 0.2}
-    scene = {"overhead_clearance_m": 1.0, "left_gap_m": 0.5,
-             "right_gap_m": 0.5, "floor_height_m": 0.0}
+    prof = {
+        "peak_height_m": 3.0,
+        "half_width_left_m": 0.2,
+        "half_width_right_m": 0.2,
+        "foot_clearance_m": 0.2,
+    }
+    scene = {
+        "overhead_clearance_m": 1.0,
+        "left_gap_m": 0.5,
+        "right_gap_m": 0.5,
+        "floor_height_m": 0.0,
+    }
     impassable = Family("dead", scene, (Candidate("m", "n0", prof, 0.0, False),))
     assert impassable.optimum() is None
     m = evaluate(CompatibilityModel(), [impassable], control="none")
