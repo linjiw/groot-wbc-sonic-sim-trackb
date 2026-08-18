@@ -31,7 +31,7 @@ cost is retained for comparing two *different* adaptations later.
 | # | claim | status |
 |---|---|---|
 | 1 | Two executable motions' full-body swept volumes separate, so a geometric window exists | **established** |
-| 2 | The same controller succeeds or fails as that geometry changes | **established** (4 verified families, 1 matched) |
+| 2 | The same controller succeeds or fails as that geometry changes | **established** (3 verified families, 1 matched) |
 | 3 | The 2×2 *outcome* survives a jittered start pose | **established** (12/12 cells, 3/3 jitters) |
 | 4 | The scene reverses the **minimum-edit feasible behaviour** | **established** on the matched overhead family |
 | 5 | A learner given counterfactual data uses scene geometry when it could otherwise ignore it | **not started — this is the decisive experiment** |

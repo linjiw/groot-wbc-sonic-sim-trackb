@@ -63,7 +63,7 @@ a { color:var(--accent); }
 
 <section>
   <div class="stats">
-    <div class="stat"><b>4</b><span>verified families</span></div>
+    <div class="stat"><b>3</b><span>verified families</span></div>
     <div class="stat"><b>1</b><span>matched family</span></div>
     <div class="stat"><b>8</b><span>nominal motions needed</span></div>
     <div class="stat"><b>2</b><span>adaptation operators</span></div>
@@ -99,7 +99,7 @@ a { color:var(--accent); }
   <h2>Distance to a paper-level dataset</h2>
   <div class="scroll"><table>
     <tr><th>dimension</th><th>now</th><th>minimum to submit</th><th></th></tr>
-    <tr><td>verified counterfactual families</td><td class="n">4</td><td class="n">24&ndash;30</td><td class="block">17%</td></tr>
+    <tr><td>verified counterfactual families</td><td class="n">3</td><td class="n">24&ndash;30</td><td class="block">13%</td></tr>
     <tr><td>&nbsp;&nbsp;of which matched-operator</td><td class="n">1</td><td class="n">&ge;12</td><td class="block">8%</td></tr>
     <tr><td>distinct nominal motions</td><td class="n">3</td><td class="n">8</td><td class="block">38%</td></tr>
     <tr><td>geometry regimes</td><td class="n">2</td><td class="n">2</td><td class="done">met</td></tr>
@@ -154,7 +154,8 @@ a { color:var(--accent); }
   <tr><td class="k">lateral</td><td class="n">3</td><td class="n">3</td><td class="n">1</td></tr>
   <tr><td class="k">floor</td><td class="n">0</td><td class="n">0</td><td class="n">0</td></tr>
   </table></div>
-  <p><strong>Three independent families from mining</strong>, and the ceiling is the supply of
+  <p><strong>Two verified families from mining</strong> &mdash; a third, <code>duck_001</code>,
+  was built but its adapted motion is rejected in <em>both</em> scenes, so it carries no contrast &mdash; and the ceiling is the supply of
   semantically valid adapted motions rather than the method. Prompting did not lift it: every
   phrasing that lowers the body pinned the waist at its limit on 100% of frames, and an
   explicit arm-tuck request produced motions 64 mm <em>wider</em> than a walk. That closed an
@@ -369,7 +370,7 @@ a { color:var(--accent); }
 <p>The repair is not more scenes. It is that <strong>for the same task, geometry must change which executable whole-body behaviour is preferred.</strong></p>
 <h3>Claim ladder</h3>
 <p>Claim 4 is stated as a <em>minimum-edit</em> reversal deliberately. Under the lexicographic rule <code>m<em>(S) = argmin_m D(m, m₀) s.t. y(S,m) = 1</code> with <code>D(m₀,m₀) = 0</code> and <code>D(T(m₀),m₀) &gt; 0</code>, the easy scene selects the nominal at zero edit and the hard scene selects the adapted motion because the nominal is infeasible. That is a strict reversal and it needs no weights over knee angle, energy or joint travel — so no calibrated scalar cost is required, and none blocks the claim. The continuous cost is retained for comparing two </em>different* adaptations later.</p>
-<div class="scroll"><table><tr><th>#</th><th>claim</th><th>status</th></tr><tr><td class="n">1</td><td class="">Two executable motions&#x27; full-body swept volumes separate, so a geometric window exists</td><td class=""><strong>established</strong></td></tr><tr><td class="n">2</td><td class="">The same controller succeeds or fails as that geometry changes</td><td class=""><strong>established</strong> (4 verified families, 1 matched)</td></tr><tr><td class="n">3</td><td class="">The 2×2 <em>outcome</em> survives a jittered start pose</td><td class=""><strong>established</strong> (12/12 cells, 3/3 jitters)</td></tr><tr><td class="n">4</td><td class="">The scene reverses the <strong>minimum-edit feasible behaviour</strong></td><td class=""><strong>established</strong> on the matched overhead family</td></tr><tr><td class="n">5</td><td class="">A learner given counterfactual data uses scene geometry when it could otherwise ignore it</td><td class=""><strong>not started — this is the decisive experiment</strong></td></tr><tr><td class="n">6</td><td class="">That behaviour generalises to scenes never fitted to a trajectory</td><td class=""><strong>not started</strong></td></tr></table></div>
+<div class="scroll"><table><tr><th>#</th><th>claim</th><th>status</th></tr><tr><td class="n">1</td><td class="">Two executable motions&#x27; full-body swept volumes separate, so a geometric window exists</td><td class=""><strong>established</strong></td></tr><tr><td class="n">2</td><td class="">The same controller succeeds or fails as that geometry changes</td><td class=""><strong>established</strong> (3 verified families, 1 matched)</td></tr><tr><td class="n">3</td><td class="">The 2×2 <em>outcome</em> survives a jittered start pose</td><td class=""><strong>established</strong> (12/12 cells, 3/3 jitters)</td></tr><tr><td class="n">4</td><td class="">The scene reverses the <strong>minimum-edit feasible behaviour</strong></td><td class=""><strong>established</strong> on the matched overhead family</td></tr><tr><td class="n">5</td><td class="">A learner given counterfactual data uses scene geometry when it could otherwise ignore it</td><td class=""><strong>not started — this is the decisive experiment</strong></td></tr><tr><td class="n">6</td><td class="">That behaviour generalises to scenes never fitted to a trajectory</td><td class=""><strong>not started</strong></td></tr></table></div>
 <p>Levels 5 and 6 are the paper. Everything below them is apparatus.</p>
 <h3>What is established</h3>
 <h4>The counterfactual, and its attribution</h4>
