@@ -51,23 +51,47 @@ RELIEVED_BY = {
 
 @dataclass(frozen=True)
 class BindingConstraint:
-    """The part an obstacle in one band and side would meet first, and by how much."""
+    """What an obstacle in one band would meet first, for each of the two ways one can approach.
+
+    A band admits two different obstacles and they are stopped by different parts of the robot.
+    A **wall** -- a rack, a cabinet edge, a door frame -- approaches from the side and is stopped by
+    whatever reaches furthest sideways within the band. A **ceiling** -- a shelf, a beam, a low
+    lintel -- descends from above and is stopped by the highest point in the band, which is usually
+    a different capsule entirely.
+
+    Reporting one number for both was an error in the first version of this map: it gave the
+    overhead band a reach of 0.097 m, the torso's sideways extent, which a shelf from above never
+    touches. The overhead constraint is the peak height, 1.301 m on the same trajectory.
+    """
 
     band: str
     side: str
-    body: str
-    #: Metres the binding capsule reaches toward that side, measured from the root and including
-    #: the capsule radius. An obstacle placed nearer than this intersects the robot.
-    reach_m: float
+    #: Part stopped by a wall approaching from ``side``, and how far it reaches that way from the
+    #: root, radius included.
+    lateral_body: str
+    lateral_reach_m: float
+    #: Part stopped by a ceiling descending into the band, and its height above the floor.
+    vertical_body: str
+    vertical_reach_m: float
     #: Frames in which any capsule occupies the band at all. A band the robot never enters cannot
     #: host an obstacle that tests anything.
     frames_in_band: int
-    relieved_by: str | None
+    lateral_relieved_by: str | None
+    vertical_relieved_by: str | None
 
-    @property
-    def constructible(self) -> bool:
-        """Whether a *family* can be built here, not merely a scene."""
-        return self.frames_in_band > 0 and self.relieved_by is not None
+    def constructible(self, obstacle: str) -> bool:
+        """Whether a *family* can be built here, not merely a scene.
+
+        ``obstacle`` is ``"wall"`` or ``"ceiling"``; they have different answers because they bind
+        different parts and only some parts have an operator that relieves them.
+        """
+        if self.frames_in_band <= 0:
+            return False
+        if obstacle == "wall":
+            return self.lateral_relieved_by is not None
+        if obstacle == "ceiling":
+            return self.vertical_relieved_by is not None
+        raise ValueError(f"obstacle must be 'wall' or 'ceiling'; got {obstacle!r}")
 
 
 def _lateral_frame(root_quat: np.ndarray) -> np.ndarray:
@@ -104,36 +128,59 @@ def criticality_map(
     out: list[BindingConstraint] = []
     for name, z0, z1 in bands:
         in_band = (high > z0) & (low < z1)
+        occupied = int(in_band.any(axis=1).sum())
+
+        # A ceiling descending into the band is stopped by the highest point inside it, which is
+        # usually a different capsule from the one a wall would meet.
+        ceiling = np.where(in_band, high, -np.inf)
+        if np.isfinite(ceiling).any():
+            flat = int(np.argmax(np.where(np.isfinite(ceiling), ceiling, -np.inf)))
+            top_body = names[flat % ceiling.shape[1]]
+            top_reach = float(ceiling[np.isfinite(ceiling)].max())
+        else:
+            top_body, top_reach = "", 0.0
+
         for side, sign in (("left", 1.0), ("right", -1.0)):
-            # Reach toward one side, radius included. Capsules outside the band cannot bind an
-            # obstacle confined to it.
-            reach = np.where(in_band, sign * offset + radii[None, :], -np.inf)
-            best = reach.max(axis=1)
-            finite = np.isfinite(best)
-            if not finite.any():
-                out.append(BindingConstraint(name, side, "", 0.0, 0, None))
+            # A wall approaching from one side is stopped by whatever reaches furthest that way.
+            wall = np.where(in_band, sign * offset + radii[None, :], -np.inf)
+            if not np.isfinite(wall).any():
+                out.append(
+                    BindingConstraint(
+                        name, side, "", 0.0, top_body, top_reach, occupied, None, None
+                    )
+                )
                 continue
-            index = int(reach[finite].max(axis=1).argmax())
-            frame = int(np.flatnonzero(finite)[index])
-            body = names[int(reach[frame].argmax())]
+            flat = int(np.argmax(np.where(np.isfinite(wall), wall, -np.inf)))
+            side_body = names[flat % wall.shape[1]]
+            side_reach = float(wall[np.isfinite(wall)].max())
             out.append(
                 BindingConstraint(
                     band=name,
                     side=side,
-                    body=body,
-                    reach_m=float(best[finite].max()),
-                    frames_in_band=int(finite.sum()),
-                    relieved_by=RELIEVED_BY.get(body),
+                    lateral_body=side_body,
+                    lateral_reach_m=side_reach,
+                    vertical_body=top_body,
+                    vertical_reach_m=top_reach,
+                    frames_in_band=occupied,
+                    lateral_relieved_by=RELIEVED_BY.get(side_body),
+                    vertical_relieved_by=RELIEVED_BY.get(top_body),
                 )
             )
     return out
 
 
-def obstacle_offset_for_margin(constraint: BindingConstraint, margin_m: float) -> float:
-    """Where to place an obstacle's inner face to leave ``margin_m`` of clearance.
+def obstacle_offset_for_margin(
+    constraint: BindingConstraint, margin_m: float, *, obstacle: str = "wall"
+) -> float:
+    """Where to put an obstacle's near face to leave ``margin_m`` of clearance.
 
-    Positive margin clears the robot; negative intersects it by that much. This is the whole point
-    of the map: difficulty becomes a number chosen in advance rather than one discovered by
-    lowering an obstacle until something touches.
+    For a wall this is a lateral offset from the root; for a ceiling it is a height above the floor.
+    Positive margin clears the robot, negative intersects it by that much. This is the point of the
+    map: difficulty becomes a number chosen in advance rather than one found by lowering an obstacle
+    until something touches.
     """
-    return constraint.reach_m + margin_m
+    if obstacle == "wall":
+        return constraint.lateral_reach_m + margin_m
+    if obstacle == "ceiling":
+        return constraint.vertical_reach_m + margin_m
+    raise ValueError(f"obstacle must be 'wall' or 'ceiling'; got {obstacle!r}")

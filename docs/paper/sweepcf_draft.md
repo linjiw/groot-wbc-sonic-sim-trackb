@@ -332,16 +332,19 @@ capsule — `torso_link`, on 199 of 199 frames of a walk. Every overhead scene t
 Because the executed trajectory gives every collision capsule's pose per frame, an obstacle confined
 to a height *band* binds whatever passes through that band. On one verified nominal:
 
-| band | binding part | reach | relieved by |
-|---|---|---|---|
-| overhead 1.15–1.60 m | `torso_link` | 0.079–0.097 m | `local_crouch` |
-| chest 0.85–1.15 m | `elbow_link` | 0.235–0.252 m | `local_arm_tuck` |
-| waist 0.55–0.85 m | `wrist_yaw_link` | 0.284–0.327 m | `local_arm_tuck` |
-| knee 0.25–0.55 m | `wrist_yaw_link` | 0.283–0.304 m | `local_arm_tuck` |
-| floor 0.00–0.25 m | `ankle_roll_link` | 0.245 m | **none** |
+A band admits two obstacles, stopped by different parts: a **wall** from the side meets whatever
+reaches furthest sideways, a **ceiling** from above meets the highest point in the band.
 
-Four distinct body parts from one walk, and **eight of ten configurations have an operator that can
-answer them**. Left and right reaches differ by up to 43 mm because the arms swing out of phase, so
+| band | wall binds | reach | ceiling binds | height |
+|---|---|---|---|---|
+| overhead 1.15–1.60 m | `torso_link` | 0.079–0.097 m | `torso_link` | 1.301 m |
+| chest 0.85–1.15 m | `elbow_link` | 0.235–0.252 m | `torso_link` | 1.296 m |
+| waist 0.55–0.85 m | `wrist_yaw_link` | 0.284–0.327 m | `shoulder_yaw_link` | 1.044 m |
+| knee 0.25–0.55 m | `wrist_yaw_link` | 0.283–0.304 m | `hip_roll_link` | 0.701 m |
+| floor 0.00–0.25 m | `ankle_roll_link` | 0.245 m | `knee_link` | 0.423 m |
+
+**Eight wall configurations are constructible**, binding three distinct parts, plus two ceiling ones;
+the rest meet a shoulder, hip, knee or ankle that no operator relieves. Left and right reaches differ by up to 43 mm because the arms swing out of phase, so
 the two sides pose genuinely different problems rather than mirrored ones.
 
 Difficulty then follows from `obstacle face = reach + margin`, so a margin ladder on one
