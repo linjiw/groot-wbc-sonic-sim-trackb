@@ -73,6 +73,34 @@ a { color:var(--accent); }
 </section>
 
 <section>
+  <h2>Distance to a paper-level dataset</h2>
+  <div class="scroll"><table>
+    <tr><th>dimension</th><th>now</th><th>minimum to submit</th><th></th></tr>
+    <tr><td>verified counterfactual families</td><td class="n">4</td><td class="n">24&ndash;30</td><td class="block">17%</td></tr>
+    <tr><td>&nbsp;&nbsp;of which matched-operator</td><td class="n">1</td><td class="n">&ge;12</td><td class="block">8%</td></tr>
+    <tr><td>distinct nominal motions</td><td class="n">3</td><td class="n">8</td><td class="block">38%</td></tr>
+    <tr><td>geometry regimes</td><td class="n">2</td><td class="n">2</td><td class="done">met</td></tr>
+    <tr><td>frozen scene-first scenes</td><td class="n">30</td><td class="n">30</td><td class="done">met</td></tr>
+    <tr><td>human-reviewed rollouts</td><td class="n">0</td><td class="n">100</td><td class="never">cohort frozen, review not begun</td></tr>
+    <tr><td>learner seeds on real families</td><td class="n">0</td><td class="n">5</td><td class="never">blocked on scale</td></tr>
+  </table></div>
+  <p><strong>Scene instances are 16, against 1 verified matched family &mdash; a 16&times;
+  inflation factor.</strong> Five shelf heights on one nominal are five scene instances, never five
+  independent behaviour families, so the counts are reported apart and the ratio is printed. The
+  apparatus is no longer the bottleneck; scale and learning evidence are.</p>
+  <div class="note" style="border-left-color:var(--fail)">
+    <h3>Both new families failed the same way, and that is the method's own lesson</h3>
+    <p>Placing the hard shelf at the <em>geometric</em> window centre did not separate the motions
+    on either x002 or x003 &mdash; the nominal cleared it with zero contact in both. Its real
+    boundary is more than 41 mm below the predicted peak, against the 8&ndash;25 mm measured on the
+    one family that worked, so <code>mf_005_c08</code> succeeded partly by luck.</p>
+    <p><strong>Geometry proposes; physics certifies.</strong> The capsule window is a candidate
+    proposal and the centre of a proposal is not a certificate. Refinement probes are running to
+    bracket each nominal's real failure boundary by rollout.</p>
+  </div>
+</section>
+
+<section>
   <h2>The claim ladder</h2>
   <div class="scroll"><table>
   <tr><th>#</th><th>claim</th><th>status</th></tr>
