@@ -189,12 +189,11 @@ def local_crouch(
 
     # Bisect on the achieved silhouette drop.
     low, high = 0.0, max_scale
-    best = build(0.0)
     for _ in range(12):
         middle = 0.5 * (low + high)
-        candidate = build(middle)
-        drop = float((nominal_silhouette - _silhouette(candidate, mjcf_path)).max())
-        best = candidate
+        drop = float(
+            (nominal_silhouette - _silhouette(build(middle), mjcf_path)).max()
+        )
         if drop < target_drop_m:
             low = middle
         else:
