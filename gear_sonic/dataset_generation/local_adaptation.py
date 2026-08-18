@@ -41,13 +41,11 @@ from .self_intersection import DEFAULT_G1_MJCF
 #: Leg joints the crouch drives, through the squat coupling.
 CROUCH_JOINTS = ("hip_pitch", "knee", "ankle_pitch")
 
-#: Metres of clearance the arm tuck must leave between a wrist and the hip on the same side.
-#: The tuck's failure mode across motions is pressing the wrist *into* the hip: rejected clips
-#: on two different nominal motions carried the identical external-contact triple
-#: ``left_hip_roll_link``, ``left_wrist_yaw_link``, ``pelvis`` at modest excursion with the
-#: route intact. Narrowing the silhouette and colliding with yourself are the same motion past
-#: a point, and nothing in the operator knew where that point was.
-MIN_WRIST_HIP_CLEARANCE_M = 0.04
+#: Kept for reference, and deliberately NOT enforced. The suggestive reading of the rejected
+#: tucks -- that they press the wrist into the hip, since two motions shared the self-contact
+#: triple ``left_hip_roll_link``, ``left_wrist_yaw_link``, ``pelvis`` -- did not survive
+#: measurement. See docs/tuck_trackability_is_not_predictable.md.
+UNENFORCED_WRIST_HIP_CLEARANCE_M = 0.04
 
 #: Fraction of waist_pitch's range the adapted clip may end at. The waist is the most
 #: efficient lever on the silhouette -- 109 mm per radian against the squat's 64 at the same
@@ -355,8 +353,6 @@ class LocalTuckReport:
     #: is still usable; it simply achieves less than was asked for, and that is preferable to
     #: reaching the target through a motion the robot cannot hold.
     excursion_capped: bool = False
-    #: Smallest wrist-to-hip gap left in the clip, in metres.
-    wrist_hip_clearance_m: float = float("inf")
 
 
 def _half_width(qpos: np.ndarray, mjcf_path) -> np.ndarray:
@@ -531,6 +527,13 @@ def wrist_hip_clearance(
 
     Measured on MuJoCo's collision geoms, because the swept-volume capsules are conservative
     outer approximations that overlap permanently and cannot resolve millimetres.
+
+    **This does not predict whether SONIC can track a tuck, and no operator bounds it.** The gap
+    is already negative on every nominal -- the arms rest against the hips, so the absolute value
+    saturates -- and its change from nominal to tuck anti-correlates with the verdict at both
+    extremes: the worst deterioration (-94.7 mm) was accepted and the mildest (-12.5 mm) rejected.
+    A bound on this quantity was added and reverted; it cost roughly eightfold tuck strength to
+    enforce a non-cause. Retained as a diagnostic only.
     """
     from .self_intersection import _load_model
 
