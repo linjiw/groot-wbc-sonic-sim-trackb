@@ -37,6 +37,7 @@ MAX_STEPS=auto
 # exported task string against the runtime manifest, so the language annotation a VLA
 # will train on has to be decided here.
 TASK="kimodo_locomotion"
+EXTRA_OVERRIDES=()
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -47,6 +48,11 @@ while [[ $# -gt 0 ]]; do
     --python) PYTHON_BIN="$2"; shift 2 ;;
     --max-steps) MAX_STEPS="$2"; shift 2 ;;
     --task) TASK="$2"; shift 2 ;;
+    # Extra Hydra overrides, whitespace-separated, appended last so they win. Added for the
+    # fixed observer camera: the ego view rides the head and the chase view follows the robot,
+    # so neither shows gait against a stationary background, and a pinned camera needs
+    # render_results, a camera offset and track_root=False that this script otherwise fixes.
+    --extra) EXTRA_OVERRIDES+=($2); shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "unknown argument: $1" >&2; usage; exit 2 ;;
   esac
@@ -180,6 +186,7 @@ env PYTHONPATH="$REPO_ROOT" "$PYTHON_BIN" gear_sonic/eval_agent_trl.py \
   ++dataset_scene_id="$SCENE" \
   ++dataset_task="$TASK_OVERRIDE" \
   +use_encoder=g1 \
+  "${EXTRA_OVERRIDES[@]}" \
   ++max_render_steps="$MAX_STEPS" \
   +success_manifest="$OUT/success_manifest.json" \
   "~manager_env/recorders=empty" "+manager_env/recorders=dataset" \
