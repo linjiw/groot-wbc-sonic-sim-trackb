@@ -84,19 +84,25 @@ a { color:var(--accent); }
     <tr><td>human-reviewed rollouts</td><td class="n">0</td><td class="n">100</td><td class="never">cohort frozen, review not begun</td></tr>
     <tr><td>learner seeds on real families</td><td class="n">0</td><td class="n">5</td><td class="never">blocked on scale</td></tr>
   </table></div>
-  <p><strong>Scene instances are 16, against 1 verified matched family &mdash; a 16&times;
-  inflation factor.</strong> Five shelf heights on one nominal are five scene instances, never five
+  <p><strong>Scene instances are 18, against 1 verified matched family.</strong> Five shelf heights on one nominal are five scene instances, never five
   independent behaviour families, so the counts are reported apart and the ratio is printed. The
   apparatus is no longer the bottleneck; scale and learning evidence are.</p>
   <div class="note" style="border-left-color:var(--fail)">
-    <h3>Both new families failed the same way, and that is the method's own lesson</h3>
-    <p>Placing the hard shelf at the <em>geometric</em> window centre did not separate the motions
-    on either x002 or x003 &mdash; the nominal cleared it with zero contact in both. Its real
-    boundary is more than 41 mm below the predicted peak, against the 8&ndash;25 mm measured on the
-    one family that worked, so <code>mf_005_c08</code> succeeded partly by luck.</p>
-    <p><strong>Geometry proposes; physics certifies.</strong> The capsule window is a candidate
-    proposal and the centre of a proposal is not a certificate. Refinement probes are running to
-    bracket each nominal's real failure boundary by rollout.</p>
+    <h3>Withdrawn: both new families were void for a coordinate-frame bug</h3>
+    <p>This board briefly reported that placing the hard shelf at the geometric window centre fails,
+    that the predictor over-states by more than 40 mm, and that <code>mf_005_c08</code> succeeded
+    partly by luck. <strong>All three are withdrawn.</strong></p>
+    <p>The shelves for x002 and x003 were placed in the <em>reference</em> motion's coordinate
+    frame, while the rollout offsets the motion by &minus;2.0 m at conversion. The executed paths
+    run x &isin; [&minus;1.98, &minus;0.03] and [&minus;1.98, 0.33] against shelves at
+    [1.26, 1.76] and [1.29, 1.79]: the robot walked past two metres clear. The nominal
+    &ldquo;cleared&rdquo; an obstacle it never approached, and eight rollouts measured nothing.</p>
+    <p>Where the shelf is genuinely in the path, the predictor is accurate: on the one correctly
+    built family the reference peak is <strong>8.0 mm</strong> above the highest shelf the nominal
+    survived, and the <em>executed</em> peak is <strong>1.8 mm</strong> above it.</p>
+    <p><code>scene_route_check.py</code> now refuses a rollout whose path never enters the
+    obstacle's footprint, and names the shift that would fix it. It flags exactly these two
+    families and passes the one that worked.</p>
   </div>
 </section>
 
@@ -371,6 +377,7 @@ a { color:var(--accent); }
 <div class="scroll"><table><tr><th></th><th>easy scene (1.355 m)</th><th>hard scene (1.257 m)</th></tr><tr><td class=""><strong>nominal walk</strong></td><td class="">accepted, 0.0 N</td><td class=""><strong>rejected, 3253.5 N</strong></td></tr><tr><td class=""><strong>local crouch</strong></td><td class="">accepted, 0.0 N</td><td class=""><strong>accepted, 0.0 N</strong></td></tr></table></div>
 <p>Attribution: contact on <code>torso_link</code> at frame 90, root-height deficit at frame 97 — the drift follows the collision by 140 ms. The crouch&#x27;s drift is 0.100 m/s in <em>both</em> scenes, so the shelf never reaches it.</p>
 <h4>The predicted window is optimistic on both sides</h4>
+<p>&gt; <strong>Note.</strong> Two later families appeared to show a far larger optimism, above 40 mm. They were void: &gt; their shelves sat in the reference motion&#x27;s frame while the rollout offset the motion by −2.0 m, &gt; so the robot never reached them. Those numbers are withdrawn; the figures below come from the one &gt; family whose obstacle was verifiably in the path.</p>
 <p>Probing both boundaries rather than assuming them changed how families must be placed.</p>
 <div class="scroll"><table><tr><th>shelf</th><th>motion</th><th>predicted</th><th>observed</th></tr><tr><td class="n">1.2971 m</td><td class="">nominal</td><td class="">fails</td><td class=""><strong>accepted</strong></td></tr><tr><td class="n">1.2801 m</td><td class="">nominal</td><td class="">fails</td><td class="">rejected — 85.0 N overhead, 0.0 lateral</td></tr><tr><td class="n">1.2574 m</td><td class="">nominal</td><td class="">fails</td><td class="">rejected</td></tr><tr><td class="n">1.2574 m</td><td class="">crouch</td><td class="">clears</td><td class="">accepted</td></tr><tr><td class="n">1.2154 m</td><td class="">crouch</td><td class="">clears</td><td class=""><strong>rejected</strong></td></tr></table></div>
 <p>The nominal survives 8 mm below where it is predicted to fail; the crouch fails 8 mm above where it is predicted to clear. Both errors shrink the usable window: the real one is between <strong>22.7 and 81.7 mm</strong> wide against a predicted 97.7, so in the worst case the prediction over-states it more than fourfold. It does contain 1.2574 m, verified from both sides.</p>

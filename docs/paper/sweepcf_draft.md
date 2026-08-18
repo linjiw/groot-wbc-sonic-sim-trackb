@@ -149,6 +149,11 @@ never reaches it.
 
 ### The predicted window is optimistic on both sides
 
+> **Note.** Two later families appeared to show a far larger optimism, above 40 mm. They were void:
+> their shelves sat in the reference motion's frame while the rollout offset the motion by −2.0 m,
+> so the robot never reached them. Those numbers are withdrawn; the figures below come from the one
+> family whose obstacle was verifiably in the path.
+
 Probing both boundaries rather than assuming them changed how families must be placed.
 
 | shelf | motion | predicted | observed |
