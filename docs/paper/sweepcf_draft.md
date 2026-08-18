@@ -139,11 +139,50 @@ Attribution: contact on `torso_link` at frame 90, root-height deficit at frame 9
 follows the collision by 140 ms. The crouch's drift is 0.100 m/s in *both* scenes, so the shelf
 never reaches it.
 
-Two cautions belong in the paper next to this table. The negative is violent — 3253.5 N at 48 mm
-of penetration, where an earlier family produced 137.2 N at 89 mm, so **force does not follow
-penetration across motions** and cannot be modelled as if it does. And the hard shelf sits at the
-centre of the predicted window, the most robust placement and the least informative: it cannot
-locate the real boundary. Rungs 8 and 25 mm inside each predicted boundary probe that directly.
+### The predicted window is optimistic on both sides
+
+Probing both boundaries rather than assuming them changed how families must be placed.
+
+| shelf | motion | predicted | observed |
+|---|---|---|---|
+| 1.2971 m | nominal | fails | **accepted** |
+| 1.2574 m | nominal | fails | rejected |
+| 1.2574 m | crouch | clears | accepted |
+| 1.2154 m | crouch | clears | **rejected** |
+
+The nominal survives 8 mm below where it is predicted to fail; the crouch fails 8 mm above where it
+is predicted to clear. Both errors shrink the usable window: the real one is contained in
+(1.2154, 1.2971) — at most **81.7 mm** against the predicted 97.7 — and contains 1.2574, verified
+from both sides.
+
+The two errors have different causes. Swept capsules are conservative outer approximations, so they
+should make a motion look taller than it is and predict interference early, which is what happened
+to the nominal. The crouch failing *higher* than predicted is not geometric at all: at 1.2154 m the
+shelf pressed `torso_link` down at 1017.4 N and the controller lost its reference. A swept volume
+knows where the robot went; it does not know that a controller squeezed into a gap stops being able
+to track. **So placement targets the window's centre**, and the margin cannot be replaced by a
+predicted-boundary offset.
+
+### Measuring this found a gate defect, and corrected three published numbers
+
+`disallowed_robot_contact` tested only the *horizontal* component of external contact, because the
+settling load a dropped robot puts on its hips is vertical and had to be excluded. Excluding all
+vertical force also excluded every overhead collision. The crouch at 1.2154 m carried 1017.4 N
+straight down on `torso_link` with a horizontal component of exactly 0.0, so the gate stayed
+silent; only the ensuing drift caught it, meaning a milder jam would have been **accepted** — in
+precisely the regime this corpus exists to supply. Sign separates the two cases: the floor holding a
+knee up pushes +z, an obstacle overhead pushes −z.
+
+Auditing all 230 evaluable episodes found 10 carrying an overhead push above the lateral one, all
+already rejected on other grounds, so the corpus holds no false accepts. It did correct three
+earlier claims, all of which had read the smaller component:
+
+- the first family's "3.0 N graze" was a **409.3 N** push on `torso_link`; that negative was never
+  marginal
+- penetration does **not** track force: 3.3× penetration buys **1.15×** overhead force, not the 18×
+  the lateral figures implied, so the graze-versus-crash tuning story is withdrawn
+- the start-pose jitter spread is **1.35×** on overhead against 6.9× on lateral, so the force is far
+  steadier than reported
 
 ### The lateral operator does not, and its yield is a measured cost
 
