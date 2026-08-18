@@ -73,6 +73,29 @@ a { color:var(--accent); }
 </section>
 
 <section>
+  <h2>Where everything lives</h2>
+  <div class="scroll"><table>
+    <tr><th>what</th><th>where</th><th>for</th></tr>
+    <tr><td><b>Walkthrough</b></td>
+        <td><a href="https://claude.ai/code/artifact/e4323adf-67af-4089-9cf7-5d04a86cc61c">artifact &middot; e4323adf</a></td>
+        <td>room camera, side view and head camera for all four cells &mdash; show this first</td></tr>
+    <tr><td><b>Dataset page</b></td>
+        <td><a href="https://claude.ai/code/artifact/3adc15c1-7410-401e-b27b-37989e369141">artifact &middot; 3adc15c1</a></td>
+        <td>what the release folder contains, generated from its own manifest</td></tr>
+    <tr><td><b>This board</b></td><td>you are here</td>
+        <td>claims, evidence, and what is still unproven</td></tr>
+    <tr><td>Release folder</td><td class="k">/data/robotixx/groot-wbc-kimodo-m0/sweepcf_release/</td>
+        <td>7 families, 25 cells, 150 motions, 234 files, fingerprinted</td></tr>
+    <tr><td>Repository</td><td class="k">research/cg-wbc-v0-golden-path</td>
+        <td>code, scene geometry, frozen splits, this page's source</td></tr>
+  </table></div>
+  <p>The three pages are generated from the same data and rebuilt by
+  <code>docs/progress/refresh_board.py</code> and
+  <code>scripts/research/render_release_page.py</code>, so a number cannot drift between them
+  without the source changing.</p>
+</section>
+
+<section>
   <h2>Distance to a paper-level dataset</h2>
   <div class="scroll"><table>
     <tr><th>dimension</th><th>now</th><th>minimum to submit</th><th></th></tr>
