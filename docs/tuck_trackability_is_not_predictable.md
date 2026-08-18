@@ -4,12 +4,17 @@ The local arm tuck is accepted by SONIC on **1 of 3 valid nominal motions**. Thi
 attempts to predict *which* one from the clip alone, both of which failed, and the decision to
 stop trying.
 
-> **Correction (2026-08-18).** This document described these as "bare-plane rollouts, no obstacles"
-> and reasoned from it that every external contact must be the floor. That is wrong. The screening
-> scene `cf_005_056_easy` contains a shelf at 1.3906 m spanning x ∈ [2.424, 2.924] and four walls
-> in a 12.882 × 5.000 m room. One motion passes under the shelf and another comes within 0.4 m of a
-> wall, so the screen was never obstacle-free and the floor was never the only surface available.
-> The consequences are set out at the end.
+> **Correction (2026-08-18), and its own correction.** This document described these as "bare-plane
+> rollouts, no obstacles" and reasoned that every external contact must be the floor. The scene is
+> not bare: `cf_005_056_easy` holds a shelf at 1.3906 m spanning x ∈ [2.424, 2.924] and four walls
+> in a 12.882 × 5.000 m room.
+>
+> But measuring what the furniture could actually reach narrows the damage sharply. The tallest
+> screening clip peaks at **1.3061 m**, clearing that shelf by **84 mm**, so the shelf could never
+> touch any of them — and indeed every accepted cell records exactly 0.0 N of external contact.
+> Of 45 graded cells in obstacle scenes, 30 never entered their obstacle's footprint at all.
+> **The only contaminated verdicts are x001's, and the wall is what contaminated them.** Every
+> other operator verdict in this document stands.
 
 ## The evidence
 
@@ -108,8 +113,9 @@ pure reference drift with *zero* external contact, and x002's and x003's were ac
 external contact, so no obstacle was ever involved. The finding that self-contact magnitude is not
 severity also stands, since it compares cells within the same scene.
 
-**How far the damage goes: two cells of forty-seven.** Auditing every graded rollout for how close
-its root came to a wall bounds this precisely.
+**How far the damage goes: two cells of forty-seven.** Two independent audits bound it. Wall
+proximity finds only x001's cells close enough to be struck; the route check finds that the
+screening shelf, where clips reach it at all, sits 84 mm above the tallest of them.
 
 | wall gap | outcome | cell |
 |---|---|---|
