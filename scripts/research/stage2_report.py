@@ -58,6 +58,27 @@ def executed(directory: Path) -> dict:
     return payload
 
 
+def half_width_of(payload: dict) -> np.ndarray:
+    """Per-frame half-width across the heading, for the lateral regime.
+
+    A lateral operator moves width, not height. Measuring an arm tuck on the silhouette
+    reports a reference effect of exactly 0.0 mm -- true, and about the wrong axis.
+    """
+    root = np.asarray(payload["root_pos_w"], dtype=np.float64)
+    quat = np.asarray(payload["root_quat_w"], dtype=np.float64)
+    w, x, y, z = (quat[:, i] for i in range(4))
+    yaw = np.arctan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
+    lateral = np.stack([-np.sin(yaw), np.cos(yaw)], axis=1)
+    starts, ends, radii, _ = body_capsules_world(
+        np.asarray(payload["body_pos_w"], dtype=np.float64),
+        np.asarray(payload["body_quat_w"], dtype=np.float64),
+        list(payload["body_names"]), capsules=G1_COLLISION_CAPSULES,
+    )
+    centres = 0.5 * (starts + ends)
+    offsets = centres[:, :, :2] - root[:, None, :2]
+    return (np.abs(np.einsum("tcd,td->tc", offsets, lateral)) + radii[None, :]).max(axis=1)
+
+
 def silhouette_of(payload: dict) -> np.ndarray:
     starts, ends, radii, _ = body_capsules_world(
         np.asarray(payload["body_pos_w"], dtype=np.float64),
@@ -70,19 +91,33 @@ def silhouette_of(payload: dict) -> np.ndarray:
 def report(
     nominal_ref: np.ndarray, adapted_ref: np.ndarray,
     nominal_dir: Path, adapted_dir: Path, station: float, half_window: float = 0.08,
+    regime: str = "overhead",
 ) -> dict:
+    from gear_sonic.dataset_generation.local_adaptation import _half_width
+    from gear_sonic.dataset_generation.reference_payload import payload_from_reference
+
     progress = route_progress(nominal_ref[:, :2])
     core = np.abs(progress - station) <= half_window
-    reference_effect = float(
-        (_silhouette(nominal_ref, DEFAULT_G1_MJCF)
-         - _silhouette(adapted_ref, DEFAULT_G1_MJCF))[core].min()
-    )
+    if regime == "overhead":
+        reference_effect = float(
+            (_silhouette(nominal_ref, DEFAULT_G1_MJCF)
+             - _silhouette(adapted_ref, DEFAULT_G1_MJCF))[core].min()
+        )
+        measure = silhouette_of
+    elif regime == "lateral":
+        reference_effect = float(
+            (_half_width(nominal_ref, DEFAULT_G1_MJCF)
+             - _half_width(adapted_ref, DEFAULT_G1_MJCF))[core].min()
+        )
+        measure = half_width_of
+    else:
+        raise ValueError(f"unknown regime {regime!r}; expected overhead or lateral")
 
     pn, pa = executed(nominal_dir), executed(adapted_dir)
     outcome_n = classify_episode(nominal_dir.name, {**pn, "total_frames": len(pn["root_pos_w"])})
     outcome_a = classify_episode(adapted_dir.name, {**pa, "total_frames": len(pa["root_pos_w"])})
 
-    sn, sa = silhouette_of(pn), silhouette_of(pa)
+    sn, sa = measure(pn), measure(pa)
     frames = min(len(sn), len(sa))
     # Executed clips can differ in length; compare over the shared prefix and say so.
     grid = np.linspace(0.0, 1.0, frames)
@@ -124,6 +159,9 @@ def main() -> int:
     parser.add_argument("--nominal", required=True)
     parser.add_argument("--adapted", required=True)
     parser.add_argument("--station", type=float, default=0.55)
+    parser.add_argument("--regime", choices=("overhead", "lateral"), default="overhead",
+                        help="which axis the operator moves; measuring the wrong one "
+                             "reports a reference effect of 0.0 mm")
     parser.add_argument("--json", type=Path)
     args = parser.parse_args()
 
@@ -131,6 +169,7 @@ def main() -> int:
         np.loadtxt(args.clips / f"{args.nominal}.csv", delimiter=","),
         np.loadtxt(args.clips / f"{args.adapted}.csv", delimiter=","),
         args.rollouts / args.nominal, args.rollouts / args.adapted, args.station,
+        regime=args.regime,
     )
     print(f"pair: {args.nominal} vs {args.adapted}\n")
     print(f"  reference effect      {result['reference_effect_m']*1000:7.1f} mm")
