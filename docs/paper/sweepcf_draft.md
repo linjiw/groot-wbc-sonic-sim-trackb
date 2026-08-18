@@ -113,18 +113,51 @@ over a window in **route-progress** coordinates centred on the obstacle station:
 |---|---|---|
 | regime | overhead | lateral |
 | touches | legs + root height | arms only |
-| waist change | **0.0000 rad** | untouched |
-| leg change | — | **0.0000 rad** |
-| effect at the station | 1.257 → 1.089 m silhouette | 0.276 → 0.231 m half-width |
+| waist change | **0.000 rad** | untouched |
+| leg change | — | **0.000 rad** |
+| effect at the station | 1.305 → 1.207 m silhouette | 0.276 → 0.231 m half-width |
 | active window | 35% of clip | 35% of clip |
 | kinematic feasibility | **6/6** | 6/6 reachable |
+| SONIC accepts it | **verified, matched 2×2** | 1 of 3 valid nominals |
 
 Locality is not tidiness. A clip crouched from frame zero cannot demonstrate a decision made
 from what the robot sees, because the obstacle is not visible when the crouch begins; such a
 pair can only support map-conditioned selection.
 
-*Status: stage 1 (kinematic) passes. Stage 2 (trackability) is queued. No hard scene has been
-built for these, deliberately.*
+### The overhead operator clears all three gates
+
+Family `mf_005_c08`. One journey, two behaviours: the two clips have identical root XY frame for
+frame, identical duration, and differ in exactly six joints — knees 0.994 rad, hip and ankle pitch
+0.497 rad each, waist 0.000 rad.
+
+| | easy scene (1.355 m) | hard scene (1.257 m) |
+|---|---|---|
+| **nominal walk** | accepted, 0.0 N | **rejected, 3253.5 N** |
+| **local crouch** | accepted, 0.0 N | **accepted, 0.0 N** |
+
+Attribution: contact on `torso_link` at frame 90, root-height deficit at frame 97 — the drift
+follows the collision by 140 ms. The crouch's drift is 0.100 m/s in *both* scenes, so the shelf
+never reaches it.
+
+Two cautions belong in the paper next to this table. The negative is violent — 3253.5 N at 48 mm
+of penetration, where an earlier family produced 137.2 N at 89 mm, so **force does not follow
+penetration across motions** and cannot be modelled as if it does. And the hard shelf sits at the
+centre of the predicted window, the most robust placement and the least informative: it cannot
+locate the real boundary. Rungs 8 and 25 mm inside each predicted boundary probe that directly.
+
+### The lateral operator does not, and its yield is a measured cost
+
+The arm tuck is accepted on **1 of 3** valid nominals. Two cheap predictors of *which* one were
+built and both refuted: wrist-to-hip clearance (already negative on every nominal, and its change
+anti-correlates with the verdict at both extremes) and lateral CoM excursion (two cells 0.1 mm
+apart landing on opposite sides of the gate). On bare-plane rollouts the verdict is set entirely by
+**external** contact; self-contact magnitude is not severity — the accepted tuck carries the highest
+self-contact of eight cells, 192.1 N, and the rejected nominal the lowest, 10.9 N.
+
+So trackability is measured per clip, and the 1-in-3 yield is a budget line — roughly three
+rollouts per usable lateral clip, plus one to screen each nominal — not a defect awaiting a fix.
+This is the fourth time on this operator that an inferred quantity had to be withdrawn in favour of
+a rollout.
 
 ## The decisive experiment (not yet run)
 
@@ -137,7 +170,22 @@ steps. Only the **construction** differs:
 - **C, SweepCF** — same task, same start and goal, geometry chosen so the preferred feasible
   behaviour reverses.
 
-Train a small **behaviour selector**, not a policy: scene → which of {walk, crouch, tuck, …}.
+Train a small **behaviour selector**, not a policy — and score scene–motion *compatibility*
+rather than scene identity, so a model cannot pass by learning "room 7 wants the crouch".
+Selection is the lexicographic rule: among candidates predicted to survive, take the cheapest.
+
+The harness and its controls are built and validated on synthetic families, so no verified family
+is spent proving the apparatus works. The privileged geometry model reaches 0.963 choice accuracy
+against a 0.25 always-nominal baseline; hiding the scene drops it to 0.126, pairing families with
+the wrong scene to 0.593, and permuting candidate order changes nothing at all, as an
+order-invariant rule must. Holding out nominal motions rather than families gives 0.958, so the
+model is not memorising what each nominal usually needs.
+
+One negative result from that validation is worth reporting: a linear model given only the four
+geometric margins scored 0.224 — *below* the baseline, choosing a failing candidate 47% of the
+time — because survival is an AND over margins and that is not linearly separable. The limiting
+margin is therefore supplied explicitly, which is what makes this model privileged and bounds what
+an ego-depth model must recover from pixels.
 Evaluate on the **frozen scene-first test set** — 30 scenes sampled independently of any
 motion, SHA-256 fingerprinted, frozen before either operator existed.
 
