@@ -1,0 +1,130 @@
+{
+  "kind": "lace_probe_rollouts",
+  "schema_version": 2,
+  "artifact_mode": "contract_smoke",
+  "data_origin": "synthetic_contract_smoke_no_scientific_claim",
+  "split_sha256": "4c119db58d2a49fe3527364a56a31e23c5a80da47b7ecb4d1beafd9bce71cd68",
+  "mechanism_names": [
+    "contact_timing",
+    "foot_slip",
+    "base_drift",
+    "balance_orientation",
+    "actuation_saturation",
+    "joint_pose_constraint"
+  ],
+  "probe_policies": [
+    {
+      "id": "sonic_release_contract_stub",
+      "checkpoint_sha256": "e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909"
+    }
+  ],
+  "domain_randomization_seeds": [101, 202],
+  "rollout_schedule": [
+    {
+      "domain_randomization_seed": 101,
+      "initial_phase": 0.2,
+      "repeat_index": 0
+    },
+    {
+      "domain_randomization_seed": 202,
+      "initial_phase": 0.7,
+      "repeat_index": 0
+    }
+  ],
+  "selected_motion_keys": [
+    "big_heavy_one_hand_right_side_high_to_front_high_R_001__A527",
+    "big_light_one_hand_behind_high_to_behind_low_R_001__A523_M"
+  ],
+  "signature_config": {
+    "minimum_resolved_failures": 1,
+    "mechanism_dirichlet_prior": 0.5,
+    "credible_interval_level": 0.95
+  },
+  "normalizer": {
+    "kind": "identity_contract_smoke",
+    "frozen": true,
+    "fit_partition": "D_atlas",
+    "mechanism_scales": {
+      "contact_timing": 1.0,
+      "foot_slip": 1.0,
+      "base_drift": 1.0,
+      "balance_orientation": 1.0,
+      "actuation_saturation": 1.0,
+      "joint_pose_constraint": 1.0
+    }
+  },
+  "episodes": [
+    {
+      "rollout_id": "contract:A527:101",
+      "motion_key": "big_heavy_one_hand_right_side_high_to_front_high_R_001__A527",
+      "probe_policy_id": "sonic_release_contract_stub",
+      "domain_randomization_seed": 101,
+      "initial_phase": 0.2,
+      "repeat_index": 0,
+      "partition": "D_atlas",
+      "failed": true,
+      "mechanism_scores": {
+        "contact_timing": 0.7,
+        "foot_slip": 0.0,
+        "base_drift": 0.0,
+        "balance_orientation": 0.1,
+        "actuation_saturation": 0.2,
+        "joint_pose_constraint": 0.0
+      }
+    },
+    {
+      "rollout_id": "contract:A527:202",
+      "motion_key": "big_heavy_one_hand_right_side_high_to_front_high_R_001__A527",
+      "probe_policy_id": "sonic_release_contract_stub",
+      "domain_randomization_seed": 202,
+      "initial_phase": 0.7,
+      "repeat_index": 0,
+      "partition": "D_atlas",
+      "failed": false,
+      "mechanism_scores": {
+        "contact_timing": 0.0,
+        "foot_slip": 0.0,
+        "base_drift": 0.0,
+        "balance_orientation": 0.0,
+        "actuation_saturation": 0.0,
+        "joint_pose_constraint": 0.0
+      }
+    },
+    {
+      "rollout_id": "contract:A523:101",
+      "motion_key": "big_light_one_hand_behind_high_to_behind_low_R_001__A523_M",
+      "probe_policy_id": "sonic_release_contract_stub",
+      "domain_randomization_seed": 101,
+      "initial_phase": 0.2,
+      "repeat_index": 0,
+      "partition": "D_atlas",
+      "failed": true,
+      "mechanism_scores": {
+        "contact_timing": 0.0,
+        "foot_slip": 0.6,
+        "base_drift": 0.3,
+        "balance_orientation": 0.1,
+        "actuation_saturation": 0.0,
+        "joint_pose_constraint": 0.0
+      }
+    },
+    {
+      "rollout_id": "contract:A523:202",
+      "motion_key": "big_light_one_hand_behind_high_to_behind_low_R_001__A523_M",
+      "probe_policy_id": "sonic_release_contract_stub",
+      "domain_randomization_seed": 202,
+      "initial_phase": 0.7,
+      "repeat_index": 0,
+      "partition": "D_atlas",
+      "failed": false,
+      "mechanism_scores": {
+        "contact_timing": 0.0,
+        "foot_slip": 0.0,
+        "base_drift": 0.0,
+        "balance_orientation": 0.0,
+        "actuation_saturation": 0.0,
+        "joint_pose_constraint": 0.0
+      }
+    }
+  ]
+}

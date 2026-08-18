@@ -1,0 +1,19 @@
+# LACE is inert until simulator probes and the RQ1 gate pass.
+enable: false
+schema_version: 1
+atlas_manifest: null
+mechanisms:
+  - contact_timing
+  - foot_slip
+  - base_drift
+  - balance_orientation
+  - actuation_saturation
+  - joint_pose_constraint
+tilt:
+  strength: 1.0
+gate_a:
+  max_kl: 0.05
+  max_probability_ratio: 2.0
+  min_effective_bins: 0.0
+  min_mechanism_exposure: null
+

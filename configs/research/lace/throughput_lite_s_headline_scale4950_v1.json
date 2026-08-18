@@ -1,0 +1,70 @@
+{
+  "benchmark": {
+    "decimation": 4,
+    "gradient_accumulation_steps": 1,
+    "num_learning_epochs": 5,
+    "num_mini_batches": 4,
+    "num_steps_per_env": 24,
+    "timed_iterations": 20,
+    "warmup_iterations": 5
+  },
+  "checkpoint": {
+    "config_path": "/data/robotixx/groot-wbc-sonic-research/lace/checkpoints/lite_s_throughput_init_v1/config.yaml",
+    "path": "/data/robotixx/groot-wbc-sonic-research/lace/checkpoints/lite_s_throughput_init_v1/last.pt",
+    "protocol": "Reuse the byte-verified CPU pre-environment Lite-S initialization from the scale-512 workload so only the resident motion cohort and N_env change"
+  },
+  "dataset": {
+    "expected_identity": {
+      "motion_count": 1996,
+      "resident_motion_count": 1996,
+      "resident_motion_order_sha256": "e26ce6958340b2f39af2abfeee6a37332a4c92d2dc0b6ddaf7ee36f8f82473cb",
+      "resident_motion_set_sha256": "e26ce6958340b2f39af2abfeee6a37332a4c92d2dc0b6ddaf7ee36f8f82473cb",
+      "resident_unique_motion_count": 1996,
+      "selection_sha256": "96855aa100b20bf15f0d4b6c896682fa01d2df25f9af0ed4d38e446f84c1ee7d",
+      "split_manifest_file_sha256": "17aff99541b4dbac92f49b6307e1863125897bdf79a19c2bfcffe23ef71d1067",
+      "split_sha256": "53244389d62c7c9a64e7bb9e0a8e6c7aace6fb6ba1d1f37ce3ad994bc0f4d76a",
+      "subset_manifest_file_sha256": "daac75535614c34227422a9d878949407ab6c91eabfd09d8b73827a7b505d38a",
+      "subset_sha256": "ef911e0ef126f8f51f68cbb6823ee99405d1f8bb8b931583bb03984cb2a79e5e"
+    },
+    "partition": "D_curriculum",
+    "split_manifest": "/data/robotixx/groot-wbc-sonic-research/lace/manifests/bones_seed_official_headline_scale4950_split_v1.json",
+    "subset_root": "/data/robotixx/groot-wbc-sonic-research/datasets/bones_seed_official_headline_scale4950_d_curriculum"
+  },
+  "env_counts": [
+    128,
+    256,
+    512,
+    1024
+  ],
+  "experiment": "manager/universal_token/g1_only/lace_lite_s",
+  "kind": "lace_sonic_lite_throughput_protocol",
+  "launch": {
+    "cell_timeout_seconds": 7200,
+    "gpu_index": 0,
+    "max_external_gpu_memory_mib": 0,
+    "minimum_free_gpu_memory_mib": 28672,
+    "monitor_poll_seconds": 2.0
+  },
+  "output_root": "/data/robotixx/groot-wbc-sonic-research/lace/throughput",
+  "python_executable": "/home/robotixx/miniconda3/envs/env_isaaclab/bin/python",
+  "repo_root": "/home/robotixx/GR00T-WholeBodyControl",
+  "run_id": "lite_s_headline_scale4950_dcurriculum_env_sweep_v1",
+  "schema_version": 1,
+  "seed": 20260814,
+  "selection_rule": {
+    "cuda_memory_safety_margin_mib": 4096,
+    "direction": "maximize",
+    "eligibility": "all_gates_pass",
+    "metric": "sustained_end_to_end_control_transitions_per_second",
+    "tie_breaker": "smaller_num_envs"
+  },
+  "storage_root": "/data/robotixx/groot-wbc-sonic-research",
+  "tmp_root": "/data/robotixx/groot-wbc-sonic-research/lace/tmp/throughput",
+  "train_entrypoint": "gear_sonic/train_agent_trl.py",
+  "workload": {
+    "all_motions_loaded_required": true,
+    "resident_motion_count": 1996,
+    "resident_motion_order": "lexicographic_motion_key",
+    "terrain_type": "plane"
+  }
+}

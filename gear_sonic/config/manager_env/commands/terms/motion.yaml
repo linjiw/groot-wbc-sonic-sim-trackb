@@ -1,6 +1,11 @@
 motion:
   _target_: gear_sonic.envs.manager_env.mdp.commands.TrackingCommandCfg
   asset_name: "robot"
+  # LACE atlas collection stays inert unless a runner supplies both the frozen
+  # schedule digest and one exact row per vectorized environment.
+  atlas_probe_mode: false
+  atlas_probe_assignments: null
+  atlas_probe_schedule_sha256: null
 
   motion_lib_cfg:
     motion_file: ${robot.motion.motion_file}
@@ -31,6 +36,22 @@ motion:
       advmass_n: 16               # advantage_mass band knob (M5-A ablation only)
       tripwire_max_prob_over_uniform: 20.0  # D9: safety ceiling for ZPD signals only
       family_kernel: null         # D6 remnant: {key_pattern: ..., weights: {1: 0.25}}
+      # LACE composes with the native per-bin distribution only when explicitly
+      # enabled after the RQ1 gate. MotionLibBase ignores this block today, so the
+      # release path remains unchanged while CPU-side contracts are developed.
+      lace:
+        enable: false
+        schema_version: 1
+        atlas_manifest: null
+    # RQ1-only fixed motion-level exposure. The command installs this after all
+    # planned motions are resident. The pre-outcome lock is deep-reconstructed
+    # from its split, representation-blind panels, and intervention protocol.
+    # It is inert for release and atlas configurations.
+    lace_fixed_distribution:
+      enable: false
+      plan_lock_path: null
+      plan_lock_file_sha256: null
+      distribution_id: null
 
   resampling_time_range: [1000000000.0, 1000000000.0]  # [1.0e9, 1.0e9]
   debug_vis: true

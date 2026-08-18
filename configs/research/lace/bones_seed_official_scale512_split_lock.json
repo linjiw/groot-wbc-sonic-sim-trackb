@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "kind": "lace_split_artifact_lock",
+  "seed": 20260813,
+  "artifact": {
+    "path": "/data/robotixx/groot-wbc-sonic-research/lace/manifests/bones_seed_official_scale512_split_v1.json",
+    "file_sha256": "83802f1d7d3d7b351889754f7de65f6c82fa2adeb99a1ce5e5f4d20fc99bb466",
+    "selection_sha256": "4a9d530513b15557a556a8a790e5dab49c11b796d84aa0384c3db0a283e555e7",
+    "split_sha256": "4c119db58d2a49fe3527364a56a31e23c5a80da47b7ecb4d1beafd9bce71cd68"
+  },
+  "inputs": {
+    "cohort_manifest": "configs/research/bones_seed_official_zpd_scale512.json",
+    "cohort_manifest_sha256": "b0f1d6a5bdab7990f1aab280a990d0a73c03a37e1605978beaf2a0c25b3080cd",
+    "materialized_manifest": "/data/robotixx/groot-wbc-sonic-research/datasets/bones_seed_official_zpd_scale512/dataset_manifest.json",
+    "materialized_manifest_sha256": "665883f134304b40eca96379908a78792565cba62e7dcd940c1436db57674efb",
+    "paired_dataset_sha256": "0f0ad3a0f41b33ba5fdc28fdcdae33156f876769dba3218e64f0e914d17fb05a"
+  },
+  "partition_summary": {
+    "D_atlas": {
+      "motion_count": 107,
+      "source_group_count": 55
+    },
+    "D_curriculum": {
+      "motion_count": 233,
+      "source_group_count": 131
+    },
+    "D_geometry": {
+      "motion_count": 76,
+      "source_group_count": 39
+    },
+    "D_controller": {
+      "motion_count": 48,
+      "source_group_count": 21
+    },
+    "D_test": {
+      "motion_count": 48,
+      "source_group_count": 22
+    }
+  },
+  "scope": "Implementation and atlas-pilot cohort; not the preregistered headline RQ1 cohort."
+}

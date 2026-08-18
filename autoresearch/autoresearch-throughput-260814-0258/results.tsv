@@ -1,0 +1,9 @@
+iteration	change	metric	result	decision	notes
+1	freeze throughput measurement and selection contract	design audit	passed	keep	primary metric corrected to timed end-to-end control transitions/s; fixed schedule and smaller-N tie break frozen before outcomes
+2	separate attempted optimizer calls from synchronized updates	CPU callback tests	passed	keep	tracks nonfinite skips, Accelerate overflow skips, sync boundaries, and true synchronized updates; accumulation>1 covered
+3	materialize exact shared pre-environment Lite-S initialization	CPU constructor/load verification	passed	keep	actor=1227514 critic=1171329; strict state load and per-tensor/model/file hashes; no environment or GPU construction
+4	bind executable command config source data and initialization	focused CPU suite	22 passed	keep	exact Hydra argv composes; rehashed-plan/source/symlink/split/result tampering fail closed
+5	isolate OOM and global device-memory safety	focused CPU suite	22 passed	keep	minimum cuda mem_get_info free gates 4 GiB; OOM-before-metrics is terminal and larger cells are marked not run
+6	materialize immutable production inputs	CPU-only artifact verification	passed	keep	233-motion D_curriculum subset and Lite-S init bundle created under /data; GPU launch intentionally not run
+7	continuous physical-GPU isolation and runtime invariants	focused CPU suite	23 passed	keep	per-poll process-group allowlist, postflight, global free, process-tree RSS, GPU/driver/package receipts, and contamination regression
+8	freeze RQ1-resident motion and terrain workload	focused CPU suite + production dry compose	24 passed; 4/4 argv compose	keep	all cells force the same 233 sorted resident D_curriculum motions on plane terrain; callback and aggregate attest subset/count/unique/universe/all-loaded/order/set every iteration

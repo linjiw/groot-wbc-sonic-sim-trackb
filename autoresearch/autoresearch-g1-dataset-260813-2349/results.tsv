@@ -1,0 +1,16 @@
+iteration	change	metric	result	decision	notes
+0	baseline audit	M0 gates proven	3/7	keep	Offline contracts, adapter/FK, and LeRobot exporter profile proven; GPU now visible; 1.5 GB free
+1	released SONIC CUDA/PhysX smoke	M0 gates proven	4/7	keep	One-env plane and scene_usd rollouts reached explicit success markers on Isaac Sim 5.1 / Isaac Lab 2.3.2
+2	direct tokenizer latent recorder	M0 gates proven	5/7	keep	Real 7-frame artifact passed schema-v2 gate with finite varying 64D token and 36D qpos
+3	65-frame LeRobot export	M0 gates proven	6/7	superseded	Schema-plumbing gate passed, but this pre-audit export is invalid for training and actual GR00T import was still unavailable
+4	join encoder workers on close	M0 gates proven	6/7	keep	Removed post-export PyAV teardown hazard; 4/4 real encoded frames decoded and worker was stopped
+5	repo-owned household and factory scene package	M0 gates proven	6/7	keep	Self-contained Z-up/metre USDA fixtures pass hashes, license, floor, collision, and 0.45 m route-clearance preflight
+6	true ego RGB plus physics/contact acceptance	M0 gates proven	6/7	superseded	Established real Isaac RGB and synchronized physics capture; the pre-audit exports remain invalid for training
+7	exact pinned official GR00T loader smoke	M0 gates proven	7/7	keep-schema-only	Pinned ab88b50 source proved the loader API and registered shapes on a pre-audit analogue; final exports were revalidated in iterations 13-14
+8	Kimodo waypoint candidate through SONIC factory	M0 gates proven	7/7	keep-rejected	Real generated reference remained stable but failed p95 route and hip/wrist self-contact gates; retained as reason-coded quarantine evidence
+9	Kimodo text candidate and clean subclip export	M0 gates proven	7/7	superseded	The initial export exposed joint-order and causal-alignment defects during final audit; it is invalid for training
+10	joint-order and causal-alignment audit	M0 gates proven	7/7	keep	IsaacLab joint arrays are reordered to MuJoCo/G1 labels and post-step observations are paired with the next policy action; sentinel regressions added
+11	pair-resolved support-floor sensing	M0 gates proven	7/7	keep	Corrected TerrainImporter path /World/ground/terrain; independent ankle-to-floor sensors now distinguish support from non-ground foot contact
+12	typed lineage and runtime binding	M0 gates proven	7/7	keep	Request, GenerationResult, ConversionResult, scene, task, motion, checkpoint, camera, trajectory, and video are content-addressed and cross-validated
+13	final Kimodo factory export	M0 gates proven	7/7	keep	Fresh 175-frame rollout yielded accepted raw [43,109), 65 causal rows, strict GR00T file gate, zero-error semantic boundary checks, and 26 official loader steps
+14	final Kimodo household export	M0 gates proven	7/7	keep	Fresh 175-frame rotated-route rollout yielded accepted raw [43,109), 65 causal rows, strict GR00T file gate, zero-error semantic boundary checks, and 26 official loader steps

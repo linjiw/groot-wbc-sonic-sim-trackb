@@ -1,0 +1,5 @@
+rq1_training:
+  _target_: gear_sonic.trl.callbacks.rq1_training_callback.RQ1TrainingCallback
+  plan_path: ${rq1_training.plan_path}
+  plan_sha256: ${rq1_training.plan_sha256}
+  runtime_metrics_path: ${rq1_training.runtime_metrics_path}

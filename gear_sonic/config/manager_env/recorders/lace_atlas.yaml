@@ -1,0 +1,28 @@
+_target_: gear_sonic.research.lace.isaac_recorder.create_isaac_recorder_manager_cfg
+
+# Opt-in only. The term writes one JSON object per completed episode and disables
+# Isaac Lab's HDF5 exporter. Scientific identity comes only from the frozen
+# AtlasProbeBatch on the motion command; it is never duplicated in this config.
+failure_atlas:
+  _target_: gear_sonic.research.lace.isaac_recorder.create_isaac_recorder_cfg
+  enabled: false
+  output_path: ""
+  allow_append_existing: false
+  partition: D_atlas
+  command_name: motion
+  robot_name: robot
+  joint_action_name: joint_pos
+  contact_sensor_name: contact_forces
+  foot_body_names:
+    - left_ankle_roll_link
+    - right_ankle_roll_link
+  contact_force_threshold: 10.0
+  ground_normal_axis: 2
+  fall_termination_terms: []
+  timeout_termination_terms:
+    - time_out
+  # Installed Isaac Lab 2.3.2 TerminationManager.compute source contract.
+  # Any upstream/private-API drift fails before the first environment step.
+  expected_termination_compute_source_sha256: d6e3e411f73f62aa302422f6df617d48ce9065f0182b29a6642860b8a1cb7f7f
+  probe_thresholds: {}
+  max_episode_steps: 10000

@@ -1,0 +1,16 @@
+throughput_benchmark:
+  _target_: gear_sonic.trl.callbacks.throughput_benchmark_callback.ThroughputBenchmarkCallback
+  output_path: ${experiment_dir}/throughput_metrics.jsonl
+  benchmark_contract_sha256: ${throughput_benchmark.contract_sha256}
+  cell_contract_sha256: ${throughput_benchmark.cell_contract_sha256}
+  cell_id: ${throughput_benchmark.cell_id}
+  num_envs: ${num_envs}
+  num_steps_per_env: ${algo.config.num_steps_per_env}
+  decimation: ${manager_env.config.decimation}
+  warmup_iterations: ${throughput_benchmark.warmup_iterations}
+  timed_iterations: ${throughput_benchmark.timed_iterations}
+  dataset_subset_sha256: ${throughput_benchmark.dataset_subset_sha256}
+  expected_resident_motion_count: ${throughput_benchmark.expected_resident_motion_count}
+  expected_resident_motion_order_sha256: ${throughput_benchmark.expected_resident_motion_order_sha256}
+  expected_resident_motion_set_sha256: ${throughput_benchmark.expected_resident_motion_set_sha256}
+  expected_terrain_type: ${throughput_benchmark.expected_terrain_type}

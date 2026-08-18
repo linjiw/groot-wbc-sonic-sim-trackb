@@ -1,0 +1,26 @@
+{
+  "schema_version": 2,
+  "reference_length_inventory_sha256": "c63e837a752f6a5b81dc779b48cd9dd4a1cb36484db0639056688fada56186f0",
+  "probe_policies": [
+    {
+      "id": "sonic_release_external_audit",
+      "checkpoint_sha256": "e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909"
+    }
+  ],
+  "domain_randomization_seeds": [
+    101,
+    202
+  ],
+  "phase_targets": [
+    {
+      "phase_id": "start",
+      "target_fraction": 0.0
+    },
+    {
+      "phase_id": "mid",
+      "target_fraction": 0.5
+    }
+  ],
+  "repeats": 2,
+  "rollout_id_prefix": "lace-release-d-atlas-external-v1"
+}

@@ -1,0 +1,76 @@
+# @package _global_
+# SONIC-Lite-S: one G1 reference encoder, one action decoder, and no
+# cross-modal reconstruction/alignment modules.
+
+defaults:
+  - quantizers/fsq@algo.config.actor.backbone.quantizer
+
+manager_env:
+  commands:
+    motion:
+      encoder_sample_probs:
+        g1: 1.0
+
+algo:
+  config:
+    actor:
+      _target_: gear_sonic.trl.modules.actor_critic_modules.Actor
+      running_mean_std: false
+      input_obs_dict: true
+      has_aux_loss: false
+      backbone:
+        _target_: gear_sonic.trl.modules.universal_token_modules.UniversalTokenModule
+        num_future_frames: ${manager_env.commands.motion.num_future_frames}
+        proprioception_features: ["actor_obs"]
+        encoder_sample_probs: ${manager_env.commands.motion.encoder_sample_probs}
+        num_fsq_levels: 32
+        fsq_level_list: 32
+        max_num_tokens: 2
+        reencode_smpl_g1_recon: false
+        aux_loss_func: {}
+        aux_loss_coef: {}
+        encoders:
+          g1:
+            inputs: ["command_multi_future_nonflat", "motion_anchor_ori_b_mf_nonflat"]
+            params:
+              _target_: gear_sonic.trl.modules.base_module.BaseModule
+              input_dim:
+              output_dim:
+              num_input_temporal_dims: ${manager_env.commands.motion.num_future_frames}
+              num_output_temporal_dims: ${algo.config.actor.backbone.max_num_tokens}
+              module_config_dict:
+                layer_config:
+                  type: MLP
+                  hidden_dims: [384, 256, 128]
+                  activation: SiLU
+        decoders:
+          g1_dyn:
+            inputs: ["token_flattened", "proprioception"]
+            outputs: ["action"]
+            has_temporal_dim: false
+            params:
+              _target_: gear_sonic.trl.modules.base_module.BaseModule
+              input_dim:
+              output_dim:
+              num_input_temporal_dims:
+              num_output_temporal_dims:
+              module_config_dict:
+                layer_config:
+                  type: MLP
+                  hidden_dims: [512, 384, 256, 128]
+                  activation: SiLU
+
+    critic:
+      _target_: gear_sonic.trl.modules.actor_critic_modules.Critic
+      running_mean_std: true
+      backbone:
+        _target_: gear_sonic.trl.modules.base_module.BaseModule
+        process_output_dim: true
+        module_config_dict:
+          type: MLP
+          input_dim: ["critic_obs"]
+          output_dim: [1]
+          layer_config:
+            type: MLP
+            hidden_dims: [512, 384, 256, 128]
+            activation: SiLU

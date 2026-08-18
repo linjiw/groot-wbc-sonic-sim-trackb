@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "kind": "lace_signature_stability_gate_config",
+  "frozen": true,
+  "scientific_use": true,
+  "stage": "scale512_primary_atlas_screen",
+  "declared_before_primary_atlas_rollouts": true,
+  "split_selection_sha256": "4a9d530513b15557a556a8a790e5dab49c11b796d84aa0384c3db0a283e555e7",
+  "mechanism_names": [
+    "contact_timing",
+    "foot_slip",
+    "base_drift",
+    "balance_orientation",
+    "actuation_saturation",
+    "joint_pose_constraint"
+  ],
+  "policy_order": [
+    "pi_lite_early",
+    "pi_lite_mid",
+    "pi_lite_late"
+  ],
+  "split_half_definition": {
+    "axis": "repeat_index",
+    "half_a_repeat_indices": [0],
+    "half_b_repeat_indices": [1],
+    "rollouts_per_motion_policy_full": 8,
+    "rollouts_per_motion_policy_half": 4,
+    "minimum_resolved_failures_full": 3,
+    "minimum_resolved_failures_per_half": 2,
+    "common_support_rule": "q_resolved_for_every_policy_in_both_halves_no_imputation"
+  },
+  "analysis": {
+    "neighbor_k": 10,
+    "bootstrap_replicates": 2000,
+    "bootstrap_seed": 8132026,
+    "bootstrap_confidence_level": 0.95,
+    "difficulty_ridge_alpha": 0.1
+  },
+  "thresholds": {
+    "minimum_common_support_motion_count": 40,
+    "minimum_common_support_fraction": 0.5,
+    "minimum_common_support_source_group_count": 20,
+    "maximum_median_js_divergence_bits": 0.1,
+    "minimum_distance_matrix_spearman": 0.5,
+    "minimum_mean_neighbor_overlap_fraction": 0.4,
+    "minimum_channel_point_spearman": 0.4,
+    "minimum_channel_bootstrap_ci_lower": 0.0,
+    "minimum_channel_valid_bootstrap_fraction": 0.95,
+    "minimum_global_mechanism_mass_fraction": 0.01,
+    "maximum_global_mechanism_mass_fraction": 0.6,
+    "minimum_positive_source_groups_per_mechanism": 5,
+    "maximum_single_source_group_share": 0.25,
+    "maximum_difficulty_reconstruction_r2": 0.8
+  },
+  "threshold_rationale": {
+    "js": "0.1 bit limits typical split-half mechanism drift to one tenth of the maximum binary-information scale.",
+    "rank_and_neighbors": "0.5 distance-rank and 0.4 ten-neighbor overlap require reproducible geometry well above random overlap without claiming near-identity.",
+    "channels": "Every policy-channel must have a point rank correlation of at least 0.4 and a nonnegative 95% source-group bootstrap lower bound; degenerate channels fail.",
+    "coverage": "At least 40 of 107 motions, half of D_atlas, and 20 recording groups must support the complete three-policy mechanism-only comparison.",
+    "incidence": "Each named mechanism must contribute at least 1% but no more than 60% of attributed mass, span five groups, and receive at most 25% of its mass from one group.",
+    "difficulty": "Cross-validated R2 above 0.8 means scalar failure frequency almost reconstructs the conditional mechanism geometry and defeats the proposed separation."
+  },
+  "failure_action": {
+    "within_motion_noise_only": "Freeze an expanded schedule before collecting it, increase from R=8 to R=16 once, and rerun the unchanged gate.",
+    "coverage_activation_or_difficulty_failure": "Stop before RQ1 training; redesign or narrow the claim without changing thresholds from observed transfer outcomes.",
+    "second_failure_after_r16": "Stop: the handcrafted failure geometry is not stable enough for transfer claims."
+  },
+  "gate_config_sha256": "d28c64d0537240e80529a55ef95a8c9dcab8cf1e2b4d3896bf00ef753a9becac"
+}

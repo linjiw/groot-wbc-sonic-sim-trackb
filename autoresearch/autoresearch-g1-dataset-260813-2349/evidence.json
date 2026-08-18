@@ -1,0 +1,193 @@
+{
+  "schema_version": 2,
+  "recorded_at": "2026-08-14",
+  "scope": "Kimodo plus SONIC plus Isaac Lab synthetic G1 dataset spike",
+  "release_status": "research_evidence_only",
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "isaac_lab": "2.3.2",
+    "torch": "2.7.0+cu128",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "driver": "590.48.01",
+    "sonic_checkpoint_sha256": "sha256:e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909"
+  },
+  "scenes": {
+    "household_room": "sha256:80ca27440b5addf2cd0ef04b37cd71b23723cc904701dd7252ec700f90554ce7",
+    "factory_aisle": "sha256:ea935ea01582ab42b5155247772a464b1dffda99e20c5795bb56f55752a265d5"
+  },
+  "factory_episode": {
+    "source": "official bundled Kimodo-G1-RP single-text example",
+    "live_kimodo_inference_performed": false,
+    "prompt": "A person walking forward quickly stumbles but maintains their balance",
+    "status": "recorded_rollout_rejected_clean_causal_subclip_accepted",
+    "converted_motion_frames": 150,
+    "converted_motion_fps": 30,
+    "runtime_frames": 175,
+    "runtime_timestamp_span_s": 3.48,
+    "runtime_trajectory_sha256": "sha256:e309d388a9255d84be181d8eebc655e0ee06be0479b700f49ffabc0b69d57e1a",
+    "runtime_video_sha256": "sha256:6f44dae94d73db35e49da988ae679188ae0757ba6a30c2929852a075ededf811",
+    "runtime_success_manifest_sha256": "sha256:4a6b1cb687188d1b774ac92b87f1d9cdc73fd8dd032c00a4ffbe56813ed84bc8",
+    "recorded_rollout_rejection": {
+      "reason": "disallowed_robot_contact",
+      "force_n": 320.1523002662216,
+      "frame": 109,
+      "bodies": [
+        "left_hip_roll_link",
+        "left_wrist_yaw_link"
+      ]
+    },
+    "validated_raw_frame_range": {
+      "start": 43,
+      "end_exclusive": 109,
+      "frames": 66
+    },
+    "export_alignment": {
+      "observation_source_frame_range": {
+        "start": 43,
+        "end_exclusive": 108
+      },
+      "action_source_frame_range": {
+        "start": 44,
+        "end_exclusive": 109
+      },
+      "exported_frames": 65,
+      "contract": "post_step_observation_with_next_policy_action"
+    },
+    "accepted_metrics": {
+      "reference_displacement_m": 1.9412379660791825,
+      "executed_progress_ratio": 0.9261772928570238,
+      "endpoint_error_m": 0.21706223352202167,
+      "path_error_p95_m": 0.2164112402031935,
+      "minimum_root_height_m": 0.6450424790382385,
+      "maximum_root_tilt_rad": 0.28403014599937265,
+      "maximum_nonfoot_contact_force_n": 0.0,
+      "maximum_foot_non_ground_contact_force_n": 0.0,
+      "supported_fraction": 0.9545454545454546
+    },
+    "acceptance_report_sha256": "sha256:c06720ef0b40f5d7efd03deda0f96241887097eb6a1ac6765ff08ae0d75580bb"
+  },
+  "household_episode": {
+    "source": "official bundled Kimodo-G1-RP single-text example, rotated onto the household route",
+    "live_kimodo_inference_performed": false,
+    "prompt": "A person walking forward quickly stumbles but maintains their balance",
+    "status": "recorded_rollout_rejected_clean_causal_subclip_accepted",
+    "converted_motion_frames": 150,
+    "converted_motion_fps": 30,
+    "runtime_frames": 175,
+    "runtime_timestamp_span_s": 3.48,
+    "runtime_trajectory_sha256": "sha256:6dcba2b1e1104313079210cc1675dac8c1b214fd7676c2a8d25666961b0bac85",
+    "runtime_video_sha256": "sha256:d551bb983504b3a874780f04b22ebaf93cdd55e83212025d8e0fa2a65e5eea34",
+    "runtime_success_manifest_sha256": "sha256:59d7e3652e566247ee278025f96d82d66e98bfa41cc98b33c63cd23913f215ec",
+    "recorded_rollout_rejection": {
+      "reason": "disallowed_robot_contact",
+      "force_n": 317.02035505548014,
+      "frame": 109,
+      "bodies": [
+        "left_hip_roll_link",
+        "left_wrist_yaw_link"
+      ]
+    },
+    "validated_raw_frame_range": {
+      "start": 43,
+      "end_exclusive": 109,
+      "frames": 66
+    },
+    "export_alignment": {
+      "observation_source_frame_range": {
+        "start": 43,
+        "end_exclusive": 108
+      },
+      "action_source_frame_range": {
+        "start": 44,
+        "end_exclusive": 109
+      },
+      "exported_frames": 65,
+      "contract": "post_step_observation_with_next_policy_action"
+    },
+    "accepted_metrics": {
+      "reference_displacement_m": 1.9412379075516204,
+      "executed_progress_ratio": 0.9247364074275328,
+      "endpoint_error_m": 0.21979859858174172,
+      "path_error_p95_m": 0.21865474056301293,
+      "minimum_root_height_m": 0.6446046829223633,
+      "maximum_root_tilt_rad": 0.28329109909827704,
+      "maximum_nonfoot_contact_force_n": 0.0,
+      "maximum_foot_non_ground_contact_force_n": 0.0,
+      "supported_fraction": 0.9545454545454546
+    },
+    "acceptance_report_sha256": "sha256:ea10395c534e9ad39be88896363da607cc648b3f0fafe04bb12a5bc7a678c468"
+  },
+  "factory_typed_lineage": {
+    "note": "The EpisodeRequest is an explicit final/post-hoc rollout request, not the original bundled Kimodo inference request.",
+    "episode_request_id": "sha256:392501ddc13c09f5ac38c5220f31fdfec7a8e1d6db0263fdb5c70197c8ce7ae2",
+    "generation_result_id": "sha256:98744f9bf37b1239e365ca15c0121911548c9a4c4296f8b89e2dbc766a84583b",
+    "conversion_result_id": "sha256:c4ba0ae8e63448e0673a8f1891c309fb9e72d329fe7445f0cf116d59aec6c08a",
+    "conversion_manifest_sha256": "sha256:fa46b45f8c7ee37d8018ebc439040404e4eee20eb307df8e19368e475686fd2b",
+    "sonic_motion_sha256": "sha256:a1da00cb3d9682563c4554f6e59c414ac4dfd0180dd90b54bbdca649950eac02"
+  },
+  "household_typed_lineage": {
+    "note": "The EpisodeRequest is an explicit final/post-hoc rollout request, not the original bundled Kimodo inference request.",
+    "episode_request_id": "sha256:5039f1592888f9cbc61dc7dc8b323a349e431701c3a8127afed0a9702f97c9cb",
+    "generation_result_id": "sha256:9e6d6f05855006cef039c4c21e2b2551533598a2ae861c13a5ae7c890a0afb7b",
+    "conversion_result_id": "sha256:20acbd54d2ac94a74a8f17b4b9ab67b9ee24e5096ee8dc38bc4fac7bd388f73a",
+    "conversion_manifest_sha256": "sha256:b81720399e3076863dfc6d406685f3ca1bd1b6ac509eb909daefb5cf02a29bbe",
+    "sonic_motion_sha256": "sha256:d0b2b1cb3d61483d9ecff73035e1d6c80b7f0daad9dfbc4b1f271e90ae55f40e"
+  },
+  "factory_export": {
+    "path": "/tmp/sonic_kimodo_single_factory_lerobot_final_20260814",
+    "parquet_rows": 65,
+    "parquet_sha256": "sha256:fd7f0038478daaea58370eeecd0b1a68e75340da915116fbf47e97d22fd1186e",
+    "video_sha256": "sha256:9b25317a8419c85289ffcb387d43a537f8a4b30e5361f06daa7cf0ab9d4add6e",
+    "info_sha256": "sha256:86e0d22fa563c527ef4bd327b7a9ffb5e0ce4ce38a23620126735842ea16d21f",
+    "video": {
+      "codec": "h264",
+      "pixel_format": "yuv420p",
+      "resolution": [640, 480],
+      "fps": 50,
+      "frames": 65
+    },
+    "strict_file_gate": "passed",
+    "semantic_boundary_check": "first and last rows match reordered observations and next-step actions with zero numeric error"
+  },
+  "household_export": {
+    "path": "/tmp/sonic_kimodo_single_household_lerobot_final_20260814",
+    "parquet_rows": 65,
+    "parquet_sha256": "sha256:a4091b3352293ce1644170a5973140558b10e06cede7260cfc2325845c8b08b9",
+    "video_sha256": "sha256:4d6f1b4c2fde24a129ace008c9abcd2accb63259500cc3b2f1a00d1dd876e1a7",
+    "info_sha256": "sha256:90a356f6fa3f0d30c5bf629f147ad752253f38a81376205dba33e86e76ff018c",
+    "video": {
+      "codec": "h264",
+      "pixel_format": "yuv420p",
+      "resolution": [640, 480],
+      "fps": 50,
+      "frames": 65
+    },
+    "strict_file_gate": "passed",
+    "semantic_boundary_check": "first and last rows match reordered observations and next-step actions with zero numeric error"
+  },
+  "official_groot_loader_smoke": {
+    "revision": "ab88b50c718f6528e1df9dcbaf75865d1b604760",
+    "datasets": {
+      "factory_aisle": {
+        "path": "/tmp/sonic_kimodo_single_factory_lerobot_final_20260814",
+        "valid_steps": 26
+      },
+      "household_room": {
+        "path": "/tmp/sonic_kimodo_single_household_lerobot_final_20260814",
+        "valid_steps": 26
+      }
+    },
+    "action_horizon": 40,
+    "status": "passed",
+    "caveat": "Exact source dataset/decoder code was unmodified; an imported-but-unused transformers.ProcessorMixin symbol was stubbed because the durable GR00T inference environment is not installed."
+  },
+  "superseded_artifacts": {
+    "status": "invalid_for_training",
+    "reason": "Earlier exports predated the audited IsaacLab-to-MuJoCo joint reorder and causal observation/action shift."
+  },
+  "artifact_storage": {
+    "paths_are_ephemeral": true,
+    "binaries_committed_to_repository": false,
+    "note": "Archive the source run, typed provenance bundle, and export before treating this evidence as durable."
+  }
+}

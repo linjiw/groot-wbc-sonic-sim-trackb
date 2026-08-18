@@ -41,6 +41,14 @@ from .self_intersection import DEFAULT_G1_MJCF
 #: Leg joints the crouch drives, through the squat coupling.
 CROUCH_JOINTS = ("hip_pitch", "knee", "ankle_pitch")
 
+#: Metres of clearance the arm tuck must leave between a wrist and the hip on the same side.
+#: The tuck's failure mode across motions is pressing the wrist *into* the hip: rejected clips
+#: on two different nominal motions carried the identical external-contact triple
+#: ``left_hip_roll_link``, ``left_wrist_yaw_link``, ``pelvis`` at modest excursion with the
+#: route intact. Narrowing the silhouette and colliding with yourself are the same motion past
+#: a point, and nothing in the operator knew where that point was.
+MIN_WRIST_HIP_CLEARANCE_M = 0.04
+
 #: Fraction of waist_pitch's range the adapted clip may end at. The waist is the most
 #: efficient lever on the silhouette -- 109 mm per radian against the squat's 64 at the same
 #: excursion, because the capsule that sets the peak is torso_link and there is no neck joint
@@ -334,6 +342,8 @@ class LocalTuckReport:
     #: is still usable; it simply achieves less than was asked for, and that is preferable to
     #: reaching the target through a motion the robot cannot hold.
     excursion_capped: bool = False
+    #: Smallest wrist-to-hip gap left in the clip, in metres.
+    wrist_hip_clearance_m: float = float("inf")
 
 
 def _half_width(qpos: np.ndarray, mjcf_path) -> np.ndarray:
@@ -502,3 +512,47 @@ def local_arm_tuck(
             np.abs(adapted[:, 7:] - qpos[:, 7:]).max() >= max_excursion * 0.999
         ),
     )
+
+def wrist_hip_clearance(
+    qpos: np.ndarray,
+    *,
+    mjcf_path: str | Path = DEFAULT_G1_MJCF,
+    frame_stride: int = 3,
+) -> float:
+    """Smallest gap between either wrist and the hip on its own side, over a clip.
+
+    Measured on MuJoCo's collision geoms, because the swept-volume capsules are conservative
+    outer approximations that overlap permanently and cannot resolve millimetres.
+    """
+    from .self_intersection import _load_model
+
+    mujoco, model = _load_model(mjcf_path)
+    data = mujoco.MjData(model)
+
+    def geoms_of(fragment: str) -> list[int]:
+        out = []
+        for geom in range(model.ngeom):
+            name = mujoco.mj_id2name(
+                model, mujoco.mjtObj.mjOBJ_BODY, model.geom_bodyid[geom]
+            ) or ""
+            if fragment in name:
+                out.append(geom)
+        return out
+
+    pairs = []
+    for side in ("left", "right"):
+        for wrist in geoms_of(f"{side}_wrist"):
+            for hip in geoms_of(f"{side}_hip"):
+                pairs.append((wrist, hip))
+    if not pairs:
+        return float("inf")
+
+    scratch = np.zeros(6)
+    best = float("inf")
+    for index in range(0, len(qpos), frame_stride):
+        data.qpos[:] = qpos[index]
+        mujoco.mj_forward(model, data)
+        for first, second in pairs:
+            best = min(best, float(mujoco.mj_geomDistance(
+                model, data, first, second, 0.5, scratch)))
+    return best

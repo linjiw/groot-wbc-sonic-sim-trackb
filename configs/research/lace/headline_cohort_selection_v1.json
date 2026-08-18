@@ -1,0 +1,86 @@
+{
+  "schema_version": 2,
+  "kind": "lace_headline_cohort_selection_protocol",
+  "frozen": true,
+  "scientific_use": true,
+  "declared_before_headline_candidate_policy_outcomes": true,
+  "outcome_access_permitted": false,
+  "prior_rollout_disposition": "The earlier two-motion released-checkpoint instrumentation smoke is ineligible scientific evidence, is outside this 4,950-motion candidate grid, and was not consulted to choose this cohort, its size, or its split.",
+  "source": {
+    "repo_id": "bones-studio/seed",
+    "revision": "2f59b2077b9da34dd4e43618e705c7cb962c9a66",
+    "metadata_path": "/data/robotixx/groot-wbc-sonic-research/datasets/bones_seed_archives/metadata/seed_metadata_v004.csv",
+    "metadata_bytes": 146411608,
+    "metadata_sha256": "71d09422034946d17dbb0db027d569408c486545bdb12f7979d55e6ffd9bbc39",
+    "published_motion_count": 142220,
+    "eligible_motion_count": 129785,
+    "eligibility_rule": "official_release_filename_filter"
+  },
+  "selection": {
+    "builder": "scripts/research/build_bones_seed_official_cohort.py",
+    "builder_sha256": "7b51a0a3ad9ff7d332ce242393639970410b1f50a321c6826bd9d8e918f3154b",
+    "filter_implementation": "gear_sonic/data_process/filter_and_copy_bones_data.py",
+    "filter_implementation_sha256": "d2cb306f47a81e88717e93a1bf94f3818ddeaceae30423fedd6764a5ab9b56ae",
+    "seed": 20260725,
+    "duration_bins": 4,
+    "stratification": "category_x_eligible_duration_quantile",
+    "tie_breaker": "sha256(seed + NUL + motion_key)",
+    "candidate_size_grid": {
+      "start_inclusive": 4500,
+      "stop_inclusive": 5500,
+      "step": 50
+    },
+    "pre_outcome_constraints": {
+      "minimum_d_atlas_motion_count": 1000,
+      "maximum_d_atlas_motion_count": 1024,
+      "minimum_d_geometry_plus_d_test_source_groups": 100
+    },
+    "selection_rule": "unique_grid_candidate_satisfying_all_pre_outcome_constraints",
+    "selected_size": 4950,
+    "selection_sha256": "feaf9564a492608efed599a99db9b207145c899d76bbe54a622ed8de5df16d9f"
+  },
+  "split_preview": {
+    "builder": "gear_sonic.research.lace.split:build_source_disjoint_split",
+    "builder_sha256": "d622e24e44bcbe657f9867c786bd7f4881bb40fc3c7909e8851aaedad99d122c",
+    "seed": 20260813,
+    "source_group_count": 487,
+    "partition_summary": {
+      "D_atlas": {
+        "motion_count": 1006,
+        "source_group_count": 88
+      },
+      "D_curriculum": {
+        "motion_count": 1996,
+        "source_group_count": 257
+      },
+      "D_geometry": {
+        "motion_count": 822,
+        "source_group_count": 63
+      },
+      "D_controller": {
+        "motion_count": 557,
+        "source_group_count": 38
+      },
+      "D_test": {
+        "motion_count": 569,
+        "source_group_count": 41
+      }
+    },
+    "d_geometry_plus_d_test_source_groups": 104,
+    "note": "Counts are path-independent metadata-only screening. The final split digest is frozen only after paired materialization is bound."
+  },
+  "artifacts": {
+    "cohort_path": "/data/robotixx/groot-wbc-sonic-research/lace/manifests/bones_seed_official_headline_scale4950_cohort_v1.json",
+    "cohort_file_sha256": "a0b9461bcbbb87bff2a0e52b2a3875ca74ae808a91c00688f9e7c85cc4b2328e",
+    "g1_member_list_path": "/data/robotixx/groot-wbc-sonic-research/lace/manifests/bones_seed_official_headline_scale4950_g1_members_v1.txt",
+    "g1_member_list_file_sha256": "5361acac5e2384988d659bfd9500ed634e1691fa2f57d01786ed94f280c640c8",
+    "smpl_member_list_path": "/data/robotixx/groot-wbc-sonic-research/lace/manifests/bones_seed_official_headline_scale4950_smpl_members_v1.txt",
+    "smpl_member_list_file_sha256": "fa0f27e2bb34c3b04bb81269997c30eac2ff926b084bf34001196d491ab5a0ea",
+    "materializer_path": "scripts/research/materialize_bones_seed_official_cohort.py",
+    "materializer_file_sha256": "4687eb1c8b4c961203061b6fc5c29fa3ddb2411443ff76df5e1edb62e64b0737",
+    "paired_manifest_builder_path": "scripts/research/build_bones_seed_paired_manifest.py",
+    "paired_manifest_builder_file_sha256": "1b4d55514f586e5273b9aebbcaee19a207183bd7a2ddf903c835668a55d82f92"
+  },
+  "scope": "Headline-scale cohort selection only. Scientific rollout readiness additionally requires paired materialization, a final source-disjoint split lock, reference-feasibility controls, frozen probe checkpoints, and an externally anchored analysis protocol.",
+  "protocol_sha256": "379c28a2022b6d32a3daaea5c748fcf797aa85bccca5d7c54212a9afb7aed71b"
+}

@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "kind": "lace_representation_protocol_scale512",
+  "frozen": true,
+  "scientific_use": true,
+  "declared_before_transfer_outcomes": true,
+  "outcome_access_permitted": false,
+  "split": {
+    "selection_sha256": "4a9d530513b15557a556a8a790e5dab49c11b796d84aa0384c3db0a283e555e7",
+    "fit_partition": "D_atlas",
+    "motion_count": 107,
+    "source_group_count": 55
+  },
+  "candidate_representations": [
+    "failure_mechanism",
+    "scalar_difficulty",
+    "reference_kinematics",
+    "motion_semantics",
+    "kinematics_plus_difficulty",
+    "reference_feasibility",
+    "feasibility_plus_kinematics_plus_difficulty"
+  ],
+  "clustering": {
+    "method": "standardized_deterministic_multistart_lloyd_kmeans_v1",
+    "scaler_method": "d_atlas_population_mean_std_zero_variance_scale_one_v1",
+    "supported_k": [
+      4,
+      6,
+      8
+    ],
+    "primary_k": 6,
+    "shared_seed": 8132026,
+    "n_init": 32,
+    "max_iterations": 300,
+    "convergence_tolerance": 1e-10,
+    "tie_breaking": "argmin_lowest_canonical_cluster_then_lexicographic_fit_key",
+    "minimum_support_by_k": {
+      "4": {
+        "minimum_cell_size": 12,
+        "minimum_source_groups_per_cell": 8
+      },
+      "6": {
+        "minimum_cell_size": 8,
+        "minimum_source_groups_per_cell": 5
+      },
+      "8": {
+        "minimum_cell_size": 5,
+        "minimum_source_groups_per_cell": 4
+      }
+    }
+  },
+  "random_matched_size_controls": {
+    "unit": "motion",
+    "control_count": 100,
+    "seed_base": 8133000,
+    "seed_rule": "seed_base_plus_zero_based_control_index",
+    "preserve_observed_cell_sizes_exactly": true,
+    "retain_source_group_ids_for_blocked_inference": true,
+    "selection_from_transfer_outcomes_permitted": false,
+    "whole_source_group_sensitivity": {
+      "role": "separate_sensitivity_not_primary_matched_size_null",
+      "exact_cell_size_preservation_guaranteed": false,
+      "reason": "Whole source groups have heterogeneous motion counts, so permuting indivisible groups cannot generally preserve every observed cluster size exactly."
+    }
+  },
+  "protocol_sha256": "8c42d6a26dfdf7751b58c0cad0e008ff4b9921185ec8d0eb6e96fd5a137f2adb"
+}

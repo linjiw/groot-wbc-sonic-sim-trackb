@@ -3,6 +3,7 @@
 import gc  # noqa: F401
 import math
 import os
+from pathlib import Path
 
 import accelerate
 from accelerate import utils as accelerate_utils
@@ -201,9 +202,7 @@ class PolicyAndValueWrapper(nn.Module):
             results["action_mean_w_imgaug"] = policy_state_dict_w_imgaug["action_mean"]
             results["actions_w_imgaug"] = policy_state_dict_w_imgaug["actions"]
             if "normalized_actions" in policy_state_dict_w_imgaug:
-                results["normalized_actions_w_imgaug"] = policy_state_dict_w_imgaug[
-                    "normalized_actions"
-                ]
+                results["normalized_actions_w_imgaug"] = policy_state_dict_w_imgaug["normalized_actions"]
         elif mode == "policy_deterministic":
             self.policy.act(**kwargs)
             results = {
@@ -244,19 +243,19 @@ class PrinterHVCallback(TrainerCallback):  # noqa: F405
             print_str = f" \033[1m Learning iteration {state.global_step}  \033[0m "
 
             log_string = (
-                f"""{print_str.center(width, ' ')}\n\n"""
-                f"""{'Computation:':>{pad}} {logs['fps']:.0f} steps/s (Collection: {logs['collection_time']:.3f}s, Learning {logs['learn_time']:.3f}s)\n"""  # noqa: E501
-                f"""{'Mean action noise std:':>{pad}} {logs['Policy/mean_noise_std']:.2f}\n"""
+                f"""{print_str.center(width, " ")}\n\n"""
+                f"""{"Computation:":>{pad}} {logs["fps"]:.0f} steps/s (Collection: {logs["collection_time"]:.3f}s, Learning {logs["learn_time"]:.3f}s)\n"""  # noqa: E501
+                f"""{"Mean action noise std:":>{pad}} {logs["Policy/mean_noise_std"]:.2f}\n"""
             )
 
             for k, v in logs.items():
                 if k.startswith("objective/"):
                     # Keep the original logic
                     if k.startswith("objective/kin_"):
-                        log_string += f"""{f'{k}:':>{pad}} {v:.5f}\n"""
+                        log_string += f"""{f"{k}:":>{pad}} {v:.5f}\n"""
                     else:
                         new_key = k.replace("objective/", "")
-                        log_string += f"""{f'Mean {new_key}:':>{pad}} {v:.5f}\n"""
+                        log_string += f"""{f"Mean {new_key}:":>{pad}} {v:.5f}\n"""
 
             env_log_string = ""
             ep_string = ""
@@ -269,17 +268,17 @@ class PrinterHVCallback(TrainerCallback):  # noqa: F405
                     env_log_string += f"{entry}\n"
                 if k.startswith("Episode/"):
                     new_key = k.replace("Episode/", "")
-                    ep_string += f"""{f'Mean episode {new_key}:':>{pad}} {v:.4f}\n"""
+                    ep_string += f"""{f"Mean episode {new_key}:":>{pad}} {v:.4f}\n"""
 
             log_string += env_log_string
             log_string += ep_string
             log_string += (
-                f"""{'-' * width}\n"""
-                f"""{'Total episodes:':>{pad}} {logs['episode']}\n"""
-                f"""{'Total timesteps:':>{pad}} {logs['tot_timesteps']}\n"""
-                f"""{'Iteration time:':>{pad}} {logs['collection_time'] + logs['learn_time']:.2f}s\n"""
-                f"""{'Total time:':>{pad}} {logs['tot_time']:.2f}s\n"""
-                f"""{'ETA:':>{pad}} {logs['tot_time'] / logs['batch_idx'] * (logs['num_total_batches'] - logs['batch_idx']):.1f}s\n"""  # noqa: E501
+                f"""{"-" * width}\n"""
+                f"""{"Total episodes:":>{pad}} {logs["episode"]}\n"""
+                f"""{"Total timesteps:":>{pad}} {logs["tot_timesteps"]}\n"""
+                f"""{"Iteration time:":>{pad}} {logs["collection_time"] + logs["learn_time"]:.2f}s\n"""
+                f"""{"Total time:":>{pad}} {logs["tot_time"]:.2f}s\n"""
+                f"""{"ETA:":>{pad}} {logs["tot_time"] / logs["batch_idx"] * (logs["num_total_batches"] - logs["batch_idx"]):.1f}s\n"""  # noqa: E501
             )
 
             log_string += f"Logging Directory: {logs['experiment_save_dir']}"
@@ -392,6 +391,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
                 ``disc_model`` for discriminator-based training).
         """
         self.accelerator = accelerator
+        self._lace_resume_requested = bool(resume)
         self._init_trl(
             args,
             config,
@@ -414,6 +414,15 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
             **kwargs,
         )
         self._init_config()
+        if self.rq1_training_metrics:
+            from gear_sonic.research.lace.rq1_training import (
+                assert_rq1_trainer_callbacks,
+            )
+
+            assert_rq1_trainer_callbacks(
+                self.callback_handler.callbacks,
+                resume=self._lace_resume_requested,
+            )
         self._setup_storage()
 
         if checkpoint is not None:
@@ -476,9 +485,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
             if args.bf16 and getattr(self.policy_model, "is_loaded_in_4bit", False):
                 models_utils.peft_module_casting_to_bf16(self.policy_model)
 
-        self.is_peft_model = accelerate_utils.is_peft_available() and isinstance(
-            self.policy_model, peft.PeftModel
-        )
+        self.is_peft_model = accelerate_utils.is_peft_available() and isinstance(self.policy_model, peft.PeftModel)
         self.model_adapter_name = args.model_adapter_name
         self.ref_adapter_name = args.ref_adapter_name
 
@@ -494,9 +501,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
 
         self.reward_model = reward_model
         self.train_dataset = train_dataset
-        self.train_dataset_len = (
-            len(train_dataset) if train_dataset is not None else self.env.config.num_envs
-        )
+        self.train_dataset_len = len(train_dataset) if train_dataset is not None else self.env.config.num_envs
         self.value_model = value_model
         self.data_collator = data_collator
         self.eval_dataset = eval_dataset
@@ -551,15 +556,11 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
             args.total_episodes / args.batch_size
         )  # we may train for more than `total_episodes`
         time_tensor = torch.tensor(int(time.time()), device=accelerator.device)
-        time_int = accelerate_utils.broadcast(
-            time_tensor, 0
-        ).item()  # avoid different timestamps across processes
+        time_int = accelerate_utils.broadcast(time_tensor, 0).item()  # avoid different timestamps across processes
         args.run_name = f"{args.exp_name}__{args.seed}__{time_int}"
         self.local_seed = local_seed
         if args.num_sample_generations > 0:
-            self.sample_generations_freq = max(
-                1, args.num_total_batches // args.num_sample_generations
-            )
+            self.sample_generations_freq = max(1, args.num_total_batches // args.num_sample_generations)
         self.local_dataloader_batch_size = args.local_batch_size
 
         #########
@@ -613,9 +614,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
         )
         self.current_flos = 0
         self.hp_search_backend = None
-        self.is_deepspeed_enabled = (
-            getattr(self.accelerator.state, "deepspeed_plugin", None) is not None
-        )
+        self.is_deepspeed_enabled = getattr(self.accelerator.state, "deepspeed_plugin", None) is not None
         self.is_fsdp_enabled = getattr(self.accelerator.state, "fsdp_plugin", None) is not None
         # Create distant repo and output directory if needed
         self.hub_model_id = None
@@ -695,9 +694,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
             elif self.env.config.obs.obs_dict.vision_obs[0] in ["rgb_image"]:
                 num_channels = 3
             else:
-                raise ValueError(
-                    f"Invalid vision observation type: {self.env.config.obs.obs_dict.vision_obs[0]}"
-                )
+                raise ValueError(f"Invalid vision observation type: {self.env.config.obs.obs_dict.vision_obs[0]}")
 
             if self.env.config.obs.obs_dict.vision_obs[0] == "height_map":
                 heightmap_resolution = self.env.config.simulator.config.heightmap.resolution
@@ -732,6 +729,14 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
         self.use_padding_mask = self.config.get("use_padding_mask", False)
         self.ppo_shuffle_every_epoch = self.config.get("ppo_shuffle_every_epoch", True)
         self.empty_cache_every_n_ppo_epoch = self.config.get("empty_cache_every_n_ppo_epoch", -1)
+        # Opt-in counters for the LACE throughput harness.  The default path
+        # remains byte-for-byte equivalent in behavior; benchmark cells pay
+        # only a few Python integer increments and one done-buffer reduction
+        # per PPO iteration.
+        self.throughput_benchmark_metrics = bool(self.config.get("throughput_benchmark_metrics", False))
+        # RQ1 accounting is separately opt-in because it records a full
+        # motion-level occupancy vector and fails on any optimizer skip.
+        self.rq1_training_metrics = bool(self.config.get("rq1_training_metrics", False))
 
         self.entropy_coef = self.config.entropy_coef
         self.desired_kl = self.config.desired_kl
@@ -740,9 +745,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
         self.adaptive_lr_min = self.config.get("adaptive_lr_min", 1e-5)
         self.adaptive_lr_max = self.config.get("adaptive_lr_max", 1e-2)
         self.sync_advantage_normalization = self.config.get("sync_advantage_normalization", True)
-        self.multi_critic_advantage_weights = self.config.get(
-            "multi_critic_advantage_weights", None
-        )
+        self.multi_critic_advantage_weights = self.config.get("multi_critic_advantage_weights", None)
 
         self.compute_imgaug_bc_loss = self.config.get("compute_imgaug_bc_loss", False)
         self.imgaug_bc_loss_coef = self.config.get("imgaug_bc_loss_coef", 1.0)
@@ -763,9 +766,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
             obs_shape = (obs_dim,) if isinstance(obs_dim, int) else tuple(obs_dim)
             if obs_key in ["vision_obs", "camera_rgb"]:
                 # Vision observations are stored as [H, W, C] image, not flattened
-                self.storage.register_key(
-                    obs_key, shape=tuple(self.camera_resolution), dtype=torch.float
-                )
+                self.storage.register_key(obs_key, shape=tuple(self.camera_resolution), dtype=torch.float)
             else:
                 self.storage.register_key(obs_key, shape=obs_shape, dtype=torch.float)
             if obs_key == "critic_obs" and self.use_symmetry:
@@ -784,18 +785,14 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
         self.storage.register_key("action_sigma", shape=(self.num_act,), dtype=torch.float)
 
         if self.learn_normalized_actions:
-            self.storage.register_key(
-                "normalized_actions", shape=(self.num_act,), dtype=torch.float
-            )
+            self.storage.register_key("normalized_actions", shape=(self.num_act,), dtype=torch.float)
 
         self.state.rewbuffer = deque(maxlen=100)
         self.state.lenbuffer = deque(maxlen=100)
         self.cur_reward_sum = torch.zeros(
             self.env.num_envs, self.num_critics, dtype=torch.float, device=self.accelerator.device
         )
-        self.cur_episode_length = torch.zeros(
-            self.env.num_envs, dtype=torch.float, device=self.accelerator.device
-        )
+        self.cur_episode_length = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.accelerator.device)
         self.state.cur_reward_sum = self.cur_reward_sum
         self.state.cur_episode_length = self.cur_episode_length
         self.ep_infos = []
@@ -875,9 +872,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
         value_chunks = []
         for i in range(len(attnmask_chunks)):
             chunk_obs_dict = {key: obs_chunks[key][i] for key in obs_chunks}
-            chunk_values = value_model.evaluate(
-                obs_dict=chunk_obs_dict, episode_attnmask=attnmask_chunks[i]
-            )
+            chunk_values = value_model.evaluate(obs_dict=chunk_obs_dict, episode_attnmask=attnmask_chunks[i])
             value_chunks.append(chunk_values)
         return torch.cat(value_chunks, dim=0)
 
@@ -932,10 +927,16 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
                         continue
                     self.storage.update_key(key, value)
 
+                # Exposure belongs to the motion that generated this action,
+                # before a terminal step can resample the command.
+                rq1_pre_step_motion_ids = None
+                if self.rq1_training_metrics:
+                    rq1_pre_step_motion_ids = self.env.motion_ids.detach().clone()
+
                 # Step the environment
                 if self.use_symmetry:
-                    obs_dict, rewards, dones, infos, termination_ids, termination_observations = (
-                        self.env.step(policy_state_dict)
+                    obs_dict, rewards, dones, infos, termination_ids, termination_observations = self.env.step(
+                        policy_state_dict
                     )
                 else:
                     obs_dict, rewards, dones, infos = self.env.step(policy_state_dict)
@@ -943,11 +944,18 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
                     obs_dict[obs_key] = obs_dict[obs_key].to(device)
                     if obs_key == "critic_obs" and self.use_symmetry:
                         next_critic_obs = obs_dict[obs_key].clone()
-                        next_critic_obs[termination_ids.to(device)] = termination_observations.to(
-                            device
-                        )
+                        next_critic_obs[termination_ids.to(device)] = termination_observations.to(device)
                         self.storage.update_key("next_" + obs_key, next_critic_obs)
                 rewards, dones = rewards.to(device), dones.to(device)
+                if self.rq1_training_metrics:
+                    accounting = getattr(self.env, "_lace_rq1_accounting", None)
+                    if accounting is None:
+                        raise RuntimeError("RQ1 runtime accounting was not installed")
+                    accounting.record_control_step(
+                        rq1_pre_step_motion_ids,
+                        dones,
+                        infos["time_outs"],
+                    )
                 rewards_stored = rewards.clone()
                 if rewards.dim() == 1:
                     rewards_stored = rewards_stored.unsqueeze(1)
@@ -983,16 +991,15 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
                         obs_value = self.storage.query_key(key).to(device)
                         obs_value = torch.cat([obs_value, obs_dict[key].unsqueeze(0)], dim=0)
                         all_obs_dict[key] = obs_value.transpose(0, 1)
-                all_values = self._chunked_value_evaluate(
-                    value_model, all_obs_dict, episode_attnmask
-                ).transpose(0, 1)
+                all_values = self._chunked_value_evaluate(value_model, all_obs_dict, episode_attnmask).transpose(
+                    0, 1
+                )
                 values, last_values = all_values[:-1], all_values[-1]
 
                 rewards = self.storage.query_key("rewards")
 
                 new_rewards = (
-                    rewards.to(device)
-                    + self.gamma * self.storage.query_key("time_outs").to(device) * values
+                    rewards.to(device) + self.gamma * self.storage.query_key("time_outs").to(device) * values
                 )
                 self.storage.batch_update_data("rewards", new_rewards)
 
@@ -1052,9 +1059,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
         Returns:
             Flipped action tensor with the same shape.
         """
-        flipped_actions = (
-            actions[:, :, self.env.flip_action_info[:, 0]] * self.env.flip_action_info[:, 1]
-        )
+        flipped_actions = actions[:, :, self.env.flip_action_info[:, 0]] * self.env.flip_action_info[:, 1]
         return flipped_actions
 
     def _process_env_step(self, rewards, dones, infos):  # noqa: ARG002
@@ -1137,9 +1142,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
         """
         device = self.accelerator.device
 
-        all_obs_dict = {
-            key: self.storage.query_key(key).transpose(0, 1).to(device) for key in obs_keys
-        }
+        all_obs_dict = {key: self.storage.query_key(key).transpose(0, 1).to(device) for key in obs_keys}
         actions = self.storage.actions.transpose(0, 1).to(device)
         logprobs = self.storage.actions_log_prob.transpose(0, 1).squeeze(-1).to(device)
         values = self.storage.values.transpose(0, 1).to(device)  # noqa: PD011
@@ -1156,9 +1159,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
                 key: torch.cat((all_obs_dict[key], self._flip_obs(all_obs_dict[key], key)), dim=0)
                 for key in all_obs_dict.keys()  # noqa: SIM118
             }
-            next_critic_obs = torch.cat(
-                (next_critic_obs, self._flip_obs(next_critic_obs, "critic_obs")), dim=0
-            )
+            next_critic_obs = torch.cat((next_critic_obs, self._flip_obs(next_critic_obs, "critic_obs")), dim=0)
             actions = torch.cat((actions, self._flip_actions(actions)), dim=0)
             logprobs = logprobs.repeat(2, 1)
             values = values.repeat(2, 1, 1)
@@ -1176,9 +1177,9 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
                 true_indices = torch.where(padding_mask[i])[0]
                 if len(true_indices) > 0:
                     padding_mask[i, true_indices[0]] = False
-                    padding_mask_p1[
-                        i, true_indices[0] : min(true_indices[0] + 2, padding_mask_p1.shape[1])
-                    ] = False
+                    padding_mask_p1[i, true_indices[0] : min(true_indices[0] + 2, padding_mask_p1.shape[1])] = (
+                        False
+                    )
             logprobs = torch.masked_fill(logprobs, padding_mask, INVALID_LOGPROB)
             values = torch.masked_fill(values, padding_mask_p1, 0)
         else:
@@ -1398,8 +1399,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
         ratio = torch.exp(logprobs_diff).unsqueeze(-1)
         if self.multi_critic_advantage_weights is not None:
             mb_advantage = (
-                mb_advantage
-                * torch.tensor(self.multi_critic_advantage_weights).to(mb_advantage)[None, None, :]
+                mb_advantage * torch.tensor(self.multi_critic_advantage_weights).to(mb_advantage)[None, None, :]
             )
         pg_losses = -mb_advantage * ratio
         pg_losses2 = -mb_advantage * torch.clamp(ratio, 1.0 - args.cliprange, 1.0 + args.cliprange)
@@ -1414,9 +1414,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
                 torch.sum(
                     torch.square(
                         self._flip_actions(self.policy_model(mb_obs_dict))
-                        - self.policy_model(
-                            {"actor_obs": self._flip_obs(mb_obs_dict["actor_obs"], "actor_obs")}
-                        )
+                        - self.policy_model({"actor_obs": self._flip_obs(mb_obs_dict["actor_obs"], "actor_obs")})
                     ),
                     dim=-1,
                 )
@@ -1444,12 +1442,8 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
 
         if torch.isnan(loss) or torch.isinf(loss):
             print(f"Invalid loss detected: {loss}")  # noqa: T201
-            print(
-                f"Ratio stats: min={ratio.min()}, max={ratio.max()}, mean={ratio.mean()}"
-            )  # noqa: T201
-            print(
-                f"Advantage stats: min={mb_advantage.min()}, max={mb_advantage.max()}"
-            )  # noqa: T201
+            print(f"Ratio stats: min={ratio.min()}, max={ratio.max()}, mean={ratio.mean()}")  # noqa: T201
+            print(f"Advantage stats: min={mb_advantage.min()}, max={mb_advantage.max()}")  # noqa: T201
             # Skip this update or use previous valid parameters
 
         loss_dict = {
@@ -1519,9 +1513,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
         pg_loss = loss_dict["ppo_loss_dict"]["pg_loss"]
         vf_loss = loss_dict["ppo_loss_dict"]["vf_loss"]
         entropy_loss = loss_dict["ppo_loss_dict"]["entropy_loss"]
-        weighted_ppo_loss = loss_dict["ppo_loss_dict"]["ppo_loss"] * self.config.get(
-            "ppo_loss_coef", 1.0
-        )
+        weighted_ppo_loss = loss_dict["ppo_loss_dict"]["ppo_loss"] * self.config.get("ppo_loss_coef", 1.0)
         ratio = loss_dict["ppo_loss_dict"]["ratio"]
         vf_clipfrac = loss_dict["ppo_loss_dict"]["vf_clipfrac"]
 
@@ -1540,22 +1532,20 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
                 self.config.imgaug_bc_loss_coef * imgaug_bc_loss
             )
         if self.use_symmetry:
-            self.actor_sym_loss_stats[ppo_epoch_idx, minibatch_idx, microbatch_idx] = loss_dict[
-                "ppo_loss_dict"
-            ]["actor_sym_loss"]
-            self.critic_sym_loss_stats[ppo_epoch_idx, minibatch_idx, microbatch_idx] = loss_dict[
-                "ppo_loss_dict"
-            ]["critic_sym_loss"]
-            self.estimation_loss_stats[ppo_epoch_idx, minibatch_idx, microbatch_idx] = loss_dict[
-                "ppo_loss_dict"
-            ]["estimation_loss"]
-            self.swap_loss_stats[ppo_epoch_idx, minibatch_idx, microbatch_idx] = loss_dict[
-                "ppo_loss_dict"
-            ]["swap_loss"]
+            self.actor_sym_loss_stats[ppo_epoch_idx, minibatch_idx, microbatch_idx] = loss_dict["ppo_loss_dict"][
+                "actor_sym_loss"
+            ]
+            self.critic_sym_loss_stats[ppo_epoch_idx, minibatch_idx, microbatch_idx] = loss_dict["ppo_loss_dict"][
+                "critic_sym_loss"
+            ]
+            self.estimation_loss_stats[ppo_epoch_idx, minibatch_idx, microbatch_idx] = loss_dict["ppo_loss_dict"][
+                "estimation_loss"
+            ]
+            self.swap_loss_stats[ppo_epoch_idx, minibatch_idx, microbatch_idx] = loss_dict["ppo_loss_dict"][
+                "swap_loss"
+            ]
         self.entropy_stats[ppo_epoch_idx, minibatch_idx, microbatch_idx] = -entropy_loss
-        self.weighted_ppo_loss_stats[ppo_epoch_idx, minibatch_idx, microbatch_idx] = (
-            weighted_ppo_loss
-        )
+        self.weighted_ppo_loss_stats[ppo_epoch_idx, minibatch_idx, microbatch_idx] = weighted_ppo_loss
         self.vf_clipfrac_stats[ppo_epoch_idx, minibatch_idx, microbatch_idx] = vf_clipfrac
         self.ratio_stats[ppo_epoch_idx, minibatch_idx, microbatch_idx] = ratio.mean()
         self.advantage_mean_stats[ppo_epoch_idx, minibatch_idx, microbatch_idx] = mb_rollout_data[
@@ -1577,20 +1567,14 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
         approxkl_avg = self.accelerator.gather_for_metrics(self.approxkl_stats).mean().item()
 
         metrics["policy/approxkl_avg"] = approxkl_avg
-        metrics["policy/clipfrac_avg"] = (
-            self.accelerator.gather_for_metrics(self.pg_clipfrac_stats).mean().item()
-        )
-        metrics["loss/policy_avg"] = (
-            self.accelerator.gather_for_metrics(self.pg_loss_stats).mean().item()
-        )
+        metrics["policy/clipfrac_avg"] = self.accelerator.gather_for_metrics(self.pg_clipfrac_stats).mean().item()
+        metrics["loss/policy_avg"] = self.accelerator.gather_for_metrics(self.pg_loss_stats).mean().item()
         if self.compute_imgaug_bc_loss:
             metrics["loss/imgaug_bc_avg"] = (
                 self.accelerator.gather_for_metrics(self.imgaug_bc_loss_stats).mean().item()
             )
             metrics["loss/weighted_imgaug_bc_avg"] = (
-                self.accelerator.gather_for_metrics(self.weighted_imgaug_bc_loss_stats)
-                .mean()
-                .item()
+                self.accelerator.gather_for_metrics(self.weighted_imgaug_bc_loss_stats).mean().item()
             )
         if self.use_symmetry:
             metrics["loss/actor_sym"] = (
@@ -1602,31 +1586,19 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
             metrics["loss/estimation"] = (
                 self.accelerator.gather_for_metrics(self.estimation_loss_stats).mean().item()
             )
-            metrics["loss/swap"] = (
-                self.accelerator.gather_for_metrics(self.swap_loss_stats).mean().item()
-            )
-        metrics["loss/value_avg"] = (
-            self.accelerator.gather_for_metrics(self.vf_loss_stats).mean().item()
-        )
-        metrics["loss/entropy_avg"] = (
-            self.accelerator.gather_for_metrics(self.entropy_stats).mean().item()
-        )
+            metrics["loss/swap"] = self.accelerator.gather_for_metrics(self.swap_loss_stats).mean().item()
+        metrics["loss/value_avg"] = self.accelerator.gather_for_metrics(self.vf_loss_stats).mean().item()
+        metrics["loss/entropy_avg"] = self.accelerator.gather_for_metrics(self.entropy_stats).mean().item()
         metrics["loss/weighted_ppo_loss_avg"] = (
             self.accelerator.gather_for_metrics(self.weighted_ppo_loss_stats).mean().item()
         )
-        metrics["val/clipfrac_avg"] = (
-            self.accelerator.gather_for_metrics(self.vf_clipfrac_stats).mean().item()
-        )
+        metrics["val/clipfrac_avg"] = self.accelerator.gather_for_metrics(self.vf_clipfrac_stats).mean().item()
         metrics["val/ratio"] = self.accelerator.gather_for_metrics(self.ratio_stats).mean().item()
-        metrics["val/ratio_var"] = (
-            self.accelerator.gather_for_metrics(self.ratio_stats).var().item()
-        )
+        metrics["val/ratio_var"] = self.accelerator.gather_for_metrics(self.ratio_stats).var().item()
         metrics["val/advantage_mean"] = (
             self.accelerator.gather_for_metrics(self.advantage_mean_stats).mean().item()
         )
-        metrics["val/advantage_std"] = (
-            self.accelerator.gather_for_metrics(self.advantage_std_stats).mean().item()
-        )
+        metrics["val/advantage_std"] = self.accelerator.gather_for_metrics(self.advantage_std_stats).mean().item()
         metrics["objective/entropy"] = metrics["loss/entropy_avg"]
 
         return metrics
@@ -1696,6 +1668,12 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
 
         for batch_idx in range(1, args.num_total_batches + 1):
             batch_start_time = time.time()
+            benchmark_optimizer_step_attempts = 0
+            benchmark_optimizer_nonfinite_skips = 0
+            benchmark_accelerator_step_skips = 0
+            benchmark_sync_boundaries = 0
+            benchmark_synchronized_parameter_updates = 0
+            benchmark_synchronized_update_skips = 0
             self.state.episode += 1 * args.batch_size
             data = next(iter_dataloader)  # noqa: F841
 
@@ -1734,9 +1712,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
                     minibatch_idx = 0
                     if self.ppo_shuffle_every_epoch or ppo_epoch_idx == 0:
                         b_inds = torch.randperm(args.local_batch_size, device=device)
-                    for mini_batch_start in range(
-                        0, args.local_batch_size, args.local_mini_batch_size
-                    ):
+                    for mini_batch_start in range(0, args.local_batch_size, args.local_mini_batch_size):
                         mini_batch_end = mini_batch_start + args.local_mini_batch_size
                         mini_batch_inds = b_inds[mini_batch_start:mini_batch_end]
                         microbatch_idx = 0
@@ -1748,34 +1724,22 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
                             ):
                                 with accelerator.accumulate(model):
                                     with common.Timer("get_mb_rollout_data"):
-                                        micro_batch_end = (
-                                            micro_batch_start + args.per_device_train_batch_size
-                                        )
-                                        micro_batch_inds = mini_batch_inds[
-                                            micro_batch_start:micro_batch_end
-                                        ]
-                                        mb_rollout_data = self._get_mb_rollout_data(
-                                            rollout_data, micro_batch_inds
-                                        )
+                                        micro_batch_end = micro_batch_start + args.per_device_train_batch_size
+                                        micro_batch_inds = mini_batch_inds[micro_batch_start:micro_batch_end]
+                                        mb_rollout_data = self._get_mb_rollout_data(rollout_data, micro_batch_inds)
 
                                     if self.use_symmetry:
-                                        estimation_loss, swap_loss = (
-                                            self.policy_model.update_estimator(
-                                                mb_rollout_data["mb_obs_dict"]["actor_obs"],
-                                                mb_rollout_data["mb_next_critic_obs"],
-                                                self.args.learning_rate,
-                                            )
+                                        estimation_loss, swap_loss = self.policy_model.update_estimator(
+                                            mb_rollout_data["mb_obs_dict"]["actor_obs"],
+                                            mb_rollout_data["mb_next_critic_obs"],
+                                            self.args.learning_rate,
                                         )
 
                                     with common.Timer("forward_model"):
-                                        forward_results = self._forward_model(
-                                            model, mb_rollout_data
-                                        )
+                                        forward_results = self._forward_model(model, mb_rollout_data)
 
                                     with common.Timer("compute_loss"):
-                                        loss_dict = self._compute_loss(
-                                            forward_results, mb_rollout_data
-                                        )
+                                        loss_dict = self._compute_loss(forward_results, mb_rollout_data)
 
                                     with common.Timer("backward"):
                                         accelerator.backward(loss_dict["loss"])
@@ -1783,18 +1747,28 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
                                     with common.Timer("gradient_clipping"):
                                         grad_norm = self._gradient_clipping()
 
+                                    is_sync_boundary = bool(accelerator.sync_gradients)
+                                    benchmark_sync_boundaries += int(is_sync_boundary)
                                     if grad_norm is not None:
+                                        benchmark_optimizer_step_attempts += 1
                                         with common.Timer("optimizer_step"):
                                             optimizer.step()
+                                        if is_sync_boundary:
+                                            if accelerator.optimizer_step_was_skipped:
+                                                benchmark_accelerator_step_skips += 1
+                                                benchmark_synchronized_update_skips += 1
+                                            else:
+                                                benchmark_synchronized_parameter_updates += 1
                                     else:
                                         print("NaN in gradient! Skipped!!!!")  # noqa: T201
+                                        benchmark_optimizer_nonfinite_skips += 1
+                                        if is_sync_boundary:
+                                            benchmark_synchronized_update_skips += 1
 
                                     optimizer.zero_grad()
                                     with torch.no_grad():
                                         if self.use_symmetry:
-                                            loss_dict["ppo_loss_dict"][
-                                                "estimation_loss"
-                                            ] = estimation_loss
+                                            loss_dict["ppo_loss_dict"]["estimation_loss"] = estimation_loss
                                             loss_dict["ppo_loss_dict"]["swap_loss"] = swap_loss
                                         with common.Timer("update_stats_buffer"):
                                             self._update_stats_buffer(
@@ -1821,6 +1795,19 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
             with common.Timer("sync_adaptive_sampling"):
                 self.sync_adaptive_sampling()
 
+            if self.rq1_training_metrics:
+                accounting = getattr(self.env, "_lace_rq1_accounting", None)
+                if accounting is None:
+                    raise RuntimeError("RQ1 runtime accounting disappeared during training")
+                accounting.record_optimizer_iteration(
+                    optimizer_step_attempts=benchmark_optimizer_step_attempts,
+                    optimizer_nonfinite_skips=benchmark_optimizer_nonfinite_skips,
+                    optimizer_accelerator_skips=benchmark_accelerator_step_skips,
+                    sync_boundaries=benchmark_sync_boundaries,
+                    successful_parameter_updates=benchmark_synchronized_parameter_updates,
+                    synchronized_update_skips=benchmark_synchronized_update_skips,
+                )
+
             # print(self.accelerator.process_index, self.model.module.policy.running_mean_std.running_mean.mean(), self.model.module.policy.running_mean_std.running_var.mean(), self.model.module.policy.running_mean_std.count)  # noqa: E501
             # print(self.accelerator.process_index, self.policy_model.running_mean_std.running_mean)
             # print('--------------------------------')
@@ -1846,17 +1833,13 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
                 metrics["eps"] = eps
                 metrics["objective/rewards"] = (
                     self.accelerator.gather_for_metrics(
-                        torch.tensor(np.mean(np.array(self.state.rewbuffer).sum(axis=-1))).to(
-                            device
-                        )
+                        torch.tensor(np.mean(np.array(self.state.rewbuffer).sum(axis=-1))).to(device)
                     )
                     .mean()
                     .item()
                 )
                 metrics["objective/length"] = (
-                    self.accelerator.gather_for_metrics(
-                        torch.tensor(np.mean(self.state.lenbuffer)).to(device)
-                    )
+                    self.accelerator.gather_for_metrics(torch.tensor(np.mean(self.state.lenbuffer)).to(device))
                     .mean()
                     .item()
                 )
@@ -1865,9 +1848,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
                 env_log_dict = self.episode_env_tensors.mean_and_clear()
 
                 ep_infos = process_ep_infos(self.ep_infos, device)
-                self.state.tot_timesteps += (
-                    self.num_steps_per_env * self.env.num_envs * accelerator.num_processes
-                )
+                self.state.tot_timesteps += self.num_steps_per_env * self.env.num_envs * accelerator.num_processes
                 self.state.tot_time += collection_time + learn_time
                 self.state.epoch = self.state.episode / self.train_dataset_len  # used by self.log
                 self.state.global_step += 1
@@ -1899,6 +1880,66 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
                     metrics["Policy/mean_noise_std"] = self.policy_model.std.mean().item()
                 else:
                     metrics["Policy/mean_noise_std"] = 0.0
+                if self.throughput_benchmark_metrics:
+                    from gear_sonic.research.lace.throughput import (
+                        resident_motion_identity,
+                    )
+
+                    done_buffer = self.storage.query_key("dones").bool()
+                    timeout_buffer = self.storage.query_key("time_outs").bool()
+                    # Isaac exposes done = terminated | timeout.  Give timeout
+                    # precedence so the two reported reset causes are exactly
+                    # disjoint even if an upstream environment raises both.
+                    timed_out = done_buffer & timeout_buffer
+                    terminated = done_buffer & ~timeout_buffer
+                    expected_optimizer_attempts = (
+                        args.num_ppo_epochs * args.num_mini_batches * args.num_micro_batches
+                    )
+                    gradient_accumulation_steps = int(args.gradient_accumulation_steps)
+                    if expected_optimizer_attempts % gradient_accumulation_steps:
+                        raise RuntimeError(
+                            "throughput benchmark requires optimizer attempts to divide "
+                            "exactly by gradient_accumulation_steps"
+                        )
+                    motion_lib = getattr(self.env, "_motion_lib", None)
+                    if motion_lib is None:
+                        raise RuntimeError("throughput benchmark requires a resident motion library")
+                    resident_identity = resident_motion_identity(
+                        tuple(str(key) for key in motion_lib.curr_motion_keys)
+                    )
+                    resident_universe_motion_count = int(motion_lib._num_unique_motions)
+                    resident_all_motions_loaded = bool(motion_lib.all_motions_loaded)
+                    terrain_type = str(self.env.config.get("terrain_type", ""))
+                    metrics.update(
+                        {
+                            "benchmark/optimizer_step_attempts": (benchmark_optimizer_step_attempts),
+                            "benchmark/optimizer_nonfinite_skips": (benchmark_optimizer_nonfinite_skips),
+                            "benchmark/optimizer_accelerator_skips": (benchmark_accelerator_step_skips),
+                            "benchmark/optimizer_expected_attempts": (expected_optimizer_attempts),
+                            "benchmark/sync_boundaries": benchmark_sync_boundaries,
+                            "benchmark/synchronized_parameter_updates": (benchmark_synchronized_parameter_updates),
+                            "benchmark/synchronized_update_skips": (benchmark_synchronized_update_skips),
+                            "benchmark/synchronized_expected_updates": (
+                                expected_optimizer_attempts // gradient_accumulation_steps
+                            ),
+                            "benchmark/reset_count": int(done_buffer.sum().item()),
+                            "benchmark/termination_count": int(terminated.sum().item()),
+                            "benchmark/timeout_count": int(timed_out.sum().item()),
+                            "benchmark/resident_motion_count": resident_identity["resident_motion_count"],
+                            "benchmark/resident_unique_motion_count": resident_identity[
+                                "resident_unique_motion_count"
+                            ],
+                            "benchmark/resident_universe_motion_count": (resident_universe_motion_count),
+                            "benchmark/resident_all_motions_loaded": (resident_all_motions_loaded),
+                            "benchmark/resident_motion_order_sha256": resident_identity[
+                                "resident_motion_order_sha256"
+                            ],
+                            "benchmark/resident_motion_set_sha256": resident_identity[
+                                "resident_motion_set_sha256"
+                            ],
+                            "benchmark/terrain_type": terrain_type,
+                        }
+                    )
                 self.append_to_log_dict(log_dict)
                 metrics.update({f"Env/{k}": v for k, v in env_log_dict.items()})
                 metrics.update(env_log_dict)
@@ -1938,36 +1979,25 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
         """
         sync_running_mean_std_freq = self.env.config.get("sync_running_mean_std_freq", 1)
         if self.state.global_step < 200 or (
-            sync_running_mean_std_freq > 0
-            and (self.state.global_step + 1) % sync_running_mean_std_freq == 0
+            sync_running_mean_std_freq > 0 and (self.state.global_step + 1) % sync_running_mean_std_freq == 0
         ):
-            if (
-                hasattr(self.policy_model, "use_running_mean_std")
-                and self.policy_model.use_running_mean_std
-            ):
+            if hasattr(self.policy_model, "use_running_mean_std") and self.policy_model.use_running_mean_std:
                 # print(f"Syncing policy running mean std at global step {self.state.global_step}")
                 self.accelerator.wait_for_everyone()
                 self.policy_model.running_mean_std.sync_across_gpus(self.accelerator)
-            if (
-                hasattr(self.value_model, "use_running_mean_std")
-                and self.value_model.use_running_mean_std
-            ):
+            if hasattr(self.value_model, "use_running_mean_std") and self.value_model.use_running_mean_std:
                 self.accelerator.wait_for_everyone()
                 self.value_model.running_mean_std.sync_across_gpus(self.accelerator)
 
     def sync_adaptive_sampling(self):
         """Synchronize adaptive motion sampling weights across GPU processes."""
-        sync_adaptive_sampling_all_gpus_freq = self.env.config.get(
-            "sync_adaptive_sampling_all_gpus_freq", 200
-        )
+        sync_adaptive_sampling_all_gpus_freq = self.env.config.get("sync_adaptive_sampling_all_gpus_freq", 200)
         sync_across_gpus = (
             sync_adaptive_sampling_all_gpus_freq > 0
             and (self.state.global_step + 1) % sync_adaptive_sampling_all_gpus_freq == 0
         )
         if hasattr(self.env, "sync_and_compute_adaptive_sampling"):
-            self.env.sync_and_compute_adaptive_sampling(
-                self.accelerator, sync_across_gpus=sync_across_gpus
-            )
+            self.env.sync_and_compute_adaptive_sampling(self.accelerator, sync_across_gpus=sync_across_gpus)
 
     def append_to_log_dict(self, log_dict):
         """Hook for subclasses to inject additional entries into the per-iteration log dict."""
@@ -2042,9 +2072,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
 
         # Check for NaN/Inf in gradients
         for name, param in model.named_parameters():
-            if param.grad is not None and (
-                torch.isnan(param.grad).any() or torch.isinf(param.grad).any()
-            ):
+            if param.grad is not None and (torch.isnan(param.grad).any() or torch.isinf(param.grad).any()):
                 print(  # noqa: T201
                     f"[Rank {self.accelerator.process_index}] NaN/Inf grad in {name}, norm={param.grad.norm():.3e}"
                 )
@@ -2130,9 +2158,9 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
                 advantages.std(dim=(0, 1), keepdim=True) + 1e-8
             )
             # ungather advantages
-            advantages = advantages.reshape(
-                self.accelerator.num_processes, -1, *advantages.shape[1:]
-            )[self.accelerator.process_index].to(device)
+            advantages = advantages.reshape(self.accelerator.num_processes, -1, *advantages.shape[1:])[
+                self.accelerator.process_index
+            ].to(device)
         else:
             advantages = (advantages - advantages.mean(dim=(0, 1), keepdim=True)) / (
                 advantages.std(dim=(0, 1), keepdim=True) + 1e-8
@@ -2177,25 +2205,73 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
             The loaded checkpoint dict.
         """
         print(f"Loading checkpoint from {checkpoint_path}")  # noqa: T201
-        checkpoint = torch.load(
-            checkpoint_path, map_location=self.accelerator.device, weights_only=False
-        )
+        checkpoint = torch.load(checkpoint_path, map_location=self.accelerator.device, weights_only=False)
 
         # Load model state
         model = self.accelerator.unwrap_model(self.model)
-        if "actor_model_state_dict" in checkpoint:
-            model.policy.load_state_dict(checkpoint["actor_model_state_dict"])
-        elif "policy_state_dict" in checkpoint:
-            model.policy.load_state_dict(checkpoint["policy_state_dict"], strict=False)
-        if "value_state_dict" in checkpoint and model.value_model is not None:
-            model.value_model.load_state_dict(checkpoint["value_state_dict"])
+        if self.rq1_training_metrics:
+            from gear_sonic.research.lace.rq1_training import (
+                RQ1TrainingError,
+                file_sha256,
+                strict_load_rq1_state_dict,
+            )
+            from gear_sonic.research.lace.schema import canonical_sha256
+
+            if resume:
+                raise RQ1TrainingError("RQ1 checkpoint loading requires resume=False")
+            policy_keys = [key for key in ("actor_model_state_dict", "policy_state_dict") if key in checkpoint]
+            if len(policy_keys) != 1:
+                raise RQ1TrainingError("RQ1 checkpoint must contain exactly one policy state-dict key")
+            policy_source_key = policy_keys[0]
+            policy_checkpoint, policy_post = strict_load_rq1_state_dict(
+                model.policy,
+                checkpoint[policy_source_key],
+                label="policy",
+            )
+            if model.value_model is None or checkpoint.get("value_state_dict") is None:
+                raise RQ1TrainingError("RQ1 checkpoint must contain a value-model state dict")
+            value_checkpoint, value_post = strict_load_rq1_state_dict(
+                model.value_model,
+                checkpoint["value_state_dict"],
+                label="value",
+            )
+            raw_optimizer = getattr(self.optimizer, "optimizer", self.optimizer)
+            optimizer_state_entries = len(raw_optimizer.state)
+            if optimizer_state_entries != 0:
+                raise RQ1TrainingError("RQ1 optimizer was not freshly initialized")
+            initialization_report = {
+                "kind": "lace_rq1_model_only_initialization_report",
+                "schema_version": 1,
+                "checkpoint_path": str(Path(checkpoint_path).resolve()),
+                "checkpoint_sha256": file_sha256(checkpoint_path),
+                "resume": False,
+                "policy_source_key": policy_source_key,
+                "policy_strict": True,
+                "policy_checkpoint_state": policy_checkpoint,
+                "policy_post_load_state": policy_post,
+                "value_source_key": "value_state_dict",
+                "value_strict": True,
+                "value_checkpoint_state": value_checkpoint,
+                "value_post_load_state": value_post,
+                "optimizer_state_restored": False,
+                "lr_scheduler_state_restored": False,
+                "environment_state_restored": False,
+                "trainer_state_restored": False,
+                "optimizer_state_entry_count_before_training": optimizer_state_entries,
+            }
+            initialization_report["initialization_report_sha256"] = canonical_sha256(initialization_report)
+            self.env._lace_rq1_initialization_report = initialization_report
+        else:
+            if "actor_model_state_dict" in checkpoint:
+                model.policy.load_state_dict(checkpoint["actor_model_state_dict"])
+            elif "policy_state_dict" in checkpoint:
+                model.policy.load_state_dict(checkpoint["policy_state_dict"], strict=False)
+            if "value_state_dict" in checkpoint and model.value_model is not None:
+                model.value_model.load_state_dict(checkpoint["value_state_dict"])
 
         if resume:
             # Load optimizer state
-            if (
-                "optimizer_state_dict" in checkpoint
-                and checkpoint["optimizer_state_dict"] is not None
-            ):
+            if "optimizer_state_dict" in checkpoint and checkpoint["optimizer_state_dict"] is not None:
                 self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
 
                 # Update learning rate if available
@@ -2205,10 +2281,7 @@ class TRLPPOTrainer(PPOTrainer):  # noqa: F405
                         param_group["lr"] = self.args.learning_rate
 
             # Load learning rate scheduler state
-            if (
-                "lr_scheduler_state_dict" in checkpoint
-                and checkpoint["lr_scheduler_state_dict"] is not None
-            ):
+            if "lr_scheduler_state_dict" in checkpoint and checkpoint["lr_scheduler_state_dict"] is not None:
                 self.lr_scheduler.load_state_dict(checkpoint["lr_scheduler_state_dict"])
 
             if "env_state_dict" in checkpoint:
