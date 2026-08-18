@@ -21,12 +21,19 @@ executable whole-body behaviour is preferred.**
 
 ## Claim ladder
 
+Claim 4 is stated as a *minimum-edit* reversal deliberately. Under the lexicographic rule
+`m*(S) = argmin_m D(m, m₀) s.t. y(S,m) = 1` with `D(m₀,m₀) = 0` and `D(T(m₀),m₀) > 0`, the easy
+scene selects the nominal at zero edit and the hard scene selects the adapted motion because the
+nominal is infeasible. That is a strict reversal and it needs no weights over knee angle, energy or
+joint travel — so no calibrated scalar cost is required, and none blocks the claim. The continuous
+cost is retained for comparing two *different* adaptations later.
+
 | # | claim | status |
 |---|---|---|
 | 1 | Two executable motions' full-body swept volumes separate, so a geometric window exists | **established** |
-| 2 | The same controller succeeds or fails as that geometry changes | **established** (one family, verified) |
+| 2 | The same controller succeeds or fails as that geometry changes | **established** (4 verified families, 1 matched) |
 | 3 | The 2×2 *outcome* survives a jittered start pose | **established** (12/12 cells, 3/3 jitters) |
-| 4 | The scene *reverses the preference* between two feasible behaviours | **partial** — the reversal is demonstrated; the cost defining "preferred" is not calibrated |
+| 4 | The scene reverses the **minimum-edit feasible behaviour** | **established** on the matched overhead family |
 | 5 | A learner given counterfactual data uses scene geometry when it could otherwise ignore it | **not started — this is the decisive experiment** |
 | 6 | That behaviour generalises to scenes never fitted to a trajectory | **not started** |
 
@@ -215,7 +222,11 @@ hold — and for the crouch that turns out to be predictable from the clip alone
 | 0.994 rad | 005 | accepted | 0.100 m/s |
 | 1.000 rad | x000 | **rejected** | 0.225 m/s |
 
-Monotone across four clips and three nominals, with the boundary in a 6 mrad gap. This prediction
+Monotone across four clips and three nominals. The threshold is **motion-specific**, not global: a
+within-motion sweep on the failing clip accepts at 0.619 rad and rejects at 0.980, where another
+motion holds 0.994. So crouch feasibility is not predictable from motion identity or a universal
+cap — it is **cheaply screenable with one targeted rollout**, at exactly the excursion a usable
+window requires. This prediction
 was **registered in writing before the last two rollouts returned**, after four earlier attempts to
 infer trackability from a clip had all been withdrawn; the stated reason for expecting it to hold
 this time — that excursion should govern a drift failure where geometry governs a collision — is

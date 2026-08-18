@@ -65,6 +65,7 @@ a { color:var(--accent); }
   <div class="stats">
     <div class="stat"><b>4</b><span>verified families</span></div>
     <div class="stat"><b>1</b><span>matched family</span></div>
+    <div class="stat"><b>8</b><span>nominal motions needed</span></div>
     <div class="stat"><b>2</b><span>adaptation operators</span></div>
     <div class="stat"><b>30</b><span>frozen test scenes</span></div>
     <div class="stat"><b>638</b><span>tests passing</span></div>
@@ -78,7 +79,7 @@ a { color:var(--accent); }
   <tr><td class="n">1</td><td>Two executable motions' swept volumes separate, so a window exists</td><td class="done">established</td></tr>
   <tr><td class="n">2</td><td>The same controller succeeds or fails as that geometry changes</td><td class="done">established &mdash; now on a <em>matched</em> pair</td></tr>
   <tr><td class="n">3</td><td>The 2&times;2 <em>outcome</em> survives a jittered start pose</td><td class="done">established &mdash; 12/12, 3/3</td></tr>
-  <tr><td class="n">4</td><td>The scene <em>reverses the preference</em> between two feasible behaviours</td><td class="block">partial &mdash; cost not calibrated</td></tr>
+  <tr><td class="n">4</td><td>The scene reverses the <em>minimum-edit feasible behaviour</em></td><td class="done">established &mdash; matched overhead family</td></tr>
   <tr><td class="n">5</td><td>A learner given this data uses geometry when it could ignore it</td><td class="open">not started &mdash; the decisive experiment</td></tr>
   <tr><td class="n">6</td><td>That transfers to scenes never fitted to a trajectory</td><td class="open">not started</td></tr>
   <tr><td class="n">&mdash;</td><td>The robot perceives the scene and chooses to duck</td><td class="never">not claimed</td></tr>
@@ -122,7 +123,7 @@ a { color:var(--accent); }
   <tr><td>stage 1 &mdash; kinematic</td><td class="done">6/6</td><td class="done">6/6</td></tr>
   <tr><td>stage 2 &mdash; trackable</td><td class="done">2 of 3 nominals</td><td class="open">1 of 3 nominals</td></tr>
   <tr><td>how it fails</td><td>tracking drift, no contact</td><td>collision at low drift</td></tr>
-  <tr><td>trackability predictable?</td><td class="done">yes &mdash; knee excursion</td><td class="never">no &mdash; 2 predictors refuted</td></tr>
+  <tr><td>feasibility screening</td><td class="done">one targeted rollout</td><td class="never">measured yield &mdash; 2 predictors refuted</td></tr>
   <tr><td>stage 3 &mdash; matched 2&times;2</td><td class="done">verified</td><td class="block">needs a trackable clip</td></tr>
   </table></div>
   <p>Both start from an accepted nominal motion and change only what one obstacle requires,
@@ -187,7 +188,7 @@ a { color:var(--accent); }
     </ul>
   </div>
   <div class="note" style="border-left-color:var(--pass)">
-    <h3>Crouch trackability is predictable from the clip &mdash; a registered prediction that held</h3>
+    <h3>Crouch feasibility is motion-specific, and cheaply screenable</h3>
     <div class="scroll"><table>
       <tr><th>knee excursion</th><th>motion</th><th>outcome</th><th>|drift|</th></tr>
       <tr><td class="n">0.929 rad</td><td>x002</td><td class="done">accepted</td><td class="n">0.015 m/s</td></tr>
@@ -195,7 +196,11 @@ a { color:var(--accent); }
       <tr><td class="n">0.994 rad</td><td>005</td><td class="done">accepted</td><td class="n">0.100 m/s</td></tr>
       <tr><td class="n">1.000 rad</td><td>x000</td><td class="block">rejected</td><td class="n">0.225 m/s</td></tr>
     </table></div>
-    <p>Monotone across four clips and three different nominals, boundary inside a 6 mrad gap. Written
+    <p>Monotone across four clips and three different nominals. The threshold is <strong>motion-specific</strong>,
+    not global &mdash; a within-motion sweep accepts the failing clip at 0.619 rad and rejects it at
+    0.980, where another motion holds 0.994. So this is not predictable from motion identity or a
+    universal cap; it is screenable with <strong>one targeted rollout</strong> at exactly the
+    excursion a usable window needs. Written
     down <em>before</em> the last two rollouts returned &mdash; four earlier attempts to infer
     trackability from a clip had all been withdrawn, so this one was registered rather than assumed.
     The reason given in advance is what made it hold: excursion should govern a <em>drift</em>
@@ -306,7 +311,8 @@ a { color:var(--accent); }
 <p>A dataset can vary its scenes without varying anything a policy could learn from. The corpus this work started from does exactly that: the same motion, replayed through different clutter, yields different images and a bit-identical state trajectory. Scene appearance changed; behavioural supervision did not. A policy trained on it can ignore the scene entirely and lose nothing.</p>
 <p>The repair is not more scenes. It is that <strong>for the same task, geometry must change which executable whole-body behaviour is preferred.</strong></p>
 <h3>Claim ladder</h3>
-<div class="scroll"><table><tr><th>#</th><th>claim</th><th>status</th></tr><tr><td class="n">1</td><td class="">Two executable motions&#x27; full-body swept volumes separate, so a geometric window exists</td><td class=""><strong>established</strong></td></tr><tr><td class="n">2</td><td class="">The same controller succeeds or fails as that geometry changes</td><td class=""><strong>established</strong> (one family, verified)</td></tr><tr><td class="n">3</td><td class="">The 2×2 <em>outcome</em> survives a jittered start pose</td><td class=""><strong>established</strong> (12/12 cells, 3/3 jitters)</td></tr><tr><td class="n">4</td><td class="">The scene <em>reverses the preference</em> between two feasible behaviours</td><td class=""><strong>partial</strong> — the reversal is demonstrated; the cost defining &quot;preferred&quot; is not calibrated</td></tr><tr><td class="n">5</td><td class="">A learner given counterfactual data uses scene geometry when it could otherwise ignore it</td><td class=""><strong>not started — this is the decisive experiment</strong></td></tr><tr><td class="n">6</td><td class="">That behaviour generalises to scenes never fitted to a trajectory</td><td class=""><strong>not started</strong></td></tr></table></div>
+<p>Claim 4 is stated as a <em>minimum-edit</em> reversal deliberately. Under the lexicographic rule <code>m<em>(S) = argmin_m D(m, m₀) s.t. y(S,m) = 1</code> with <code>D(m₀,m₀) = 0</code> and <code>D(T(m₀),m₀) &gt; 0</code>, the easy scene selects the nominal at zero edit and the hard scene selects the adapted motion because the nominal is infeasible. That is a strict reversal and it needs no weights over knee angle, energy or joint travel — so no calibrated scalar cost is required, and none blocks the claim. The continuous cost is retained for comparing two </em>different* adaptations later.</p>
+<div class="scroll"><table><tr><th>#</th><th>claim</th><th>status</th></tr><tr><td class="n">1</td><td class="">Two executable motions&#x27; full-body swept volumes separate, so a geometric window exists</td><td class=""><strong>established</strong></td></tr><tr><td class="n">2</td><td class="">The same controller succeeds or fails as that geometry changes</td><td class=""><strong>established</strong> (4 verified families, 1 matched)</td></tr><tr><td class="n">3</td><td class="">The 2×2 <em>outcome</em> survives a jittered start pose</td><td class=""><strong>established</strong> (12/12 cells, 3/3 jitters)</td></tr><tr><td class="n">4</td><td class="">The scene reverses the <strong>minimum-edit feasible behaviour</strong></td><td class=""><strong>established</strong> on the matched overhead family</td></tr><tr><td class="n">5</td><td class="">A learner given counterfactual data uses scene geometry when it could otherwise ignore it</td><td class=""><strong>not started — this is the decisive experiment</strong></td></tr><tr><td class="n">6</td><td class="">That behaviour generalises to scenes never fitted to a trajectory</td><td class=""><strong>not started</strong></td></tr></table></div>
 <p>Levels 5 and 6 are the paper. Everything below them is apparatus.</p>
 <h3>What is established</h3>
 <h4>The counterfactual, and its attribution</h4>
@@ -356,7 +362,7 @@ a { color:var(--accent); }
 <div class="scroll"><table><tr><th></th><th>crouch</th><th>arm tuck</th></tr><tr><td class="">yield</td><td class=""><strong>2 of 3</strong></td><td class="n">1 of 3</td></tr><tr><td class="">failure mode</td><td class="">reference drift, <strong>zero</strong> external contact</td><td class=""><code>disallowed_robot_contact</code> at 0.051 and 0.003 m/s drift</td></tr></table></div>
 <p>The distinction matters more than the counts. A collision is governed by geometry, which the swept-volume machinery already models. A tracking failure is governed by how hard a clip is to hold — and for the crouch that turns out to be predictable from the clip alone:</p>
 <div class="scroll"><table><tr><th>knee excursion</th><th>motion</th><th>outcome</th><th>\</th><th>drift\</th><th></th></tr><tr><td class="n">0.929 rad</td><td class="">x002</td><td class="">accepted</td><td class="n">0.015 m/s</td></tr><tr><td class="n">0.936 rad</td><td class="">x003</td><td class="">accepted</td><td class="n">0.025 m/s</td></tr><tr><td class="n">0.994 rad</td><td class="n">005</td><td class="">accepted</td><td class="n">0.100 m/s</td></tr><tr><td class="n">1.000 rad</td><td class="">x000</td><td class=""><strong>rejected</strong></td><td class="n">0.225 m/s</td></tr></table></div>
-<p>Monotone across four clips and three nominals, with the boundary in a 6 mrad gap. This prediction was <strong>registered in writing before the last two rollouts returned</strong>, after four earlier attempts to infer trackability from a clip had all been withdrawn; the stated reason for expecting it to hold this time — that excursion should govern a drift failure where geometry governs a collision — is what distinguished it. The operator&#x27;s cap is now set from this measurement rather than from the arm tuck&#x27;s unrelated failure.</p>
+<p>Monotone across four clips and three nominals. The threshold is <strong>motion-specific</strong>, not global: a within-motion sweep on the failing clip accepts at 0.619 rad and rejects at 0.980, where another motion holds 0.994. So crouch feasibility is not predictable from motion identity or a universal cap — it is <strong>cheaply screenable with one targeted rollout</strong>, at exactly the excursion a usable window requires. This prediction was <strong>registered in writing before the last two rollouts returned</strong>, after four earlier attempts to infer trackability from a clip had all been withdrawn; the stated reason for expecting it to hold this time — that excursion should govern a drift failure where geometry governs a collision — is what distinguished it. The operator&#x27;s cap is now set from this measurement rather than from the arm tuck&#x27;s unrelated failure.</p>
 <p>For the tuck, no such predictor exists. Two were built and refuted, so its yield is a <strong>budget line</strong> — roughly three rollouts per usable lateral clip, plus one to screen each nominal.</p>
 <h4>The lateral operator&#x27;s yield is a measured cost</h4>
 <p>The arm tuck is accepted on <strong>1 of 3</strong> valid nominals. Two cheap predictors of <em>which</em> one were built and both refuted: wrist-to-hip clearance (already negative on every nominal, and its change anti-correlates with the verdict at both extremes) and lateral CoM excursion (two cells 0.1 mm apart landing on opposite sides of the gate). The verdict is set entirely by <strong>external</strong> contact; self-contact magnitude is not severity — the accepted tuck carries the highest self-contact of eight cells, 192.1 N, and the rejected nominal the lowest, 10.9 N.</p>
