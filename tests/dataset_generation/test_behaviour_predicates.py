@@ -8,7 +8,9 @@ import numpy as np
 import pytest
 
 from gear_sonic.dataset_generation.behaviour_predicates import (
+    MIN_STEP_APEX_M,
     PREDICATES,
+    REFERENCE_STEP_APEX_M,
     PredicateError,
     check_behaviour,
     check_duck_under,
@@ -387,3 +389,36 @@ def test_both_new_lateral_modes_dispatch_to_the_width_predicate():
     for behaviour in ("arm_tuck", "shoulder_turn"):
         result = check_behaviour(behaviour, tucking())
         assert result is not None and result.satisfied
+
+
+# ---- domain transfer ---------------------------------------------------------------------
+
+def test_the_apex_threshold_differs_between_a_reference_and_a_rollout():
+    """Tracking lowers the foot, so one absolute number cannot serve both domains.
+
+    Across the corpus the trailing foot's apex drops 0.034 m from reference to execution for
+    a plain walk and 0.039 m for a clip labelled step_over -- the controller flattens
+    everything, not step-overs selectively. The executed threshold of 0.18 m sits between the
+    two populations, so applied to references it passes nearly everything and looked like
+    evidence that the generator produced a step-over the controller then lost. It had not:
+    on references, step_over apex is 0.193-0.226 m against a walk's 0.206-0.222 m,
+    Mann-Whitney p = 0.693.
+    """
+    payload = stepping(120, 0.21, 0.21)          # a reference-scale swing, not a step-over
+    assert check_step_over(payload).satisfied, "0.21 m clears the executed threshold"
+
+    payload["kind"] = "reference"
+    graded = check_step_over(payload)
+    assert not graded.satisfied
+    assert graded.measurements["apex_threshold_m"] == REFERENCE_STEP_APEX_M
+
+
+def test_a_genuine_reference_step_over_still_passes():
+    payload = stepping(120, 0.30, 0.28)
+    payload["kind"] = "reference"
+    assert check_step_over(payload).satisfied
+
+
+def test_a_recorded_payload_keeps_the_executed_threshold():
+    payload = stepping(120, 0.21, 0.21)
+    assert check_step_over(payload).measurements["apex_threshold_m"] == MIN_STEP_APEX_M

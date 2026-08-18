@@ -68,6 +68,20 @@ MIN_DUCK_DROP_M = 0.08
 #: doing something walking does not.
 MIN_STEP_APEX_M = 0.18
 
+#: The same criterion for a *reference* clip rather than an executed one. Two thresholds are
+#: needed because tracking systematically lowers the foot: across the corpus the trailing
+#: foot's apex drops 0.034 m from reference to execution for a plain walk and 0.039 m for a
+#: clip labelled step_over -- the controller flattens everything, not step-overs selectively.
+#: A single absolute number therefore cannot serve both domains, and 0.18 m happens to sit
+#: between them, so it passes nearly every reference and fails nearly every rollout. That
+#: looked like the generator producing a step-over that the controller then lost. It is not:
+#: measured on references, step_over apex is 0.193-0.226 m against a plain walk's
+#: 0.206-0.222 m, Mann-Whitney p = 0.693. The behaviour is absent in both domains.
+#:
+#: This threshold sits just above the observed reference walking range, so a clip has to
+#: clear a walk's swing to count.
+REFERENCE_STEP_APEX_M = 0.24
+
 #: Metres the half-width must fall below the episode's own walking width for a narrowing to
 #: count. Relative, not absolute, for the reason stand_to_walk taught: the G1's half-width
 #: runs 0.273 m tucked to 0.664 m at peak arm swing, so a single absolute threshold would
@@ -325,6 +339,17 @@ def _foot_heights(payload: dict) -> dict[str, np.ndarray]:
     return {name: bodies[:, index, 2] for name, index in feet.items()}
 
 
+def _step_apex_threshold(payload: dict) -> float:
+    """Pick the apex threshold for the domain this payload came from.
+
+    A reference clip carries ``kind == "reference"``; a recorded trajectory does not. Getting
+    this wrong does not produce a small error, it produces the opposite verdict.
+    """
+    return (
+        REFERENCE_STEP_APEX_M if payload.get("kind") == "reference" else MIN_STEP_APEX_M
+    )
+
+
 def check_step_over(
     payload: dict, *, obstacle_x: float | None = None, obstacle_top_z: float | None = None
 ) -> PredicateResult:
@@ -345,11 +370,13 @@ def check_step_over(
     lowest_apex_foot = min(apex, key=apex.get)
     lowest_apex = apex[lowest_apex_foot]
 
+    threshold = _step_apex_threshold(payload)
     measurements = {f"apex_{name}_m": value for name, value in apex.items()}
-    satisfied = lowest_apex >= MIN_STEP_APEX_M
+    measurements["apex_threshold_m"] = threshold
+    satisfied = lowest_apex >= threshold
     reason = (
         "both feet cleared" if satisfied
-        else f"{lowest_apex_foot} only rose {lowest_apex:.3f} m (need {MIN_STEP_APEX_M})"
+        else f"{lowest_apex_foot} only rose {lowest_apex:.3f} m (need {threshold})"
     )
 
     if obstacle_x is not None and obstacle_top_z is not None:
