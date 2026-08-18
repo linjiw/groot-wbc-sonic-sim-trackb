@@ -8,6 +8,40 @@ quietly becomes a "finding we always suspected".
 
 *(none)*
 
+## P6, refuted — and it exposed a worse error
+
+**P6 — the arm tuck's collisions are the wrist reaching the floor (registered 2026-08-18, before
+measuring).** The tuck fails by `disallowed_robot_contact` at *low* drift, on `pelvis` (x000) and
+`right_wrist_yaw_link` (x002). These are bare-plane rollouts, so the only surface available is the
+ground: a wrist registering external contact means the arm came down far enough to touch it.
+
+Prediction: the tuck lowers the wrist's minimum ground clearance, and the two rejected motions lose
+more of it than the accepted one (x003).
+
+*Why this one is worth another attempt after P4 failed.* P4 asked a **self**-clearance question
+(wrist against hip) about a failure the gate scores as **external**, which was the wrong currency
+from the start. This asks a ground-clearance question about a ground collision. It is also the
+right *kind* of predictor by the distinction the crouch work established: the tuck fails by
+collision, and collisions are governed by geometry, which is exactly what a swept volume can see.
+
+If refuted, then geometry does not predict the tuck's failures either, and per-clip rollout
+screening is confirmed as the only method for the lateral regime — which is a usable answer, just an
+expensive one.
+
+**Refuted, and on a premise that was false.** The wrist's minimum ground clearance is 0.62–0.67 m in
+every clip and the tuck changes it by at most 0.4 mm, in the wrong direction. But the reasoning
+rested on "these are bare-plane rollouts, so the only surface is the floor" — and the screening scene
+`cf_005_056_easy` in fact holds a shelf at 1.3906 m and four walls.
+
+Chasing that down was worth more than the prediction. `x001`'s nominal, which I had excluded as
+untrackable, was rejected for a force of exactly (0.0, 277.6, 0.0) N with its root 0.21 m from a wall
+— it **walked into the wall**, a room-sizing artifact, not a trackability failure. The tuck's yield
+of 1 of 3 valid nominals therefore rests on a denominator that may be 4.
+
+The lesson is not about prediction at all: **I asserted a property of the apparatus — "bare plane" —
+without checking it, and then reasoned from it repeatedly across documents and commit messages.**
+The registered prediction is what forced the check.
+
 ## P5, confirmed — after I got the intermediate reading wrong twice
 
 The registered claim was that knee excursion governs crouch trackability. It does. Getting there
