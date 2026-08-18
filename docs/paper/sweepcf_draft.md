@@ -118,7 +118,8 @@ over a window in **route-progress** coordinates centred on the obstacle station:
 | effect at the station | 1.305 → 1.207 m silhouette | 0.276 → 0.231 m half-width |
 | active window | 35% of clip | 35% of clip |
 | kinematic feasibility | **6/6** | 6/6 reachable |
-| SONIC accepts it | **verified, matched 2×2** | 1 of 3 valid nominals |
+| SONIC accepts it | **2 of 3** valid nominals | 1 of 3 valid nominals |
+| how it fails | tracking drift, no contact | collision at low drift |
 
 Locality is not tidiness. A clip crouched from frame zero cannot demonstrate a decision made
 from what the robot sees, because the obstacle is not visible when the crouch begins; such a
@@ -189,7 +190,38 @@ The audit also corrected three earlier claims, all of which had read the smaller
 - the start-pose jitter spread is **1.35×** on overhead against 6.9× on lateral, so the force is far
   steadier than reported
 
-### The lateral operator does not, and its yield is a measured cost
+### The two operators fail in different ways, and only one is predictable
+
+Cross-motion yield over nominals SONIC accepts on a bare plane — `x001` is excluded because its own
+nominal is rejected at 277.6 N on `left_knee_link`, so adapting it never tested an operator:
+
+| | crouch | arm tuck |
+|---|---|---|
+| yield | **2 of 3** | 1 of 3 |
+| failure mode | reference drift, **zero** external contact | `disallowed_robot_contact` at 0.051 and 0.003 m/s drift |
+
+The distinction matters more than the counts. A collision is governed by geometry, which the
+swept-volume machinery already models. A tracking failure is governed by how hard a clip is to
+hold — and for the crouch that turns out to be predictable from the clip alone:
+
+| knee excursion | motion | outcome | \|drift\| |
+|---|---|---|---|
+| 0.929 rad | x002 | accepted | 0.015 m/s |
+| 0.936 rad | x003 | accepted | 0.025 m/s |
+| 0.994 rad | 005 | accepted | 0.100 m/s |
+| 1.000 rad | x000 | **rejected** | 0.225 m/s |
+
+Monotone across four clips and three nominals, with the boundary in a 6 mrad gap. This prediction
+was **registered in writing before the last two rollouts returned**, after four earlier attempts to
+infer trackability from a clip had all been withdrawn; the stated reason for expecting it to hold
+this time — that excursion should govern a drift failure where geometry governs a collision — is
+what distinguished it. The operator's cap is now set from this measurement rather than from the arm
+tuck's unrelated failure.
+
+For the tuck, no such predictor exists. Two were built and refuted, so its yield is a **budget
+line** — roughly three rollouts per usable lateral clip, plus one to screen each nominal.
+
+### The lateral operator's yield is a measured cost
 
 The arm tuck is accepted on **1 of 3** valid nominals. Two cheap predictors of *which* one were
 built and both refuted: wrist-to-hip clearance (already negative on every nominal, and its change

@@ -96,12 +96,17 @@ a { color:var(--accent); }
   <tr><td class="k">lateral</td><td class="n">3</td><td class="n">3</td><td class="n">1</td></tr>
   <tr><td class="k">floor</td><td class="n">0</td><td class="n">0</td><td class="n">0</td></tr>
   </table></div>
-  <p><strong>Three independent families</strong>, and the ceiling is the supply of
+  <p><strong>Three independent families from mining</strong>, and the ceiling is the supply of
   semantically valid adapted motions rather than the method. Prompting did not lift it: every
   phrasing that lowers the body pinned the waist at its limit on 100% of frames, and an
   explicit arm-tuck request produced motions 64 mm <em>wider</em> than a walk. That closed an
   engineering path under one set of templates and one checkpoint &mdash; it is not a claim
   about what the generator can do.</p>
+  <p>These counts are <em>mined pairs</em>, and they are deliberately kept apart from the
+  operator-built total. The matched family is a fourth verified family but not a fourth mined
+  pair: it is one nominal against its own adapted clip, which is why it sidesteps this
+  bottleneck entirely and why the operators exist. Conflating the two would make the supply
+  problem look solved when only its workaround is.</p>
 </section>
 
 <section>
@@ -115,7 +120,9 @@ a { color:var(--accent); }
   <tr><td>effect at the station</td><td class="n">1.305 &rarr; 1.207 m</td><td class="n">0.276 &rarr; 0.231 m</td></tr>
   <tr><td>active window</td><td class="n">35%</td><td class="n">35%</td></tr>
   <tr><td>stage 1 &mdash; kinematic</td><td class="done">6/6</td><td class="done">6/6</td></tr>
-  <tr><td>stage 2 &mdash; trackable</td><td class="done">yes</td><td class="open">1 of 3 nominals</td></tr>
+  <tr><td>stage 2 &mdash; trackable</td><td class="done">2 of 3 nominals</td><td class="open">1 of 3 nominals</td></tr>
+  <tr><td>how it fails</td><td>tracking drift, no contact</td><td>collision at low drift</td></tr>
+  <tr><td>trackability predictable?</td><td class="done">yes &mdash; knee excursion</td><td class="never">no &mdash; 2 predictors refuted</td></tr>
   <tr><td>stage 3 &mdash; matched 2&times;2</td><td class="done">verified</td><td class="block">needs a trackable clip</td></tr>
   </table></div>
   <p>Both start from an accepted nominal motion and change only what one obstacle requires,
@@ -179,8 +186,26 @@ a { color:var(--accent); }
       lateral &mdash; the force is far steadier than reported</li>
     </ul>
   </div>
+  <div class="note" style="border-left-color:var(--pass)">
+    <h3>Crouch trackability is predictable from the clip &mdash; a registered prediction that held</h3>
+    <div class="scroll"><table>
+      <tr><th>knee excursion</th><th>motion</th><th>outcome</th><th>|drift|</th></tr>
+      <tr><td class="n">0.929 rad</td><td>x002</td><td class="done">accepted</td><td class="n">0.015 m/s</td></tr>
+      <tr><td class="n">0.936 rad</td><td>x003</td><td class="done">accepted</td><td class="n">0.025 m/s</td></tr>
+      <tr><td class="n">0.994 rad</td><td>005</td><td class="done">accepted</td><td class="n">0.100 m/s</td></tr>
+      <tr><td class="n">1.000 rad</td><td>x000</td><td class="block">rejected</td><td class="n">0.225 m/s</td></tr>
+    </table></div>
+    <p>Monotone across four clips and three different nominals, boundary inside a 6 mrad gap. Written
+    down <em>before</em> the last two rollouts returned &mdash; four earlier attempts to infer
+    trackability from a clip had all been withdrawn, so this one was registered rather than assumed.
+    The reason given in advance is what made it hold: excursion should govern a <em>drift</em>
+    failure, where geometry governs a <em>collision</em>.</p>
+    <p>So the cap comes from this measurement now. It had been 1.00 &mdash; the worst available value,
+    since the one clip that failed failed <em>at</em> it, a clip being pushed to the cap whenever its
+    target drop is out of reach.</p>
+  </div>
   <div class="note">
-    <h3>The lateral operator did not, and two predictors of why were refuted</h3>
+    <h3>The tuck has no such predictor: two were refuted</h3>
     <p>The arm tuck is accepted on 1 of 3 valid nominals. Wrist-to-hip clearance is already
     negative on every nominal, and its change <em>anti</em>-correlates with the verdict at both
     extremes; lateral CoM excursion puts two cells 0.1 mm apart on opposite sides of the gate.
@@ -299,7 +324,7 @@ a { color:var(--accent); }
 <h3>Matched adaptation operators</h3>
 <p>The fix is to construct the adapted motion from the nominal rather than pair two independently generated clips. That also removes a fair objection to the existing family — that a shelf separated two different journeys rather than two behaviours.</p>
 <p>Both operators preserve root XY and yaw, duration, gait phase, start and goal, and act only over a window in <strong>route-progress</strong> coordinates centred on the obstacle station:</p>
-<div class="scroll"><table><tr><th></th><th><code>local_crouch</code></th><th><code>local_arm_tuck</code></th></tr><tr><td class="">regime</td><td class="">overhead</td><td class="">lateral</td></tr><tr><td class="">touches</td><td class="">legs + root height</td><td class="">arms only</td></tr><tr><td class="">waist change</td><td class=""><strong>0.000 rad</strong></td><td class="">untouched</td></tr><tr><td class="">leg change</td><td class="">—</td><td class=""><strong>0.000 rad</strong></td></tr><tr><td class="">effect at the station</td><td class="n">1.305 → 1.207 m silhouette</td><td class="n">0.276 → 0.231 m half-width</td></tr><tr><td class="">active window</td><td class="n">35% of clip</td><td class="n">35% of clip</td></tr><tr><td class="">kinematic feasibility</td><td class=""><strong>6/6</strong></td><td class="n">6/6 reachable</td></tr><tr><td class="">SONIC accepts it</td><td class=""><strong>verified, matched 2×2</strong></td><td class="n">1 of 3 valid nominals</td></tr></table></div>
+<div class="scroll"><table><tr><th></th><th><code>local_crouch</code></th><th><code>local_arm_tuck</code></th></tr><tr><td class="">regime</td><td class="">overhead</td><td class="">lateral</td></tr><tr><td class="">touches</td><td class="">legs + root height</td><td class="">arms only</td></tr><tr><td class="">waist change</td><td class=""><strong>0.000 rad</strong></td><td class="">untouched</td></tr><tr><td class="">leg change</td><td class="">—</td><td class=""><strong>0.000 rad</strong></td></tr><tr><td class="">effect at the station</td><td class="n">1.305 → 1.207 m silhouette</td><td class="n">0.276 → 0.231 m half-width</td></tr><tr><td class="">active window</td><td class="n">35% of clip</td><td class="n">35% of clip</td></tr><tr><td class="">kinematic feasibility</td><td class=""><strong>6/6</strong></td><td class="n">6/6 reachable</td></tr><tr><td class="">SONIC accepts it</td><td class=""><strong>2 of 3</strong> valid nominals</td><td class="n">1 of 3 valid nominals</td></tr><tr><td class="">how it fails</td><td class="">tracking drift, no contact</td><td class="">collision at low drift</td></tr></table></div>
 <p>Locality is not tidiness. A clip crouched from frame zero cannot demonstrate a decision made from what the robot sees, because the obstacle is not visible when the crouch begins; such a pair can only support map-conditioned selection.</p>
 <h4>The overhead operator clears all three gates</h4>
 <p>Family <code>mf_005_c08</code>. One journey, two behaviours: the two clips have identical root XY frame for frame, identical duration, and differ in exactly six joints — knees 0.994 rad, hip and ankle pitch 0.497 rad each, waist 0.000 rad.</p>
@@ -320,7 +345,14 @@ a { color:var(--accent); }
 <p>  the lateral figures implied, so the graze-versus-crash tuning story is withdrawn</p>
 <ul><li>the start-pose jitter spread is <strong>1.35×</strong> on overhead against 6.9× on lateral, so the force is far</li></ul>
 <p>  steadier than reported</p>
-<h4>The lateral operator does not, and its yield is a measured cost</h4>
+<h4>The two operators fail in different ways, and only one is predictable</h4>
+<p>Cross-motion yield over nominals SONIC accepts on a bare plane — <code>x001</code> is excluded because its own nominal is rejected at 277.6 N on <code>left_knee_link</code>, so adapting it never tested an operator:</p>
+<div class="scroll"><table><tr><th></th><th>crouch</th><th>arm tuck</th></tr><tr><td class="">yield</td><td class=""><strong>2 of 3</strong></td><td class="n">1 of 3</td></tr><tr><td class="">failure mode</td><td class="">reference drift, <strong>zero</strong> external contact</td><td class=""><code>disallowed_robot_contact</code> at 0.051 and 0.003 m/s drift</td></tr></table></div>
+<p>The distinction matters more than the counts. A collision is governed by geometry, which the swept-volume machinery already models. A tracking failure is governed by how hard a clip is to hold — and for the crouch that turns out to be predictable from the clip alone:</p>
+<div class="scroll"><table><tr><th>knee excursion</th><th>motion</th><th>outcome</th><th>\</th><th>drift\</th><th></th></tr><tr><td class="n">0.929 rad</td><td class="">x002</td><td class="">accepted</td><td class="n">0.015 m/s</td></tr><tr><td class="n">0.936 rad</td><td class="">x003</td><td class="">accepted</td><td class="n">0.025 m/s</td></tr><tr><td class="n">0.994 rad</td><td class="n">005</td><td class="">accepted</td><td class="n">0.100 m/s</td></tr><tr><td class="n">1.000 rad</td><td class="">x000</td><td class=""><strong>rejected</strong></td><td class="n">0.225 m/s</td></tr></table></div>
+<p>Monotone across four clips and three nominals, with the boundary in a 6 mrad gap. This prediction was <strong>registered in writing before the last two rollouts returned</strong>, after four earlier attempts to infer trackability from a clip had all been withdrawn; the stated reason for expecting it to hold this time — that excursion should govern a drift failure where geometry governs a collision — is what distinguished it. The operator&#x27;s cap is now set from this measurement rather than from the arm tuck&#x27;s unrelated failure.</p>
+<p>For the tuck, no such predictor exists. Two were built and refuted, so its yield is a <strong>budget line</strong> — roughly three rollouts per usable lateral clip, plus one to screen each nominal.</p>
+<h4>The lateral operator&#x27;s yield is a measured cost</h4>
 <p>The arm tuck is accepted on <strong>1 of 3</strong> valid nominals. Two cheap predictors of <em>which</em> one were built and both refuted: wrist-to-hip clearance (already negative on every nominal, and its change anti-correlates with the verdict at both extremes) and lateral CoM excursion (two cells 0.1 mm apart landing on opposite sides of the gate). On bare-plane rollouts the verdict is set entirely by <strong>external</strong> contact; self-contact magnitude is not severity — the accepted tuck carries the highest self-contact of eight cells, 192.1 N, and the rejected nominal the lowest, 10.9 N.</p>
 <p>So trackability is measured per clip, and the 1-in-3 yield is a budget line — roughly three rollouts per usable lateral clip, plus one to screen each nominal — not a defect awaiting a fix. This is the fourth time on this operator that an inferred quantity had to be withdrawn in favour of a rollout.</p>
 <h3>The decisive experiment (not yet run)</h3>
