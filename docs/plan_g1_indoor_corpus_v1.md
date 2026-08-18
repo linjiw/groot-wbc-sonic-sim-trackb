@@ -5,6 +5,59 @@ Baseline: dataset_v2 as of 2026-08-16 — 15 episodes / 3,720 rows, 18 scenes in
 
 ---
 
+## The plan narrowed (2026-08-17)
+
+Everything below this section remains the long-range plan. It is no longer the working
+order. A review on 2026-08-17 pointed out that the plan had spread — Layer A/B/C
+restructuring, thirteen semantic validators, VLA benchmark, household taxonomy, release
+structure — while the experiment the whole thing rests on had not been closed. The
+correction is to compress to one falsifiable question:
+
+> **Prove that changing one scene parameter reliably turns motion A from success to failure
+> while motion B still succeeds.**
+
+Without that, the dataset, the navigation framing and the VLA work are all aspiration. With
+it, they are extensions of an established scientific object.
+
+**Three claim levels, kept strictly apart.** Conflating them is the main way this work could
+overreach:
+
+| Level | Claim | Status |
+|---|---|---|
+| 1 | Swept volumes separate, so a geometric window exists | established |
+| 2 | The same controller succeeds or fails as that geometry changes | established for one family |
+| 3 | It survives a perturbed start pose, not one deterministic replay | in progress |
+
+A fourth claim — that the robot *perceives* the scene and *chooses* to duck — is not made.
+Both motions are prescribed references; what changes is which one physics permits.
+
+**Working priority.**
+
+- **P0** — close one causal family completely: the 2×2 in physics, failure attribution
+  purity, three small start-pose perturbations, and a report card that only claims what its
+  artefacts support. See `docs/first_counterfactual_family.md`.
+- **P1** — turn the single case into a method: pairwise discriminative-window mining over the
+  existing corpus, three geometry regimes, five families each, and yield statistics
+  (geometry-predicted validity, physics validity, intended-failure purity, perturbation
+  robustness).
+- **P2** — only at 20–30 verified families, the minimal benchmark: does a learned
+  scene–motion compatibility scorer beat a root-cylinder heuristic on held-out families.
+
+**The binding constraint is motion supply, not method.** Mining the corpus says three
+mutually disjoint families exist — two overhead, one lateral, zero floor — against a target
+of fifteen, and the ceiling traces directly to generator fidelity (`duck_under` 3/7,
+`step_over` 0/7) and to a taxonomy with no mode that narrows the robot at all. That promotes
+the prompt feedback loop from a quality improvement to a prerequisite. Full argument in
+`docs/counterfactual_pair_supply.md`.
+
+**Explicitly not now:** renaming the release, restructuring the paper outline, the remaining
+semantic validators, more visually-different-only scenes, VLA training, photorealistic
+assets, household manipulation, calling any of this a navigation policy, substituting
+geometric prediction for physics rollout, or using one deterministic capture for both
+boundary discovery and verification.
+
+---
+
 ## Progress against this plan (updated 2026-08-16)
 
 **Phase A closed except the throughput benchmark.**
