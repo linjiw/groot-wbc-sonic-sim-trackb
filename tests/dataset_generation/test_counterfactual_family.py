@@ -240,3 +240,39 @@ def test_the_window_is_the_family_content():
         shelf(3.0), search_high=2.4, capsules=TEST_CAPSULES,
     )
     assert wide.window_m > narrow.window_m
+
+
+# ---- per-frame clearance profile ---------------------------------------------------------
+
+def test_the_profile_minimum_agrees_with_the_scalar_clearance():
+    """One sampler, two views of it. If these drift apart the boundary search is measuring
+    something the attribution report is not."""
+    from gear_sonic.dataset_generation.counterfactual_family import swept_clearance_profile
+
+    pos, quat = straight_walk(frames=60)
+    names = ["pelvis", "torso_link"]
+    box = (1.3, -1.0, 1.05, 1.7, 1.0, 1.3)
+    profile = swept_clearance_profile(pos, quat, names, box, capsules=TEST_CAPSULES)
+    scalar, frame = swept_clearance_to_box(pos, quat, names, box, capsules=TEST_CAPSULES)
+    assert profile.shape == (60,)
+    assert profile.min() == pytest.approx(scalar)
+    assert int(np.argmin(profile)) == frame
+
+
+def test_first_interference_precedes_the_deepest_frame():
+    """The two are different questions, and conflating them mis-scores the predictor.
+
+    A robot touches the near face of a half-metre-deep shelf well before it reaches the
+    point of greatest penetration; comparing an observed first contact against a predicted
+    *deepest* frame charges the prediction for that gap.
+    """
+    from gear_sonic.dataset_generation.counterfactual_family import swept_clearance_profile
+
+    pos, quat = straight_walk(frames=120)
+    names = ["pelvis", "torso_link"]
+    box = (1.0, -1.0, 1.0, 1.6, 1.0, 1.4)
+    profile = swept_clearance_profile(pos, quat, names, box, capsules=TEST_CAPSULES)
+    assert (profile < 0.0).any(), "the box must actually be hit for this to test anything"
+    negative = np.argwhere(profile < 0.0)
+    if negative.size:
+        assert int(negative[0, 0]) <= int(np.argmin(profile))

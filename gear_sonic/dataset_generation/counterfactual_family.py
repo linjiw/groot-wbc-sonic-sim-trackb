@@ -124,6 +124,37 @@ class CounterfactualFamily:
         return self.easy_clearance_m > 0.0 > self.hard_clearance_m
 
 
+def swept_clearance_profile(
+    body_pos: np.ndarray,
+    body_quat: np.ndarray,
+    body_names: Sequence[str],
+    box: tuple[float, float, float, float, float, float],
+    *,
+    capsules=G1_COLLISION_CAPSULES,
+) -> np.ndarray:
+    """Per-frame clearance between the executed swept volume and an axis-aligned box.
+
+    The minimum over this is what a boundary search needs, but the profile itself answers a
+    different question: *when* does the obstacle first interfere, as opposed to when is the
+    interference deepest. Those are not the same frame, and comparing a predicted deepest
+    frame against an observed first contact makes a prediction look worse than it is.
+    """
+    starts, ends, radii, _ = body_capsules_world(
+        body_pos, body_quat, body_names, capsules=capsules
+    )
+    min_x, min_y, min_z, max_x, max_y, max_z = box
+    lower = np.array([min_x, min_y, min_z])
+    upper = np.array([max_x, max_y, max_z])
+
+    # Sample points along each capsule segment, including both ends.
+    weights = np.linspace(0.0, 1.0, 5).reshape(1, 1, 5, 1)
+    points = starts[:, :, None, :] * (1.0 - weights) + ends[:, :, None, :] * weights
+
+    clamped = np.clip(points, lower, upper)
+    distances = np.linalg.norm(points - clamped, axis=-1) - radii[None, :, None]
+    return distances.min(axis=(1, 2))
+
+
 def swept_clearance_to_box(
     body_pos: np.ndarray,
     body_quat: np.ndarray,
@@ -150,20 +181,9 @@ def swept_clearance_to_box(
     ``build_paired_family``, which exists because this was learned the hard way, with two
     different motions both reading -0.0680 m, the torso capsule's radius.
     """
-    starts, ends, radii, _ = body_capsules_world(
-        body_pos, body_quat, body_names, capsules=capsules
+    per_frame = swept_clearance_profile(
+        body_pos, body_quat, body_names, box, capsules=capsules
     )
-    min_x, min_y, min_z, max_x, max_y, max_z = box
-    lower = np.array([min_x, min_y, min_z])
-    upper = np.array([max_x, max_y, max_z])
-
-    # Sample points along each capsule segment, including both ends.
-    weights = np.linspace(0.0, 1.0, 5).reshape(1, 1, 5, 1)
-    points = starts[:, :, None, :] * (1.0 - weights) + ends[:, :, None, :] * weights
-
-    clamped = np.clip(points, lower, upper)
-    distances = np.linalg.norm(points - clamped, axis=-1) - radii[None, :, None]
-    per_frame = distances.min(axis=(1, 2))
     frame = int(np.argmin(per_frame))
     return float(per_frame[frame]), frame
 
