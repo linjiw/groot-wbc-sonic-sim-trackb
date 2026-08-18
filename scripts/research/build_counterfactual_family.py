@@ -55,16 +55,16 @@ from gear_sonic.dataset_generation.clutter_scene_builder import (  # noqa: E402
     FurniturePiece,
     render_scene_usda,
 )
-from gear_sonic.dataset_generation.motion_envelope import (  # noqa: E402
-    best_overhead_station,
-)
 from gear_sonic.dataset_generation.counterfactual_family import (  # noqa: E402
     CounterfactualError,
     ObstacleSpec,
-    swept_clearance_to_box,
     build_paired_family,
+    swept_clearance_to_box,
 )
 from gear_sonic.dataset_generation.episode_outcome import classify_episode  # noqa: E402
+from gear_sonic.dataset_generation.motion_envelope import (  # noqa: E402
+    best_overhead_station,
+)
 from gear_sonic.dataset_generation.route_placement import canonical_path_xy  # noqa: E402
 from gear_sonic.dataset_generation.trajectory_segments import (  # noqa: E402
     best_evaluable_payload,
