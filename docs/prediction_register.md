@@ -8,9 +8,10 @@ quietly becomes a "finding we always suspected".
 
 *(none)*
 
-## P5, confirmed
+## P5, partly confirmed and partly refuted
 
-Registered before the two pending cells returned, and it held — the first of five to do so.
+Registered before the two pending cells returned. The **correlation** held; the **causal** reading
+did not, and the causal reading is the one that mattered.
 
 | excursion | motion | outcome | \|drift\| |
 |---|---|---|---|
@@ -19,17 +20,33 @@ Registered before the two pending cells returned, and it held — the first of f
 | 0.994 rad | 005 | accepted | 0.100 m/s |
 | 1.000 rad | x000 | **rejected** | 0.225 m/s |
 
-Drift magnitude rises monotonically with knee excursion across four clips and three different
-nominals, and the boundary sits between 0.994 and 1.000 rad. The reason given in advance for
-expecting this — that the crouch fails by tracking drift where the tuck fails by collision, and
-excursion plausibly governs the former — is the reason it worked. **Crouch yield: 2 of 3 valid
-nominals; tuck: 1 of 3.**
+Drift magnitude does rise monotonically with knee excursion across those four clips. But the four
+clips come from **three different motions**, so that table mixes between-motion and within-motion
+variation — and the within-motion test refutes the causal claim:
 
-The immediate consequence is that `MAX_CROUCH_EXCURSION_RAD = 1.00` was the worst available choice:
-the single clip that failed failed *at* the cap, because the cap is what a clip gets pushed to when
-its target drop is out of reach. Tightened to 0.98, which costs x000 only 2.6 mm of its 72.2 mm drop
-and is being verified by rollout — 0.980 rad is just 20 mrad under the value that failed, so if x000
-is still rejected the boundary is motion-dependent and lower still.
+| excursion | motion | outcome | \|drift\| |
+|---|---|---|---|
+| 1.000 rad | x000 | rejected | 0.224 m/s |
+| **0.980 rad** | x000 | **rejected** | **0.223 m/s** |
+
+Cutting 20 mrad on the motion that failed moved its drift by 0.001 m/s. **So excursion correlates
+with trackability across motions but does not control it within one**, at least over this range, and
+"crouch trackability is predictable from knee excursion" is too strong. x000 is a harder motion to
+crouch, and the monotone table was largely reading motion identity.
+
+What survives: the crouch fails by drift with zero contact where the tuck fails by collision, and
+the crouch's yield is **2 of 3** valid nominals against the tuck's 1 of 3. What does not: that the
+clip alone tells you which.
+
+Two far weaker crouches on x000 — 0.619 rad for a 30 mm drop and 0.420 rad for 15 mm — are running
+to settle whether it is crouchable at any strength. If both drift, x000 is simply not crouchable and
+the yield stays 2 of 3. If one holds, the threshold is motion-specific and no single global cap can
+express it.
+
+`MAX_CROUCH_EXCURSION_RAD` was tightened from 1.00 to 0.98 on the strength of this prediction. The
+bound is still defensible — a cap should sit below every excursion observed to fail — but the benefit
+claimed for it, that it would turn an untrackable clip into a trackable one, **is false**, and the
+commit message asserting it is wrong.
 
 ### The original registration, unedited
 
