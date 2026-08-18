@@ -39,6 +39,33 @@ variants and 42 are plain walks — 73% of the corpus is unconstrained locomotio
 the diversity that does not help. The behaviours a counterfactual needs, crouch and lateral
 narrowing, are 12 of 150 and are the ones that fail.
 
+## The controller agrees, independently
+
+The same conclusion falls out of tracking quality, measured over 238 evaluable episodes without
+reference to the generator's screen at all:
+
+| behaviour | episodes | accepted | drift median m/s | range |
+|---|---|---|---|---|
+| **crouch** | 21 | **13 (62%)** | **0.100** | [0.000, 0.310] |
+| side / narrow | 6 | 6 (100%) | 0.049 | [0.018, 0.069] |
+| arms | 32 | 25 (78%) | 0.031 | [0.000, 0.093] |
+| stop / start | 7 | 7 (100%) | 0.037 | [0.011, 0.063] |
+| turn | 50 | 49 (98%) | 0.026 | [0.000, 0.074] |
+| walk | 9 | 5 (56%) | 0.020 | [0.000, 0.062] |
+
+Crouch carries roughly **four times** the reference drift of a turn and the worst acceptance rate of
+any well-sampled class. So the two stages agree without being told to: the behaviour that is hardest
+to *generate* — 44% embodiment-feasible against 100% — is also the hardest to *track*.
+
+That matters because the two could easily have disagreed. A generator can produce clips that are
+kinematically awkward but easy to follow, or smooth ones that are impossible to balance. Here the
+difficulty is intrinsic to the behaviour rather than to either component, which is the more useful
+finding: no amount of prompt engineering or controller tuning removes it, and constructing the
+adaptation is the way around.
+
+*Medians with ranges rather than means: several classes have fewer than ten episodes, and a mean
+over six invites a confidence the sample does not support.*
+
 ## Why this matters for the method
 
 This is the quantitative case for constructing adapted motions with a **local operator** rather than

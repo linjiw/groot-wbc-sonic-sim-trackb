@@ -307,6 +307,13 @@ cannot fold that far. Meanwhile 73% of the corpus is unconstrained locomotion, 6
 42 plain walks, which is precisely the diversity that does not help. The behaviours a counterfactual
 needs are 12 of 150, and they are the ones that fail.
 
+Tracking quality agrees independently. Over 238 evaluable episodes, crouch carries a median
+reference drift of **0.100 m/s** against a turn's 0.026 — roughly four times — and is accepted 13 of
+21 against 49 of 50. The two stages could easily have disagreed: a generator can emit clips that are
+kinematically awkward but easy to follow, or smooth ones impossible to balance. Here the difficulty
+is intrinsic to the behaviour rather than to either component, which is the more useful finding,
+because no amount of prompt engineering or controller tuning removes it.
+
 This is the quantitative case for constructing adapted motions with a **local operator** rather than
 requesting them from a generator. An operator applied to an already-accepted walk inherits that
 walk's feasibility and changes only what one obstacle requires, which is why the adapted clip is
