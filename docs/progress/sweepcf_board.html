@@ -52,17 +52,10 @@ a { color:var(--accent); }
 .draft hr { border:0; border-top:1px solid var(--rule); width:100%; margin:.4rem 0; }
 .draft table { font-size:13.5px; }
 .draft p, .draft ul, .draft ol { max-width:68ch; }
-.draft { display:flex; flex-direction:column; gap:1rem; padding:1.4rem 1.5rem;
-  background:var(--card); border:1px solid var(--rule); border-radius:3px; }
-.draft h3 { font-size:1.08rem; margin-top:.6rem; color:var(--accent); }
-.draft h3:first-child { margin-top:0; }
-.draft hr { border:0; border-top:1px solid var(--rule); width:100%; margin:.4rem 0; }
-.draft table { font-size:13.5px; }
-.draft p, .draft ul, .draft ol { max-width:68ch; }
 </style>
 
 <header>
-  <p class="eyebrow">sweepcf &middot; 116 commits on research/cg-wbc-v0-golden-path &middot; 619 tests</p>
+  <p class="eyebrow">sweepcf &middot; 139 commits on research/cg-wbc-v0-golden-path &middot; 638 tests</p>
   <h1>Counterfactual supervision, and what is left to prove</h1>
   <p class="lede">A dataset can vary its scenes without varying anything a policy could learn
   from. This is the state of repairing that, with the unproven parts marked.</p>
@@ -70,11 +63,11 @@ a { color:var(--accent); }
 
 <section>
   <div class="stats">
-    <div class="stat"><b>3</b><span>verified families</span></div>
-    <div class="stat"><b>1</b><span>outcome-robust</span></div>
+    <div class="stat"><b>4</b><span>verified families</span></div>
+    <div class="stat"><b>1</b><span>matched family</span></div>
     <div class="stat"><b>2</b><span>adaptation operators</span></div>
     <div class="stat"><b>30</b><span>frozen test scenes</span></div>
-    <div class="stat"><b>619</b><span>tests passing</span></div>
+    <div class="stat"><b>638</b><span>tests passing</span></div>
   </div>
 </section>
 
@@ -83,7 +76,7 @@ a { color:var(--accent); }
   <div class="scroll"><table>
   <tr><th>#</th><th>claim</th><th>status</th></tr>
   <tr><td class="n">1</td><td>Two executable motions' swept volumes separate, so a window exists</td><td class="done">established</td></tr>
-  <tr><td class="n">2</td><td>The same controller succeeds or fails as that geometry changes</td><td class="done">established</td></tr>
+  <tr><td class="n">2</td><td>The same controller succeeds or fails as that geometry changes</td><td class="done">established &mdash; now on a <em>matched</em> pair</td></tr>
   <tr><td class="n">3</td><td>The 2&times;2 <em>outcome</em> survives a jittered start pose</td><td class="done">established &mdash; 12/12, 3/3</td></tr>
   <tr><td class="n">4</td><td>The scene <em>reverses the preference</em> between two feasible behaviours</td><td class="block">partial &mdash; cost not calibrated</td></tr>
   <tr><td class="n">5</td><td>A learner given this data uses geometry when it could ignore it</td><td class="open">not started &mdash; the decisive experiment</td></tr>
@@ -314,12 +307,13 @@ a { color:var(--accent); }
 <p>Attribution: contact on <code>torso_link</code> at frame 90, root-height deficit at frame 97 — the drift follows the collision by 140 ms. The crouch&#x27;s drift is 0.100 m/s in <em>both</em> scenes, so the shelf never reaches it.</p>
 <h4>The predicted window is optimistic on both sides</h4>
 <p>Probing both boundaries rather than assuming them changed how families must be placed.</p>
-<div class="scroll"><table><tr><th>shelf</th><th>motion</th><th>predicted</th><th>observed</th></tr><tr><td class="n">1.2971 m</td><td class="">nominal</td><td class="">fails</td><td class=""><strong>accepted</strong></td></tr><tr><td class="n">1.2574 m</td><td class="">nominal</td><td class="">fails</td><td class="">rejected</td></tr><tr><td class="n">1.2574 m</td><td class="">crouch</td><td class="">clears</td><td class="">accepted</td></tr><tr><td class="n">1.2154 m</td><td class="">crouch</td><td class="">clears</td><td class=""><strong>rejected</strong></td></tr></table></div>
-<p>The nominal survives 8 mm below where it is predicted to fail; the crouch fails 8 mm above where it is predicted to clear. Both errors shrink the usable window: the real one is contained in (1.2154, 1.2971) — at most <strong>81.7 mm</strong> against the predicted 97.7 — and contains 1.2574, verified from both sides.</p>
+<div class="scroll"><table><tr><th>shelf</th><th>motion</th><th>predicted</th><th>observed</th></tr><tr><td class="n">1.2971 m</td><td class="">nominal</td><td class="">fails</td><td class=""><strong>accepted</strong></td></tr><tr><td class="n">1.2801 m</td><td class="">nominal</td><td class="">fails</td><td class="">rejected — 85.0 N overhead, 0.0 lateral</td></tr><tr><td class="n">1.2574 m</td><td class="">nominal</td><td class="">fails</td><td class="">rejected</td></tr><tr><td class="n">1.2574 m</td><td class="">crouch</td><td class="">clears</td><td class="">accepted</td></tr><tr><td class="n">1.2154 m</td><td class="">crouch</td><td class="">clears</td><td class=""><strong>rejected</strong></td></tr></table></div>
+<p>The nominal survives 8 mm below where it is predicted to fail; the crouch fails 8 mm above where it is predicted to clear. Both errors shrink the usable window: the real one is between <strong>22.7 and 81.7 mm</strong> wide against a predicted 97.7, so in the worst case the prediction over-states it more than fourfold. It does contain 1.2574 m, verified from both sides.</p>
 <p>The two errors have different causes. Swept capsules are conservative outer approximations, so they should make a motion look taller than it is and predict interference early, which is what happened to the nominal. The crouch failing <em>higher</em> than predicted is not geometric at all: at 1.2154 m the shelf pressed <code>torso_link</code> down at 1017.4 N and the controller lost its reference. A swept volume knows where the robot went; it does not know that a controller squeezed into a gap stops being able to track. <strong>So placement targets the window&#x27;s centre</strong>, and the margin cannot be replaced by a predicted-boundary offset.</p>
 <h4>Measuring this found a gate defect, and corrected three published numbers</h4>
 <p><code>disallowed_robot_contact</code> tested only the <em>horizontal</em> component of external contact, because the settling load a dropped robot puts on its hips is vertical and had to be excluded. Excluding all vertical force also excluded every overhead collision. The crouch at 1.2154 m carried 1017.4 N straight down on <code>torso_link</code> with a horizontal component of exactly 0.0, so the gate stayed silent; only the ensuing drift caught it, meaning a milder jam would have been <strong>accepted</strong> — in precisely the regime this corpus exists to supply. Sign separates the two cases: the floor holding a knee up pushes +z, an obstacle overhead pushes −z.</p>
-<p>Auditing all 230 evaluable episodes found 10 carrying an overhead push above the lateral one, all already rejected on other grounds, so the corpus holds no false accepts. It did correct three earlier claims, all of which had read the smaller component:</p>
+<p>Auditing all 230 evaluable episodes found 10 carrying an overhead push above the lateral one, all already rejected on other grounds — so the corpus held no false accepts. <strong>That was luck, and the next rollout proved it:</strong> the 1.2801 m probe is rejected for <code>disallowed_robot_contact</code> alone, its drift below threshold, and regraded with the lateral-only gate it comes out <strong>accepted</strong> — a walk whose torso is pressed down 85 N, recorded as a clean traversal.</p>
+<p>The audit also corrected three earlier claims, all of which had read the smaller component:</p>
 <ul><li>the first family&#x27;s &quot;3.0 N graze&quot; was a <strong>409.3 N</strong> push on <code>torso_link</code>; that negative was never</li></ul>
 <p>  marginal</p>
 <ul><li>penetration does <strong>not</strong> track force: 3.3× penetration buys <strong>1.15×</strong> overhead force, not the 18×</li></ul>

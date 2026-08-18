@@ -146,14 +146,15 @@ Probing both boundaries rather than assuming them changed how families must be p
 | shelf | motion | predicted | observed |
 |---|---|---|---|
 | 1.2971 m | nominal | fails | **accepted** |
+| 1.2801 m | nominal | fails | rejected — 85.0 N overhead, 0.0 lateral |
 | 1.2574 m | nominal | fails | rejected |
 | 1.2574 m | crouch | clears | accepted |
 | 1.2154 m | crouch | clears | **rejected** |
 
 The nominal survives 8 mm below where it is predicted to fail; the crouch fails 8 mm above where it
-is predicted to clear. Both errors shrink the usable window: the real one is contained in
-(1.2154, 1.2971) — at most **81.7 mm** against the predicted 97.7 — and contains 1.2574, verified
-from both sides.
+is predicted to clear. Both errors shrink the usable window: the real one is between **22.7 and
+81.7 mm** wide against a predicted 97.7, so in the worst case the prediction over-states it more
+than fourfold. It does contain 1.2574 m, verified from both sides.
 
 The two errors have different causes. Swept capsules are conservative outer approximations, so they
 should make a motion look taller than it is and predict interference early, which is what happened
@@ -174,8 +175,12 @@ precisely the regime this corpus exists to supply. Sign separates the two cases:
 knee up pushes +z, an obstacle overhead pushes −z.
 
 Auditing all 230 evaluable episodes found 10 carrying an overhead push above the lateral one, all
-already rejected on other grounds, so the corpus holds no false accepts. It did correct three
-earlier claims, all of which had read the smaller component:
+already rejected on other grounds — so the corpus held no false accepts. **That was luck, and the
+next rollout proved it:** the 1.2801 m probe is rejected for `disallowed_robot_contact` alone, its
+drift below threshold, and regraded with the lateral-only gate it comes out **accepted** — a walk
+whose torso is pressed down 85 N, recorded as a clean traversal.
+
+The audit also corrected three earlier claims, all of which had read the smaller component:
 
 - the first family's "3.0 N graze" was a **409.3 N** push on `torso_link`; that negative was never
   marginal
