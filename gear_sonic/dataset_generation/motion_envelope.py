@@ -493,3 +493,70 @@ def best_one_sided_station(
             if window > best[2]:
                 best = (float(station), side, window)
     return best
+
+
+#: Link-name fragments belonging to the arms. Everything else sets a floor an upper-body
+#: operator cannot get below.
+ARM_FRAGMENTS = ("shoulder", "elbow", "wrist")
+
+
+def width_decomposition(
+    payload: Mapping,
+    station_x: float,
+    side: str,
+    *,
+    span: float = DEFAULT_STATION_SPAN_M,
+    capsules: Mapping[str, Sequence] = G1_COLLISION_CAPSULES,
+) -> dict:
+    """Split the width at one station into the part an arm tuck can move and the part it cannot.
+
+    An arm tuck narrows the robot only where the arms are what makes it widest. Where a hip or
+    a knee is already as wide, tucking the arms changes the silhouette not at all, and no
+    amount of operator strength will produce a family. That is a property of the clip and the
+    station, and it should make the generator refuse rather than be discovered after four
+    rollouts.
+
+    Returns the arm-driven width, the non-arm floor beneath it, and the reduction actually
+    available -- the difference, clipped at zero.
+    """
+    if side not in ("left", "right"):
+        raise ValueError(f"side must be 'left' or 'right'; got {side!r}")
+
+    root = np.asarray(payload["root_pos_w"], dtype=np.float64)
+    quat = np.asarray(payload["root_quat_w"], dtype=np.float64)
+    w, x, y, z = (quat[:, i] for i in range(4))
+    yaw = np.arctan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
+    lateral = np.stack([-np.sin(yaw), np.cos(yaw)], axis=1)
+
+    starts, ends, radii, owners = body_capsules_world(
+        np.asarray(payload["body_pos_w"], dtype=np.float64),
+        np.asarray(payload["body_quat_w"], dtype=np.float64),
+        list(payload["body_names"]), capsules=capsules,
+    )
+    centres = 0.5 * (starts + ends)
+    offsets = centres[:, :, :2] - root[:, None, :2]
+    signed = np.einsum("tcd,td->tc", offsets, lateral)
+    extent = (signed if side == "left" else -signed) + radii[None, :]
+
+    inside = np.abs(root[:, 0] - station_x) <= span / 2
+    if not inside.any():
+        return {
+            "arm_width_m": float("nan"), "nonarm_floor_m": float("nan"),
+            "available_reduction_m": 0.0, "critical_capsule": "",
+        }
+
+    arms = [i for i, owner in enumerate(owners)
+            if any(fragment in owner for fragment in ARM_FRAGMENTS)]
+    others = [i for i in range(len(owners)) if i not in arms]
+
+    arm_width = float(extent[inside][:, arms].max()) if arms else float("-inf")
+    floor = float(extent[inside][:, others].max()) if others else float("-inf")
+    widest = int(np.argmax(extent[inside].max(axis=0)))
+
+    return {
+        "arm_width_m": arm_width,
+        "nonarm_floor_m": floor,
+        "available_reduction_m": max(0.0, arm_width - floor),
+        "critical_capsule": owners[widest],
+        "arms_are_widest": bool(arm_width > floor),
+    }

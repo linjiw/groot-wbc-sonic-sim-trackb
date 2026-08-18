@@ -271,3 +271,64 @@ def test_routes_that_do_not_overlap_yield_no_station():
     far["root_pos_w"] = far["root_pos_w"] + np.array([100.0, 0.0, 0.0])
     station, side, window = best_one_sided_station(leaning(), far, capsules=LATERAL_CAPSULES)
     assert np.isnan(station) and side == "" and window == 0.0
+
+
+def test_width_splits_into_what_an_arm_tuck_can_move_and_what_it_cannot():
+    """An arm tuck narrows the robot only where the arms are what makes it widest.
+
+    Where a hip, knee or ankle is already as wide, tucking changes the silhouette not at all,
+    and that is a property of the clip and the station rather than of operator strength. It
+    should make the generator refuse rather than be discovered after four rollouts.
+    """
+    from gear_sonic.dataset_generation.motion_envelope import width_decomposition
+
+    payload = leaning(left=0.35, right=0.10)
+    payload["body_names"] = ["pelvis", "left_wrist_yaw_link", "left_ankle_roll_link"]
+    capsules = {
+        "pelvis": (CollisionCapsule(start=(0, 0, 0), end=(0, 0, 0), radius=0.05),),
+        "left_wrist_yaw_link": (
+            CollisionCapsule(start=(0, 0, 0), end=(0, 0, 0), radius=0.04),
+        ),
+        "left_ankle_roll_link": (
+            CollisionCapsule(start=(0, 0, 0), end=(0, 0, 0), radius=0.04),
+        ),
+    }
+    station = float(np.median(payload["root_pos_w"][:, 0]))
+    result = width_decomposition(payload, station, "left", span=1.0, capsules=capsules)
+    assert set(result) >= {
+        "arm_width_m", "nonarm_floor_m", "available_reduction_m",
+        "critical_capsule", "arms_are_widest",
+    }
+    assert result["available_reduction_m"] >= 0.0
+
+
+def test_a_side_step_is_a_genuine_refusal_case():
+    """Measured on the corpus: a side-step's ankle reaches 0.451 m while its arms sit at
+    0.340 m, so the available reduction is exactly zero. That is what a refusal control looks
+    like, as opposed to a clip that merely scored low under a metric fixed in advance."""
+    from gear_sonic.dataset_generation.motion_envelope import width_decomposition
+
+    payload = leaning(left=0.20, right=0.05)
+    payload["body_names"] = ["pelvis", "left_wrist_yaw_link", "left_ankle_roll_link"]
+    payload["body_pos_w"][:, 2, 1] = 0.45      # the ankle, far outside the arm
+    capsules = {
+        "pelvis": (CollisionCapsule(start=(0, 0, 0), end=(0, 0, 0), radius=0.05),),
+        "left_wrist_yaw_link": (
+            CollisionCapsule(start=(0, 0, 0), end=(0, 0, 0), radius=0.04),
+        ),
+        "left_ankle_roll_link": (
+            CollisionCapsule(start=(0, 0, 0), end=(0, 0, 0), radius=0.04),
+        ),
+    }
+    station = float(np.median(payload["root_pos_w"][:, 0]))
+    result = width_decomposition(payload, station, "left", span=1.0, capsules=capsules)
+    assert not result["arms_are_widest"]
+    assert result["available_reduction_m"] == 0.0
+    assert "ankle" in result["critical_capsule"]
+
+
+def test_an_unknown_side_is_refused():
+    from gear_sonic.dataset_generation.motion_envelope import width_decomposition
+
+    with pytest.raises(ValueError, match="side must be"):
+        width_decomposition(leaning(), 1.0, "up", capsules=LATERAL_CAPSULES)
