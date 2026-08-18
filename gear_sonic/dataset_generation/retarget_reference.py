@@ -122,7 +122,6 @@ def retarget_crouch(
     # ankle-roll link so it needs forward kinematics; a large shift is a reason to look at
     # the clip rather than roll it out.
     from .reference_payload import payload_from_reference
-
     from .swept_volume import G1_COLLISION_CAPSULES, body_capsules_world
 
     def sole_and_tilt(clip: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
