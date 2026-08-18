@@ -156,7 +156,7 @@ def main() -> int:
 
     gain = np.array([r["maximal"] for r in rows]) - np.array([r["midpoint"] for r in rows])
     moved = np.array([abs(r["station_maximal_m"] - r["station_midpoint_m"]) for r in rows])
-    print(f"\nchoosing the station over taking the midpoint:")
+    print("\nchoosing the station over taking the midpoint:")
     print(f"  median gain {np.median(gain)*1000:+.0f} mm, best {gain.max()*1000:+.0f} mm")
     print(f"  the chosen station sits a median {np.median(moved):.2f} m from the midpoint")
     rescued = int(((np.array([r['maximal'] for r in rows]) >= USABLE_WINDOW_M)
