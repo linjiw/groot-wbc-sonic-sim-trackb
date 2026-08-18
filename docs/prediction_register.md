@@ -21,18 +21,29 @@ the clip.
 against 0.224 — twenty mrad changed nothing — so I withdrew the causal claim and said excursion
 correlates across motions without controlling within one.
 
-**Reading 3, from a wider within-motion sweep.** Excursion *does* control it. My 0.980 probe was
-simply still inside x000's failure region, because that motion's threshold is nowhere near 0.99:
+**Reading 3, from a full within-motion sweep.** Excursion *does* control it, monotonically, inside a
+single motion:
 
-| excursion | drop | outcome | drift |
+| excursion | window | outcome | drift |
 |---|---|---|---|
-| 0.619 rad | 30.0 mm | **accepted** | 0.140 m/s |
-| 0.980 rad | 69.6 mm | rejected | 0.223 m/s |
-| 1.000 rad | 72.2 mm | rejected | 0.224 m/s |
+| 0.000 rad | — | accepted | 0.048 m/s |
+| 0.420 rad | 24.0 mm | accepted | 0.104 m/s |
+| 0.619 rad | 43.1 mm | **accepted** | 0.140 m/s |
+| 0.980 rad | 92.3 mm | rejected | 0.223 m/s |
+| 1.000 rad | 95.6 mm | rejected | 0.224 m/s |
 
-So the threshold is real and **motion-specific**: x000's sits in (0.619, 0.980) where motion 005
-holds at 0.994. A 20 mrad step was far too small to find it, and reading 2 mistook "no effect over
-this range" for "no effect".
+The threshold is real, **motion-specific** — x000's acceptance boundary lies in (0.619, 0.980) where
+motion 005 holds at 0.994 — and the drift curve **saturates** near the top: 0.223 against 0.224 for
+the last 20 mrad.
+
+That saturation is the whole explanation for reading 2. I sampled two points on the flat part of the
+curve, saw no difference, and concluded the curve did not exist. The lesson is narrower than "test
+within as well as between": it is that a null result from a single small step near a plateau says
+nothing about the relationship, and a sweep costs three rollouts where a wrong retraction costs a
+published claim.
+
+Incidentally the gate's own drift threshold is bracketed by the same sweep: accepted at 0.140 m/s,
+rejected at 0.223.
 
 ### What this means operationally, which is the useful part
 
