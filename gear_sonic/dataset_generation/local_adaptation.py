@@ -61,7 +61,10 @@ class LocalCrouchReport:
 
     frames: int
     station_fraction: float
-    #: Metres the collision-capsule silhouette peak came down by, at its lowest.
+    #: Metres the silhouette came down by **at its least**, inside the fully-active window.
+    #: The minimum rather than the maximum, because a shelf must clear the robot on every
+    #: frame it passes under; the peak drop would place a shelf the robot clears at one
+    #: instant and hits at the rest.
     silhouette_drop_m: float
     nominal_silhouette_m: float
     adapted_silhouette_m: float
@@ -176,23 +179,49 @@ def local_crouch(
     centre = 0.5 * (lower + upper)
     half = 0.5 * (upper - lower) * range_keep
 
+    # A squat is a *coupled* motion, and that has to be built in rather than discovered.
+    # Moving any single leg joint alone raises the body rather than lowering it -- measured on
+    # a real walk, every one of the six gave a negative drop -- because flexing one joint
+    # tilts the body or lifts a foot and the root compensation then puts it back. Only the
+    # hip/knee/ankle triple moving together shortens the leg while keeping the torso upright
+    # and the sole flat, which is the standard relationship below.
+    #
+    # Scaling the existing angles instead of adding to them was the earlier mistake: it ties
+    # the depth to gait phase, so the drop oscillated between 0.033 m and 0.157 m inside a
+    # window where the profile was fully active, and the obstacle sat at an extended moment.
+    coupling = {"hip_pitch": -1.0, "knee": +2.0, "ankle_pitch": -1.0}
+    leg_gain = np.zeros(len(legs))
+    for position, joint in enumerate(legs):
+        for key, gain in coupling.items():
+            if key in names[joint]:
+                leg_gain[position] = gain
+                break
+
     def build(scale: float) -> np.ndarray:
         out = qpos.copy()
-        # Flex the legs in proportion to the local profile, so the crouch is confined to the
-        # stretch of route the obstacle occupies and the rest of the clip is untouched.
-        factor = 1.0 + alpha[:, None] * scale
-        out[:, 7 + np.asarray(legs)] = qpos[:, 7 + np.asarray(legs)] * factor
+        # One parameter, the squat angle, modulated by the local profile.
+        out[:, 7 + np.asarray(legs)] = (
+            qpos[:, 7 + np.asarray(legs)] + alpha[:, None] * scale * leg_gain[None, :]
+        )
         out[:, 7 : 7 + count] = np.clip(out[:, 7 : 7 + count], centre - half, centre + half)
         # The root follows the legs, per frame, so the feet stay where the nominal put them.
         out[:, 2] += nominal_soles - _sole_height(out, mjcf_path)
         return out
 
-    # Bisect on the achieved silhouette drop.
+    # Bisect on the *smallest* drop inside the fully-active window, not the largest anywhere.
+    # A shelf has to clear the robot on every frame it passes under, so the binding number is
+    # the minimum. The same squat angle still yields different silhouette drops across the
+    # gait -- 0.102 to 0.200 m at one setting -- and targeting the peak would place a shelf the
+    # robot clears at its lowest instant and hits at every other.
+    core = alpha > 0.9
+    if not core.any():
+        core = alpha >= alpha.max() - 1e-9
+
     low, high = 0.0, max_scale
     for _ in range(12):
         middle = 0.5 * (low + high)
         drop = float(
-            (nominal_silhouette - _silhouette(build(middle), mjcf_path)).max()
+            (nominal_silhouette - _silhouette(build(middle), mjcf_path))[core].min()
         )
         if drop < target_drop_m:
             low = middle
@@ -210,7 +239,7 @@ def local_crouch(
     return adapted, LocalCrouchReport(
         frames=len(qpos),
         station_fraction=station_fraction,
-        silhouette_drop_m=float((nominal_silhouette - adapted_silhouette).max()),
+        silhouette_drop_m=float((nominal_silhouette - adapted_silhouette)[core].min()),
         nominal_silhouette_m=float(nominal_silhouette.min()),
         adapted_silhouette_m=float(adapted_silhouette.min()),
         waist_change_rad=waist_change,
