@@ -80,3 +80,36 @@ def check_route_meets_obstacle(
         closest_approach_m=float(distance.min()),
         suggested_shift_x_m=float(path[nearest, 0] - 0.5 * (x_min + x_max)),
     )
+
+
+def capsule_box_clearance(
+    starts: np.ndarray,
+    ends: np.ndarray,
+    radii: np.ndarray,
+    box: tuple[float, float, float, float, float, float],
+) -> tuple[float, int, int]:
+    """Smallest gap between any collision capsule and an axis-aligned box, over a whole clip.
+
+    ``check_route_meets_obstacle`` asks whether the *root path* enters an obstacle's footprint,
+    which is the right question for a ceiling the robot walks under and the wrong one for a wall it
+    walks past: the root never enters a wall's footprint, so that check would reject every lateral
+    scene ever built.
+
+    This asks the question that actually decides the outcome for either shape -- how close does the
+    body come to the solid -- and returns ``(clearance, frame, capsule)``. Negative clearance means
+    the capsule and the box overlap by that much.
+    """
+    x0, y0, z0, x1, y1, z1 = box
+    lower = np.array([x0, y0, z0], dtype=np.float64)
+    upper = np.array([x1, y1, z1], dtype=np.float64)
+
+    # Sample along each capsule's axis. The segment-to-box distance has no short closed form, and a
+    # sampled minimum is exact enough at the millimetre scale these scenes are placed to.
+    samples = np.linspace(0.0, 1.0, 9)[None, None, :, None]
+    points = starts[:, :, None, :] * (1.0 - samples) + ends[:, :, None, :] * samples
+    clamped = np.clip(points, lower, upper)
+    distance = np.linalg.norm(points - clamped, axis=-1) - radii[None, :, None]
+
+    flat = int(np.argmin(distance))
+    frame, capsule, _ = np.unravel_index(flat, distance.shape)
+    return float(distance.min()), int(frame), int(capsule)
