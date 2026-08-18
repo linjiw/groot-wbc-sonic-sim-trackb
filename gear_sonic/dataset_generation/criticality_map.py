@@ -38,15 +38,26 @@ DEFAULT_BANDS = (
     ("floor", 0.00, 0.25),
 )
 
-#: Which operator, if any, relieves a binding part. An obstacle binding a part with no operator
-#: produces a negative that nothing can answer, which is a scene, not a family.
+#: Which operator relieves a binding part, **per obstacle type**. The pairing is not a property of
+#: the body alone: the crouch lowers the robot without narrowing it, so it answers a ceiling meeting
+#: the torso and does nothing about a wall meeting the same torso. Keying this by body alone
+#: produced a planned configuration whose "window" was −7.0 mm — the adapted clip was *wider* than
+#: the nominal, because crouching swings the torso outward slightly on one side.
+#:
+#: The tuck is the mirror case: it narrows the arms without lowering them, so it answers a wall at
+#: the arms and not a ceiling that meets a shoulder.
 RELIEVED_BY = {
-    "torso_link": "local_crouch",
-    "left_wrist_yaw_link": "local_arm_tuck",
-    "right_wrist_yaw_link": "local_arm_tuck",
-    "left_elbow_link": "local_arm_tuck",
-    "right_elbow_link": "local_arm_tuck",
+    ("ceiling", "torso_link"): "local_crouch",
+    ("wall", "left_wrist_yaw_link"): "local_arm_tuck",
+    ("wall", "right_wrist_yaw_link"): "local_arm_tuck",
+    ("wall", "left_elbow_link"): "local_arm_tuck",
+    ("wall", "right_elbow_link"): "local_arm_tuck",
 }
+
+
+def operator_for(obstacle: str, body: str) -> str | None:
+    """The operator that relieves ``body`` when the obstacle arrives as ``obstacle``."""
+    return RELIEVED_BY.get((obstacle, body))
 
 
 @dataclass(frozen=True)
@@ -105,11 +116,19 @@ def criticality_map(
     *,
     bands: Sequence[tuple[str, float, float]] = DEFAULT_BANDS,
     capsules: Mapping[str, Sequence] = G1_COLLISION_CAPSULES,
+    frames: np.ndarray | None = None,
 ) -> list[BindingConstraint]:
     """For each height band and side, which body part an obstacle would meet first.
 
     Measured on the *executed* trajectory rather than the reference, because the reference is what
     was asked for and the execution is what the room will actually contain.
+
+    ``frames`` restricts the measurement to a boolean mask of frames, and for a **local** adaptation
+    it is mandatory. An obstacle sees only the frames the robot spends in front of it, while a
+    maximum over the whole clip sees the robot standing full height everywhere else. Measured
+    clip-wide, a local crouch appears to buy a window of −6.6 mm; measured over the frames it is
+    active, the same clip buys 97.7 mm. The difference is not subtle and it is the whole point of a
+    *local* operator.
     """
     starts, ends, radii, names = body_capsules_world(
         np.asarray(payload["body_pos_w"], dtype=np.float64),
@@ -125,20 +144,29 @@ def criticality_map(
     high = np.maximum(starts[:, :, 2], ends[:, :, 2]) + radii[None, :]
     low = np.minimum(starts[:, :, 2], ends[:, :, 2]) - radii[None, :]
 
+    if frames is not None:
+        mask = np.asarray(frames, dtype=bool)
+        if mask.shape[0] != high.shape[0]:
+            raise ValueError(
+                f"frame mask has {mask.shape[0]} entries for a {high.shape[0]}-frame capture"
+            )
+        if not mask.any():
+            raise ValueError("frame mask selects no frames, so nothing can bind an obstacle")
+        high, low, offset = high[mask], low[mask], offset[mask]
+
     out: list[BindingConstraint] = []
     for name, z0, z1 in bands:
         in_band = (high > z0) & (low < z1)
         occupied = int(in_band.any(axis=1).sum())
 
-        # A ceiling descending into the band is stopped by the highest point inside it, which is
-        # usually a different capsule from the one a wall would meet.
-        ceiling = np.where(in_band, high, -np.inf)
-        if np.isfinite(ceiling).any():
-            flat = int(np.argmax(np.where(np.isfinite(ceiling), ceiling, -np.inf)))
-            top_body = names[flat % ceiling.shape[1]]
-            top_reach = float(ceiling[np.isfinite(ceiling)].max())
-        else:
-            top_body, top_reach = "", 0.0
+        # A ceiling is defined by its height, so it is *not* band-restricted: it is stopped by the
+        # robot's highest point, wherever that is. Restricting it to a band measures something that
+        # changes identity the moment an adaptation moves the body out of the band -- a crouch that
+        # drops the torso below 1.15 m made the same measurement report a 2 mm window where the
+        # verified family has 98 mm. The band selects where a *wall* goes; a ceiling ignores it.
+        flat = int(np.argmax(high))
+        top_body = names[flat % high.shape[1]]
+        top_reach = float(high.max())
 
         for side, sign in (("left", 1.0), ("right", -1.0)):
             # A wall approaching from one side is stopped by whatever reaches furthest that way.
@@ -162,8 +190,8 @@ def criticality_map(
                     vertical_body=top_body,
                     vertical_reach_m=top_reach,
                     frames_in_band=occupied,
-                    lateral_relieved_by=RELIEVED_BY.get(side_body),
-                    vertical_relieved_by=RELIEVED_BY.get(top_body),
+                    lateral_relieved_by=operator_for("wall", side_body),
+                    vertical_relieved_by=operator_for("ceiling", top_body),
                 )
             )
     return out

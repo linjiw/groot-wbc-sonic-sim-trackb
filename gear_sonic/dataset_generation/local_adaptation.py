@@ -139,6 +139,38 @@ class LocalCrouchReport:
     excursion_capped: bool = False
 
 
+def active_frames(
+    nominal_qpos: np.ndarray,
+    adapted_qpos: np.ndarray,
+    *,
+    threshold: float = 0.5,
+    trim: float = 0.2,
+) -> np.ndarray:
+    """Frames where a local adaptation is fully active, as a boolean mask.
+
+    Any window measured over a *fixed* slice of route progress takes its maximum from the ramp
+    edges, where the adaptation has barely begun and the adapted clip still looks like the nominal.
+    That reported a 14 mm window for a 180 mm adaptation once, and a 2.4 mm window for a 95 mm one
+    later, in a different script -- the same mistake twice because the fix lived in a script instead
+    of here.
+
+    The mask is found from the clips themselves: frames whose joint departure exceeds ``threshold``
+    of its peak, with ``trim`` of them dropped from each end so the ramp is excluded.
+    """
+    nominal = np.asarray(nominal_qpos, dtype=np.float64)
+    adapted = np.asarray(adapted_qpos, dtype=np.float64)
+    count = min(len(nominal), len(adapted))
+    departure = np.abs(adapted[:count, 7:] - nominal[:count, 7:]).max(axis=1)
+    if not departure.any():
+        raise ValueError("the two clips are identical, so no adaptation is active anywhere")
+    active = np.flatnonzero(departure > threshold * departure.max())
+    margin = int(len(active) * trim)
+    kept = active[margin : len(active) - margin] if margin else active
+    mask = np.zeros(count, dtype=bool)
+    mask[kept] = True
+    return mask
+
+
 def route_progress(root_xy: np.ndarray) -> np.ndarray:
     """Cumulative path length, normalised to [0, 1].
 
