@@ -224,3 +224,192 @@ def local_crouch(
         ),
         scale_applied=float(0.5 * (low + high)),
     )
+
+
+#: Joints the arm tuck may use. Upper body only: the legs, the root and the gait are not
+#: touched at all, which is why this operator is easier than the crouch and why its output is
+#: far more likely to remain trackable -- nothing about the support or contact schedule moves.
+TUCK_JOINTS = ("shoulder", "elbow", "wrist")
+
+
+@dataclass(frozen=True)
+class LocalTuckReport:
+    """What the arm tuck achieved, and what it left alone."""
+
+    frames: int
+    station_fraction: float
+    #: Metres the collision-capsule half-width came in by, at its narrowest.
+    half_width_reduction_m: float
+    #: Widest the robot gets **inside the adaptation window**, before and after. These, not
+    #: the whole-clip maxima, are what a gap placed at the station would test: the operator is
+    #: local, so the clip's overall widest frame is usually outside the window and barely
+    #: moves. Reporting the whole-clip figure made a working tuck look like it did nothing.
+    nominal_half_width_at_station_m: float
+    adapted_half_width_at_station_m: float
+    #: Whole-clip maxima, kept so a caller can see the tuck did not widen the robot elsewhere.
+    nominal_half_width_m: float
+    adapted_half_width_m: float
+    #: Largest change to any leg joint, in radians. Should be exactly 0.
+    leg_change_rad: float
+    active_fraction: float
+    root_path_preserved: bool
+    scale_applied: float
+
+
+def _half_width(qpos: np.ndarray, mjcf_path) -> np.ndarray:
+    """Per-frame half-width across the direction of travel, on capsule surfaces.
+
+    Across the heading rather than the world y axis, and on the capsule rather than a link
+    origin: the G1's measured half-width runs 0.273 m with arms tucked to 0.664 m at peak arm
+    swing, so both choices change the answer by more than any tuck would.
+    """
+    from .reference_payload import payload_from_reference
+    from .swept_volume import G1_COLLISION_CAPSULES, body_capsules_world
+
+    payload = payload_from_reference(qpos, mjcf_path=mjcf_path)
+    root = np.asarray(payload["root_pos_w"], dtype=np.float64)
+    quat = np.asarray(payload["root_quat_w"], dtype=np.float64)
+    w, x, y, z = (quat[:, i] for i in range(4))
+    yaw = np.arctan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
+    lateral = np.stack([-np.sin(yaw), np.cos(yaw)], axis=1)
+
+    starts, ends, radii, _ = body_capsules_world(
+        np.asarray(payload["body_pos_w"], dtype=np.float64),
+        np.asarray(payload["body_quat_w"], dtype=np.float64),
+        list(payload["body_names"]), capsules=G1_COLLISION_CAPSULES,
+    )
+    centres = 0.5 * (starts + ends)
+    offsets = centres[:, :, :2] - root[:, None, :2]
+    return (np.abs(np.einsum("tcd,td->tc", offsets, lateral)) + radii[None, :]).max(axis=1)
+
+
+def local_arm_tuck(
+    nominal_qpos: np.ndarray,
+    station_fraction: float,
+    *,
+    target_reduction_m: float = 0.08,
+    window: float = DEFAULT_WINDOW,
+    ramp: float = DEFAULT_RAMP,
+    range_keep: float = DEFAULT_RANGE_KEEP,
+    mjcf_path: str | Path = DEFAULT_G1_MJCF,
+) -> tuple[np.ndarray, LocalTuckReport]:
+    """Draw the arms in toward the torso locally, narrowing the silhouette.
+
+    The lateral counterpart to :func:`local_crouch`, and a deliberately easier operator: the
+    root, the legs and the contact schedule are untouched, so the only thing a tracker has to
+    follow differently is the arms.
+
+    Asking a generator for this produced motions 64 mm *wider* than a plain walk, which is why
+    it is constructed here instead. Narrowing is done by scaling the arm joints toward the
+    posture they hold at their narrowest, rather than toward zero, since zero is a T-pose in
+    some conventions and would widen the robot.
+    """
+    qpos = np.asarray(nominal_qpos, dtype=np.float64)
+    if qpos.ndim != 2 or qpos.shape[1] < 8:
+        raise ValueError(f"expected (T, 7+J) reference qpos, got {qpos.shape}")
+    if not 0.0 <= station_fraction <= 1.0:
+        raise ValueError(f"station_fraction must be in [0, 1]; got {station_fraction}")
+    if target_reduction_m <= 0.0:
+        raise ValueError(f"target_reduction_m must be positive; got {target_reduction_m}")
+
+    names, limits = load_joint_limits(mjcf_path)
+    count = min(qpos.shape[1] - 7, limits.shape[0])
+    arms = [
+        i for i, name in enumerate(names[:count])
+        if any(key in name for key in TUCK_JOINTS)
+    ]
+    legs = [
+        i for i, name in enumerate(names[:count])
+        if any(key in name for key in CROUCH_JOINTS)
+    ]
+    if not arms:
+        raise ValueError("no arm joints found in the model")
+
+    alpha = adaptation_profile(
+        route_progress(qpos[:, :2]), station_fraction, window=window, ramp=ramp
+    )
+    nominal_width = _half_width(qpos, mjcf_path)
+    lower, upper = limits[:count, 0], limits[:count, 1]
+    centre = 0.5 * (lower + upper)
+    half = 0.5 * (upper - lower) * range_keep
+
+    # Which way each arm joint has to move to narrow the robot is not knowable from the
+    # joint's name, and guessing it wrongly is how the first version of this operator made
+    # two clips *wider* than the walk they came from. It blended toward the arm pose at the
+    # clip's own narrowest frame, which is narrow only in combination with that frame's torso
+    # orientation; transplanted elsewhere in the gait it is not.
+    #
+    # So the direction is measured. Each arm joint is nudged both ways and the sign that
+    # reduces the mean half-width over the active window is kept.
+    active = alpha > 0.05
+    if not active.any():
+        active = np.ones(len(qpos), dtype=bool)
+    baseline = float(nominal_width[active].mean())
+    probe_step = 0.15
+    direction = np.zeros(len(arms))
+
+    # Mirrored joints are probed together. Half-width is a maximum over capsules, and in a
+    # symmetric arm pose both wrists attain it at once -- moving one alone cannot lower a
+    # maximum that two capsules share, so a per-joint probe sees a flat objective and gives
+    # up. Real clips swing out of phase and hide this; a symmetric one exposes it.
+    groups: dict[str, list[int]] = {}
+    for position, joint in enumerate(arms):
+        stem = names[joint].removeprefix("left_").removeprefix("right_")
+        groups.setdefault(stem, []).append(position)
+
+    for members in groups.values():
+        best_delta, best_signs = 0.0, [0.0] * len(members)
+        # A mirrored pair narrows when the two sides move oppositely; a midline joint when it
+        # moves either way. Both hypotheses are tried and the better kept.
+        candidates = [[1.0] * len(members), [-1.0] * len(members)]
+        if len(members) == 2:
+            candidates += [[1.0, -1.0], [-1.0, 1.0]]
+        for signs in candidates:
+            trial = qpos.copy()
+            for sign, position in zip(signs, members):
+                joint = arms[position]
+                trial[:, 7 + joint] = np.clip(
+                    trial[:, 7 + joint] + sign * probe_step, lower[joint], upper[joint]
+                )
+            reduction = baseline - float(_half_width(trial, mjcf_path)[active].mean())
+            if reduction > best_delta:
+                best_delta, best_signs = reduction, list(signs)
+        for sign, position in zip(best_signs, members):
+            direction[position] = sign
+
+    def build(scale: float) -> np.ndarray:
+        out = qpos.copy()
+        step = alpha[:, None] * scale * direction[None, :]
+        out[:, 7 + np.asarray(arms)] = qpos[:, 7 + np.asarray(arms)] + step
+        out[:, 7 : 7 + count] = np.clip(out[:, 7 : 7 + count], centre - half, centre + half)
+        return out
+
+    low, high = 0.0, 1.5
+    for _ in range(10):
+        middle = 0.5 * (low + high)
+        reduction = float((nominal_width - _half_width(build(middle), mjcf_path)).max())
+        if reduction < target_reduction_m:
+            low = middle
+        else:
+            high = middle
+    adapted = build(0.5 * (low + high))
+    adapted_width = _half_width(adapted, mjcf_path)
+
+    return adapted, LocalTuckReport(
+        frames=len(qpos),
+        station_fraction=station_fraction,
+        half_width_reduction_m=float((nominal_width - adapted_width).max()),
+        nominal_half_width_at_station_m=float(nominal_width[active].max()),
+        adapted_half_width_at_station_m=float(adapted_width[active].max()),
+        nominal_half_width_m=float(nominal_width.max()),
+        adapted_half_width_m=float(adapted_width.max()),
+        leg_change_rad=float(
+            np.abs(adapted[:, 7 + np.asarray(legs)] - qpos[:, 7 + np.asarray(legs)]).max()
+        ) if legs else 0.0,
+        active_fraction=float((alpha > 0.01).mean()),
+        root_path_preserved=bool(
+            np.array_equal(adapted[:, :3], qpos[:, :3])
+            and np.array_equal(adapted[:, 3:7], qpos[:, 3:7])
+        ),
+        scale_applied=float(0.5 * (low + high)),
+    )

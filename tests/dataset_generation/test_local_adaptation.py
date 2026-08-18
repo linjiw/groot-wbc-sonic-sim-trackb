@@ -156,3 +156,72 @@ def test_bad_arguments_are_refused():
         local_crouch(walk(), 0.5, target_drop_m=-0.1)
     with pytest.raises(ValueError, match=r"\(T, 7\+J\)"):
         local_crouch(np.zeros(36), 0.5)
+
+
+# ---- arm tuck ------------------------------------------------------------------------------
+
+def swinging_arms(frames: int = 90) -> np.ndarray:
+    """A walk whose arms swing out to the sides, so there is width to take in."""
+    qpos = walk(frames)
+    phase = np.linspace(0.0, 6 * np.pi, frames)
+    from gear_sonic.dataset_generation.motion_prefilter import load_joint_limits
+    names, _ = load_joint_limits(DEFAULT_G1_MJCF)
+    for index, name in enumerate(names[:29]):
+        if "shoulder_roll" in name:
+            sign = 1.0 if name.startswith("left") else -1.0
+            qpos[:, 7 + index] = sign * (0.35 + 0.15 * np.sin(phase))
+    return qpos
+
+
+def test_the_tuck_leaves_the_legs_and_the_root_alone():
+    """The reason this operator is easier than the crouch: nothing about the support or
+    contact schedule moves, so a tracker has only the arms to follow differently."""
+    from gear_sonic.dataset_generation.local_adaptation import local_arm_tuck
+
+    nominal = swinging_arms()
+    adapted, report = local_arm_tuck(nominal, 0.55, target_reduction_m=0.06)
+    assert report.leg_change_rad == pytest.approx(0.0, abs=1e-12)
+    assert np.array_equal(adapted[:, :7], nominal[:, :7])
+    assert report.root_path_preserved
+
+
+def test_the_tuck_narrows_the_robot_where_the_obstacle_is():
+    from gear_sonic.dataset_generation.local_adaptation import local_arm_tuck
+
+    _, report = local_arm_tuck(swinging_arms(), 0.55, target_reduction_m=0.06)
+    assert report.adapted_half_width_at_station_m < report.nominal_half_width_at_station_m
+
+
+def test_the_tuck_never_makes_the_robot_wider_anywhere():
+    """The failure of the first version, which blended toward the arm pose at the clip's own
+    narrowest frame. That pose is narrow only alongside that frame's torso orientation, and
+    transplanted elsewhere in the gait it made two real clips 20 to 40 mm wider.
+    """
+    from gear_sonic.dataset_generation.local_adaptation import local_arm_tuck
+
+    _, report = local_arm_tuck(swinging_arms(), 0.55, target_reduction_m=0.08)
+    assert report.adapted_half_width_m <= report.nominal_half_width_m + 1e-6
+
+
+def test_a_deeper_target_takes_more_width_in():
+    from gear_sonic.dataset_generation.local_adaptation import local_arm_tuck
+
+    _, light = local_arm_tuck(swinging_arms(), 0.55, target_reduction_m=0.04)
+    _, heavy = local_arm_tuck(swinging_arms(), 0.55, target_reduction_m=0.10)
+    assert heavy.half_width_reduction_m > light.half_width_reduction_m
+
+
+def test_the_tuck_is_local_like_the_crouch():
+    from gear_sonic.dataset_generation.local_adaptation import local_arm_tuck
+
+    _, report = local_arm_tuck(swinging_arms(), 0.55, target_reduction_m=0.06)
+    assert 0.05 < report.active_fraction < 0.6
+
+
+def test_bad_tuck_arguments_are_refused():
+    from gear_sonic.dataset_generation.local_adaptation import local_arm_tuck
+
+    with pytest.raises(ValueError, match="station_fraction"):
+        local_arm_tuck(walk(), 1.4)
+    with pytest.raises(ValueError, match="target_reduction_m"):
+        local_arm_tuck(walk(), 0.5, target_reduction_m=0.0)
