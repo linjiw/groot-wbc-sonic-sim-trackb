@@ -35,6 +35,7 @@ from pathlib import Path
 import pickle
 import subprocess
 import sys
+import time
 
 import numpy as np
 
@@ -55,6 +56,10 @@ PERTURBATIONS = (
     ("p2", -0.012, 0.018, math.radians(-0.8)),
     ("p3", 0.008, -0.015, math.radians(1.0)),
 )
+
+#: Free GPU memory a rollout needs before it is worth starting, in MiB. PhysX asks for a
+#: 256 MiB block up front and several more after; starting below this wastes a cell.
+REQUIRED_GPU_MIB = 6000
 
 #: What each cell is supposed to do. The family is the one False.
 EXPECTED_ACCEPT = {
@@ -81,7 +86,47 @@ def convert(csv: Path, out: Path, key: str, start_xy, yaw: float) -> bool:
     return result.returncode == 0
 
 
-def rollout(scene: str, motion: Path, out: Path, log: Path) -> None:
+class InfrastructureError(RuntimeError):
+    """A rollout did not run. This is never a scientific result.
+
+    The first attempt at this verification hit PhysX GPU out-of-memory on a shared card --
+    ``PxgCudaDeviceMemoryAllocator failed to allocate 268435456 bytes`` while another job
+    held 21 GB -- and every one of the twelve cells would have come back empty. Reported as
+    outcomes, that reads as ``perturbation_robust: false``: the family disowned because a
+    neighbour was using the GPU. Isaac also exits zero after printing a fatal traceback, so
+    the exit code cannot be trusted either. An absent rollout must stop the run.
+    """
+
+
+def free_gpu_mib() -> int:
+    """Free memory on the card, or -1 if it cannot be read."""
+    try:
+        result = subprocess.run(
+            ["nvidia-smi", "--query-gpu=memory.free", "--format=csv,noheader,nounits"],
+            capture_output=True, text=True, check=True,
+        )
+        return int(result.stdout.strip().splitlines()[0])
+    except (OSError, ValueError, subprocess.CalledProcessError):
+        return -1
+
+
+def wait_for_gpu(required_mib: int, *, timeout_s: float = 3600.0) -> None:
+    """Block until the card has room, rather than burning cells against a full GPU."""
+    deadline = time.monotonic() + timeout_s
+    while True:
+        free = free_gpu_mib()
+        if free < 0 or free >= required_mib:
+            return
+        if time.monotonic() > deadline:
+            raise InfrastructureError(
+                f"only {free} MiB free after waiting {timeout_s / 60:.0f} min; "
+                f"need {required_mib} MiB"
+            )
+        print(f"    waiting for GPU: {free} MiB free, need {required_mib} MiB")
+        time.sleep(60)
+
+
+def rollout(scene: str, motion: Path, out: Path, log: Path) -> bool:
     log.parent.mkdir(parents=True, exist_ok=True)
     with log.open("w") as handle:
         subprocess.run(
@@ -92,6 +137,7 @@ def rollout(scene: str, motion: Path, out: Path, log: Path) -> None:
             ],
             stdout=handle, stderr=subprocess.STDOUT, check=False,
         )
+    return "PASS" in log.read_text(encoding="utf-8", errors="replace")
 
 
 def outcome_of(directory: Path, key: str) -> str:
@@ -136,12 +182,18 @@ def main() -> int:
                         table[name][key] = "convfail"
                         print(f"  CONVFAIL {key}")
                         continue
+                    wait_for_gpu(REQUIRED_GPU_MIB)
                     print(f"  rolling out {key} ...")
-                    rollout(
-                        f"{family['family_id']}_{difficulty}", motion, out,
-                        work / name / "logs" / f"{key}.log",
-                    )
+                    log = work / name / "logs" / f"{key}.log"
+                    if not rollout(
+                        f"{family['family_id']}_{difficulty}", motion, out, log
+                    ):
+                        raise InfrastructureError(
+                            f"{name}/{key} did not complete; see {log}"
+                        )
                 result = outcome_of(out, key)
+                if result == "no_rollout":
+                    raise InfrastructureError(f"{name}/{key} recorded no trajectory")
                 table[name][key] = result
                 mark = "ok" if (result == "accepted") == EXPECTED_ACCEPT[key] else "DEPARTS"
                 print(f"    {key:16s} {result:12s} {mark}")
@@ -185,4 +237,9 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except InfrastructureError as error:
+        print(f"\nINFRASTRUCTURE FAILURE: {error}")
+        print("No verdict written -- this says nothing about the family.")
+        raise SystemExit(2) from error

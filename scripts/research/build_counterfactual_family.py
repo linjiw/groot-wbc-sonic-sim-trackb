@@ -54,6 +54,9 @@ from gear_sonic.dataset_generation.clutter_scene_builder import (  # noqa: E402
     FurniturePiece,
     render_scene_usda,
 )
+from gear_sonic.dataset_generation.motion_envelope import (  # noqa: E402
+    best_overhead_station,
+)
 from gear_sonic.dataset_generation.counterfactual_family import (  # noqa: E402
     CounterfactualError,
     ObstacleSpec,
@@ -219,8 +222,24 @@ def main() -> int:
         probes[label] = executed_bodies(out)
         print(f"  {label}: {probes[label]['total_frames']} frames recorded")
 
-    # --- 2. binary-search the shelf height the nominal motion first interferes with -------
-    mid = path_xy[len(path_xy) // 2]
+    # --- 2. choose where to put the shelf, then search its height ------------------------
+    # Not the path midpoint. An obstacle only separates two motions where they actually
+    # differ, and the adapted motion ducks over a stretch of its route rather than all of
+    # it. On the first family the midpoint caught the leading edge of the duck and yielded a
+    # 0.053 m window, while the station where the duck is deepest offers 0.18 m -- the
+    # difference between a 3 N graze and a decisive collision.
+    station_x, predicted_window = best_overhead_station(probes["nominal"], probes["adapted"])
+    if np.isfinite(station_x):
+        # Follow the nominal route's y at that station, so the shelf still spans the corridor.
+        index = int(np.argmin(np.abs(path_xy[:, 0] - station_x)))
+        mid = path_xy[index]
+        print(f"\nshelf station x = {station_x:.2f} m "
+              f"(predicted window {predicted_window:.3f} m); "
+              f"path midpoint would have been x = {path_xy[len(path_xy) // 2][0]:.2f} m")
+    else:
+        mid = path_xy[len(path_xy) // 2]
+        print("\nno station separates the motions; falling back to the path midpoint")
+
     shelf = ObstacleSpec(
         name="LowShelf", size=SHELF_SIZE,
         base_center=(float(mid[0]), float(mid[1]), 2.30),
