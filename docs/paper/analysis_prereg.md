@@ -122,3 +122,34 @@ is **0.73**.
 difference is detectable at 0.97, a 0.20 difference only at 0.73 — below the 0.80 convention — so
 the threshold sits near 0.25 and differences below it will not be claimed. The decision rule, the
 n, the seed count and the ambiguous zone are all unchanged.
+
+## Amendment 2 — 2026-08-19, before any label
+
+**What changed.** The experiment's family set is now fixed by a date rather than a count, and one
+expanded re-analysis is pre-declared.
+
+**Why.** The 56-cell banded batch produced zero verified families and was stopped at 21 cells for
+defects in the scene builder and the minimum-edit calibration. Nothing in that failure touches the
+question this experiment asks. The go/no-go was always that the experiment needs *contrast*, not
+corpus size, and three verified families were already declared sufficient to run it. Letting family
+yield move the experiment's date would make the schedule a function of an unrelated engineering
+setback, and would leave the eventual count looking chosen rather than fixed.
+
+**Primary analysis.** Whatever families are verified at **2026-08-24, 23:59 local** constitute the
+family set. The learner runs Aug 24–27 on that set under the specification already registered above
+— four input tiers, ≥10 seeds, exact binomial CIs, closed-loop scoring with `(scene_hash,
+motion_hash)` dedupe against certified cells — and the branch decision is written to the board on
+Aug 28. The set is frozen by timestamp before any label exists, and its size is reported whatever it
+turns out to be.
+
+**Pre-declared expanded re-analysis.** If **≥6 additional families** verify by **2026-09-03**, the
+identical analysis is re-run once on the enlarged set. Both results are reported side by side, with
+the Aug 24 result named as primary in every table that carries either. There is exactly one
+expansion, at one threshold, on one date; a second look is not available, and no result from the
+primary analysis may inform whether the expansion happens.
+
+**What this does not license.** A small family set does not become grounds for softening the
+decision rule. If the intervals are wide, the width is reported and the conclusion is stated as
+provisional — wide intervals at n = 30 scenes are a limitation already acknowledged in this
+document, not a reason to move a threshold. The ambiguous zone, the α, the seed count and the
+minimum detectable effect are all unchanged.
