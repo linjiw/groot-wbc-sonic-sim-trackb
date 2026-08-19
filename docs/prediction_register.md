@@ -197,6 +197,23 @@ its commanded joint amplitude while delivering 38% of its predicted window. Both
 consistent with the operator acting distally on a constraint that binds proximally, and the gap
 between them is the part a joint-space cap could never fix.
 
+### Superseded by the automated measurement
+
+The hand figures below (30%, 59%, 25%) were point samples. `score_family_batch.py --plans` now
+measures the same quantity reproducibly — on the binding body, over the frames where each run is
+within 10 cm of the binding position — and reports **43%, 70% and 30%**. The automated numbers are
+authoritative because they are what will run over all fourteen families; the hand ones are kept
+because the reasoning that produced them is what identified the metric in the first place.
+
+Aligning by position rather than frame index is the part that matters. Matched frames compare a
+blocked nominal at x = 1.32 m against an adapted run already at x = 1.92 m — two different places,
+one of which has no obstacle in it — and that error alone reported the overhead crouch at −21%.
+
+The repairability conclusions are unchanged under the new numbers: chest needs 0.091 rad and waist
+0.211 rad against a 0.40 rad cap, and the ceiling needs 1.419 rad against 0.98 — still over cap,
+now by 1.4× rather than 2.1×. Both conclusions survive the revision, which is the only reason they
+were worth stating before it.
+
 ### Three bands measured: delivery is 25–59%, and the metric has to be local
 
 With three families complete, delivered window measured on the binding body the plan names:

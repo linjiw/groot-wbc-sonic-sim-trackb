@@ -22,6 +22,7 @@ import pickle
 
 import numpy as np
 
+from gear_sonic.dataset_generation.swept_volume import G1_COLLISION_CAPSULES, body_capsules_world
 from gear_sonic.dataset_generation.trajectory_acceptance import evaluate_locomotion_trajectory
 from gear_sonic.dataset_generation.trajectory_segments import best_evaluable_payload
 
@@ -78,6 +79,109 @@ def cell_report(cell: Path) -> dict | None:
     }
 
 
+def delivered_window(family: Path, plan: dict) -> float | None:
+    """How much clearance the operator actually bought, at the moment the obstacle binds.
+
+    Measured on the binding body the plan names, at the place along the route where the obstacle
+    binds -- never over the whole episode, and never at matched frame indices.
+
+    Both restrictions were learned by getting them wrong. A maximum over the episode is dominated by
+    whatever the robot does furthest from the obstacle, the part the operator never touched, and it
+    reported a real 27 mm crouch as *negative* delivery. Matching by frame index is just as wrong for
+    a different reason: a nominal that the obstacle stops falls behind, so at the frame it strikes,
+    the adapted run is half a metre further down the room and is being compared at a place the
+    obstacle is not. Both runs are therefore sampled where each one reaches the binding x.
+    """
+    body, vertical = plan["binding_body"], plan["obstacle"] == "ceiling"
+
+    def reach(cell: Path, frames: slice | None) -> float | None:
+        found = sorted(cell.glob("trajectories/*.trajectory.pkl"))
+        if not found:
+            return None
+        with open(found[0], "rb") as handle:
+            payload, _ = best_evaluable_payload(pickle.load(handle))
+        if payload is None or "body_pos_w" not in payload:
+            return None
+        starts, ends, radii, owner = body_capsules_world(
+            np.asarray(payload["body_pos_w"], dtype=np.float64),
+            np.asarray(payload["body_quat_w"], dtype=np.float64),
+            list(payload["body_names"]),
+            capsules=G1_COLLISION_CAPSULES,
+        )
+        keep = [k for k in range(starts.shape[1]) if owner[k] == body]
+        if not keep:
+            return None
+        window = frames or slice(None)
+        if vertical:
+            return float(
+                max(
+                    (P[window, k, 2] + radii[k]).max()
+                    for k in keep
+                    for P in (starts, ends)
+                )
+            )
+        root = np.asarray(payload["root_pos_w"], dtype=np.float64)
+        quat = np.asarray(payload["root_quat_w"], dtype=np.float64)
+        w, x, y, z = (quat[:, i] for i in range(4))
+        yaw = np.arctan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
+        cos, sin = np.cos(-yaw), np.sin(-yaw)
+        best = -np.inf
+        for k in keep:
+            for P in (starts, ends):
+                delta = P[:, k, :] - root
+                lateral = sin * delta[:, 0] + cos * delta[:, 1] + radii[k]
+                best = max(best, float(lateral[window].max()))
+        return best
+
+    # Locate the binding moment from the nominal's own contact on that body.
+    found = sorted((family / "nominal_hard").glob("trajectories/*.trajectory.pkl"))
+    if not found:
+        return None
+    with open(found[0], "rb") as handle:
+        payload, _ = best_evaluable_payload(pickle.load(handle))
+    if payload is None or "robot_contact_force_w" not in payload:
+        return None
+    # The binding moment is found from whatever the robot actually struck, not from the body the
+    # plan names. Those differ routinely: a plan naming left_elbow_link describes a capsule the
+    # elbow shares with left_shoulder_yaw_link, and the contact is reported against the shoulder.
+    # Reach is still measured on the named body -- only the timing comes from the strike.
+    names = list(payload["contact_body_names"])
+    feet = set(payload.get("allowed_foot_contact_body_names", ()))
+    keep = [i for i, name in enumerate(names) if name not in feet]
+    if not keep:
+        return None
+    magnitudes = np.linalg.norm(np.asarray(payload["robot_contact_force_w"])[:, keep, :], axis=2)
+    per_frame = magnitudes.max(axis=1)
+    if per_frame.max() <= 50.0:
+        return None
+    peak = int(per_frame.argmax())
+    binding_x = float(np.asarray(payload["root_pos_w"], dtype=np.float64)[peak, 0])
+
+    def near_binding_x(cell: Path) -> slice | None:
+        """Frames where this run is within 10 cm of where the obstacle binds."""
+        found = sorted(cell.glob("trajectories/*.trajectory.pkl"))
+        if not found:
+            return None
+        with open(found[0], "rb") as handle:
+            data, _ = best_evaluable_payload(pickle.load(handle))
+        if data is None or "root_pos_w" not in data:
+            return None
+        x = np.asarray(data["root_pos_w"], dtype=np.float64)[:, 0]
+        close = np.flatnonzero(np.abs(x - binding_x) < 0.10)
+        if not len(close):
+            return None
+        return slice(int(close[0]), int(close[-1]) + 1)
+
+    spans = {c: near_binding_x(family / c) for c in ("nominal_hard", "adapted_hard")}
+    if any(s is None for s in spans.values()):
+        return None
+    nominal = reach(family / "nominal_hard", spans["nominal_hard"])
+    adapted = reach(family / "adapted_hard", spans["adapted_hard"])
+    if nominal is None or adapted is None:
+        return None
+    return nominal - adapted
+
+
 def miss_mode(cells: dict[str, dict]) -> str:
     """Why a family does not hold, named so that opposite causes are not merged."""
     if all(cells[c]["accepted"] == WANTED[c] for c in CELLS):
@@ -100,8 +204,14 @@ def miss_mode(cells: dict[str, dict]) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("root", type=Path, help="directory of family directories")
+    ap.add_argument("--plans", type=Path, default=None, help="batch.json, to measure delivery")
     ap.add_argument("--json", type=Path, default=None)
     args = ap.parse_args()
+
+    plans = {}
+    if args.plans and args.plans.exists():
+        for plan in json.loads(args.plans.read_text())["plans"]:
+            plans[(plan["nominal"], plan["band"], plan["side"])] = plan
 
     families = sorted(p for p in args.root.iterdir() if p.is_dir())
     rows, partial = [], 0
@@ -110,7 +220,19 @@ def main() -> int:
         if any(v is None for v in cells.values()):
             partial += 1
             continue
-        rows.append({"family": family.name, "cells": cells, "mode": miss_mode(cells)})
+        row = {"family": family.name, "cells": cells, "mode": miss_mode(cells)}
+        parts = family.name.split("_")
+        plan = plans.get((f"{parts[0]}_{parts[1]}", parts[3], parts[4])) if len(parts) > 4 else None
+        if plan:
+            delivered = delivered_window(family, plan)
+            row["predicted_window_m"] = plan["window_m"]
+            row["binding_body"] = plan["binding_body"]
+            row["operator"] = plan["operator"]
+            row["delivered_window_m"] = delivered
+            row["delivery_ratio"] = (
+                delivered / plan["window_m"] if delivered is not None and plan["window_m"] else None
+            )
+        rows.append(row)
 
     if not rows:
         print(f"no complete families yet ({partial} partial)")
@@ -122,6 +244,16 @@ def main() -> int:
             f"{('ok' if row['cells'][c]['accepted'] else 'no'):>7s}" for c in CELLS
         )
         print(f"{row['family']:>34s} {marks}  {row['mode']}")
+
+    measured = [r for r in rows if r.get("delivery_ratio") is not None]
+    if measured:
+        print(f"\n{'family':>30s} {'binding body':>22s} {'pred':>8s} {'deliv':>8s} {'ratio':>6s}")
+        for row in measured:
+            print(
+                f"{row['family']:>30s} {row['binding_body']:>22s} "
+                f"{1000 * row['predicted_window_m']:7.1f}mm {1000 * row['delivered_window_m']:7.1f}mm "
+                f"{100 * row['delivery_ratio']:5.0f}%"
+            )
 
     verified = [r for r in rows if r["mode"] == "verified"]
     print(f"\n{len(verified)} of {len(rows)} complete families verified; {partial} still running")
