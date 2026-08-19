@@ -197,6 +197,48 @@ its commanded joint amplitude while delivering 38% of its predicted window. Both
 consistent with the operator acting distally on a constraint that binds proximally, and the gap
 between them is the part a joint-space cap could never fix.
 
+## The room is sized from the route and centred on the origin
+
+*Found 2026-08-19. The batch was stopped on this.*
+
+`n_064` fails its easy scene identically in two different scenes — 183.5 N lateral, 0.355 m lag, the
+same rejection set, in a ceiling scene and a wall scene. Identical numbers across different
+obstacles mean the contact is with neither. It is with the room.
+
+`build_graded_scene.py` computes `room = (span_x + 4.0, max(span_y + 4.0, 5.0))` and passes it as
+`room_size_xy` — **a size with no centre**. The room is therefore built about the origin, while a
+route has no obligation to be centred there. `n_064`'s route runs x = −2.83 … −2.00, so a 4.83 m
+room spans −2.42 … +2.42 and the robot begins 0.42 m outside its own room. The measured overrun is
+418 mm and the peak force is +183.5 N in pure +x, pushing it back in.
+
+Screening all eight screened nominals against this criterion costs nothing and settles the batch:
+
+| nominal | forward travel | origin-centred room fit |
+|---|---|---|
+| `n_001` | 1.87 m | yes |
+| `n_004` | 2.12 m | yes |
+| `n_013` | 4.21 m | yes |
+| `n_014` | 6.22 m | yes |
+| `n_126` | 3.50 m | yes |
+| `n_064` | 1.80 m | **no, by 906 mm** |
+| `n_065` | 0.82 m | **no, by 414 mm** |
+| `n_122` | 3.98 m | **no, by 1981 mm** |
+
+`n_064` and `n_065` were the only nominals left in the queue, and both fail. Every remaining cell —
+ten configurations, forty rollouts — would have been void: not failed, void, because a baseline that
+cannot survive its easy scene makes its whole family uninterpretable. **The batch loop was stopped
+after 21 of 56 cells**, with the rollout already in flight left to finish.
+
+Two things this is not. It is not a screening threshold that needs loosening: the screen asks
+whether a clip tracks, which `n_064` does. And it is not a property of short clips — `n_001` travels
+1.87 m against `n_064`'s 1.80 m and fits, because it happens to start near the origin. The criterion
+is *where* the route sits, not how far it goes, which is why no amount of looking at the clips
+predicts it and one line of arithmetic does.
+
+The fix is to centre the room on the route rather than the origin, which is a change to the scene
+builder alone. Five nominals pass and a corrected batch can use them, so the pilot is not blocked —
+it is delayed by the rollouts already spent.
+
 ## A screened nominal can still fail its own easy scene
 
 *Found 2026-08-19 on the first `n_064` family.*
