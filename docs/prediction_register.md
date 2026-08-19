@@ -140,6 +140,34 @@ otherwise every failure buys an extension.
 falls short at the end of Workstream A, this is the cheapest place to return to, and the band is
 recorded here so the return costs two rollouts rather than ten.
 
+## P6: the transport cost predicts family yield by band
+
+*Registered 2026-08-19, with 2 of 56 cells seen and 12 of 14 configurations unrolled.*
+
+The batch splits by operator exactly along the band: the three ceiling/overhead configurations are
+relieved by `local_crouch`, the eleven wall chest/waist configurations by `local_arm_tuck`. The
+transport-cost finding above says the crouch spends more forward progress than the endpoint gate
+allows, and the survival measurement says arm departures reach the body nearly intact while leg
+departures do not. If both are right, yield should separate cleanly by band. Registered before the
+results exist:
+
+1. **No ceiling/overhead configuration produces a verified family.** All three adapted cells fail
+   `reference_endpoint_tracking_error`. Falsified by any one of the three verifying.
+2. **At least 8 of the 11 wall configurations have adapted cells that pass tracking** — endpoint
+   error below 0.35 m in both easy and hard scenes. Falsified at 7 or fewer.
+3. **The adapted cell's endpoint error is lower for tuck configurations than for crouch
+   configurations**, with no overlap between the two groups. Falsified by any overlap.
+
+Prediction 3 is the sharp one. Predictions 1 and 2 could both come out right for reasons unrelated
+to transport cost — a wall is simply an easier obstacle than a ceiling, and that alone would
+separate the groups. Only 3 tests the mechanism, because it asks about the specific quantity the
+mechanism is about, and it fails if the two groups' endpoint errors interleave even where both
+verify.
+
+What would make all three uninformative: if the wall configurations fail for contact rather than
+tracking, the tuck's transport advantage is never exercised and the comparison says nothing. That
+outcome is recorded as such rather than reinterpreted.
+
 ## The crouch cannot pay its own transport cost
 
 *Found 2026-08-19, diagnosing the first completed banded family.*
