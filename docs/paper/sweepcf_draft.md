@@ -241,6 +241,51 @@ tuck's unrelated failure.
 For the tuck, no such predictor exists. Two were built and refuted, so its yield is a **budget
 line** — roughly three rollouts per usable lateral clip, plus one to screen each nominal.
 
+### What an operator buys, against what its plan assumed
+
+The minimum-edit rule asks for the smallest adaptation that clears the obstacle. Whether it clears
+anything depends on a quantity the rule never measures: how much of the commanded edit reaches the
+surface the obstacle actually binds against. Measured on the binding body each plan names, at the
+place along the route where the obstacle binds:
+
+<!-- generated:delivery-table -->
+| family | binding body | predicted | delivered | ratio | needed command | cap | reachable |
+|---|---|---|---|---|---|---|---|
+| `n_013_ceiling_overhead_left` | `torso_link` | 90.2 mm | 39.0 mm | 43% | 1.420 rad | 0.98 rad | **no — 1.4× over** |
+| `n_013_wall_chest_left` | `left_elbow_link` | 23.8 mm | 16.7 mm | 70% | 0.091 rad | 0.40 rad | yes |
+| `n_013_wall_waist_left` | `left_wrist_yaw_link` | 51.4 mm | 15.5 mm | 30% | 0.211 rad | 0.40 rad | yes |
+| `n_013_wall_waist_right` | `right_wrist_yaw_link` | 53.9 mm | -31.3 mm | -58% | — | 0.40 rad | **misaligned** |
+<!-- /generated:delivery-table -->
+
+The measurement is easy to get wrong and two wrong versions are worth naming, because both produce
+confident numbers. A maximum taken over the whole episode is dominated by whatever the robot does
+furthest from the obstacle — the part no operator touched — and reported a real 27 mm crouch as
+*negative* delivery. Comparing at matched frame indices is worse: a nominal that the obstacle stops
+falls behind, so at the frame it strikes, the adapted run is half a metre further down the room and
+is being measured where there is no obstacle. Both runs must be sampled where each one reaches the
+binding position.
+
+Two consequences follow, and they point in opposite directions.
+
+**The wall configurations are a calibration error.** Both need edits well inside the tuck's cap —
+the rule asked for roughly a third to a half of what was required — so correcting the delivery model
+would make them reachable without touching the cap, the gate, the journey, or the acceptance
+thresholds. A minimum computed against an optimistic model is optimistic by the same factor, and
+dividing the minimum by the measured delivery ratio is what the rule was always meant to mean.
+
+**The overhead configuration is not repairable by scaling.** Clearing its hard scene needs more
+commanded crouch than the operator's cap allows, and the crouch already fails the endpoint gate well
+below that cap by spending more forward progress than the budget permits. Both limits bind
+independently, so no deeper crouch produces an overhead family. The options are scene-side: place
+the hard face at a margin the crouch can deliver, or drop the band.
+
+A third outcome appears once and is reported rather than absorbed: a configuration whose delivered
+window is *negative*, meaning its adapted body sits further from the route than its nominal at the
+moment the obstacle binds, though the same operator retracts correctly over the episode as a whole.
+Scaling cannot fix an adaptation that is not where the obstacle is. On the reference clips every
+configuration places its obstacle inside its own adaptation window, so whatever separates them acts
+during execution, and this draft does not claim to know what it is.
+
 ### The lower-body operator cannot pay its own transport cost
 
 The two operators differ on a second axis, and this one bounds which obstacles the method can

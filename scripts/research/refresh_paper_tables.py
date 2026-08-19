@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 from pathlib import Path
 import pickle
 import re
@@ -84,7 +85,52 @@ def transport_table() -> str:
     return "\n".join(lines)
 
 
-BUILDERS = {"survival-table": survival_table, "transport-table": transport_table}
+FAMILY_SCORES = Path("/data/robotixx/groot-wbc-kimodo-m0/wsA/family_scores.json")
+
+#: Per-operator excursion caps, for asking whether a needed edit is reachable at all.
+OPERATOR_CAP = {"local_crouch": 0.98, "local_arm_tuck": 0.40}
+
+#: Commanded amplitude per configuration, from the release index. Keyed by band.
+COMMANDED_RAD = {"overhead": 0.6137, "chest": 0.0635, "waist": 0.0635}
+
+
+def delivery_table() -> str:
+    """What each operator bought, against what its plan assumed it would buy."""
+    if not FAMILY_SCORES.exists():
+        return "_family scores missing; run score_family_batch.py --plans_"
+    rows = [r for r in json.loads(FAMILY_SCORES.read_text()) if r.get("delivery_ratio") is not None]
+    if not rows:
+        return "_no family has both cells of its hard pair yet_"
+    lines = [
+        "| family | binding body | predicted | delivered | ratio | needed command | cap | reachable |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    for row in sorted(rows, key=lambda r: r["family"]):
+        ratio = row["delivery_ratio"]
+        band = next((b for b in COMMANDED_RAD if b in row["family"]), None)
+        cap = OPERATOR_CAP.get(row["operator"], float("nan"))
+        if band and ratio > 0:
+            needed = COMMANDED_RAD[band] / ratio
+            verdict = "yes" if needed <= cap else f"**no — {needed / cap:.1f}× over**"
+            needed_text = f"{needed:.3f} rad"
+        else:
+            # A negative ratio means the adaptation and the obstacle do not coincide, and no
+            # amount of scaling the edit fixes that. Dividing by it would print a negative command.
+            needed_text = "—"
+            verdict = "**misaligned**"
+        lines.append(
+            f"| `{row['family']}` | `{row['binding_body']}` | "
+            f"{1000 * row['predicted_window_m']:.1f} mm | {1000 * row['delivered_window_m']:.1f} mm | "
+            f"{100 * ratio:.0f}% | {needed_text} | {cap:.2f} rad | {verdict} |"
+        )
+    return "\n".join(lines)
+
+
+BUILDERS = {
+    "survival-table": survival_table,
+    "transport-table": transport_table,
+    "delivery-table": delivery_table,
+}
 
 
 def rewrite(text: str) -> tuple[str, list[str]]:
