@@ -86,6 +86,9 @@ EPISODE_COLUMNS = [
     "video_room",
     "video_side",
     "video_ego",
+    "video_front",
+    "video_top",
+    "n_videos",
 ]
 
 
@@ -208,10 +211,21 @@ def episode_row(cell_dir: Path, family_id: str, videos: Path | None) -> dict | N
             pass
 
     if videos:
-        for key, suffix in (("video_room", "room"), ("video_side", "side"), ("video_ego", "ego")):
+        for key, suffix in (
+            ("video_room", "room"),
+            ("video_side", "side"),
+            ("video_ego", "ego"),
+            ("video_front", "front"),
+            ("video_top", "top"),
+        ):
             candidate = videos / f"{cell_dir.name}__{suffix}.mp4"
             if candidate.exists():
                 row[key] = str(candidate)
+        row["n_videos"] = sum(
+            1
+            for k in ("video_room", "video_side", "video_ego", "video_front", "video_top")
+            if row[k]
+        )
     return row
 
 
