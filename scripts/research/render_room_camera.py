@@ -104,6 +104,17 @@ def main() -> int:
     ap.add_argument("--fps", type=int, default=25)
     ap.add_argument("--focal", type=float, default=760.0)
     ap.add_argument("--stride", type=int, default=2)
+    ap.add_argument(
+        "--view",
+        choices=("corner", "front", "side", "top"),
+        default="corner",
+        help="where the fixed camera stands in the room",
+    )
+    ap.add_argument(
+        "--clearance",
+        action="store_true",
+        help="annotate the running gap between the body and the obstacle",
+    )
     args = ap.parse_args()
     args.out.parent.mkdir(parents=True, exist_ok=True)
 
@@ -146,11 +157,18 @@ def main() -> int:
         except Exception:  # noqa: BLE001
             shelf = None
 
-    # Pinned beside and behind the obstacle, at standing eye height, so the robot walks across
-    # the frame rather than toward the lens.
+    # Four fixed stations, so the same episode can be shown from angles that answer different
+    # questions: a corner reads gait, the front reads lateral clearance, the side reads height
+    # clearance, and overhead reads the route.
     focus_x = float((shelf[0] + shelf[3]) / 2) if shelf is not None else float(root[:, 0].mean())
-    eye = np.array([focus_x - 0.9, -2.7, 1.35])
-    rotation, eye = look_at(eye, (focus_x + 0.25, 0.0, 0.80))
+    target = (focus_x + 0.25, 0.0, 0.80)
+    stations = {
+        "corner": np.array([focus_x - 0.9, -2.7, 1.35]),
+        "front": np.array([focus_x - 3.2, 0.0, 1.10]),
+        "side": np.array([focus_x + 0.1, -3.0, 1.05]),
+        "top": np.array([focus_x + 0.05, -0.9, 4.2]),
+    }
+    rotation, eye = look_at(stations[args.view], target)
 
     half_w, half_l = room[0] / 2, room[1] / 2
     # The floor is drawn as tiles rather than one quad. A single ground plane has corners behind
@@ -173,6 +191,19 @@ def main() -> int:
             [-half_w, half_l, 2.8],
         ]
     )
+
+    # The running gap between the body and the solid, which is what a viewer wants to judge and
+    # what a still frame cannot convey on its own.
+    gaps = None
+    if args.clearance and shelf is not None:
+        from gear_sonic.dataset_generation.scene_route_check import capsule_box_clearance
+
+        gaps = np.array(
+            [
+                capsule_box_clearance(starts[f : f + 1], ends[f : f + 1], radii, tuple(shelf))[0]
+                for f in range(len(root))
+            ]
+        )
 
     fig, ax = plt.subplots(figsize=(7.2, 4.05), dpi=130)
     frames = []
@@ -250,9 +281,24 @@ def main() -> int:
         ax.set_ylim(-300, 250)
         ax.set_aspect("equal")
         ax.axis("off")
-        ax.set_title(
-            f"{args.cell.name}   {outcome.outcome}   frame {frame}", fontsize=10, loc="left"
-        )
+        title = f"{args.cell.name}   {outcome.outcome}   frame {frame}"
+        if gaps is not None:
+            gap = float(gaps[frame])
+            title += f"      gap {gap * 1000:+.0f} mm"
+            # The running gap is the thing a viewer is trying to judge and the thing a still frame
+            # cannot convey, so it is drawn large rather than left in the title.
+            ax.text(
+                0.985,
+                0.05,
+                f"{gap * 1000:+.0f} mm",
+                transform=ax.transAxes,
+                ha="right",
+                va="bottom",
+                fontsize=18,
+                weight="bold",
+                color=(ROBOT_HIT if gap <= 0 else ROBOT_OK),
+            )
+        ax.set_title(title, fontsize=10, loc="left")
         fig.tight_layout(pad=0.4)
         fig.canvas.draw()
         frames.append(np.asarray(fig.canvas.buffer_rgba())[:, :, :3].copy())
