@@ -197,6 +197,35 @@ its commanded joint amplitude while delivering 38% of its predicted window. Both
 consistent with the operator acting distally on a constraint that binds proximally, and the gap
 between them is the part a joint-space cap could never fix.
 
+### Three bands measured: delivery is 25–59%, and the metric has to be local
+
+With three families complete, delivered window measured on the binding body the plan names:
+
+| family | binding body | predicted | delivered | ratio |
+|---|---|---|---|---|
+| `n_013_ceiling_overhead_left` | `torso_link` | 90.2 mm | 27.5 mm | 30% |
+| `n_013_wall_chest_left` | `left_elbow_link` | 23.8 mm | 14.0 mm | 59% |
+| `n_013_wall_waist_left` | `left_wrist_yaw_link` | 51.4 mm | 12.9 mm | 25% |
+
+P7.3 predicted a third within a factor of two, meaning 17–67%. All three fall inside it, though on
+three families that is weak support rather than confirmation.
+
+**The overhead row needed correcting twice, and the corrections are the lesson.** Measured as the
+tallest surface anywhere on the robot, delivery came out at −1.4 mm — the adapted body appearing
+*taller* than the nominal. Measured on `torso_link` alone but still as a maximum over the whole
+episode, it stayed at −1.4 mm. Only when measured at the place the obstacle sits does the crouch
+appear at all: the torso is 27.5 mm lower at x = 0.60 m and 22.0 mm lower at x = 0.90 m, and 10 mm
+*higher* by x = 1.10 m, because the adaptation window has closed by then.
+
+A local edit cannot be measured by a global extreme. The maximum over an episode is dominated by
+whatever the robot does furthest from the obstacle, which is precisely the part the operator did not
+touch. Every window figure quoted from here on is measured on the named binding body at the
+obstacle's own location.
+
+The waist family failed the same way as the chest family — its adapted motion struck the aperture —
+despite a predicted window more than twice as wide. That is the outcome P7.2 did not expect, and it
+weakens the reading that narrow windows alone explain the chest failure.
+
 ### P7, registered before the remaining twelve configurations report
 
 1. **No chest-band configuration produces a verified family.** Falsified by any one of the five.
