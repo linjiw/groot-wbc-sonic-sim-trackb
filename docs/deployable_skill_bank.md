@@ -71,7 +71,7 @@ The minimum set a closed loop can be built on:
 | local arm tuck | **exists** as a causal reference; tracks at 88–105% of the nominal, so it needs no retiming |
 | speed-consistent local crouch | **now buildable**; one clip retimed, none rolled out yet |
 | stop / abstain | **missing** — no clip, and the selector has nothing to choose when nothing is feasible |
-| phase-aligned walk → adapt → walk transition | **partly**: the retiming ramps pace with the adaptation inside one clip, but nothing yet composes two clips at a chosen gait phase |
+| phase-aligned walk → adapt → walk transition | **now buildable**: `motion_transitions.py` estimates gait phase from the soles and joins two clips at matched phase; composed on the real overhead pair, none rolled out yet |
 
 The four beyond the minimum — graded crouch depths, left/right tuck, sidestep, step-over — are all
 reachable with the existing operators and none of them is the blocker.
@@ -79,8 +79,20 @@ reachable with the existing operators and none of them is the blocker.
 **The transition is the one that cannot be skipped.** A real robot never enters a crouch from frame
 zero of a clip. Every closed-loop episode has to decide when to begin adapting, from which gait
 phase, when to recover, and how to switch between two obstacles without a discontinuity in the
-commanded action. Retiming makes each clip internally coherent; it does not yet make two clips
-joinable.
+commanded action. Retiming makes each clip internally coherent; `motion_transitions` makes two of
+them joinable.
+
+Composed on the real overhead pair — nominal `013` walk into the retimed deployable crouch and back
+out — the planner placed both seams at a gait-phase gap of **0.04 rad**, the worst commanded-velocity
+step near a seam was **0.138 rad/frame against the clip's own largest natural step of 0.266**, the
+route was held, and the peak silhouette under the shelf footprint stayed at 1.2091 m. A seam smoother
+than the motion's own worst acceleration is the property that matters; it is still a reference
+property, and no rollout has been spent on it.
+
+One measured limit is recorded rather than tuned away: the sole-height phase estimator reports 7
+wraps on the crouched clip against 4 on the walk, because a crouch compresses the signal it reads.
+It does not reach the planner, which compares phases locally, but stride *counts* from a crouched
+clip should not be trusted.
 
 ## What the retiming has been checked against, on CPU
 

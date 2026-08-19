@@ -27,6 +27,14 @@ that the frame being switched into sits exactly where the robot already is. This
 operation the controller performs on reset, applied without the reset: heading-only rotation, so
 the reference is not tipped, and the height left alone, so a crouched clip stays crouched.
 
+**A measured limit of the phase estimator, recorded rather than tuned away.** On the retimed
+overhead crouch it reports 7 wraps against the nominal walk's 4 over the same route. The crouch
+compresses the sole-height difference the estimator reads, so the loop shrinks toward the noise and
+picks up spurious crossings. This does not reach the planner's decisions -- it compares phases
+locally, near one station, and found gaps of 0.04 rad at both seams of a real walk-crouch-walk
+composition -- but the *count* of strides in a crouched clip should not be trusted, and any future
+use that integrates phase over a whole clip needs a contact-based estimator instead of this one.
+
 What this module does not do is decide *whether* to switch. That is the selector's job, and the
 cost this returns is one of its inputs.
 """
@@ -38,6 +46,11 @@ from dataclasses import dataclass
 import numpy as np
 
 from .deployable_retiming import route_deviation_m, slerp
+
+# One definition of route progress, not three. `local_adaptation` owns it because that is where an
+# obstacle station is first expressed in it, and a second copy here would be the same mistake the
+# window measurement already made once by living in a script.
+from .local_adaptation import route_progress  # noqa: F401  (re-exported for callers of this module)
 
 #: Frames of cross-fade across the join. Long enough that the tracker sees a ramp rather than a
 #: step, short enough that the blended stretch is not a pose neither clip ever held. At 30 fps this
@@ -114,8 +127,13 @@ def gait_phase(soles: np.ndarray) -> np.ndarray:
     comparable between two clips that never shared a frame index.
 
     Both axes are scaled by their own spread before the angle is taken. Without that the loop is a
-    thin ellipse — the difference is centimetres, its derivative is millimetres per frame — and the
+    thin ellipse -- the difference is centimetres, its derivative is millimetres per frame -- and the
     angle would spend almost all of the stride near two values.
+
+    The angle **advances** with time, and zero is the moment the feet are level and separating. The
+    sign matters: a phase that ran backwards would still be a valid cycle coordinate and would still
+    match two clips correctly, but every caller reading it as "how far through the stride" would be
+    reading it inverted.
     """
     heights = np.asarray(soles, dtype=np.float64)
     if heights.ndim != 2 or heights.shape[1] != 2:
@@ -132,7 +150,7 @@ def gait_phase(soles: np.ndarray) -> np.ndarray:
         # A clip with no stride — standing, or both feet moving together. There is no phase to
         # report, and returning zeros says so without pretending the loop exists.
         return np.zeros(len(heights))
-    return np.arctan2(difference / scale_d, -rate / scale_r)
+    return np.arctan2(difference / scale_d, rate / scale_r)
 
 
 def phase_gap(a: float, b: float) -> float:
@@ -145,14 +163,6 @@ def support_profile(soles: np.ndarray, *, down_m: float = SOLE_DOWN_M) -> np.nda
     heights = np.asarray(soles, dtype=np.float64)
     floor = float(heights.min())
     return (heights - floor < down_m).mean(axis=1)
-
-
-def route_progress(root_xy: np.ndarray) -> np.ndarray:
-    """Cumulative path length, normalised to [0, 1]."""
-    steps = np.linalg.norm(np.diff(np.asarray(root_xy, dtype=np.float64), axis=0), axis=1)
-    cumulative = np.concatenate([[0.0], np.cumsum(steps)])
-    total = cumulative[-1]
-    return cumulative / total if total > 1e-9 else np.linspace(0.0, 1.0, len(root_xy))
 
 
 def _joint_velocity(qpos: np.ndarray) -> np.ndarray:
@@ -347,7 +357,9 @@ def join_discontinuity(clip: np.ndarray, frame: int) -> tuple[float, float]:
     return position, velocity
 
 
-def holds_route(source_qpos: np.ndarray, stitched: np.ndarray, *, tolerance_m: float = 0.05) -> bool:
+def holds_route(
+    source_qpos: np.ndarray, stitched: np.ndarray, *, tolerance_m: float = 0.05
+) -> bool:
     """Whether the stitched clip still walks the source's line through the room.
 
     A transition that veers is a different route, and a scene built against the source no longer
