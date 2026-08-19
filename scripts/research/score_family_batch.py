@@ -193,6 +193,11 @@ def miss_mode(cells: dict[str, dict]) -> str:
     """Why a family does not hold, named so that opposite causes are not merged."""
     if all(cells[c]["accepted"] == WANTED[c] for c in CELLS):
         return "verified"
+    # A nominal that cannot survive its own easy scene voids the family: every other cell is then
+    # measured against a baseline that does not work, and reporting one of their failures instead
+    # describes a symptom while the cause sits in the first cell.
+    if not cells["nominal_easy"]["accepted"]:
+        return "nominal does not survive the easy scene"
     if cells["nominal_hard"]["accepted"]:
         return "hard scene did not stop the nominal"
     adapted = [c for c in ("adapted_easy", "adapted_hard") if not cells[c]["accepted"]]
@@ -203,8 +208,6 @@ def miss_mode(cells: dict[str, dict]) -> str:
         return "adapted motion still struck the obstacle"
     if adapted and all(cells[c]["tracking_failed"] for c in adapted):
         return "adaptation cost more progress than the gate allows"
-    if not cells["nominal_easy"]["accepted"]:
-        return "nominal does not survive the easy scene"
     return "other"
 
 

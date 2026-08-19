@@ -197,6 +197,38 @@ its commanded joint amplitude while delivering 38% of its predicted window. Both
 consistent with the operator acting distally on a constraint that binds proximally, and the gap
 between them is the part a joint-space cap could never fix.
 
+## A screened nominal can still fail its own easy scene
+
+*Found 2026-08-19 on the first `n_064` family.*
+
+`n_064` passed the nominal screens. Its first family is nonetheless void: the nominal fails the
+**easy** scene, which is supposed to be the cell that always works.
+
+| cell | verdict | external | overhead | lag |
+|---|---|---|---|---|
+| `n_013` nominal_easy | accepted | 0.0 N | 0.0 N | 0.217 m |
+| `n_064` nominal_easy | **rejected** | 183.5 N | 0.0 N | 0.355 m |
+| `n_064` nominal_hard | rejected | 113.6 N | 43.1 N | 0.477 m |
+
+The contact is **lateral, with no overhead component at all**, in a scene whose only intended
+obstacle is a ceiling — and it carries `disallowed_foot_non_ground_contact`, a foot touching
+something that is not the floor. Neither is possible from the ceiling the scene was built to place.
+The route is meeting geometry that is not the obstacle, most likely the room's own walls, which
+`build_graded_scene.py` sizes as the nominal's span plus 4 m.
+
+**This is a screening gap, not a placement gap.** The nominal screen asks whether a clip tracks;
+it does not ask whether the clip fits the room that will be built around it. `n_013` clears its easy
+scene at exactly 0.0 N and `n_064` does not, and nothing in the screen distinguishes them.
+
+Its consequence for this batch is large. If the four remaining `n_064` configurations share the
+fault, twenty rollouts produce void families — not failed ones, void, because a baseline that cannot
+survive the easy scene makes every other cell in its family uninterpretable. `n_065` is untested and
+may or may not follow.
+
+The scorer now names this case first for exactly that reason. It previously reported this family as
+"adapted motion still struck the obstacle", which is true and useless: it describes a symptom three
+cells downstream of a baseline that never worked.
+
 ## The recalibrated tuck is already known to track
 
 *Checked 2026-08-19 against clips already run, no new rollouts.*
