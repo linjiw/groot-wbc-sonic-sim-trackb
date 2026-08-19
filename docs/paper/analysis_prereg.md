@@ -93,3 +93,32 @@ above. Both vintages are disclosed in any reported result.
 Every rollout must pass `scene_route_check.py`; a scene the robot never reaches measures nothing
 whatever its outcome reads. Success is explicit markers plus expected artifacts, never exit codes.
 No null conclusion is drawn without a sweep of at least three points spanning the range.
+
+---
+
+## Amendment 1 — 2026-08-19, before any label
+
+**What changed.** The stated power for the primary comparison. The original text read *"an exact
+binomial test distinguishes 0.50 from 0.80 with power ≈ 0.85"*. Computing the Clopper–Pearson
+intervals and the exact one-sided test gives **0.97**, not 0.85.
+
+**Why.** The original figure was an estimate written from memory rather than computed. It understated
+the test's power, which is the conservative direction, but a pre-registration that carries an
+uncomputed number is not doing its job.
+
+**The corrected numbers**, exact and reproducible:
+
+| successes / 30 | rate | 95% CI | width |
+|---|---|---|---|
+| 15 | 0.50 | [0.31, 0.69] | 0.37 |
+| 21 | 0.70 | [0.51, 0.85] | 0.35 |
+| 24 | 0.80 | [0.61, 0.92] | 0.31 |
+| 27 | 0.90 | [0.73, 0.98] | 0.24 |
+
+One-sided at α = 0.05: reject H₀ = 0.50 at **≥20/30**; power against 0.80 is **0.97**, against 0.70
+is **0.73**.
+
+**What does not change.** The minimum detectable effect stands as originally registered: a 0.30
+difference is detectable at 0.97, a 0.20 difference only at 0.73 — below the 0.80 convention — so
+the threshold sits near 0.25 and differences below it will not be claimed. The decision rule, the
+n, the seed count and the ambiguous zone are all unchanged.

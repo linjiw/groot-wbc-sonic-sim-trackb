@@ -394,6 +394,33 @@ The last two matter because a policy that always crouches is safe and has unders
 all three are equal, the question becomes *when does counterfactual supervision add anything
 beyond geometric collision reasoning* — which is still a paper, and a more interesting one.
 
+## Anticipating the three objections
+
+**Why n = 30 suffices.** The statistical unit is the scene, and thirty scene-first scenes were
+frozen before any operator existed. Exact Clopper–Pearson intervals at n = 30 are wide but not
+uninformative: 24/30 gives [0.61, 0.92] and 27/30 gives [0.73, 0.98]. A one-sided exact test rejects
+0.50 at ≥20/30 with power 0.97 against 0.80 and 0.73 against 0.70. So a 0.30 difference is
+comfortably detectable and a 0.20 difference is not, which is why the pre-registration commits in
+advance to claiming nothing below about 0.25. Intervals are shown on every reported proportion
+rather than point estimates alone.
+
+**Why a selector rather than a policy.** Because the controller is frozen, deterministic under a
+fixed configuration, and does not learn, any difference in outcome between two candidate choices is
+attributable to **the choice** rather than to control. A policy that both perceives and acts improves
+for reasons its authors cannot decompose; here control is held constant by construction, which is
+what makes *does counterfactual supervision improve selection* a question with a clean answer. The
+cost is that this work claims nothing about continuous visuomotor control, and says so.
+
+**Why the random-obstacle baseline is fair.** Dataset B draws obstacles from the same parameter
+support as C and receives **honest labels**: predictions from the swept-volume model, with mandatory
+physics audit of any scene whose predicted margin falls within ±25 mm of a boundary — the calibrated
+error of that predictor on the one family where both boundaries were bracketed. Predictor–physics
+agreement is reported on the audited slice, so the reader can see how much of B's labelling is
+trusted rather than measured. Example count, motion identity and rendering budget are equalised
+across A, B and C, and **informative-label density is reported per dataset** rather than assumed
+equal — a comparison that wins only because one arm has more informative examples has explained
+nothing.
+
 ## What this draft deliberately leaves out
 
 - The contact-attribution detail beyond the one number that ties geometry to physics
