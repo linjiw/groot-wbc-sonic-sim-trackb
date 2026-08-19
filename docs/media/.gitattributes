@@ -1,0 +1,3 @@
+# Site images must be real files, not LFS pointers. GitHub Pages does not resolve LFS, so a
+# tracked PNG is served as its 130-byte pointer and every figure on the page renders broken.
+*.png -filter -diff -merge text=auto
