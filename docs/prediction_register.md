@@ -197,6 +197,37 @@ its commanded joint amplitude while delivering 38% of its predicted window. Both
 consistent with the operator acting distally on a constraint that binds proximally, and the gap
 between them is the part a joint-space cap could never fix.
 
+## The recalibrated tuck is already known to track
+
+*Checked 2026-08-19 against clips already run, no new rollouts.*
+
+The wall repair asks for 0.091 rad at chest and 0.211 rad at waist, against the 0.064 rad the
+minimum-edit rule currently commands. Whether that is safe is answerable from the sweep, which
+already spans an order of magnitude of tuck amplitude:
+
+| clip | commanded | endpoint lag | tracking |
+|---|---|---|---|
+| `w_tuck06win18` | 0.072 rad | 0.257 m | accepted outright |
+| `w_tuckcap30` | 0.282 rad | 0.218 m | passes |
+| `w_tuckcap40` | 0.314 rad | 0.195 m | passes |
+| `w_tuck14win18` | 0.741 rad | 0.112 m | passes |
+| `w_tuck10win30` | 0.869 rad | 0.084 m | passes |
+
+**No tuck fails tracking at any amplitude tested**, and endpoint lag *falls* monotonically as the
+tuck grows — 0.257 m down to 0.084 m, against a 0.35 m threshold. The recalibrated targets sit in
+the middle of a range already demonstrated to track, and they land on the better side of it.
+
+This is the exact opposite of the crouch, where lag rises with depth and the gate binds at about
+5 cm. The two operators differ in sign on every axis measured so far: survival, transport cost, and
+now trackability headroom. An adaptation that moves the arms is nearly free to the controller; one
+that moves the legs is charged for.
+
+The clips above are rejected, but for `disallowed_robot_contact` rather than tracking — they were
+run in a scene with obstacles, so contact is expected and says nothing about whether the amplitude
+is executable. What is *not* established is whether a larger tuck creates self-contact by pressing
+the arm into the torso; the sweep cannot separate that from obstacle contact, and the recalibrated
+batch would need to.
+
 ## The reference-side planning is not what misaligns
 
 *Screened 2026-08-19 across all fourteen configurations, no GPU.*
