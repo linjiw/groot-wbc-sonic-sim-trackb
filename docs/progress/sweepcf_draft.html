@@ -1,0 +1,1023 @@
+<title>SweepCF Working Draft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300;1,6..72,400&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+:root{
+  --paper:#FCFCFB; --raised:#F3F4F2; --ink:#191D20; --ink-2:#3C444A; --muted:#6E787E;
+  --line:#DEE1DE; --accent:#9A5F0B; --accent-soft:#F5EBDA;
+  --good:#2F6B52; --bad:#9E3A31;
+  --measure:68ch;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#12161A; --raised:#1A2026; --ink:#E9EDEF; --ink-2:#BCC5CB; --muted:#87949C;
+    --line:#28323A; --accent:#E8A33D; --accent-soft:#241C0F;
+    --good:#5FA184; --bad:#D4695F;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#12161A; --raised:#1A2026; --ink:#E9EDEF; --ink-2:#BCC5CB; --muted:#87949C;
+  --line:#28323A; --accent:#E8A33D; --accent-soft:#241C0F; --good:#5FA184; --bad:#D4695F;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:Newsreader,Georgia,"Times New Roman",serif; font-weight:300;
+  font-size:clamp(1.02rem,.98rem + .25vw,1.16rem); line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.shell{display:grid; grid-template-columns:minmax(0,1fr); max-width:82rem; margin:0 auto;
+  padding:clamp(1.5rem,4vw,4rem) clamp(1.1rem,4vw,3rem)}
+@media (min-width:1080px){ .shell{grid-template-columns:15rem minmax(0,1fr); gap:clamp(2rem,4vw,4.5rem)} }
+h1,h2,h3,nav,.chip,thead th{font-family:Archivo,system-ui,sans-serif}
+h1{font-size:clamp(2rem,1.4rem + 2.6vw,3.2rem); font-weight:800; letter-spacing:-.03em;
+   line-height:1.02; margin:0 0 .6rem; text-wrap:balance}
+h2{font-size:clamp(1.4rem,1.15rem + 1vw,1.9rem); font-weight:700; letter-spacing:-.02em;
+   line-height:1.15; margin:3.4rem 0 .9rem; text-wrap:balance; scroll-margin-top:1.5rem}
+h3{font-size:clamp(1.08rem,1rem + .45vw,1.3rem); font-weight:700; letter-spacing:-.01em;
+   margin:2.2rem 0 .6rem; color:var(--ink); text-wrap:balance; scroll-margin-top:1.5rem}
+h2::before{content:""; display:block; width:2rem; height:2px; background:var(--accent); margin-bottom:.9rem}
+p,ul,ol{max-width:var(--measure)}
+p{margin:0 0 1.05rem; color:var(--ink-2)}
+strong{color:var(--ink); font-weight:400; font-family:Archivo,sans-serif; font-size:.94em}
+em{font-style:italic}
+a{color:var(--accent); text-underline-offset:2px}
+code{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:.86em;
+  background:var(--raised); border:1px solid var(--line); border-radius:2px; padding:.08em .34em}
+blockquote{margin:1.4rem 0; padding:.9rem 1.2rem; background:var(--raised);
+  border-left:2px solid var(--accent); max-width:var(--measure)}
+blockquote p{margin:0; color:var(--ink); font-family:"JetBrains Mono",monospace; font-size:.86rem}
+hr{border:0; border-top:1px solid var(--line); margin:2.5rem 0}
+ul,ol{padding-left:1.2rem} li{margin:.35rem 0; color:var(--ink-2)}
+.tablewrap{overflow-x:auto; margin:1.3rem 0; border:1px solid var(--line); background:var(--raised)}
+table{border-collapse:collapse; width:100%; min-width:32rem;
+  font-family:"JetBrains Mono",ui-monospace,monospace; font-size:.82rem; font-variant-numeric:tabular-nums}
+th,td{text-align:left; padding:.55rem .75rem; border-bottom:1px solid var(--line); vertical-align:top}
+thead th{font-family:Archivo,sans-serif; font-size:.74rem; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--muted); font-weight:700; background:var(--paper)}
+tbody tr:last-child td{border-bottom:0}
+.status{background:var(--accent-soft); border:1px solid var(--accent); padding:1rem 1.2rem;
+  margin:1.6rem 0 0; max-width:var(--measure)}
+.status p{margin:0; color:var(--ink)}
+.masthead{border-bottom:1px solid var(--line); padding-bottom:1.6rem; margin-bottom:.5rem}
+.kicker{font-family:Archivo,sans-serif; font-size:.74rem; font-weight:700; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--accent); margin:0 0 .9rem}
+.meta{display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1.1rem}
+.chip{font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  border:1px solid var(--line); color:var(--muted); padding:.3rem .55rem; border-radius:2px}
+nav{position:sticky; top:1.5rem; align-self:start; max-height:calc(100svh - 3rem); overflow-y:auto;
+  font-size:.78rem; display:none}
+@media (min-width:1080px){ nav{display:block} }
+nav p{font-family:Archivo,sans-serif; font-size:.7rem; font-weight:700; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted); margin:0 0 .7rem}
+nav a{display:block; padding:.28rem 0 .28rem .7rem; color:var(--muted); text-decoration:none;
+  border-left:2px solid var(--line); line-height:1.35}
+nav a:hover{color:var(--ink)}
+nav a.sub{padding-left:1.4rem; font-size:.74rem}
+nav a.on{color:var(--accent); border-left-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }
+html{scroll-behavior:smooth}
+</style>
+<div class="shell">
+  <nav aria-label="Contents"><p>Contents</p><a class="" href="#the-thesis-in-one-sentence">The thesis, in one sentence</a>
+<a class="" href="#claim-ladder">Claim ladder</a>
+<a class="" href="#what-is-established">What is established</a>
+<a class="sub" href="#the-counterfactual-and-its-attribution">The counterfactual, and its attribution</a>
+<a class="sub" href="#obstacle-placement-is-part-of-the-algorithm">Obstacle placement is part of the algorithm</a>
+<a class="sub" href="#physical-validity-is-not-behavioural-validity">Physical validity is not behavioural validity</a>
+<a class="" href="#the-bottleneck-and-what-it-forced">The bottleneck, and what it forced</a>
+<a class="" href="#matched-adaptation-operators">Matched adaptation operators</a>
+<a class="sub" href="#the-overhead-operator-clears-all-three-gates">The overhead operator clears all three gates</a>
+<a class="sub" href="#the-predicted-window-is-optimistic-on-both-sides">The predicted window is optimistic on both sides</a>
+<a class="sub" href="#measuring-this-found-a-gate-defect-and-corrected-three-publi">Measuring this found a gate defect, and corrected three published numbers</a>
+<a class="sub" href="#the-two-operators-fail-in-different-ways-and-only-one-is-pre">The two operators fail in different ways, and only one is predictable</a>
+<a class="sub" href="#what-an-operator-buys-against-what-its-plan-assumed">What an operator buys, against what its plan assumed</a>
+<a class="sub" href="#the-lower-body-operator-cannot-pay-its-own-transport-cost">The lower-body operator cannot pay its own transport cost</a>
+<a class="sub" href="#the-lateral-operator-s-yield-is-a-measured-cost">The lateral operator's yield is a measured cost</a>
+<a class="" href="#a-tracking-controller-is-a-feasibility-oracle-and-that-is-a-">A tracking controller is a feasibility oracle, and that is a second contribution</a>
+<a class="sub" href="#it-also-says-how-much-of-an-edit-actually-happened">It also says how much of an edit actually happened</a>
+<a class="" href="#generated-motion-is-not-free-and-it-fails-where-the-dataset-">Generated motion is not free, and it fails where the dataset needs it most</a>
+<a class="" href="#scene-difficulty-is-a-design-parameter-not-a-search-outcome">Scene difficulty is a design parameter, not a search outcome</a>
+<a class="" href="#the-decisive-experiment-not-yet-run">The decisive experiment (not yet run)</a>
+<a class="" href="#anticipating-the-three-objections">Anticipating the three objections</a>
+<a class="" href="#what-this-draft-deliberately-leaves-out">What this draft deliberately leaves out</a>
+<a class="" href="#figure-1-as-intended">Figure 1, as intended</a></nav>
+  <main>
+    <header class="masthead">
+      <p class="kicker">Working draft · ICRA 2027 · not yet submission-formatted</p>
+      <h1>SweepCF — working draft</h1>
+      <div class="meta">
+        <span class="chip">Unitree G1 · 29 DoF</span>
+        <span class="chip">Frozen SONIC</span>
+        <span class="chip">Isaac Lab 2.3.2</span>
+        <span class="chip">Pre-registered</span>
+      </div>
+    </header>
+    <div class="status"><p><strong>Status: a draft of an argument, not of a paper.</strong> Claim levels are marked throughout, and
+the central learning experiment has not been run. Nothing here should be quoted as a result
+without checking the status line beside it.</p></div>
+<hr />
+<h2 id="the-thesis-in-one-sentence">The thesis, in one sentence</h2>
+<p><strong>Counterfactual supervision is what turns scene variation into scene-conditioned behaviour.</strong></p>
+<p>A dataset can vary its scenes without varying anything a policy could learn from. The corpus
+this work started from does exactly that: the same motion, replayed through different clutter,
+yields different images and a bit-identical state trajectory. Scene appearance changed;
+behavioural supervision did not. A policy trained on it can ignore the scene entirely and lose
+nothing.</p>
+<p>The repair is not more scenes. It is that <strong>for the same task, geometry must change which
+executable whole-body behaviour is preferred.</strong></p>
+<h2 id="claim-ladder">Claim ladder</h2>
+<p>Claim 4 is stated as a <em>minimum-edit</em> reversal deliberately. Under the lexicographic rule
+<code>m*(S) = argmin_m D(m, m₀) s.t. y(S,m) = 1</code> with <code>D(m₀,m₀) = 0</code> and <code>D(T(m₀),m₀) &gt; 0</code>, the easy
+scene selects the nominal at zero edit and the hard scene selects the adapted motion because the
+nominal is infeasible. That is a strict reversal and it needs no weights over knee angle, energy or
+joint travel — so no calibrated scalar cost is required, and none blocks the claim. The continuous
+cost is retained for comparing two <em>different</em> adaptations later.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>claim</th>
+<th>status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Two executable motions' full-body swept volumes separate, so a geometric window exists</td>
+<td><strong>established</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td>The same controller succeeds or fails as that geometry changes</td>
+<td><strong>established</strong> (3 verified families, 1 matched)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>The 2×2 <em>outcome</em> survives a jittered start pose</td>
+<td><strong>established</strong> (12/12 cells, 3/3 jitters)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>The scene reverses the <strong>minimum-edit feasible behaviour</strong></td>
+<td><strong>established</strong> on the matched overhead family</td>
+</tr>
+<tr>
+<td>5</td>
+<td>A learner given counterfactual data uses scene geometry when it could otherwise ignore it</td>
+<td><strong>not started — this is the decisive experiment</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td>That behaviour generalises to scenes never fitted to a trajectory</td>
+<td><strong>not started</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Levels 5 and 6 are the paper. Everything below them is apparatus.</p>
+<h2 id="what-is-established">What is established</h2>
+<h3 id="the-counterfactual-and-its-attribution">The counterfactual, and its attribution</h3>
+<p>Same task, same start, same goal, same corridor. One shelf moves 179 mm.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>easy (1.391 m)</th>
+<th>hard (1.212 m)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>nominal walk</td>
+<td>accepted, 0.0 N</td>
+<td><strong>rejected</strong></td>
+</tr>
+<tr>
+<td>adapted duck</td>
+<td>accepted, 0.0 N</td>
+<td>accepted, 0.0 N</td>
+</tr>
+</tbody>
+</table></div>
+<p>The rejection is attributed, not merely counted. Contact is on <code>torso_link</code> at frame 113
+against a swept-volume prediction of frame <strong>112</strong> — one frame, 20 ms. Reference drift begins
+at frame 120, <em>after</em> the contact, so the drift is the collision's consequence rather than a
+tracking failure that coincided with it. Every other cell records no lateral contact at all.</p>
+<p>Forces are four separate quantities and are reported as such: 55.4 N at first contact,
+137.2 N peak, 19.8 N·s impulse, 0.32 s duration. Under start-pose jitter the peak ranges
+95.5–658.3 N while the verdict never moves, which is why the established claim is
+<strong>start-pose outcome robustness</strong> and not robustness in general.</p>
+<h3 id="obstacle-placement-is-part-of-the-algorithm">Obstacle placement is part of the algorithm</h3>
+<p>Over every compatible pair in the corpus, with a 50 mm window as the usability bar:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>overhead, 55 pairs</th>
+<th>pairs ≥ 50 mm</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>random station</td>
+<td><strong>0 / 55</strong></td>
+</tr>
+<tr>
+<td>route midpoint</td>
+<td><strong>0 / 55</strong></td>
+</tr>
+<tr>
+<td>maximal envelope separation</td>
+<td><strong>5 / 55</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Lateral: 4 → 6 → <strong>25 of 88</strong>. In the overhead regime neither baseline yields a single family,
+so station selection is not an optimisation but the step that makes the method exist. The
+chosen station sits a median 0.50 m from the midpoint — further than a 0.5 m shelf is deep, so
+the two placements do not overlap.</p>
+<p><em>Caveat: this is geometric yield. A 50 mm window is necessary for a family, not sufficient,
+and the bar is calibrated on one family.</em></p>
+<h3 id="physical-validity-is-not-behavioural-validity">Physical validity is not behavioural validity</h3>
+<p>Over the frozen corpus, 132 of 156 evaluable episodes are accepted — the robot tracked its
+reference safely. Where a predicate exists to ask whether it did the thing its label claims,
+only <strong>17 of 37</strong> pass. Three body modes score zero and one scores 3/7.</p>
+<p>Graded on the references directly by forward kinematics, across all 150 prompts: <strong>24 of 75</strong>
+carry their behaviour, in the seven modes that have a predicate. The split is clean —
+whole-clip <em>styles</em> come back at 100%, <em>events at a specified moment</em> at 0%.</p>
+<h2 id="the-bottleneck-and-what-it-forced">The bottleneck, and what it forced</h2>
+<p>Mining the corpus for pairs gives the number the plan needs, and it is not the pair count:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>regime</th>
+<th>viable pairs</th>
+<th>distinct adapted motions</th>
+<th><strong>independent families</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>overhead</td>
+<td>5</td>
+<td>2</td>
+<td><strong>2</strong></td>
+</tr>
+<tr>
+<td>lateral</td>
+<td>3</td>
+<td>3</td>
+<td><strong>1</strong></td>
+</tr>
+<tr>
+<td>floor</td>
+<td>0</td>
+<td>0</td>
+<td><strong>0</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Three independent families. The ceiling is the supply of semantically valid adapted motions,
+not the method.</p>
+<p>Prompting did not lift it. Seven new modes at two seeds each: every phrasing that lowers the
+body pins the waist at its limit on 100% of frames, the one phrasing that does not is 8 mm
+<em>taller</em> than a walk, and an explicit arm-tuck request produced motions 64 mm <em>wider</em>.
+<em>Scope: one set of templates, one checkpoint, one sampling configuration. This closed an
+engineering path; it is not a claim about what the generator can do.</em></p>
+<h2 id="matched-adaptation-operators">Matched adaptation operators</h2>
+<p>The fix is to construct the adapted motion from the nominal rather than pair two independently
+generated clips. That also removes a fair objection to the existing family — that a shelf
+separated two different journeys rather than two behaviours.</p>
+<p>Both operators preserve root XY and yaw, duration, gait phase, start and goal, and act only
+over a window in <strong>route-progress</strong> coordinates centred on the obstacle station:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><code>local_crouch</code></th>
+<th><code>local_arm_tuck</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>regime</td>
+<td>overhead</td>
+<td>lateral</td>
+</tr>
+<tr>
+<td>touches</td>
+<td>legs + root height</td>
+<td>arms only</td>
+</tr>
+<tr>
+<td>waist change</td>
+<td><strong>0.000 rad</strong></td>
+<td>untouched</td>
+</tr>
+<tr>
+<td>leg change</td>
+<td>—</td>
+<td><strong>0.000 rad</strong></td>
+</tr>
+<tr>
+<td>effect at the station</td>
+<td>1.305 → 1.207 m silhouette</td>
+<td>0.276 → 0.231 m half-width</td>
+</tr>
+<tr>
+<td>active window</td>
+<td>35% of clip</td>
+<td>35% of clip</td>
+</tr>
+<tr>
+<td>kinematic feasibility</td>
+<td><strong>6/6</strong></td>
+<td>6/6 reachable</td>
+</tr>
+<tr>
+<td>SONIC accepts it</td>
+<td><strong>2 of 3</strong> valid nominals</td>
+<td>1 of 3 valid nominals</td>
+</tr>
+<tr>
+<td>how it fails</td>
+<td>tracking drift, no contact</td>
+<td>collision at low drift</td>
+</tr>
+</tbody>
+</table></div>
+<p>Locality is not tidiness. A clip crouched from frame zero cannot demonstrate a decision made
+from what the robot sees, because the obstacle is not visible when the crouch begins; such a
+pair can only support map-conditioned selection.</p>
+<h3 id="the-overhead-operator-clears-all-three-gates">The overhead operator clears all three gates</h3>
+<p>Family <code>mf_005_c08</code>. One journey, two behaviours: the two clips have identical root XY frame for
+frame, identical duration, and differ in exactly six joints — knees 0.994 rad, hip and ankle pitch
+0.497 rad each, waist 0.000 rad.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>easy scene (1.355 m)</th>
+<th>hard scene (1.257 m)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>nominal walk</strong></td>
+<td>accepted, 0.0 N</td>
+<td><strong>rejected, 3253.5 N</strong></td>
+</tr>
+<tr>
+<td><strong>local crouch</strong></td>
+<td>accepted, 0.0 N</td>
+<td><strong>accepted, 0.0 N</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Attribution: contact on <code>torso_link</code> at frame 90, root-height deficit at frame 97 — the drift
+follows the collision by 140 ms. The crouch's drift is 0.100 m/s in <em>both</em> scenes, so the shelf
+never reaches it.</p>
+<h3 id="the-predicted-window-is-optimistic-on-both-sides">The predicted window is optimistic on both sides</h3>
+<blockquote>
+<p><strong>Note.</strong> Two later families appeared to show a far larger optimism, above 40 mm. They were void:
+their shelves sat in the reference motion's frame while the rollout offset the motion by −2.0 m,
+so the robot never reached them. Those numbers are withdrawn; the figures below come from the one
+family whose obstacle was verifiably in the path.</p>
+</blockquote>
+<p>Probing both boundaries rather than assuming them changed how families must be placed.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>shelf</th>
+<th>motion</th>
+<th>predicted</th>
+<th>observed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.2971 m</td>
+<td>nominal</td>
+<td>fails</td>
+<td><strong>accepted</strong></td>
+</tr>
+<tr>
+<td>1.2801 m</td>
+<td>nominal</td>
+<td>fails</td>
+<td>rejected — 85.0 N overhead, 0.0 lateral</td>
+</tr>
+<tr>
+<td>1.2574 m</td>
+<td>nominal</td>
+<td>fails</td>
+<td>rejected</td>
+</tr>
+<tr>
+<td>1.2574 m</td>
+<td>crouch</td>
+<td>clears</td>
+<td>accepted</td>
+</tr>
+<tr>
+<td>1.2154 m</td>
+<td>crouch</td>
+<td>clears</td>
+<td><strong>rejected</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>The nominal survives 8 mm below where it is predicted to fail; the crouch fails 8 mm above where it
+is predicted to clear. Both errors shrink the usable window: the real one is between <strong>22.7 and
+81.7 mm</strong> wide against a predicted 97.7, so in the worst case the prediction over-states it more
+than fourfold. It does contain 1.2574 m, verified from both sides.</p>
+<p>The two errors have different causes. Swept capsules are conservative outer approximations, so they
+should make a motion look taller than it is and predict interference early, which is what happened
+to the nominal. The crouch failing <em>higher</em> than predicted is not geometric at all: at 1.2154 m the
+shelf pressed <code>torso_link</code> down at 1017.4 N and the controller lost its reference. A swept volume
+knows where the robot went; it does not know that a controller squeezed into a gap stops being able
+to track. <strong>So placement targets the window's centre</strong>, and the margin cannot be replaced by a
+predicted-boundary offset.</p>
+<h3 id="measuring-this-found-a-gate-defect-and-corrected-three-publi">Measuring this found a gate defect, and corrected three published numbers</h3>
+<p><code>disallowed_robot_contact</code> tested only the <em>horizontal</em> component of external contact, because the
+settling load a dropped robot puts on its hips is vertical and had to be excluded. Excluding all
+vertical force also excluded every overhead collision. The crouch at 1.2154 m carried 1017.4 N
+straight down on <code>torso_link</code> with a horizontal component of exactly 0.0, so the gate stayed
+silent; only the ensuing drift caught it, meaning a milder jam would have been <strong>accepted</strong> — in
+precisely the regime this corpus exists to supply. Sign separates the two cases: the floor holding a
+knee up pushes +z, an obstacle overhead pushes −z.</p>
+<p>Auditing all 230 evaluable episodes found 10 carrying an overhead push above the lateral one, all
+already rejected on other grounds — so the corpus held no false accepts. <strong>That was luck, and the
+next rollout proved it:</strong> the 1.2801 m probe is rejected for <code>disallowed_robot_contact</code> alone, its
+drift below threshold, and regraded with the lateral-only gate it comes out <strong>accepted</strong> — a walk
+whose torso is pressed down 85 N, recorded as a clean traversal.</p>
+<p>The audit also corrected three earlier claims, all of which had read the smaller component:</p>
+<ul>
+<li>the first family's "3.0 N graze" was a <strong>409.3 N</strong> push on <code>torso_link</code>; that negative was never
+  marginal</li>
+<li>penetration does <strong>not</strong> track force: 3.3× penetration buys <strong>1.15×</strong> overhead force, not the 18×
+  the lateral figures implied, so the graze-versus-crash tuning story is withdrawn</li>
+<li>the start-pose jitter spread is <strong>1.35×</strong> on overhead against 6.9× on lateral, so the force is far
+  steadier than reported</li>
+</ul>
+<h3 id="the-two-operators-fail-in-different-ways-and-only-one-is-pre">The two operators fail in different ways, and only one is predictable</h3>
+<p>Cross-motion yield over nominals SONIC accepts. One caveat travels with these numbers: the screen
+was run in a <em>furnished</em> room rather than on a bare plane, and <code>x001</code>'s nominal was excluded on the
+strength of a 277.6 N rejection that turns out to be a wall strike — its root passed 0.21 m from the
+wall face carrying a force of exactly (0.0, 277.6, 0.0) N. <strong>So the tuck's denominator may be 4, and
+a re-screen on a true bare plane is running.</strong> An audit of all 47 graded cells found only x001's two
+within 0.35 m of a wall, so no verified family is affected.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>crouch</th>
+<th>arm tuck</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>yield</td>
+<td><strong>2 of 3</strong></td>
+<td>1 of 3</td>
+</tr>
+<tr>
+<td>failure mode</td>
+<td>reference drift, <strong>zero</strong> external contact</td>
+<td><code>disallowed_robot_contact</code> at 0.051 and 0.003 m/s drift</td>
+</tr>
+</tbody>
+</table></div>
+<p>The distinction matters more than the counts. A collision is governed by geometry, which the
+swept-volume machinery already models. A tracking failure is governed by how hard a clip is to
+hold — and for the crouch that turns out to be predictable from the clip alone:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>knee excursion</th>
+<th>motion</th>
+<th>outcome</th>
+<th>|drift|</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.929 rad</td>
+<td>x002</td>
+<td>accepted</td>
+<td>0.015 m/s</td>
+</tr>
+<tr>
+<td>0.936 rad</td>
+<td>x003</td>
+<td>accepted</td>
+<td>0.025 m/s</td>
+</tr>
+<tr>
+<td>0.994 rad</td>
+<td>005</td>
+<td>accepted</td>
+<td>0.100 m/s</td>
+</tr>
+<tr>
+<td>1.000 rad</td>
+<td>x000</td>
+<td><strong>rejected</strong></td>
+<td>0.225 m/s</td>
+</tr>
+</tbody>
+</table></div>
+<p>Monotone across four clips and three nominals. The threshold is <strong>motion-specific</strong>, not global: a
+within-motion sweep on the failing clip accepts at 0.619 rad and rejects at 0.980, where another
+motion holds 0.994. So crouch feasibility is not predictable from motion identity or a universal
+cap — it is <strong>cheaply screenable with one targeted rollout</strong>, at exactly the excursion a usable
+window requires. This prediction
+was <strong>registered in writing before the last two rollouts returned</strong>, after four earlier attempts to
+infer trackability from a clip had all been withdrawn; the stated reason for expecting it to hold
+this time — that excursion should govern a drift failure where geometry governs a collision — is
+what distinguished it. The operator's cap is now set from this measurement rather than from the arm
+tuck's unrelated failure.</p>
+<p>For the tuck, no such predictor exists. Two were built and refuted, so its yield is a <strong>budget
+line</strong> — roughly three rollouts per usable lateral clip, plus one to screen each nominal.</p>
+<h3 id="what-an-operator-buys-against-what-its-plan-assumed">What an operator buys, against what its plan assumed</h3>
+<p>The minimum-edit rule asks for the smallest adaptation that clears the obstacle. Whether it clears
+anything depends on a quantity the rule never measures: how much of the commanded edit reaches the
+surface the obstacle actually binds against. Measured on the binding body each plan names, at the
+place along the route where the obstacle binds:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>family</th>
+<th>binding body</th>
+<th>predicted</th>
+<th>delivered</th>
+<th>ratio</th>
+<th>needed command</th>
+<th>cap</th>
+<th>reachable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>n_013_ceiling_overhead_left</code></td>
+<td><code>torso_link</code></td>
+<td>90.2 mm</td>
+<td>39.0 mm</td>
+<td>43%</td>
+<td>1.420 rad</td>
+<td>0.98 rad</td>
+<td><strong>no — 1.4× over</strong></td>
+</tr>
+<tr>
+<td><code>n_013_wall_chest_left</code></td>
+<td><code>left_elbow_link</code></td>
+<td>23.8 mm</td>
+<td>16.7 mm</td>
+<td>70%</td>
+<td>0.091 rad</td>
+<td>0.40 rad</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>n_013_wall_waist_left</code></td>
+<td><code>left_wrist_yaw_link</code></td>
+<td>51.4 mm</td>
+<td>15.5 mm</td>
+<td>30%</td>
+<td>0.211 rad</td>
+<td>0.40 rad</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>n_013_wall_waist_right</code></td>
+<td><code>right_wrist_yaw_link</code></td>
+<td>53.9 mm</td>
+<td>-31.3 mm</td>
+<td>-58%</td>
+<td>—</td>
+<td>0.40 rad</td>
+<td><strong>misaligned</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>The measurement is easy to get wrong and two wrong versions are worth naming, because both produce
+confident numbers. A maximum taken over the whole episode is dominated by whatever the robot does
+furthest from the obstacle — the part no operator touched — and reported a real 27 mm crouch as
+<em>negative</em> delivery. Comparing at matched frame indices is worse: a nominal that the obstacle stops
+falls behind, so at the frame it strikes, the adapted run is half a metre further down the room and
+is being measured where there is no obstacle. Both runs must be sampled where each one reaches the
+binding position.</p>
+<p>Two consequences follow, and they point in opposite directions.</p>
+<p><strong>The wall configurations are a calibration error.</strong> Both need edits well inside the tuck's cap —
+the rule asked for roughly a third to a half of what was required — so correcting the delivery model
+would make them reachable without touching the cap, the gate, the journey, or the acceptance
+thresholds. A minimum computed against an optimistic model is optimistic by the same factor, and
+dividing the minimum by the measured delivery ratio is what the rule was always meant to mean.</p>
+<p><strong>The overhead configuration is not repairable by scaling.</strong> Clearing its hard scene needs more
+commanded crouch than the operator's cap allows, and the crouch already fails the endpoint gate well
+below that cap by spending more forward progress than the budget permits. Both limits bind
+independently, so no deeper crouch produces an overhead family. The options are scene-side: place
+the hard face at a margin the crouch can deliver, or drop the band.</p>
+<p>A third outcome appears once and is reported rather than absorbed: a configuration whose delivered
+window is <em>negative</em>, meaning its adapted body sits further from the route than its nominal at the
+moment the obstacle binds, though the same operator retracts correctly over the episode as a whole.
+Scaling cannot fix an adaptation that is not where the obstacle is. On the reference clips every
+configuration places its obstacle inside its own adaptation window, so whatever separates them acts
+during execution, and this draft does not claim to know what it is.</p>
+<h3 id="the-lower-body-operator-cannot-pay-its-own-transport-cost">The lower-body operator cannot pay its own transport cost</h3>
+<p>The two operators differ on a second axis, and this one bounds which obstacles the method can
+address at all. <code>local_crouch</code> lowers the reference root by about 0.14 m and leaves the forward
+schedule untouched: the adapted reference still commands the same displacement over the same four
+seconds. A crouched G1 cannot walk that fast, so it arrives short, and the acceptance gate reads the
+shortfall as a tracking failure.</p>
+<p>Endpoint lag rises monotonically with crouch depth:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>clip</th>
+<th>endpoint lag</th>
+<th>verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>w_nominal</code></td>
+<td>0.257 m</td>
+<td>accepted</td>
+</tr>
+<tr>
+<td><code>w_tuckcap30</code></td>
+<td>0.218 m</td>
+<td>rejected on contact, not tracking</td>
+</tr>
+<tr>
+<td><code>w_crouch05</code></td>
+<td>0.313 m</td>
+<td>rejected</td>
+</tr>
+<tr>
+<td><code>w_crouch08</code></td>
+<td>0.399 m</td>
+<td>rejected</td>
+</tr>
+<tr>
+<td><code>w_crouch11</code></td>
+<td>0.509 m</td>
+<td>rejected</td>
+</tr>
+</tbody>
+</table></div>
+<p>The decisive row is the first. <strong>The nominal already spends 0.257 m of the 0.35 m budget</strong>, leaving
+roughly 90 mm for an adaptation to consume, and every crouch tested deeper than about 5 cm exceeds
+it. The arm tuck has the opposite sign — it tracks <em>better</em> than the nominal it modifies — which is
+the same asymmetry survival measures from the other direction.</p>
+<p>The consequence is structural rather than incidental. Only lowering the robot relieves a ceiling, so
+overhead-band families require a crouch, and a crouch deep enough to clear a ceiling costs more
+forward progress than the gate allows. The first completed banded family shows exactly this: its
+nominal walks the torso into the ceiling at 1543.6 N and its adapted motion clears the same ceiling
+at 49 N, and the adapted cells are still rejected — for missing the endpoint by 0.524 m.</p>
+<p>Two repairs are available and neither is adopted here. Retiming the adapted reference so a crouched
+robot is asked for a crouched pace would make the reference self-consistent, but it changes the
+journey the counterfactual holds fixed. Judging adapted clips on progress ratio rather than endpoint
+error would admit them, but it is a gate change and belongs in the pre-registration rather than in
+whichever patch happens to rescue the result. The limitation is reported as a limitation.</p>
+<h3 id="the-lateral-operator-s-yield-is-a-measured-cost">The lateral operator's yield is a measured cost</h3>
+<p>The arm tuck is accepted on <strong>1 of 3</strong> valid nominals. Two cheap predictors of <em>which</em> one were
+built and both refuted: wrist-to-hip clearance (already negative on every nominal, and its change
+anti-correlates with the verdict at both extremes) and lateral CoM excursion (two cells 0.1 mm
+apart landing on opposite sides of the gate). The verdict is set entirely by <strong>external</strong> contact;
+self-contact magnitude is not severity — the accepted tuck carries the highest
+self-contact of eight cells, 192.1 N, and the rejected nominal the lowest, 10.9 N.</p>
+<p>So trackability is measured per clip, and the 1-in-3 yield is a budget line — roughly three
+rollouts per usable lateral clip, plus one to screen each nominal — not a defect awaiting a fix.
+This is the fourth time on this operator that an inferred quantity had to be withdrawn in favour of
+a rollout.</p>
+<h2 id="a-tracking-controller-is-a-feasibility-oracle-and-that-is-a-">A tracking controller is a feasibility oracle, and that is a second contribution</h2>
+<p>Synthetic humanoid datasets report a <em>success rate</em>. The number is almost always a conflation of
+four different questions, which have different answers, different costs, and different failure
+modes. Separating them is cheap, and the gaps between them are where a corpus overstates itself.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>label</th>
+<th>question</th>
+<th>cost</th>
+<th>measured here</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>embodiment_feasible</code></td>
+<td>can the body reach this pose at all?</td>
+<td>CPU, milliseconds</td>
+<td><strong>96%</strong> of 150 clips</td>
+</tr>
+<tr>
+<td><code>controller_trackable</code></td>
+<td>can the controller execute it?</td>
+<td>one rollout, empty scene</td>
+<td><strong>96%</strong> of 47 joined</td>
+</tr>
+<tr>
+<td><code>semantically_valid</code></td>
+<td>does the executed motion contain the named behaviour?</td>
+<td>predicate on the execution</td>
+<td><strong>32%</strong> of 75</td>
+</tr>
+<tr>
+<td><code>scene_compatible</code></td>
+<td>does it succeed in <em>this</em> room?</td>
+<td>one rollout per scene</td>
+<td>the counterfactual signal itself</td>
+</tr>
+</tbody>
+</table></div>
+<p>The four are not interchangeable. A clip can be kinematically fine and untrackable; trackable and
+semantically empty; semantically correct and infeasible in the room it is needed for. Reporting one
+rate hides which surface a corpus is failing on, and the honest headline is the <em>smallest</em> of them —
+here 32%, not 96%.</p>
+<p><strong>The tracking controller is doing evaluation work, not just execution work.</strong> SONIC answers
+"is this motion physically executable by this embodiment under closed-loop control", which is
+exactly the question a kinematic checker cannot answer and a human reviewer answers slowly and
+inconsistently. Used deliberately it is a <em>feasibility oracle</em>: cheap relative to human review,
+reproducible, and grounded in the same physics the dataset claims to be about.</p>
+<p>It also grades continuously, not just pass/fail. Reference-tracking drift rises monotonically with
+how far an adaptation moves a joint — measured within one motion at 0.048, 0.104, 0.140, 0.223 and
+0.224 m/s for knee excursions of 0.000, 0.420, 0.619, 0.980 and 1.000 rad — so drift is a graded
+difficulty score, not merely a threshold. That makes it usable for curriculum ordering and for
+reporting <em>how hard</em> a clip is rather than only whether it survived.</p>
+<h3 id="it-also-says-how-much-of-an-edit-actually-happened">It also says how much of an edit actually happened</h3>
+<p>A clip named <code>crouch18</code> asserts a crouch. What the corpus can honestly claim is that a crouch was
+<em>commanded</em>; the frozen controller decides how much of it occurs. The difference is measurable from
+artefacts every rollout already writes, because <code>reference_g1_qpos</code> and <code>dof_pos</code> land on the same
+frame grid:</p>
+<blockquote>
+<p>survival = mean |executed_adapted − executed_nominal| ÷ mean |reference_adapted − reference_nominal|</p>
+</blockquote>
+<p>taken over the joints the operator moves and the frames it is active. Over 23 adapted clips with
+matched nominals, survival separates by body region rather than by how much was asked for:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>operator</th>
+<th>n</th>
+<th>survival</th>
+<th>median</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>crouch (lower body)</td>
+<td>11</td>
+<td>46–67%</td>
+<td><strong>58%</strong></td>
+</tr>
+<tr>
+<td>combo (hip + waist)</td>
+<td>2</td>
+<td>65–65%</td>
+<td>65%</td>
+</tr>
+<tr>
+<td>tuck (upper body)</td>
+<td>10</td>
+<td>57–116%</td>
+<td><strong>89%</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>At matched commanded amplitude near 0.3 rad the groups diverge by a factor of two — <code>x000_crouch015</code>
+survives at 46% and <code>x000_crouch030</code> at 51%, against 105%, 91% and 88% for three tucks commanding
+0.28–0.33 rad. <strong>The controller preserves arm departures and resists leg departures</strong>, which is the
+expected shape for a policy whose legs carry the load and hold balance, and which had not previously
+been measured. The arm's fidelity has its own ceiling: both uncapped large tucks, commanding 0.741
+and 0.869 rad, fall back to 57%.</p>
+<p>Two rollouts of one journey drift apart on their own, so every ratio is reported against a drift
+floor measured on the joints the operator never touches; the operator signal stands 4.7×–13.6× clear
+of it. One clip, <code>w_tuck06win18</code>, commands only 0.072 rad and survives at 61% where the amplitude
+trend predicts near-total survival; it carries the thinnest margin in its group and is recorded
+rather than explained.</p>
+<p>This matters for what a label may claim. A lower-body label overstates the executed departure by
+roughly 40%, so the release carries executed amplitude beside commanded amplitude rather than
+letting a consumer inherit the label's assertion. It also gives semantic validity a numeric partner:
+survival separates a clip whose behaviour the controller discarded from a clip whose behaviour is
+present and merely hard to see — a distinction human review cannot make from a contact sheet, and
+one that has already corrected a reviewer's reading in this project.</p>
+<h2 id="generated-motion-is-not-free-and-it-fails-where-the-dataset-">Generated motion is not free, and it fails where the dataset needs it most</h2>
+<p>Joining the generator's own kinematic screen to the controller's verdicts on the same clips gives a
+pipeline that looks healthy: 96% embodiment-feasible, 96% of the joined subset trackable. Broken
+down by behaviour it is not.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>behaviour</th>
+<th>generated</th>
+<th>embodiment-feasible</th>
+<th>tracked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>crouch</strong></td>
+<td>9</td>
+<td><strong>4 (44%)</strong></td>
+<td>2</td>
+</tr>
+<tr>
+<td>side / narrow</td>
+<td>3</td>
+<td>2 (67%)</td>
+<td>2</td>
+</tr>
+<tr>
+<td>arms</td>
+<td>6</td>
+<td>6 (100%)</td>
+<td>1</td>
+</tr>
+<tr>
+<td>turn</td>
+<td>67</td>
+<td>67 (100%)</td>
+<td>33</td>
+</tr>
+<tr>
+<td>stop / start</td>
+<td>23</td>
+<td>23 (100%)</td>
+<td>5</td>
+</tr>
+<tr>
+<td>walk</td>
+<td>42</td>
+<td>42 (100%)</td>
+<td>2 of 4</td>
+</tr>
+</tbody>
+</table></div>
+<p>Crouch is the <strong>only</strong> behaviour with a kinematic failure rate at all — 44% against 100% everywhere
+else — and every rejection is joint saturation. The mechanism is specific: the generator lowers the
+torso by folding the waist, pinning <code>waist_pitch_joint</code> at its limit on 100% of frames, and the G1
+cannot fold that far. Meanwhile 73% of the corpus is unconstrained locomotion, 67 turn variants and
+42 plain walks, which is precisely the diversity that does not help. The behaviours a counterfactual
+needs are 12 of 150, and they are the ones that fail.</p>
+<p>Tracking quality agrees independently. Over 238 evaluable episodes, crouch carries a median
+reference drift of <strong>0.100 m/s</strong> against a turn's 0.026 — roughly four times — and is accepted 13 of
+21 against 49 of 50. The two stages could easily have disagreed: a generator can emit clips that are
+kinematically awkward but easy to follow, or smooth ones impossible to balance. Here the difficulty
+is intrinsic to the behaviour rather than to either component, which is the more useful finding,
+because no amount of prompt engineering or controller tuning removes it.</p>
+<p>This is the quantitative case for constructing adapted motions with a <strong>local operator</strong> rather than
+requesting them from a generator. An operator applied to an already-accepted walk inherits that
+walk's feasibility and changes only what one obstacle requires, which is why the adapted clip is
+matched to its nominal by construction rather than paired after the fact.</p>
+<p><em>Scope: one checkpoint, one set of prompt templates, 4-second clips, 47 of 150 clips joined because
+only part of the corpus has been rolled out. This closes an engineering path under a tested
+protocol; it is not a claim about what the generator can do.</em></p>
+<h2 id="scene-difficulty-is-a-design-parameter-not-a-search-outcome">Scene difficulty is a design parameter, not a search outcome</h2>
+<p>Every scene here was originally built by lowering a shelf until something touched. That finds a
+boundary but cannot say <em>what</em> is being tested, and a full-height shelf can only bind the tallest
+capsule — <code>torso_link</code>, on 199 of 199 frames of a walk. Every overhead scene tested the same part.</p>
+<p>Because the executed trajectory gives every collision capsule's pose per frame, an obstacle confined
+to a height <em>band</em> binds whatever passes through that band. On one verified nominal:</p>
+<p>A band admits two obstacles, stopped by different parts: a <strong>wall</strong> from the side meets whatever
+reaches furthest sideways, a <strong>ceiling</strong> from above meets the highest point in the band.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>band</th>
+<th>wall binds</th>
+<th>reach</th>
+<th>ceiling binds</th>
+<th>height</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>overhead 1.15–1.60 m</td>
+<td><code>torso_link</code></td>
+<td>0.079–0.097 m</td>
+<td><code>torso_link</code></td>
+<td>1.301 m</td>
+</tr>
+<tr>
+<td>chest 0.85–1.15 m</td>
+<td><code>elbow_link</code></td>
+<td>0.235–0.252 m</td>
+<td><code>torso_link</code></td>
+<td>1.296 m</td>
+</tr>
+<tr>
+<td>waist 0.55–0.85 m</td>
+<td><code>wrist_yaw_link</code></td>
+<td>0.284–0.327 m</td>
+<td><code>shoulder_yaw_link</code></td>
+<td>1.044 m</td>
+</tr>
+<tr>
+<td>knee 0.25–0.55 m</td>
+<td><code>wrist_yaw_link</code></td>
+<td>0.283–0.304 m</td>
+<td><code>hip_roll_link</code></td>
+<td>0.701 m</td>
+</tr>
+<tr>
+<td>floor 0.00–0.25 m</td>
+<td><code>ankle_roll_link</code></td>
+<td>0.245 m</td>
+<td><code>knee_link</code></td>
+<td>0.423 m</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Eight wall configurations are constructible</strong>, binding three distinct parts, plus two ceiling ones;
+the rest meet a shoulder, hip, knee or ankle that no operator relieves. Left and right reaches differ by up to 43 mm because the arms swing out of phase, so
+the two sides pose genuinely different problems rather than mirrored ones.</p>
+<p>Difficulty then follows from <code>obstacle face = reach + margin</code>, so a margin ladder on one
+configuration yields a graded series — clear, near-threshold, marginal, infeasible — all with the
+same binding part, and therefore comparable. This also changes the cost of scale: 24–30 families is
+not 24–30 motion pairs but roughly four screened nominals at eight configurations each.</p>
+<p>A binding part is <strong>not</strong> a counterfactual. Nothing relieves the ankle, so floor obstacles produce a
+negative with no matching positive; the map marks that before rollouts are spent rather than after.</p>
+<h2 id="the-decisive-experiment-not-yet-run">The decisive experiment (not yet run)</h2>
+<p>Three datasets, identical in motions, scene count, rendering budget, learner and training
+steps. Only the <strong>construction</strong> differs:</p>
+<ul>
+<li><strong>A, decorated</strong> — one trajectory through many scenes. The failure mode being repaired.</li>
+<li><strong>B, random obstacles</strong> — more visual diversity, obstacles placed without regard to which
+  behaviours they separate.</li>
+<li><strong>C, SweepCF</strong> — same task, same start and goal, geometry chosen so the preferred feasible
+  behaviour reverses.</li>
+</ul>
+<p>Train a small <strong>behaviour selector</strong>, not a policy — and score scene–motion <em>compatibility</em>
+rather than scene identity, so a model cannot pass by learning "room 7 wants the crouch".
+Selection is the lexicographic rule: among candidates predicted to survive, take the cheapest.</p>
+<p>The harness and its controls are built and validated on synthetic families, so no verified family
+is spent proving the apparatus works. The privileged geometry model reaches 0.963 choice accuracy
+against a 0.25 always-nominal baseline; hiding the scene drops it to 0.126, pairing families with
+the wrong scene to 0.593, and permuting candidate order changes nothing at all, as an
+order-invariant rule must. Holding out nominal motions rather than families gives 0.958, so the
+model is not memorising what each nominal usually needs.</p>
+<p>One negative result from that validation is worth reporting: a linear model given only the four
+geometric margins scored 0.224 — <em>below</em> the baseline, choosing a failing candidate 47% of the
+time — because survival is an AND over margins and that is not linearly separable. The limiting
+margin is therefore supplied explicitly, which is what makes this model privileged and bounds what
+an ego-depth model must recover from pixels.
+Evaluate on the <strong>frozen scene-first test set</strong> — 30 scenes sampled independently of any
+motion, SHA-256 fingerprinted, frozen before either operator existed.</p>
+<p>Metrics: counterfactual choice accuracy (walk in the easy scene <em>and</em> crouch in the hard one),
+unsafe-choice rate, <strong>unnecessary-adaptation rate</strong>, and realised success minus adaptation cost.</p>
+<p>The last two matter because a policy that always crouches is safe and has understood nothing.</p>
+<p><strong>Go/no-go.</strong> If C beats A and B on counterfactual choice accuracy, scale the motion bank. If
+all three are equal, the question becomes <em>when does counterfactual supervision add anything
+beyond geometric collision reasoning</em> — which is still a paper, and a more interesting one.</p>
+<h2 id="anticipating-the-three-objections">Anticipating the three objections</h2>
+<p><strong>Why n = 30 suffices.</strong> The statistical unit is the scene, and thirty scene-first scenes were
+frozen before any operator existed. Exact Clopper–Pearson intervals at n = 30 are wide but not
+uninformative: 24/30 gives [0.61, 0.92] and 27/30 gives [0.73, 0.98]. A one-sided exact test rejects
+0.50 at ≥20/30 with power 0.97 against 0.80 and 0.73 against 0.70. So a 0.30 difference is
+comfortably detectable and a 0.20 difference is not, which is why the pre-registration commits in
+advance to claiming nothing below about 0.25. Intervals are shown on every reported proportion
+rather than point estimates alone.</p>
+<p><strong>Why a selector rather than a policy.</strong> Because the controller is frozen, deterministic under a
+fixed configuration, and does not learn, any difference in outcome between two candidate choices is
+attributable to <strong>the choice</strong> rather than to control. A policy that both perceives and acts improves
+for reasons its authors cannot decompose; here control is held constant by construction, which is
+what makes <em>does counterfactual supervision improve selection</em> a question with a clean answer. The
+cost is that this work claims nothing about continuous visuomotor control, and says so.</p>
+<p><strong>Why the random-obstacle baseline is fair.</strong> Dataset B draws obstacles from the same parameter
+support as C and receives <strong>honest labels</strong>: predictions from the swept-volume model, with mandatory
+physics audit of any scene whose predicted margin falls within ±25 mm of a boundary — the calibrated
+error of that predictor on the one family where both boundaries were bracketed. Predictor–physics
+agreement is reported on the audited slice, so the reader can see how much of B's labelling is
+trusted rather than measured. Example count, motion identity and rendering budget are equalised
+across A, B and C, and <strong>informative-label density is reported per dataset</strong> rather than assumed
+equal — a comparison that wins only because one arm has more informative examples has explained
+nothing.</p>
+<h2 id="what-this-draft-deliberately-leaves-out">What this draft deliberately leaves out</h2>
+<ul>
+<li>The contact-attribution detail beyond the one number that ties geometry to physics
+  (predicted 112, observed 113).</li>
+<li>The prompt-generation audit as a headline; it belongs as a motion-source ablation.</li>
+<li>The adaptation cost as a reportable ratio. It is a sign check until its weights are frozen,
+  and an operator that minimises a cost cannot use that cost to prove it is minimal.</li>
+<li>Any claim that the robot perceives the scene and chooses. Both motions are prescribed
+  references; what changes is which one physics permits.</li>
+</ul>
+<h2 id="figure-1-as-intended">Figure 1, as intended</h2>
+<p>Left: three rooms, one trajectory — <em>scene changes, behaviour label does not.</em>
+Centre: the 2×2, with one cell failing.
+Right: success probability against shelf height for both behaviours, the counterfactual window
+between the two boundaries, and <code>b*(g)</code> stepping from walk to crouch.</p>
+  </main>
+</div>
+<script>
+const links=[...document.querySelectorAll('nav a')];
+const map=new Map(links.map(a=>[a.getAttribute('href').slice(1),a]));
+const io=new IntersectionObserver(es=>{es.forEach(e=>{
+  const a=map.get(e.target.id); if(!a) return;
+  if(e.isIntersecting){links.forEach(l=>l.classList.remove('on')); a.classList.add('on');}
+})},{rootMargin:'-10% 0px -80% 0px'});
+document.querySelectorAll('h2[id],h3[id]').forEach(h=>io.observe(h));
+</script>
