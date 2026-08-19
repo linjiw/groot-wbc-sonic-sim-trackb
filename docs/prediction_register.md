@@ -140,6 +140,60 @@ otherwise every failure buys an extension.
 falls short at the end of Workstream A, this is the cheapest place to return to, and the band is
 recorded here so the return costs two rollouts rather than ten.
 
+## The operator delivers about a third of its predicted window
+
+*Found 2026-08-19 on the first wall family; eight probes, then stopped under the timebox.*
+
+`n_013_wall_chest_left` came within one cell of holding: both easy cells accepted, `nominal_hard`
+struck the aperture at 110.3 N. The adapted cell struck it too, at 91.4 N — a 17% softer collision,
+not a clearance.
+
+The planner sized that scene from a predicted window. Measured against what the executed body
+actually did, the operator under-delivers by a factor of nearly three:
+
+| quantity | chest band, `n_013` |
+|---|---|
+| predicted nominal reach | 0.2632 m |
+| predicted adapted reach | 0.2394 m |
+| **predicted window** | **23.8 mm** |
+| executed nominal surface | 0.2551 m |
+| executed adapted surface | 0.2460 m |
+| **delivered window** | **9.1 mm** |
+
+Two details keep this from being a placement bug. The nominal exceeds the planned face by 3.8 mm and
+duly strikes, so the hard scene is doing its job. And the contact force is (−86.6, 0.0, −29.1) N —
+purely frontal — so these walls are apertures the robot passes through and the shoulder catches the
+jamb, not side panels it brushes. The binding surface is the upper-arm capsule, which `shoulder_yaw`
+and `elbow` share; the tuck retracts it 9.1 mm while retracting the wrist 14.7 mm, because the
+operator acts distally and the jamb is caught proximally.
+
+Predicted windows differ by band by more than a factor of four, and the batch was gated on predicted
+width at `min_window_m = 0.02`:
+
+| band | configs | predicted window | at 38% delivery |
+|---|---|---|---|
+| overhead | 3 | 90–105 mm (median 92) | ~35 mm |
+| waist | 6 | 51–110 mm (median 58) | ~22 mm |
+| chest | 5 | 21–52 mm (median 22) | **~8 mm** |
+
+**A 20 mm gate on predicted width admits configurations with 8 mm of real window.** That is below
+the run-to-run variation of the executed body, so a scene placed inside it is not reliably placeable
+at all — which is what the chest family shows.
+
+### P7, registered before the remaining twelve configurations report
+
+1. **No chest-band configuration produces a verified family.** Falsified by any one of the five.
+2. **Waist-band configurations verify at a higher rate than chest-band ones.** They have the widest
+   windows among wall obstacles and the tuck tracks better than the nominal, so this is where the
+   method should work if it works anywhere. Falsified by chest matching or beating waist.
+3. **Delivered window stays near a third of predicted across bands**, within a factor of two.
+   Falsified by any band delivering more than two thirds or less than a sixth.
+
+The third is the one worth having, because it converts `min_window_m` from a guess into a number:
+if delivery holds near a third, the gate must sit near 0.06 m to admit only configurations with a
+real 20 mm window. That change is not made here — it is a design parameter, and changing it while
+the batch that would test it is still running would leave nothing to test it against.
+
 ## P6: the transport cost predicts family yield by band
 
 *Registered 2026-08-19, with 2 of 56 cells seen and 12 of 14 configurations unrolled.*
