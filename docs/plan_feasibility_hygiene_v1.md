@@ -5,7 +5,7 @@ a dynamic-feasibility screen, a contact-projection repair operator, and an expos
 adaptive sampler — plus a matched-compute ablation designed so that each contrast identifies one
 factor.
 
-**Status: planned, partially built, nothing measured.** No training run has been launched for this.
+**Status: built, screened, and the headline arm descoped on the evidence.** No training run has been launched for this.
 Every number below is either (a) read off shipped code, (b) measured on CPU with the real sampler
 code path, or (c) imported from a sibling project on a *different* motion bank and explicitly
 marked as not transferable. Predictions are registered as P10-P12 in
@@ -197,20 +197,28 @@ dependency, and is the least certain part of this plan.
 
 ## Order of work
 
-1. **Screen SONIC's own bank.** Until the prevalence is measured here, arm sizes are guesses. — *built, running on a slice*
+1. **Screen SONIC's own bank.** Until the prevalence is measured here, arm sizes are guesses.
+   — **DONE 2026-08-19, and it changes the plan: 7 of 4,950 clips (0.14 %) exceed
+   `infeasible_frac > 0.10`, against 22.8 % on the AMASS bank. See P10 in
+   `prediction_register.md`. Steps 6 below is descoped as a result.**
 2. **Repair the flagged clips**, produce the pruned and repaired banks, census the refusals. — *built*
 3. **Exposure ledger + the cap measurement.** Config-only; costs no GPU. — *built*
 4. **Freeze the analysis and dry-run it on synthetic outcomes** before any arm exists. — *built*
 5. Register predictions before any arm runs. — *done: P10 (prevalence), P11 (the cap may win),
    P12 (repair vs pruning) in `prediction_register.md`*
-6. Only then, arms. Priority C > E > B > D, against A.
+6. ~~Only then, arms. Priority C > E > B > D, against A.~~ **Descoped 2026-08-19.** With seven
+   flagged clips out of 4,950, arms B and C differ from A by 0.14 % of the bank. No training run
+   resolves that. The arm configs and the frozen analysis stay in the tree because they are the
+   apparatus for a *dirty* bank, and the mjlab/AMASS side is exactly that.
 
 Steps 1–4 are CPU-only by design, so the expensive step is last and best-informed.
 
 ## Open and unverified
 
-- Prevalence on BONES-SEED: **unmeasured**. Everything downstream is sized off a guess until step 1
-  finishes.
+- ~~Prevalence on BONES-SEED: **unmeasured**.~~ Measured: **0.14 %** at `infeasible_frac > 0.10`
+  (7/4,950), 2.24 % at `airborne_frac > 0.10`. Five of the seven are box jumps whose 50 cm box is
+  absent from the flat scene — a scene mismatch, not a retarget defect, and not something root
+  projection can repair.
 - Whether repair helps at all on this bank: unmeasured. The sibling project's operator recovered
   65.8% of flagged clips, but on a different retargeter's failure modes.
 - The repair operator triggers on *airborne* frames but scores on the full LP. Clips infeasible

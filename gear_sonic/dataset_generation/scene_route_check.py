@@ -17,7 +17,7 @@ obstacle's footprint, in the frame physics will use.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 
@@ -32,6 +32,11 @@ class RouteCheck:
     #: Signed x offset that would bring the path's closest point onto the footprint centre. A value
     #: near a conversion's ``--scene-start`` offset is the signature of a frame mismatch.
     suggested_shift_x_m: float
+    #: (T,) planar metres from each path point to the footprint, zero while inside it. The gate only
+    #: needs the minimum, but a model needs the series: a policy trained on the scalar learns *that*
+    #: a crouch is required and never *when*. Excluded from equality and repr so every existing
+    #: construction site and comparison keeps working.
+    distance_m: np.ndarray | None = field(default=None, repr=False, compare=False)
 
     @property
     def passes(self) -> bool:
@@ -79,6 +84,7 @@ def check_route_meets_obstacle(
         frames_inside=int(inside.sum()),
         closest_approach_m=float(distance.min()),
         suggested_shift_x_m=float(path[nearest, 0] - 0.5 * (x_min + x_max)),
+        distance_m=distance,
     )
 
 
@@ -99,6 +105,27 @@ def capsule_box_clearance(
     body come to the solid -- and returns ``(clearance, frame, capsule)``. Negative clearance means
     the capsule and the box overlap by that much.
     """
+    clearance, capsule_index = capsule_box_clearance_series(starts, ends, radii, box)
+    frame = int(np.argmin(clearance))
+    return float(clearance[frame]), frame, int(capsule_index[frame])
+
+
+def capsule_box_clearance_series(
+    starts: np.ndarray,
+    ends: np.ndarray,
+    radii: np.ndarray,
+    box: tuple[float, float, float, float, float, float],
+) -> tuple[np.ndarray, np.ndarray]:
+    """Per-frame smallest capsule-to-box gap, and which capsule binds it.
+
+    The same measurement `capsule_box_clearance` reduces to one number, kept as a series. Returns
+    ``(clearance_m, capsule_index)`` of shapes ``(T,)`` float64 and ``(T,)`` int64, negative
+    clearance meaning overlap by that much.
+
+    The scalar form is now a global minimum over this, so the two cannot disagree. That is the
+    point: a second implementation of the same geometry is how a per-frame series and the gate it
+    is supposed to explain end up telling different stories about the same episode.
+    """
     x0, y0, z0, x1, y1, z1 = box
     lower = np.array([x0, y0, z0], dtype=np.float64)
     upper = np.array([x1, y1, z1], dtype=np.float64)
@@ -110,6 +137,7 @@ def capsule_box_clearance(
     clamped = np.clip(points, lower, upper)
     distance = np.linalg.norm(points - clamped, axis=-1) - radii[None, :, None]
 
-    flat = int(np.argmin(distance))
-    frame, capsule, _ = np.unravel_index(flat, distance.shape)
-    return float(distance.min()), int(frame), int(capsule)
+    frames, capsules, _ = distance.shape
+    flat = distance.reshape(frames, capsules * distance.shape[2])
+    winner = np.argmin(flat, axis=1)
+    return flat[np.arange(frames), winner], (winner // distance.shape[2]).astype(np.int64)

@@ -194,7 +194,9 @@ def floor_geom_id(model: Any) -> int:
         return int(named)
     planes = [i for i in range(model.ngeom) if model.geom_type[i] == mujoco.mjtGeom.mjGEOM_PLANE]
     if not planes:
-        raise ValueError(f"model has no geom named {FLOOR_GEOM_NAME!r} and no plane geom to fall back on")
+        raise ValueError(
+            f"model has no geom named {FLOOR_GEOM_NAME!r} and no plane geom to fall back on"
+        )
     return int(planes[-1])
 
 
@@ -210,8 +212,7 @@ def contact_geom_ids(model: Any) -> list[int]:
     return [
         geom_id
         for geom_id in range(model.ngeom)
-        if geom_id != plane
-        and (model.geom_contype[geom_id] or model.geom_conaffinity[geom_id])
+        if geom_id != plane and (model.geom_contype[geom_id] or model.geom_conaffinity[geom_id])
     ]
 
 
@@ -220,7 +221,9 @@ def motion_qpos(model: Any, motion: Motion) -> np.ndarray:
 
     num_frames = int(motion.root_trans_offset.shape[0])
     if model.nq != 7 + motion.dof.shape[1]:
-        raise ValueError(f"model nq={model.nq} does not match a free root plus {motion.dof.shape[1]} dofs")
+        raise ValueError(
+            f"model nq={model.nq} does not match a free root plus {motion.dof.shape[1]} dofs"
+        )
     qpos = np.zeros((num_frames, model.nq), dtype=np.float64)
     qpos[:, 0:3] = motion.root_trans_offset
     # SONIC stores root_rot as XYZW (scipy convention); MuJoCo free joints want WXYZ.
@@ -383,7 +386,11 @@ def repair_motion(
     # reads as airborne there while a knee geom is on the floor here, and lands in this branch.
     # That is the right answer -- lowering the root would drive the knee through the ground.
     if float(offset.max()) <= ZERO_OFFSET_EPS_M:
-        reason = REASON_UNSCOREABLE if math.isnan(infeasible_before) else REASON_OUT_OF_SCOPE_NOT_AIRBORNE
+        reason = (
+            REASON_UNSCOREABLE
+            if math.isnan(infeasible_before)
+            else REASON_OUT_OF_SCOPE_NOT_AIRBORNE
+        )
         return motion, _result(False, reason, before, zero)
 
     if not smpl_joints_are_root_relative(motion):

@@ -162,20 +162,31 @@ footer p{max-width:none}
   <p>The same walk, run twice in an easy room and twice in a hard one — once as generated, once with
   a single local edit. Fixed camera in the room so gait stays legible.
   <strong>Three survive. One does not.</strong></p>
-  <div class="axis"><span>Easy room</span><span>Hard room</span></div>
+  <div class="axis"><span>As generated · strikes</span><span>One local edit · clears</span></div>
+  <div class="grid2">
+    <div class="cell rej"><video src="media/family_nominal_hard.mp4" muted loop playsinline preload="metadata"></video>
+      <div class="cap"><span class="label">Hard room · as generated</span><span class="verdict">−0.0 mm · STRIKES</span></div></div>
+    <div class="cell acc"><video src="media/family_adapted_hard.mp4" muted loop playsinline preload="metadata"></video>
+      <div class="cap"><span class="label">Hard room · one local edit</span><span class="verdict">+55.6 mm · CLEARS</span></div></div>
+  </div>
+  <p style="margin-top:1rem">Same shelf, same room, same controller. On the left the head meets the
+  plank and the physics reports it in newtons. On the right the robot is <strong>visibly lower</strong>
+  — knees bent, torso dropped — and passes under with 55.6 mm to spare. That difference is the label,
+  and nobody wrote it down by hand.</p>
+
+  <h3 style="margin-top:2.4rem">The other half of the family</h3>
+  <p>The same two motions in the easy room, where the shelf sits 178 mm higher and both survive.
+  Without this half there is no counterfactual — only a hard scene and a motion that failed in it.</p>
   <div class="grid2">
     <div class="cell acc"><video src="media/family_nominal_easy.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">As generated</span><span class="verdict">ACCEPTED</span></div></div>
-    <div class="cell rej"><video src="media/family_nominal_hard.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">As generated</span><span class="verdict">REJECTED</span></div></div>
+      <div class="cap"><span class="label">Easy room · as generated</span><span class="verdict">+89.7 mm · CLEARS</span></div></div>
     <div class="cell acc"><video src="media/family_adapted_easy.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">One local edit</span><span class="verdict">ACCEPTED</span></div></div>
-    <div class="cell acc"><video src="media/family_adapted_hard.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">One local edit</span><span class="verdict">ACCEPTED</span></div></div>
+      <div class="cap"><span class="label">Easy room · one local edit</span><span class="verdict">+193.4 mm · CLEARS</span></div></div>
   </div>
-  <p style="margin-top:1rem;font-size:.85rem;color:var(--muted)">Family <span class="mono">duck_003</span>.
-  The rejected cell drives its torso into the shelf; the physics reports the strike in newtons and
-  the label follows from it.</p>
+  <p style="margin-top:1rem;font-size:.85rem;color:var(--muted)">Family <span class="mono">duck_003</span>,
+  rendered in Isaac Sim from the fixed observer camera and trimmed to the crossing. The rooms are
+  deliberately bare: the geometry is controlled to the millimetre, so nothing is in them that does
+  not have to be.</p>
 
   <h3 style="margin-top:2.8rem">How close is close? Down to the millimetre.</h3>
   <p>Difficulty here is not a word, it is a measured distance. Between the easy room and the hard

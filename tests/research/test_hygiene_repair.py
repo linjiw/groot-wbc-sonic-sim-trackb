@@ -87,11 +87,15 @@ def make_motion(
     asserts, so :func:`validate_motion` passes and the redundancy claim under test is real.
     """
 
-    dof_array = np.zeros((num_frames, 29), dtype=np.float32) if dof is None else np.asarray(dof, dtype=np.float32)
-    pose_aa = np.zeros((num_frames, 30, 3), dtype=np.float32)
-    pose_aa[:, 1:, :] = (DOF_AXIS.astype(np.float64)[None] * dof_array.astype(np.float64)[:, :, None]).astype(
-        np.float32
+    dof_array = (
+        np.zeros((num_frames, 29), dtype=np.float32)
+        if dof is None
+        else np.asarray(dof, dtype=np.float32)
     )
+    pose_aa = np.zeros((num_frames, 30, 3), dtype=np.float32)
+    pose_aa[:, 1:, :] = (
+        DOF_AXIS.astype(np.float64)[None] * dof_array.astype(np.float64)[:, :, None]
+    ).astype(np.float32)
     root_trans = np.zeros((num_frames, 3), dtype=np.float32)
     root_trans[:, 2] = root_z
     root_rot = np.tile(np.array([0.0, 0.0, 0.0, 1.0], dtype=np.float32), (num_frames, 1))
@@ -155,7 +159,9 @@ def test_plan_root_offset_never_raises_and_never_penetrates():
     offset = plan_root_offset(clearance, FPS, gap_m=0.06, clearance_m=0.003, smooth_s=0.24)
     after = clearance - offset
     assert offset.min() >= 0.0, "the operator must never lift the root"
-    assert np.all(after >= np.minimum(clearance, 0.003) - 1e-9), "the blend must not deepen a penetration"
+    assert np.all(
+        after >= np.minimum(clearance, 0.003) - 1e-9
+    ), "the blend must not deepen a penetration"
     # The blend does bleed into the contact band -- that is what makes the touchdown smooth rather
     # than a step -- but only ever down to the clearance, never through it.
     assert offset[30:60].max() > 0.0
@@ -170,7 +176,9 @@ def test_apply_root_offset_touches_only_the_z_column():
     np.testing.assert_allclose(moved.root_trans_offset[:, 2], 1.0 - offset, atol=1e-6)
     assert moved.root_trans_offset.dtype == np.float32
     # and the source is not mutated in place
-    np.testing.assert_array_equal(motion.root_trans_offset[:, 2], np.ones(NUM_FRAMES, dtype=np.float32))
+    np.testing.assert_array_equal(
+        motion.root_trans_offset[:, 2], np.ones(NUM_FRAMES, dtype=np.float32)
+    )
 
 
 def test_apply_root_offset_rejects_a_mismatched_profile():
@@ -206,9 +214,7 @@ def test_hovering_clip_is_lowered_and_stops_being_airborne(model, ground_root_z)
     assert result.reason == REASON_REPAIRED
     assert result.success
     assert_non_root_fields_identical(motion, repaired)
-    np.testing.assert_allclose(
-        repaired.root_trans_offset[:, 2], ground_root_z, atol=2e-3
-    )
+    np.testing.assert_allclose(repaired.root_trans_offset[:, 2], ground_root_z, atol=2e-3)
 
 
 def test_grounded_clip_is_returned_bit_identical(model, ground_root_z):
@@ -377,7 +383,11 @@ def test_result_to_dict_is_json_shaped(model, ground_root_z):
         "offset_mean_m",
     }
     assert isinstance(payload["success"], bool)
-    assert all(isinstance(payload[k], float) for k in payload if k.endswith(("_frac_before", "_frac_after", "_m")))
+    assert all(
+        isinstance(payload[k], float)
+        for k in payload
+        if k.endswith(("_frac_before", "_frac_after", "_m"))
+    )
 
 
 # --------------------------------------------------------------------------------------
@@ -398,7 +408,9 @@ def test_needs_repair_defaults_to_yes_when_the_screen_is_silent(bank_script):
     assert bank_script.needs_repair({"infeasible_frac": 0.9}, 0.05) is True
     assert bank_script.needs_repair({"infeasible_frac": 0.01}, 0.05) is False
     assert bank_script.needs_repair({"infeasible_frac": "not a number"}, 0.05) is True
-    assert bank_script.needs_repair({"infeasible_frac": None}, 0.05) is True, "null means unscoreable"
+    assert (
+        bank_script.needs_repair({"infeasible_frac": None}, 0.05) is True
+    ), "null means unscoreable"
     assert bank_script.needs_repair({"infeasible_frac": float("nan")}, 0.05) is True
 
 
@@ -433,16 +445,24 @@ def test_bank_run_is_complete_and_copies_clean_clips_byte_for_byte(
     save_motion(make_motion(root_z=ground_root_z, key="grounded"), bank / "grounded.pkl")
     save_motion(make_motion(root_z=ground_root_z + 0.08, key="hovering"), bank / "hovering.pkl")
     # the screen says "grounded" is fine, so it must be copied without being screened again
-    (screen_dir / "grounded.json").write_text(json.dumps({"motion_key": "grounded", "infeasible_frac": 0.0}))
-    (screen_dir / "hovering.json").write_text(json.dumps({"motion_key": "hovering", "infeasible_frac": 1.0}))
+    (screen_dir / "grounded.json").write_text(
+        json.dumps({"motion_key": "grounded", "infeasible_frac": 0.0})
+    )
+    (screen_dir / "hovering.json").write_text(
+        json.dumps({"motion_key": "hovering", "infeasible_frac": 1.0})
+    )
 
     digest_before = hashlib.sha256((bank / "grounded.pkl").read_bytes()).hexdigest()
     code = bank_script.main(
         [
-            "--bank", str(bank),
-            "--out-bank", str(out_bank),
-            "--screen-dir", str(screen_dir),
-            "--out-reports", str(reports),
+            "--bank",
+            str(bank),
+            "--out-bank",
+            str(out_bank),
+            "--screen-dir",
+            str(screen_dir),
+            "--out-reports",
+            str(reports),
         ]
     )
 
@@ -478,7 +498,15 @@ def test_bank_run_resumes_without_redoing_work(bank_script, model, ground_root_z
     bank.mkdir()
     save_motion(make_motion(root_z=ground_root_z + 0.08, key="hovering"), bank / "hovering.pkl")
 
-    argv = ["--bank", str(bank), "--out-bank", str(out_bank), "--out-reports", str(reports), "--repair-all"]
+    argv = [
+        "--bank",
+        str(bank),
+        "--out-bank",
+        str(out_bank),
+        "--out-reports",
+        str(reports),
+        "--repair-all",
+    ]
     assert bank_script.main(argv) == 0
     first = (out_bank / "hovering.pkl").stat().st_mtime_ns
 

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 
 import numpy as np
 import pytest
@@ -303,3 +304,51 @@ def test_clip_screen_contract_fields_are_present_and_ordered() -> None:
         "robot_sha256",
         "source_sha256",
     ]
+
+
+# ------------------------------------------------- frozen-oracle cross-check
+#
+# These two are the only tests that touch research volumes.  They skip cleanly
+# when those volumes are not mounted, and they exist because the resample rule is
+# the one place where "looks right" is not good enough: LACE froze the frame
+# count SONIC produces for every clip in this bank, so we can check ours against
+# an oracle nobody in this package wrote.
+
+_LACE_MANIFEST_GLOB = (
+    "/data/robotixx/groot-wbc-sonic-research/lace/manifests/"
+    "bones_seed_official_headline_scale4950_*reference_lengths_v1.json"
+)
+
+
+def _frozen_length_records() -> dict[str, dict]:
+    import glob
+
+    records: dict[str, dict] = {}
+    for manifest in sorted(glob.glob(_LACE_MANIFEST_GLOB)):
+        with open(manifest, encoding="utf-8") as handle:
+            for record in json.load(handle)["motions"]:
+                records[record["motion_key"]] = record
+    return records
+
+
+def test_resample_matches_the_frozen_lace_frame_counts() -> None:
+    pytest.importorskip("torch")
+    records = _frozen_length_records()
+    if not records:
+        pytest.skip("frozen LACE reference-length manifests are not mounted")
+    import random
+
+    random.seed(11)
+    sample = random.sample(sorted(records), min(25, len(records)))
+    checked = 0
+    for key in sample:
+        record = records[key]
+        path = record["split_robot_path"]
+        if not os.path.isfile(path):
+            continue
+        motion = load_motion(path)
+        assert motion.num_frames == record["source_num_frames"], key
+        assert resample_to(motion, 50).num_frames == record["target_num_frames"], key
+        checked += 1
+    if checked == 0:
+        pytest.skip("release bank is not mounted")

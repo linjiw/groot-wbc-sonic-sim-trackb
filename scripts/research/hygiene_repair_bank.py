@@ -91,20 +91,34 @@ CENSUS_COLUMNS = (
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--bank", required=True, type=Path, help="source bank directory of .pkl clips")
-    parser.add_argument("--out-bank", required=True, type=Path, help="destination bank directory (real files)")
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "--bank", required=True, type=Path, help="source bank directory of .pkl clips"
+    )
+    parser.add_argument(
+        "--out-bank", required=True, type=Path, help="destination bank directory (real files)"
+    )
     parser.add_argument(
         "--screen-dir",
         type=Path,
         default=None,
         help="directory of per-clip screen JSONs; clips already feasible there are copied through",
     )
-    parser.add_argument("--out-reports", required=True, type=Path, help="per-clip reports, census CSV, summary")
-    parser.add_argument("--workers", type=int, default=1, help="parallel worker processes (1 = in-process)")
+    parser.add_argument(
+        "--out-reports", required=True, type=Path, help="per-clip reports, census CSV, summary"
+    )
+    parser.add_argument(
+        "--workers", type=int, default=1, help="parallel worker processes (1 = in-process)"
+    )
     parser.add_argument("--limit", type=int, default=0, help="process at most N clips (0 = all)")
-    parser.add_argument("--repair-all", action="store_true", help="ignore --screen-dir and screen every clip here")
-    parser.add_argument("--overwrite", action="store_true", help="redo clips that already have outputs")
+    parser.add_argument(
+        "--repair-all", action="store_true", help="ignore --screen-dir and screen every clip here"
+    )
+    parser.add_argument(
+        "--overwrite", action="store_true", help="redo clips that already have outputs"
+    )
     parser.add_argument("--max-offset-m", type=float, default=RepairBudget.max_offset_m)
     parser.add_argument(
         "--max-infeasible-frac-after", type=float, default=RepairBudget.max_infeasible_frac_after
@@ -206,14 +220,22 @@ def process_clip(
             "success": True,
             "reason": "screen_feasible",
             "screened_here": False,
-            "airborne_frac_before": float(screen_report.get("airborne_frac", float("nan")))
-            if screen_report
-            else float("nan"),
-            "airborne_frac_after": float(screen_report.get("airborne_frac", float("nan")))
-            if screen_report
-            else float("nan"),
-            "infeasible_frac_before": float(screen_report["infeasible_frac"]) if screen_report else 0.0,
-            "infeasible_frac_after": float(screen_report["infeasible_frac"]) if screen_report else 0.0,
+            "airborne_frac_before": (
+                float(screen_report.get("airborne_frac", float("nan")))
+                if screen_report
+                else float("nan")
+            ),
+            "airborne_frac_after": (
+                float(screen_report.get("airborne_frac", float("nan")))
+                if screen_report
+                else float("nan")
+            ),
+            "infeasible_frac_before": (
+                float(screen_report["infeasible_frac"]) if screen_report else 0.0
+            ),
+            "infeasible_frac_after": (
+                float(screen_report["infeasible_frac"]) if screen_report else 0.0
+            ),
             "offset_max_m": 0.0,
             "offset_mean_m": 0.0,
             "seconds": time.process_time() - started,
@@ -270,7 +292,9 @@ def _worker(payload: WorkPayload) -> dict[str, Any]:
     )
 
 
-def summarise(rows: list[dict[str, Any]], *, budget: RepairBudget, thresholds: ScreenThresholds) -> dict[str, Any]:
+def summarise(
+    rows: list[dict[str, Any]], *, budget: RepairBudget, thresholds: ScreenThresholds
+) -> dict[str, Any]:
     """Aggregate the census into the numbers a reader of the experiment actually wants."""
 
     attempted = [row for row in rows if row.get("screened_here")]
@@ -298,9 +322,15 @@ def summarise(rows: list[dict[str, Any]], *, budget: RepairBudget, thresholds: S
         "offset_max_m_mean": _mean([float(row["offset_max_m"]) for row in attempted]),
         "offset_max_m_max": max([float(row["offset_max_m"]) for row in attempted], default=0.0),
         "offset_mean_m_mean": _mean([float(row["offset_mean_m"]) for row in attempted]),
-        "infeasible_frac_before_mean": _mean([float(row["infeasible_frac_before"]) for row in attempted]),
-        "infeasible_frac_after_mean": _mean([float(row["infeasible_frac_after"]) for row in attempted]),
-        "airborne_frac_before_mean": _mean([float(row["airborne_frac_before"]) for row in attempted]),
+        "infeasible_frac_before_mean": _mean(
+            [float(row["infeasible_frac_before"]) for row in attempted]
+        ),
+        "infeasible_frac_after_mean": _mean(
+            [float(row["infeasible_frac_after"]) for row in attempted]
+        ),
+        "airborne_frac_before_mean": _mean(
+            [float(row["airborne_frac_before"]) for row in attempted]
+        ),
         "airborne_frac_after_mean": _mean([float(row["airborne_frac_after"]) for row in attempted]),
         "seconds_per_clip_mean": _mean([float(row["seconds"]) for row in attempted]),
         "seconds_total": float(sum(float(row["seconds"]) for row in rows)),
@@ -427,9 +457,16 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
     else:
-        print(f"[repair] INCOMPLETE: {len(expected - written)} clips missing from {args.out_bank}", flush=True)
+        print(
+            f"[repair] INCOMPLETE: {len(expected - written)} clips missing from {args.out_bank}",
+            flush=True,
+        )
 
-    print(json.dumps({k: v for k, v in summary.items() if k != "thresholds"}, indent=1, sort_keys=True))
+    print(
+        json.dumps(
+            {k: v for k, v in summary.items() if k != "thresholds"}, indent=1, sort_keys=True
+        )
+    )
     return 0 if complete else 1
 
 

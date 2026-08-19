@@ -64,7 +64,7 @@ below the hard face against the causal clip's 58 (2.30 s against 1.93 s), at the
 `adapted_hard` now fails on contact, it is drift over a longer crouch, not a shallower one, and that
 distinction is worth more than the verdict.
 
-### P10 — BONES-SEED is much cleaner than the AMASS bank, and the screen will mostly find nothing
+### P10 — BONES-SEED is much cleaner than the AMASS bank, and the screen will mostly find nothing — **CONFIRMED, and it descopes the ablation**
 
 **Registered 2026-08-19, before the dynamic-feasibility screen has been run over BONES-SEED and
 before any arm of `plan_feasibility_hygiene_v1.md` has been trained.**
@@ -82,6 +82,44 @@ If the rate comes in at or above 10%, the "already filtered" premise is wrong an
 filter is passing references that no controller can track. That is the more interesting outcome and
 the one that justifies the rest of the pipeline. A low rate means arms B and C are near-identical
 to A, and the ablation should be descoped rather than run at full cost.
+
+**Result, 2026-08-19: confirmed, by a wide margin.** Full-bank screen of all 4,950 clips
+(`gear_sonic/research/hygiene/screen.py`, 131.7 s wall on 8 CPU workers, 0 failures):
+
+| threshold | `infeasible_frac >` | `airborne_frac >` |
+|---|---|---|
+| 0.05 | 29 (0.59 %) | 225 (4.55 %) |
+| **0.10** | **7 (0.14 %)** | 111 (2.24 %) |
+| 0.20 | 5 (0.10 %) | 32 (0.65 %) |
+
+**0.14 %, against the 22.8 % measured on the AMASS/whole_body_tracking bank — a factor of 160.**
+The prediction said under 10 %; the truth is under one part in 700.
+
+The concentration half of the prediction also holds, but the *mechanism* is not what I guessed.
+The seven clips are `jump_on_50cm_002` (0.658), `kick_back_001` (0.472), `jump_off_front_50cm_R_002`
+(0.379), `jump_off_50cm_R_001` (0.366), `jump_off_front_50cm_001` (0.353), `high_jump_R_003`
+(0.138), `burpee_002` (0.136). Five of seven are box jumps. Their references are not corrupt —
+they are unsupportable **on a flat floor**, because the 50 cm box they jump onto is not in the
+scene. That is a scene-mismatch, not a retargeting artifact, and root-projection repair is the
+wrong operator for it: the fix is terrain or exclusion.
+
+**Consequence, pre-committed above and now taken: the SONIC feasibility-hygiene training ablation
+is descoped.** Arms B (prune) and C (repair) would differ from A by seven clips out of 4,950. No
+training arm can resolve that, and running the matrix would burn GPU to measure noise. I am not
+looking for a rescue analysis.
+
+**What the screen did earn on this bank**, and it is worth keeping:
+- It is *right about the hard case*. Seven `kneeling_loop_*` clips sit at `airborne_frac = 1.000`
+  with `infeasible_frac = 0.000` — feet 7–9 cm off the floor for the entire clip, weight carried
+  on the knees. A naive "airborne means broken" filter deletes exactly the rare ground-contact
+  behaviour the bank is short of. Keeping airborne and infeasible as separate axes is what makes
+  that distinction, and this is the evidence that it matters.
+- It is cheap enough to be a standing release gate: 0.145 CPU-s per clip, 0.84 ms per screened
+  frame. Running it on every new corpus costs minutes and would have caught the box jumps before
+  they reached training.
+- The negative result is itself the finding: **the official `robot_filtered` pipeline is doing its
+  job.** That is worth stating plainly, because the AMASS number invites the assumption that all
+  retargeted banks are 20 % broken. They are not.
 
 ### P11 — the per-motion cap is a cheap substitute for data hygiene, and mostly wins
 
