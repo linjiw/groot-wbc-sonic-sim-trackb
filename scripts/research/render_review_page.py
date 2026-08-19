@@ -22,6 +22,30 @@ QUESTIONS = (
 )
 
 
+#: Names that actually claim a behaviour. A first reviewer pass answered "can't tell" to the
+#: behaviour question across roughly half the cohort, correctly: `density_moderate`, `combo09` and
+#: `01_single_text_prompt__factory_aisle__p0` claim nothing a person could check. Asking anyway
+#: manufactures unanswerable questions and buries the cards where the question is real.
+BEHAVIOUR_WORDS = ("crouch", "duck", "tuck", "nominal", "walk", "squat", "step", "bend", "side")
+
+
+def claims_behaviour(episode_id: str) -> bool:
+    return any(word in episode_id.lower() for word in BEHAVIOUR_WORDS)
+
+
+def has_obstacle(episode_id: str, clearance) -> bool:
+    """Probes run on a bare plane, so there is nothing to clear and the first question cannot
+    apply. The same reviewer pass flagged every probe as unjudgeable for exactly this reason."""
+    return clearance not in ("", None) and "probe" not in episode_id.lower()
+
+
+#: Names that actually claim a behaviour. A first reviewer pass answered "can't tell" to the
+#: behaviour question on roughly half the cohort, correctly: `density_moderate`, `combo09` and
+#: `01_single_text_prompt__factory_aisle__p0` claim nothing a person could check. Asking anyway
+#: manufactures unanswerable questions and buries the cards where the question is real.
+BEHAVIOUR_WORDS = ("crouch", "duck", "tuck", "nominal", "walk", "squat", "step", "bend", "side")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--pack", type=Path, required=True)
@@ -30,7 +54,7 @@ def main() -> int:
 
     with open(args.pack / "cohort_evidence.csv", newline="") as handle:
         rows = list(csv.DictReader(handle))
-    cards, embedded = [], 0
+    cards, embedded, asked = [], 0, 0
     for index, row in enumerate(rows):
         if not row["sheet"]:
             continue
@@ -53,14 +77,32 @@ def main() -> int:
             if clearance not in ("", None)
             else ""
         )
-        buttons = "".join(f"""<div class="q" data-ep="{row['episode_id']}" data-q="{key}">
+        askable = {
+            "traversed": has_obstacle(row["episode_id"], clearance) and not reduced,
+            "upright": True,
+            "behaviour": claims_behaviour(row["episode_id"]),
+        }
+        asked += sum(1 for v in askable.values() if v)
+        parts = []
+        for key, text in QUESTIONS:
+            if askable[key]:
+                parts.append(f"""<div class="q" data-ep="{row['episode_id']}" data-q="{key}">
               <span class="qt">{text}</span>
               <div class="opts">
                 <button data-v="yes">yes</button>
                 <button data-v="no">no</button>
                 <button data-v="unsure">can’t tell</button>
               </div>
-            </div>""" for key, text in QUESTIONS)
+            </div>""")
+            else:
+                why = (
+                    "no obstacle in this episode"
+                    if key == "traversed"
+                    else "the name states no behaviour to check"
+                )
+                parts.append(f"""<div class="q na"><span class="qt">{text}</span>
+              <span class="chip">not asked — {why}</span></div>""")
+        buttons = "".join(parts)
         cards.append(f"""
   <article class="card" id="ep{index}">
     <header class="cardhead">
@@ -68,7 +110,7 @@ def main() -> int:
       <code>{row['episode_id']}</code>
       {gap}
     </header>
-    <img src="{uri}" alt="frames from {row['episode_id']}" loading="lazy">
+    <img src="{uri}" alt="frames from {row['episode_id']}">
     {note}
     {buttons}
   </article>""")
@@ -130,6 +172,8 @@ code {{ font-family:"IBM Plex Mono",monospace; font-size:.82rem; color:var(--mut
   border-radius:99px; padding:.15rem .55rem; color:var(--muted); }}
 img {{ width:100%; border-radius:3px; background:#0001; }}
 .warn {{ font-size:.85rem; color:var(--unsure); }}
+.q.na {{ opacity:.55; }}
+.q.na .qt {{ text-decoration:line-through; }}
 .q {{ display:flex; align-items:center; justify-content:space-between; gap:.8rem;
   border-top:1px solid var(--rule); padding-top:.5rem; flex-wrap:wrap; }}
 .qt {{ font-size:.9rem; }}
@@ -188,8 +232,8 @@ ol,ul {{ margin:0; padding-left:1.2rem; display:flex; flex-direction:column; gap
 {"".join(cards)}
 
 <div class="bar">
-  <span id="count">0 / {embedded * len(QUESTIONS)}</span>
-  <progress id="prog" value="0" max="{embedded * len(QUESTIONS)}"></progress>
+  <span id="count">0 / {asked}</span>
+  <progress id="prog" value="0" max="{asked}"></progress>
   <button id="copy">Copy results</button>
   <button id="show" class="ghost">Show results</button>
 </div>
@@ -203,7 +247,7 @@ ol,ul {{ margin:0; padding-left:1.2rem; display:flex; flex-direction:column; gap
 <script>
 const KEY = "sweepcf_review_v1";
 const answers = JSON.parse(localStorage.getItem(KEY) || "{{}}");
-const total = {embedded * len(QUESTIONS)};
+const total = {asked};
 
 function render() {{
   document.querySelectorAll(".q").forEach(q => {{
@@ -266,7 +310,7 @@ render();
 </script>
 """
     args.out.write_text(page, encoding="utf-8")
-    print(f"{embedded} episodes, {embedded * len(QUESTIONS)} questions")
+    print(f"{embedded} episodes, {asked} questions")
     print(f"{args.out.stat().st_size / 1024 / 1024:.2f} MB -> {args.out}")
     return 0
 
