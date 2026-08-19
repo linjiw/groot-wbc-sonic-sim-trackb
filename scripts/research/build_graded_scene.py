@@ -44,6 +44,10 @@ from gear_sonic.dataset_generation.trajectory_segments import (  # noqa: E402
 )
 
 SCENES = REPO_ROOT / "gear_sonic/data/assets/scenes/g1_counterfactual"
+#: Metres of walkable floor left beyond the route on every side. The room is grown to contain the
+#: route rather than centred on it; see the sizing note in main().
+ROUTE_CLEARANCE_M = 2.0
+
 #: A wall is thin across the route and long along it, so the robot passes beside a surface rather
 #: than clipping a post. Metres.
 WALL_THICKNESS = 0.12
@@ -139,8 +143,22 @@ def main() -> int:
     plans = json.loads(args.plans.read_text())["plans"]
     usable = [p for p in plans if p["usable"]]
     root = np.asarray(payload["root_pos_w"], dtype=np.float64)[:, :2]
-    span = root.max(0) - root.min(0)
-    room = (float(span[0] + 4.0), float(max(span[1] + 4.0, 5.0)))
+    # Size the room so that it contains the route, not merely a route of that size. The shared
+    # scene spec places walls symmetrically about the origin (`ClutterSceneSpec.walkable_bounds`),
+    # so sizing from the span alone assumes the route straddles the origin -- and a route that does
+    # not ends up partly outside its own room. n_064 began 418 mm beyond the wall and spent its
+    # episode being shoved back in: 183.5 N of lateral contact and a foot against a vertical
+    # surface, in a scene whose only intended obstacle was a ceiling. Its family was void, and so
+    # were the two nominals queued behind it.
+    #
+    # Sizing to contain is deliberately preferred over introducing a room centre. A centre would be
+    # the tidier geometry but would have to reach every consumer of ClutterSceneSpec and every
+    # scene already frozen in a split; growing the room is confined to this file and leaves the
+    # origin-centred invariant that the rest of the pipeline assumes. An off-centre route gets a
+    # larger room than it strictly needs, which costs nothing and is reported by preflight.
+    reach = np.maximum(np.abs(root.min(0)), np.abs(root.max(0)))
+    half = reach + ROUTE_CLEARANCE_M
+    room = (float(2.0 * half[0]), float(max(2.0 * half[1], 5.0)))
 
     starts, ends, radii, names = body_capsules_world(
         np.asarray(payload["body_pos_w"], dtype=np.float64),
