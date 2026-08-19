@@ -208,9 +208,17 @@ ol,ul {{ margin:0; padding-left:1.2rem; display:flex; flex-direction:column; gap
 
 <section class="intro">
   <h2>What you are looking at</h2>
-  <p>Each strip shows six moments from one episode, left to right, seen from the side. The
+  <p>Each strip shows six moments from one episode, left to right, in <b>two rows</b>. The top row
+  is the view <b>from the side</b>, the bottom row the same instants <b>from above</b>. The
   <b>brown block</b> is a shelf or wall; the <b>reddish shape</b> is the robot's body, drawn to its
-  true size. Grey band at the bottom is the floor.</p>
+  true size. Grey band at the bottom of the side view is the floor.</p>
+  <p><b>Both rows matter.</b> An arm drawn in toward the body moves sideways, which the side view
+  cannot show at all — it is hidden behind the torso. Look at the view from above to judge anything
+  about the arms, and at the side view to judge height, stance and footing.</p>
+  <p>Where a <b>pale grey body</b> appears underneath the reddish one, that is the same robot walking
+  the same route <b>without</b> the behaviour being tested — the plain-walk comparison. The
+  question is whether the reddish body departs from it. Cards with no grey body have no comparison
+  available; judge those on their own.</p>
   <p><b>Why this matters.</b> Software already judged every one of these episodes automatically.
   We need to know how often it is wrong, and that only works if you judge independently — so the
   software's answer is deliberately hidden from you here.</p>
