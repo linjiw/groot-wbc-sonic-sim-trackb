@@ -70,8 +70,113 @@ def scene_of(cell_dir: Path) -> str | None:
     return None
 
 
-def strip(payload, box, out: Path, frames: int = 6) -> bool:
-    """A row of side elevations spanning the episode, with the obstacle to scale."""
+GHOST = "#9aa3ad"
+
+
+def nominal_sibling(cell_dir: Path) -> Path | None:
+    """The unadapted counterpart of a cell, by the layout conventions already in use.
+
+    A reviewer asked whether a clip performs its named behaviour is comparing it against ordinary
+    gait remembered from cards seen much earlier. Drawing the nominal underneath makes that
+    comparison direct. Returns None when the cell has no counterpart, and the card then shows the
+    adapted body alone, exactly as before.
+    """
+    name = cell_dir.name
+    if name.startswith("adapted_"):
+        candidate = cell_dir.parent / f"nominal_{name[len('adapted_'):]}"
+        return candidate if candidate.is_dir() else None
+    prefix = name.split("_")[0]
+    candidate = cell_dir.parent / f"{prefix}_nominal"
+    if candidate.is_dir() and candidate != cell_dir:
+        return candidate
+    return None
+
+
+def ghost_capsules(cell_dir: Path):
+    """Body capsules of the nominal counterpart, or None."""
+    sibling = nominal_sibling(cell_dir)
+    if sibling is None:
+        return None
+    found = sorted(sibling.glob("trajectories/*.trajectory.pkl"))
+    if not found:
+        return None
+    try:
+        with open(found[0], "rb") as handle:
+            payload, _ = best_evaluable_payload(pickle.load(handle))
+    except (SegmentError, Exception):  # noqa: BLE001
+        return None
+    if payload is None or "body_pos_w" not in payload:
+        return None
+    starts, ends, radii, _ = body_capsules_world(
+        np.asarray(payload["body_pos_w"], dtype=np.float64),
+        np.asarray(payload["body_quat_w"], dtype=np.float64),
+        list(payload["body_names"]),
+        capsules=G1_COLLISION_CAPSULES,
+    )
+    return starts, ends, radii
+
+
+def _draw_body(ax, starts, ends, radii, index: int, axis: int, colour: str, alpha: float) -> None:
+    """One frame of capsules projected onto x and the given second axis."""
+    index = min(index, starts.shape[0] - 1)
+    for capsule in range(starts.shape[1]):
+        a, b, r = starts[index, capsule], ends[index, capsule], radii[capsule]
+        p0, p1 = np.array([a[0], a[axis]]), np.array([b[0], b[axis]])
+        for point in (p0, p1):
+            ax.add_patch(Circle(point, r, facecolor=colour, ec="none", alpha=alpha, zorder=2))
+        d = p1 - p0
+        n = float(np.hypot(*d))
+        if n > 1e-9:
+            normal = np.array([-d[1], d[0]]) / n * r
+            ax.add_patch(
+                Polygon(
+                    [p0 + normal, p1 + normal, p1 - normal, p0 - normal],
+                    closed=True,
+                    facecolor=colour,
+                    ec="none",
+                    alpha=alpha,
+                    zorder=2,
+                )
+            )
+
+
+def _plan_view(ax, starts, ends, radii, root, box, index: int, ghost=None) -> None:
+    """The same instant seen from above.
+
+    The side elevation cannot show a lateral arm tuck at all: it projects onto x-z, and the tuck
+    retracts the wrist along y by around 0.16 m. A reviewer shown only that view correctly reported
+    no visible tuck on clips whose physics contains one. This row carries the missing axis.
+    """
+    if box is not None:
+        ax.add_patch(
+            Rectangle(
+                (box[0], box[1]),
+                box[3] - box[0],
+                box[4] - box[1],
+                facecolor=SHELF,
+                edgecolor="#6b5d4a",
+                lw=0.8,
+                zorder=3,
+            )
+        )
+    if ghost is not None:
+        _draw_body(ax, ghost[0], ghost[1], ghost[2], index, 1, GHOST, 0.30)
+    _draw_body(ax, starts, ends, radii, index, 1, ROBOT, 0.55)
+    centre = float(root[index, 0])
+    ax.set_xlim(centre - 1.0, centre + 1.0)
+    ax.set_ylim(-0.8, 0.8)
+    ax.set_aspect("equal")
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+
+def strip(payload, box, out: Path, frames: int = 6, ghost=None) -> bool:
+    """Side elevation and plan view of the episode, with the obstacle to scale.
+
+    Where the cell has an unadapted counterpart it is drawn underneath in grey, so a reviewer
+    judging whether the named behaviour happened compares two bodies in one panel rather than
+    recalling ordinary gait from a card seen much earlier.
+    """
     starts, ends, radii, _ = body_capsules_world(
         np.asarray(payload["body_pos_w"], dtype=np.float64),
         np.asarray(payload["body_quat_w"], dtype=np.float64),
@@ -81,8 +186,11 @@ def strip(payload, box, out: Path, frames: int = 6) -> bool:
     root = np.asarray(payload["root_pos_w"], dtype=np.float64)
     picks = np.linspace(0, len(root) - 1, frames).astype(int)
 
-    fig, axes = plt.subplots(1, frames, figsize=(2.0 * frames, 2.5), dpi=95)
-    for ax, index in zip(np.atleast_1d(axes), picks):
+    fig, grid = plt.subplots(
+        2, len(picks), figsize=(2.0 * len(picks), 4.6), dpi=95, squeeze=False
+    )
+    for ax, plan, index in zip(grid[0], grid[1], picks):
+        _plan_view(plan, starts, ends, radii, root, box, index, ghost=ghost)
         ax.axhspan(-0.06, 0.0, facecolor="#c9ced6", zorder=0)
         if box is not None:
             ax.add_patch(
@@ -96,25 +204,9 @@ def strip(payload, box, out: Path, frames: int = 6) -> bool:
                     zorder=3,
                 )
             )
-        for capsule in range(starts.shape[1]):
-            a, b, r = starts[index, capsule], ends[index, capsule], radii[capsule]
-            p0, p1 = np.array([a[0], a[2]]), np.array([b[0], b[2]])
-            for point in (p0, p1):
-                ax.add_patch(Circle(point, r, facecolor=ROBOT, ec="none", alpha=0.5, zorder=2))
-            d = p1 - p0
-            n = float(np.hypot(*d))
-            if n > 1e-9:
-                normal = np.array([-d[1], d[0]]) / n * r
-                ax.add_patch(
-                    Polygon(
-                        [p0 + normal, p1 + normal, p1 - normal, p0 - normal],
-                        closed=True,
-                        facecolor=ROBOT,
-                        ec="none",
-                        alpha=0.5,
-                        zorder=2,
-                    )
-                )
+        if ghost is not None:
+            _draw_body(ax, ghost[0], ghost[1], ghost[2], index, 2, GHOST, 0.30)
+        _draw_body(ax, starts, ends, radii, index, 2, ROBOT, 0.55)
         centre = float(root[index, 0])
         ax.set_xlim(centre - 1.3, centre + 1.3)
         ax.set_ylim(-0.06, 1.75)
@@ -122,6 +214,8 @@ def strip(payload, box, out: Path, frames: int = 6) -> bool:
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_title(f"f{index}", fontsize=7)
+    grid[0][0].set_ylabel("from the side", fontsize=7)
+    grid[1][0].set_ylabel("from above", fontsize=7)
     fig.tight_layout(pad=0.2)
     fig.savefig(out, dpi=95)
     plt.close(fig)
@@ -228,7 +322,7 @@ def main() -> int:
                 box = None
 
         name = episode_id.replace("/", "__") + ".png"
-        strip(payload, box, sheets / name)
+        strip(payload, box, sheets / name, ghost=ghost_capsules(cell_dir))
         record["sheet"] = f"sheets/{name}"
         rows.append(record)
         rendered += 1

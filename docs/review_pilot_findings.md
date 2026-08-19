@@ -1,7 +1,8 @@
 # What the first reviewer pass found
 
-A full pass over the 98-card pack produced three defects in the pack itself and three disagreements
-with the automatic gates. The defects are fixed; the disagreements are the point of the exercise.
+A full pass over the 98-card pack produced four defects in the pack. Three were obvious once
+reported. The fourth was reported as a finding about the dataset, and turned out to be a finding
+about the evidence — which is the more useful of the two.
 
 ## Defects in the pack
 
@@ -14,37 +15,42 @@ perform the behaviour its name claims* across roughly half the cohort, correctly
 `combo09` and `01_single_text_prompt__factory_aisle__p0` claim no behaviour a person could check.
 The question is now asked only when the name states one.
 
-**Probe cells have no obstacle.** Every probe drew "probe has no visible obstacle, so contact cannot
-be judged". They run on a bare plane; there is nothing to clear. The first question is no longer
-asked of them, nor of the reduced-evidence cards where the body was never recorded.
+**Probe cells have no obstacle.** They run on a bare plane; there is nothing to clear. The first
+question is no longer asked of them, nor of the reduced-evidence cards where the body was never
+recorded. With the previous item this removed **105 of 294 questions** — a third of the reviewer's
+work, all of it unanswerable by construction. Asking anyway does not merely waste time; it buries
+the cards where the question is real.
 
-Together these removed **105 of 294 questions** — a third of the reviewer's work, all of it
-unanswerable by construction. Asking anyway does not merely waste time; it buries the cards where
-the question is real.
+**The strip could not show a tuck at all.** Three episodes were scored "does not perform its named
+behaviour": `lc005_crouch18`, `w_tuckcap30` and `w_tuckcap40`, the latter two as "arm motion looks
+essentially like nominal gait; no visible tuck". Read as a dataset finding, these were false
+semantic labels the gates had accepted. They are not.
 
-## Disagreements with the gates — the actual finding
+Measured against the nominal, the executed wrist in both `w_tuckcap` clips is drawn **0.155 m and
+0.163 m laterally** — the tuck is present in the physics, and survives execution rather than being
+tracked away by the controller. It was invisible because the strip drew capsules as `(x, z)`: a side
+elevation, in which a lateral arm retraction has no projection. The reviewer was shown the one view
+that cannot contain the behaviour, and reported accurately on what they saw.
 
-Three episodes the gates accepted were judged **semantically wrong** by the reviewer:
+Two things follow. The strip now carries a **plan view** beneath the elevation, which supplies the
+missing axis; and where a cell has an unadapted counterpart the nominal body is drawn **underneath
+in grey**, so the comparison happens inside one panel instead of against ordinary gait remembered
+from a card seen forty places earlier. On `w_tuckcap30` the pale nominal arms now extend visibly
+beyond the adapted ones at frames 79 and 118.
 
-| episode | gate | reviewer | note |
-|---|---|---|---|
-| `local_rollouts/lc005_crouch18` | accepted | behaviour **no** | "does not visibly lower relative to ordinary gait despite `crouch18`" |
-| `sweep_rollouts/w_tuckcap30` | accepted | behaviour **no** | "arm motion looks essentially like nominal gait; no visible tuck" |
-| `sweep_rollouts/w_tuckcap40` | accepted | behaviour **no** | "arm motion looks essentially like nominal gait; no visible tuck" |
-
-These are exactly the failures the four-label decomposition predicts and no numeric gate detects: the
-clips are **physically fine** — cleared, upright, tracked — and do not contain the behaviour their
-name asserts. The gates never claimed to check that, which is why `executed_semantic_valid` is a
-separate column and why the corpus-level headline is 32% rather than 96%.
-
-The two `w_tuckcap` cases are the more pointed. Both are arm-tuck clips at capped excursion, and a
-cap that produces no visible tuck is a clip that satisfies its geometric target while failing its
-semantic one. That is a real limit on how far the excursion cap can be tightened before the operator
-stops meaning anything, and it was invisible to every measurement taken so far.
+A frame-sampling fix was also attempted and **discarded**. Only one of the strip's six frames falls
+inside the adaptation window, which looked like the cause until the projection was checked; and no
+window detector survived contact with the data, because leg swing dominates every posture signal
+tried at every smoothing scale. Concentrating frames on a window would not have helped when the
+window's content was unprojectable anyway.
 
 ## What this changes
 
-Nothing about the physics results. It changes the release: `executed_semantic_valid` will be
-populated from human review rather than left null, and the three episodes above are the first
-entries. It also sharpens the arm tuck's story — its yield problem is measured, and now there is
-evidence that some of its *accepted* clips are not tucks either.
+Nothing about the physics results, and nothing about the three episodes: they are **not** entered as
+semantic failures, and `executed_semantic_valid` gains no rows from this pass. What it changes is
+the pack. A review whose evidence omits the axis the behaviour lives on cannot measure semantic
+validity — it measures the projection. The re-review runs on the corrected sheets.
+
+The episode still worth watching is the arm tuck's cap. Its yield problem is measured, and the
+question of whether a capped tuck stays *recognisable* as a tuck remains open — but it must be
+asked of evidence that can show one.
