@@ -36,6 +36,12 @@ Usage::
     # or one pair directly, for a sweep across paces rather than a measured correction
     python scripts/research/build_deployable_skill.py \\
         --nominal 013.csv --adapted n_013_ceiling_overhead_left.csv --ratio 0.7 --out DIR
+
+    # or from the amplitude sweeps, for a clip that has never been rolled out. This is a
+    # prediction and it under-corrects -- 0.252 m against a measured 0.307 m on the one family
+    # where both exist -- so expect a second pass once the rollout reports.
+    python scripts/research/build_deployable_skill.py \\
+        --nominal 013.csv --adapted n_013_ceiling_overhead_left.csv --predict local_crouch --out DIR
 """
 
 from __future__ import annotations

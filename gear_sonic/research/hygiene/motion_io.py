@@ -1,48 +1,46 @@
-"""Reader/writer/validator for SONIC motion-library clips, used by the hygiene screen.
+"""Read, validate, resample, and re-write SONIC G1 motion-library clips.
 
-WHY this module exists
-----------------------
-The dynamic-feasibility screen and the repair operator both need to (a) read a SONIC
-``.pkl`` clip without dragging in Isaac Lab or the training stack, (b) put it on the
-*same* timeline the policy actually sees, and (c) write it back without silently
-changing dtype or breaking the redundancy the format carries.  Doing that inline in
-each caller is how format drift starts, so it lives here once.
+WHY this module exists: the hygiene package has to touch the *same bytes* SONIC
+trains on.  Every other tool in the package (the dynamic screen, the repair
+operator, the sampler diagnostics) needs one loader that (a) knows the on-disk
+contract exactly, (b) never silently changes dtype or the redundant
+``pose_aa``/``dof`` encoding, and (c) reproduces SONIC's load-time 30 -> 50 Hz
+resample rather than inventing a resample of its own.  A screen run on a
+timeline that differs from the training timeline measures the wrong motion.
 
-Format (verified on the 4950-clip Bones-SEED bank)
---------------------------------------------------
-One joblib ``.pkl`` per clip.  Top level is a dict with exactly one key -- the motion
-key, which equals the file stem.  Its value is a dict with:
+On-disk contract (verified against the 4950-clip Bones-SEED bank):
+    one joblib ``.pkl`` per clip, top-level dict with exactly one key equal to
+    the motion key (and to the file stem).  The value is a dict with
 
-===================  ==============  ==================================================
-field                shape / dtype   meaning
-===================  ==============  ==================================================
-root_trans_offset    (T, 3) f32      pelvis position in world frame [m]
-pose_aa              (T, 30, 3) f32  axis-angle; row 0 = root orientation,
-                                     row i+1 = ``DOF_AXIS[i] * dof[:, i]``
-dof                  (T, 29) f32     joint angles, MuJoCo (MJCF actuator) order [rad]
-root_rot             (T, 4) f32      root quaternion, XYZW (scipy convention)
-smpl_joints          (T, 24, 3) f32  SMPL joint positions in world frame [m]
-fps                  int             30 on the shipped bank
-===================  ==============  ==================================================
+        root_trans_offset : (T, 3)     float32   pelvis position, world frame
+        pose_aa           : (T, 30, 3) float32   axis-angle; row 0 is the root
+                                                 orientation, rows 1..29 are
+                                                 ``DOF_AXIS[i] * dof[:, i]``
+        dof               : (T, 29)    float32   MuJoCo/MJCF actuator order
+        root_rot          : (T, 4)     float32   quaternion, XYZW (scipy)
+        smpl_joints       : (T, 24, 3) float32
+        fps               : int                  30 for the release bank
 
-``pose_aa`` and ``dof`` are redundant by construction; :func:`validate_motion` checks
-that redundancy to ``1e-6`` because a repair or resample that updates one and forgets
-the other produces a clip that trains differently than it screens.
+``pose_aa`` and ``dof`` are redundant by construction; :func:`validate_motion`
+checks that redundancy because a repair operator that edits one and forgets the
+other produces a clip that behaves differently in MuJoCo (which reads ``dof``)
+than in SONIC's ``Humanoid_Batch`` FK (which reads ``pose_aa``).
 
-Resampling
-----------
-SONIC loads at 30 Hz and resamples to ``target_fps: 50`` *at load time*, so any
-feasibility statement about "what the policy tracks" has to be made on the 50 Hz
-timeline.  :func:`resample_to` reproduces the pinned rule rather than inventing one --
-see :func:`resample_to` for the source references and the one documented numerical
-deviation (float32 timeline arithmetic).
+Resampling: SONIC's motion library resamples every clip to ``target_fps: 50`` at
+load time.  The pinned rule lives in
+``gear_sonic/research/lace/reference_feasibility_manifest.py::_runtime_reference``
+and is reproduced here verbatim (float32 ``torch.arange`` with an *exclusive*
+endpoint, quaternion ``slerp`` for rotations, ``lerp`` for translation, joint
+angles recovered by summing the interpolated rotation vectors).  We call the
+same ``gear_sonic.isaac_utils.rotations`` helpers LACE calls, so the two agree
+by construction instead of by coincidence.  Torch is imported lazily so that
+merely importing this module stays cheap for multiprocessing workers.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace as dataclass_replace
+from dataclasses import dataclass, replace as _dataclass_replace
 import hashlib
-import math
 import os
 from pathlib import Path
 import tempfile
@@ -50,61 +48,83 @@ from typing import Any
 
 import joblib
 import numpy as np
+from numpy.typing import NDArray
 
-from gear_sonic.data_process.convert_soma_csv_to_motion_lib import DOF_AXIS
+from gear_sonic.data_process.convert_soma_csv_to_motion_lib import (
+    DOF_AXIS,
+    NUM_BODIES,
+    NUM_DOF,
+)
+
+__all__ = [
+    "DOF_AXIS",
+    "MOTION_KEYS",
+    "Motion",
+    "load_motion",
+    "motion_sha256",
+    "resample_to",
+    "save_motion",
+    "validate_motion",
+]
 
 MOTION_KEYS = ("root_trans_offset", "pose_aa", "dof", "root_rot", "smpl_joints", "fps")
 
-NUM_DOF = 29
-NUM_POSE_ROWS = 30  # root orientation + 29 single-axis joints
-NUM_SMPL_JOINTS = 24
+#: SONIC's configured training rate (``target_fps`` in the universal-token configs).
+DEFAULT_TARGET_FPS = 50
 
-SONIC_TARGET_FPS = 50
+#: Tolerance for the ``pose_aa[:, 1:] == DOF_AXIS * dof`` identity.  The bank is
+#: written in float32 from exactly this product, so the observed error is 0.0;
+#: 1e-6 leaves room for a repair operator that rebuilds one side in float64.
+POSE_AA_DOF_ATOL = 1e-6
 
-#: ``pose_aa[:, i + 1] == DOF_AXIS[i] * dof[:, i]`` must hold to this absolute tolerance.
-POSE_DOF_REDUNDANCY_TOL = 1e-6
-#: ``root_rot`` must be a unit quaternion to this absolute tolerance.
-QUATERNION_NORM_TOL = 1e-3
-#: ``root_rot`` must agree with ``pose_aa[:, 0]`` (up to global sign) to this tolerance.
-ROOT_ROT_CONSISTENCY_TOL = 1e-4
+#: Tolerance for ``|root_rot| == 1``.  float32 quaternions on the release bank
+#: land within ~6e-8 of unit norm.
+QUAT_NORM_ATOL = 1e-5
 
-_ARRAY_FIELDS: dict[str, tuple[int, ...]] = {
+_EXPECTED_SHAPES = {
     "root_trans_offset": (3,),
-    "pose_aa": (NUM_POSE_ROWS, 3),
+    "pose_aa": (NUM_BODIES, 3),
     "dof": (NUM_DOF,),
     "root_rot": (4,),
-    "smpl_joints": (NUM_SMPL_JOINTS, 3),
+    "smpl_joints": (24, 3),
 }
+
+FloatArray = NDArray[np.float32]
 
 
 @dataclass(frozen=True)
 class Motion:
-    """One SONIC motion-library clip, held in memory in its on-disk layout."""
+    """One SONIC motion-library clip, exactly as stored on disk.
+
+    The arrays are held as given (float32 on the release bank); nothing in this
+    class upcasts, renormalizes, or reorders.  Use :meth:`replace` to derive an
+    edited clip and :meth:`to_payload` to get a dict ready for ``joblib.dump``.
+    """
 
     key: str
-    root_trans_offset: np.ndarray
-    pose_aa: np.ndarray
-    dof: np.ndarray
-    root_rot: np.ndarray
-    smpl_joints: np.ndarray
+    root_trans_offset: FloatArray
+    pose_aa: FloatArray
+    dof: FloatArray
+    root_rot: FloatArray
+    smpl_joints: FloatArray
     fps: int
 
     @property
     def num_frames(self) -> int:
-        """Number of frames ``T`` (taken from ``root_trans_offset``)."""
-        return int(self.root_trans_offset.shape[0])
+        """Frame count taken from ``dof`` (all fields share this axis)."""
+        return int(self.dof.shape[0])
 
     @property
     def duration_s(self) -> float:
-        """Clip duration on its own timeline, ``T / fps`` seconds."""
+        """Clip duration in seconds at the clip's own frame rate."""
         return float(self.num_frames) / float(self.fps)
 
     def replace(self, **kw: Any) -> "Motion":
-        """Return a copy with the given fields replaced (dataclass semantics)."""
-        return dataclass_replace(self, **kw)
+        """Return a copy with the named fields replaced."""
+        return _dataclass_replace(self, **kw)
 
     def to_payload(self) -> dict[str, dict[str, Any]]:
-        """Return the exact nested dict that :mod:`joblib` should dump for this clip."""
+        """Return ``{key: {field: array, ..., "fps": int}}`` ready for ``joblib.dump``."""
         return {
             self.key: {
                 "root_trans_offset": self.root_trans_offset,
@@ -118,306 +138,274 @@ class Motion:
 
 
 def load_motion(path: str | Path) -> Motion:
-    """Load one clip.  Raises ``ValueError`` if the container is not the SONIC layout.
+    """Load one clip ``.pkl``.
 
-    The motion key is taken from the payload (not from the filename) so that a clip
-    whose key and stem disagree is still readable; :func:`validate_motion` is where
-    structural opinions live, not here.
+    Raises ``ValueError`` when the file is not a single-key motion-library dict
+    or is missing any field of :data:`MOTION_KEYS`.  Structural problems raise;
+    *numeric* problems are reported by :func:`validate_motion` instead, so that a
+    caller can screen a suspect clip rather than being unable to open it.
     """
     path = Path(path)
     payload = joblib.load(path)
     if not isinstance(payload, dict):
-        raise ValueError(f"{path}: expected a dict at the top level, got {type(payload).__name__}")
+        raise ValueError(f"{path}: expected a dict at top level, got {type(payload).__name__}")
     if len(payload) != 1:
-        raise ValueError(f"{path}: expected exactly one motion key, got {sorted(payload)!r}")
+        raise ValueError(f"{path}: expected exactly one motion key, found {len(payload)}")
     key = next(iter(payload))
-    body = payload[key]
-    if not isinstance(body, dict):
+    record = payload[key]
+    if not isinstance(record, dict):
         raise ValueError(f"{path}: motion {key!r} is not a dict")
-    missing = [name for name in MOTION_KEYS if name not in body]
+    missing = [name for name in MOTION_KEYS if name not in record]
     if missing:
         raise ValueError(f"{path}: motion {key!r} is missing fields {missing}")
     return Motion(
         key=str(key),
-        root_trans_offset=np.asarray(body["root_trans_offset"]),
-        pose_aa=np.asarray(body["pose_aa"]),
-        dof=np.asarray(body["dof"]),
-        root_rot=np.asarray(body["root_rot"]),
-        smpl_joints=np.asarray(body["smpl_joints"]),
-        fps=int(body["fps"]),
+        root_trans_offset=np.asarray(record["root_trans_offset"]),
+        pose_aa=np.asarray(record["pose_aa"]),
+        dof=np.asarray(record["dof"]),
+        root_rot=np.asarray(record["root_rot"]),
+        smpl_joints=np.asarray(record["smpl_joints"]),
+        fps=int(record["fps"]),
     )
 
 
 def save_motion(motion: Motion, path: str | Path) -> None:
-    """Write ``motion`` to ``path`` atomically, preserving the on-disk float32 dtypes.
+    """Write ``motion`` to ``path`` atomically, preserving dtypes.
 
-    The dump goes to a temporary file in the destination directory and is then
-    ``os.replace``-d into position, so a crashed or killed writer never leaves a
-    half-written clip that a later resumable run would happily skip.
+    The temporary file is created in the destination directory so that
+    ``os.replace`` is a same-filesystem rename: a reader either sees the old file
+    or the complete new one, never a truncated pickle.  A repair sweep over 4950
+    clips that is interrupted must not leave half-written motions behind.
     """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    payload = motion.to_payload()
-    body = payload[motion.key]
-    for name in _ARRAY_FIELDS:
-        body[name] = np.ascontiguousarray(body[name], dtype=np.float32)
     handle, tmp_name = tempfile.mkstemp(dir=str(path.parent), prefix=f".{path.name}.", suffix=".tmp")
     os.close(handle)
     tmp_path = Path(tmp_name)
     try:
-        joblib.dump(payload, tmp_path)
+        joblib.dump(motion.to_payload(), tmp_path)
         os.replace(tmp_path, path)
-    finally:
-        if tmp_path.exists():
-            tmp_path.unlink()
+    except BaseException:
+        tmp_path.unlink(missing_ok=True)
+        raise
 
 
 def validate_motion(motion: Motion) -> list[str]:
-    """Return a list of human-readable problems; empty means the clip is clean.
+    """Return a list of human-readable problems; empty when the clip is clean.
 
-    Checks, in order: key/fps sanity, per-field shape, float32 dtype, finiteness,
-    ``root_rot`` unit norm, the ``pose_aa``/``dof`` redundancy, and agreement between
-    ``root_rot`` and ``pose_aa[:, 0]``.  Later checks are skipped when an earlier one
-    already made them meaningless (e.g. a wrong shape suppresses the redundancy test)
-    so the caller gets the root cause instead of a cascade.
+    Checks, in order: field shapes and the shared frame axis, dtype, finiteness,
+    ``fps``, quaternion unit norm, agreement between ``root_rot`` and
+    ``pose_aa[:, 0]``, and the ``pose_aa[:, 1:] == DOF_AXIS * dof`` redundancy.
     """
     problems: list[str] = []
-    if not isinstance(motion.key, str) or not motion.key:
-        problems.append("key must be a non-empty string")
-    if not isinstance(motion.fps, (int, np.integer)) or isinstance(motion.fps, bool):
-        problems.append(f"fps must be an int, got {type(motion.fps).__name__}")
-    elif int(motion.fps) <= 0:
-        problems.append(f"fps must be positive, got {motion.fps}")
 
-    num_frames = None
-    shapes_ok = True
-    for name, trailing in _ARRAY_FIELDS.items():
-        array = getattr(motion, name)
+    if not isinstance(motion.key, str) or not motion.key:
+        problems.append("key is empty or not a string")
+    if not isinstance(motion.fps, (int, np.integer)) or int(motion.fps) <= 0:
+        problems.append(f"fps must be a positive integer, got {motion.fps!r}")
+
+    arrays = {
+        "root_trans_offset": motion.root_trans_offset,
+        "pose_aa": motion.pose_aa,
+        "dof": motion.dof,
+        "root_rot": motion.root_rot,
+        "smpl_joints": motion.smpl_joints,
+    }
+    frame_counts: dict[str, int] = {}
+    for name, array in arrays.items():
         if not isinstance(array, np.ndarray):
-            problems.append(f"{name} must be a numpy array, got {type(array).__name__}")
-            shapes_ok = False
+            problems.append(f"{name} is not a numpy array (got {type(array).__name__})")
             continue
-        if array.ndim != 1 + len(trailing) or array.shape[1:] != trailing:
-            problems.append(f"{name} must have shape (T, {', '.join(map(str, trailing))}), got {array.shape}")
-            shapes_ok = False
+        expected = _EXPECTED_SHAPES[name]
+        if array.ndim != len(expected) + 1 or tuple(array.shape[1:]) != expected:
+            problems.append(f"{name} has shape {array.shape}, expected (T, {', '.join(map(str, expected))})")
             continue
-        if num_frames is None:
-            num_frames = int(array.shape[0])
-        elif int(array.shape[0]) != num_frames:
-            problems.append(f"{name} has {array.shape[0]} frames, expected {num_frames}")
-            shapes_ok = False
+        frame_counts[name] = int(array.shape[0])
         if array.dtype != np.float32:
-            problems.append(f"{name} must be float32, got {array.dtype}")
-        if array.size and not np.isfinite(array).all():
-            problems.append(f"{name} contains non-finite values")
-            shapes_ok = False
-    if num_frames is not None and num_frames < 2:
-        problems.append(f"clip must have at least 2 frames, got {num_frames}")
-    if not shapes_ok:
+            problems.append(f"{name} has dtype {array.dtype}, expected float32")
+        if not np.isfinite(array).all():
+            problems.append(f"{name} contains {int((~np.isfinite(array)).sum())} non-finite values")
+
+    if len(set(frame_counts.values())) > 1:
+        problems.append(f"frame axes disagree: {frame_counts}")
+    if frame_counts and min(frame_counts.values()) < 2:
+        problems.append(f"clip has fewer than 2 frames: {frame_counts}")
+
+    if problems:
+        # Shape/dtype damage makes the numeric checks below meaningless.
         return problems
 
     norms = np.linalg.norm(motion.root_rot.astype(np.float64), axis=-1)
-    worst_norm = float(np.max(np.abs(norms - 1.0))) if norms.size else 0.0
-    if worst_norm > QUATERNION_NORM_TOL:
-        problems.append(f"root_rot is not unit norm (max |‖q‖ - 1| = {worst_norm:.3e})")
+    worst_norm = float(np.max(np.abs(norms - 1.0)))
+    if worst_norm > QUAT_NORM_ATOL:
+        problems.append(
+            f"root_rot is not unit norm: max |‖q‖-1| = {worst_norm:.3e} > {QUAT_NORM_ATOL:.1e}"
+        )
 
     expected_pose = DOF_AXIS.astype(np.float64)[None, :, :] * motion.dof.astype(np.float64)[:, :, None]
-    redundancy_error = float(np.max(np.abs(motion.pose_aa[:, 1:, :].astype(np.float64) - expected_pose)))
-    if redundancy_error > POSE_DOF_REDUNDANCY_TOL:
-        frame = int(np.argmax(np.abs(motion.pose_aa[:, 1:, :].astype(np.float64) - expected_pose).max(axis=(1, 2))))
+    residual = np.abs(motion.pose_aa.astype(np.float64)[:, 1:, :] - expected_pose)
+    worst = float(residual.max())
+    if worst > POSE_AA_DOF_ATOL:
+        frame, joint, axis = np.unravel_index(int(np.argmax(residual)), residual.shape)
         problems.append(
-            "pose_aa[:, 1:] != DOF_AXIS * dof "
-            f"(max abs error {redundancy_error:.3e} > {POSE_DOF_REDUNDANCY_TOL:.0e}, worst at frame {frame})"
+            "pose_aa/dof redundancy broken: max |pose_aa[:, 1:] - DOF_AXIS * dof| = "
+            f"{worst:.3e} > {POSE_AA_DOF_ATOL:.1e} at frame {frame}, joint {joint}, axis {axis} "
+            f"({int((residual > POSE_AA_DOF_ATOL).any(axis=(1, 2)).sum())} of {residual.shape[0]} frames affected)"
         )
 
-    root_quat_xyzw = axis_angle_to_quaternion_xyzw(motion.pose_aa[:, 0, :].astype(np.float64))
-    sign = np.sign(np.sum(root_quat_xyzw * motion.root_rot.astype(np.float64), axis=-1))
-    sign[sign == 0.0] = 1.0
-    root_error = float(np.max(np.abs(root_quat_xyzw * sign[:, None] - motion.root_rot.astype(np.float64))))
-    if root_error > ROOT_ROT_CONSISTENCY_TOL:
+    root_quat_xyzw = _axis_angle_to_quat_xyzw(motion.pose_aa.astype(np.float64)[:, 0, :])
+    # A quaternion and its negation are the same rotation; compare on |dot|.
+    alignment = np.abs(np.sum(root_quat_xyzw * motion.root_rot.astype(np.float64), axis=-1))
+    worst_alignment = float(np.min(alignment))
+    if worst_alignment < 1.0 - 1e-4:
         problems.append(
-            f"root_rot disagrees with pose_aa[:, 0] (max abs error {root_error:.3e} "
-            f"> {ROOT_ROT_CONSISTENCY_TOL:.0e})"
+            "root_rot disagrees with pose_aa[:, 0]: min |dot| = "
+            f"{worst_alignment:.6f} (frame {int(np.argmin(alignment))})"
         )
+
     return problems
 
 
 def motion_sha256(motion: Motion) -> str:
-    """Content hash of a clip: stable across re-dumps, unlike the compressed ``.pkl``.
+    """Content digest of a clip: stable across files, sensitive to any edit.
 
-    joblib compression is not byte-reproducible, so hashing the container file does not
-    identify the *content* that was screened.  This hashes the key, fps and the raw
-    little-endian float32 bytes of every array instead, in the fixed ``MOTION_KEYS``
-    order, which is what a reviewer actually wants pinned in a screen record.
+    We hash the arrays rather than the ``.pkl`` because joblib pickles are not
+    byte-reproducible, and because a repaired clip held in memory must be
+    identifiable before it is ever written.
     """
     digest = hashlib.sha256()
     digest.update(motion.key.encode("utf-8"))
-    digest.update(b"\x00")
-    digest.update(str(int(motion.fps)).encode("ascii"))
-    for name in _ARRAY_FIELDS:
-        array = np.ascontiguousarray(getattr(motion, name), dtype="<f4")
-        digest.update(b"\x00")
-        digest.update(name.encode("ascii"))
-        digest.update(np.asarray(array.shape, dtype="<i8").tobytes())
+    digest.update(b"|")
+    for name in MOTION_KEYS:
+        if name == "fps":
+            digest.update(str(int(motion.fps)).encode("ascii"))
+            continue
+        array = np.ascontiguousarray(getattr(motion, name))
+        digest.update(f"{name}:{array.dtype.str}:{array.shape}|".encode("utf-8"))
         digest.update(array.tobytes())
     return digest.hexdigest()
 
 
-def resample_to(motion: Motion, target_fps: int = SONIC_TARGET_FPS) -> Motion:
-    """Put a clip on SONIC's load-time timeline (default 50 Hz).
+def resample_to(motion: Motion, target_fps: int = DEFAULT_TARGET_FPS) -> Motion:
+    """Resample a clip the way SONIC's motion library does at load time.
 
-    Reproduces the pinned rule rather than inventing one.  Sources:
+    The rule, pinned by ``lace/reference_feasibility_manifest.py`` and originally
+    implemented in ``gear_sonic/utils/motion_lib/torch_humanoid_batch.py``:
 
-    * ``gear_sonic/utils/motion_lib/torch_humanoid_batch.py``
-      (``Humanoid_Batch.interploate_pose`` / ``_compute_frame_blend`` / ``fk_batch``)
-      -- the code that actually runs at load time, and
-    * ``gear_sonic/research/lace/reference_feasibility_manifest.py``
-      (``_runtime_reference``) -- LACE's frozen restatement of the same rule.
+        duration = (T_src - 1) / source_fps
+        times    = torch.arange(0, duration, 1 / target_fps, dtype=float32)   # exclusive end
+        phase    = times / duration
+        coords   = phase * (T_src - 1)
+        i0, i1   = floor(coords), min(i0 + 1, T_src - 1);  blend = coords - i0
+        pose     = slerp(quat(pose_aa)[i0], quat(pose_aa)[i1], blend)
+        trans    = lerp(root_trans_offset[i0], root_trans_offset[i1], blend)
+        dof      = sum(axis_angle(pose)[:, 1:], axis=-1)
+        root_rot = quat_xyzw(pose[:, 0])
 
-    The rule, verbatim:
+    When ``source_fps == target_fps`` SONIC skips interpolation entirely and the
+    clip is returned unchanged.
 
-    1. ``duration = (T_src - 1) / fps_src``
-    2. ``times = arange(0, duration, 1 / target_fps)`` in **float32**, endpoint
-       **exclusive** -- so the last source frame is generally *not* sampled.
-    3. ``phase = times / duration``; ``coordinates = phase * (T_src - 1)``;
-       ``index_0 = floor(coordinates)``; ``index_1 = min(index_0 + 1, T_src - 1)``;
-       ``blend = coordinates - index_0``.
-    4. ``pose_aa`` is converted to quaternions and **slerped**; ``root_trans_offset`` is
-       **lerped**.  ``dof`` is then recovered as ``sum(pose_aa[:, 1:], axis=-1)``, which
-       is exact because every G1 joint axis is a signed unit basis vector.
-
-    Two documented deviations from the torch original, both deliberate:
-
-    * The timeline is built with ``numpy.arange(..., dtype=float32)`` instead of
-      ``torch.arange(..., dtype=torch.float32)``.  The **frame count is identical** for
-      every ``T_src`` in ``[2, 4000)`` at 30 -> 50 Hz (verified), but individual sample
-      times differ by up to ~3e-8 s because the two libraries accumulate float32
-      differently.  That propagates to ``blend`` at the ~1e-6 level, i.e. below the
-      float32 resolution of the angles themselves.
-    * The slerp is evaluated in float64 and rounded once at the end -- see :func:`_slerp`.
-      Measured against the torch implementation on real bank clips the two agree to
-      <= 1.1e-3 rad (0.06 deg) per joint, the difference being float32 cancellation in
-      SONIC's ``sqrt(1 - cos^2)``.
-    * ``smpl_joints`` is lerped.  SONIC does not resample it at load (it never reads it),
-      so there is no upstream rule to copy; lerp keeps the field on the same timeline as
-      everything else instead of leaving a silently stale array behind.
-
-    ``fps == target_fps`` is a no-op that returns the same object.
+    ``smpl_joints`` is *not* part of SONIC's runtime interpolation (the motion
+    library never reads it).  We lerp it on the same index/blend so the returned
+    clip stays internally consistent; treat those values as a convenience, not as
+    a claim about SONIC's runtime.
     """
-    target_fps = int(target_fps)
-    if target_fps <= 0:
+    if int(target_fps) <= 0:
         raise ValueError(f"target_fps must be positive, got {target_fps}")
-    source_fps = int(motion.fps)
-    if source_fps == target_fps:
-        return motion
     source_frames = motion.num_frames
+    if int(motion.fps) == int(target_fps):
+        return motion
     if source_frames < 2:
-        raise ValueError(f"{motion.key}: cannot resample a clip with {source_frames} frame(s)")
+        raise ValueError(f"{motion.key}: cannot resample a {source_frames}-frame clip")
 
-    duration = (source_frames - 1) * 1.0 / source_fps
-    times = np.arange(0.0, duration, 1.0 / target_fps, dtype=np.float32)
-    expected = int(math.ceil(duration / (1.0 / target_fps)))
-    if times.shape[0] != expected:
-        raise ValueError(
-            f"{motion.key}: float32 timeline has {times.shape[0]} samples, expected {expected}"
-        )
-    if times.shape[0] < 2:
-        raise ValueError(
-            f"{motion.key}: resampling {source_frames} frames from {source_fps} to {target_fps} Hz "
-            f"yields {times.shape[0]} frame(s)"
-        )
+    import torch  # noqa: PLC0415 - lazy: keeps module import cheap for worker processes
 
-    phase = times / np.float32(duration)
-    coordinates = phase * np.float32(source_frames - 1)
-    index_0 = np.floor(coordinates).astype(np.int64)
-    index_1 = np.minimum(index_0 + 1, source_frames - 1)
-    blend = (coordinates - index_0).astype(np.float32)
+    from gear_sonic.isaac_utils.rotations import (  # noqa: PLC0415
+        axis_angle_to_quaternion,
+        matrix_to_quaternion,
+        quaternion_to_matrix,
+        slerp,
+    )
+    from gear_sonic.trl.utils.torch_transform import quaternion_to_angle_axis  # noqa: PLC0415
 
-    pose_quat = axis_angle_to_quaternion_wxyz(motion.pose_aa.astype(np.float32))
-    resampled_quat = _slerp(pose_quat[index_0], pose_quat[index_1], blend[:, None, None])
-    pose_aa = quaternion_wxyz_to_axis_angle(resampled_quat).astype(np.float32)
-    dof = pose_aa[:, 1:, :].sum(axis=-1).astype(np.float32)
-    root_rot = resampled_quat[:, 0][:, [1, 2, 3, 0]].astype(np.float32)
-    root_trans = _lerp(
-        motion.root_trans_offset.astype(np.float32)[index_0],
-        motion.root_trans_offset.astype(np.float32)[index_1],
-        blend[:, None],
-    ).astype(np.float32)
-    smpl_joints = _lerp(
-        motion.smpl_joints.astype(np.float32)[index_0],
-        motion.smpl_joints.astype(np.float32)[index_1],
-        blend[:, None, None],
-    ).astype(np.float32)
+    pose = torch.from_numpy(np.ascontiguousarray(motion.pose_aa, dtype=np.float32))
+    translation = torch.from_numpy(np.ascontiguousarray(motion.root_trans_offset, dtype=np.float32))
+    with torch.no_grad():
+        pose_quaternion = axis_angle_to_quaternion(pose)
+        duration = (source_frames - 1) * 1.0 / float(motion.fps)
+        times = torch.arange(0, duration, 1.0 / target_fps, dtype=torch.float32, device=torch.device("cpu"))
+        phase = times / duration
+        coordinates = phase * (source_frames - 1)
+        index_0 = torch.floor(coordinates).to(dtype=torch.long)
+        index_1 = torch.minimum(index_0 + 1, torch.tensor(source_frames - 1, dtype=torch.long))
+        blend = coordinates - index_0
+        out_quaternion = slerp(pose_quaternion[index_0], pose_quaternion[index_1], blend[:, None, None])
+        out_translation = translation[index_0] * (1.0 - blend[:, None]) + translation[index_1] * blend[:, None]
+        out_pose_aa = quaternion_to_angle_axis(out_quaternion)
+        out_dof = out_pose_aa[:, 1:, :].sum(dim=-1)
+        out_root_rot_wxyz = matrix_to_quaternion(quaternion_to_matrix(out_quaternion)[:, 0])
+        out_root_rot = out_root_rot_wxyz[:, [1, 2, 3, 0]]
+
+    index_0_np = index_0.numpy()
+    index_1_np = index_1.numpy()
+    blend_np = blend.numpy()[:, None, None]
+    smpl = motion.smpl_joints.astype(np.float32)
+    out_smpl = smpl[index_0_np] * (1.0 - blend_np) + smpl[index_1_np] * blend_np
+
     return motion.replace(
-        root_trans_offset=root_trans,
+        root_trans_offset=np.ascontiguousarray(out_translation.numpy(), dtype=np.float32),
+        pose_aa=np.ascontiguousarray(out_pose_aa.numpy(), dtype=np.float32),
+        dof=np.ascontiguousarray(out_dof.numpy(), dtype=np.float32),
+        root_rot=np.ascontiguousarray(out_root_rot.numpy(), dtype=np.float32),
+        smpl_joints=np.ascontiguousarray(out_smpl, dtype=np.float32),
+        fps=int(target_fps),
+    )
+
+
+def motion_from_dof(
+    key: str,
+    *,
+    dof: np.ndarray,
+    root_trans_offset: np.ndarray,
+    root_aa: np.ndarray | None = None,
+    fps: int = DEFAULT_TARGET_FPS,
+) -> Motion:
+    """Build a clip from joint angles, rebuilding ``pose_aa``/``root_rot`` consistently.
+
+    Exists so that tests and the repair operator can synthesize or rewrite a clip
+    without independently re-deriving the redundant encoding (and drifting from
+    it).  ``root_aa`` defaults to the identity rotation.
+    """
+    dof = np.ascontiguousarray(dof, dtype=np.float32)
+    root_trans_offset = np.ascontiguousarray(root_trans_offset, dtype=np.float32)
+    frames = int(dof.shape[0])
+    if dof.shape != (frames, NUM_DOF):
+        raise ValueError(f"dof must be (T, {NUM_DOF}), got {dof.shape}")
+    if root_trans_offset.shape != (frames, 3):
+        raise ValueError(f"root_trans_offset must be ({frames}, 3), got {root_trans_offset.shape}")
+    if root_aa is None:
+        root_aa = np.zeros((frames, 3), dtype=np.float32)
+    root_aa = np.ascontiguousarray(root_aa, dtype=np.float32)
+
+    pose_aa = np.zeros((frames, NUM_BODIES, 3), dtype=np.float32)
+    pose_aa[:, 0, :] = root_aa
+    pose_aa[:, 1:, :] = (DOF_AXIS[None, :, :] * dof[:, :, None]).astype(np.float32)
+    root_rot = _axis_angle_to_quat_xyzw(root_aa.astype(np.float64)).astype(np.float32)
+    return Motion(
+        key=key,
+        root_trans_offset=root_trans_offset,
         pose_aa=pose_aa,
         dof=dof,
         root_rot=root_rot,
-        smpl_joints=smpl_joints,
-        fps=target_fps,
+        smpl_joints=np.zeros((frames, 24, 3), dtype=np.float32),
+        fps=int(fps),
     )
 
 
-def axis_angle_to_quaternion_wxyz(axis_angle: np.ndarray) -> np.ndarray:
-    """Axis-angle -> WXYZ quaternion, matching ``gear_sonic.isaac_utils.rotations``."""
-    axis_angle = np.asarray(axis_angle)
-    angles = np.linalg.norm(axis_angle, axis=-1, keepdims=True)
-    half = angles * 0.5
-    small = np.abs(angles) < 1e-6
-    scale = np.where(small, 0.5 - (angles * angles) / 48.0, np.sin(half) / np.where(small, 1.0, angles))
-    return np.concatenate([np.cos(half), axis_angle * scale], axis=-1).astype(axis_angle.dtype)
-
-
-def axis_angle_to_quaternion_xyzw(axis_angle: np.ndarray) -> np.ndarray:
-    """Axis-angle -> XYZW quaternion (the ``root_rot`` convention on disk)."""
-    quat = axis_angle_to_quaternion_wxyz(axis_angle)
-    return quat[..., [1, 2, 3, 0]]
-
-
-def quaternion_wxyz_to_axis_angle(quaternion: np.ndarray, eps: float = 1.0e-6) -> np.ndarray:
-    """WXYZ quaternion -> axis-angle, matching ``quaternion_to_angle_axis`` (Ceres rule)."""
-    quaternion = np.asarray(quaternion)
-    cos_theta = quaternion[..., 0]
-    vec = quaternion[..., 1:]
-    sin_squared = np.sum(vec * vec, axis=-1)
-    sin_theta = np.sqrt(np.maximum(sin_squared, eps))
-    two_theta = 2.0 * np.where(
-        cos_theta < 0.0,
-        np.arctan2(-sin_theta, -cos_theta),
-        np.arctan2(sin_theta, cos_theta),
-    )
-    k = np.where(sin_squared > 0.0, two_theta / np.maximum(sin_theta, eps), 2.0)
-    return (vec * k[..., None]).astype(quaternion.dtype)
-
-
-def _lerp(a: np.ndarray, b: np.ndarray, blend: np.ndarray) -> np.ndarray:
-    return a * (1.0 - blend) + b * blend
-
-
-def _slerp(q0: np.ndarray, q1: np.ndarray, blend: np.ndarray) -> np.ndarray:
-    """Restatement of ``gear_sonic.isaac_utils.rotations.slerp`` (WXYZ), evaluated in float64.
-
-    Same formula, same short-circuit thresholds (``|sin| < 0.001`` -> quaternion lerp,
-    ``|cos| >= 1`` -> ``q0``).  The one deliberate change is the working precision:
-    SONIC evaluates ``sqrt(1 - cos^2)`` in float32, and for the near-parallel quaternions
-    of adjacent 30 Hz frames (``cos`` within ~1e-5 of 1) that subtraction cancels to a few
-    significant bits.  Evaluating in float64 and rounding once at the end keeps the two
-    within ~1e-3 rad (0.06 deg) of each other on real clips, with ours the more accurate;
-    that is far below the angular resolution anything downstream of here resolves.
-    """
-    dtype = q0.dtype
-    q0 = q0.astype(np.float64)
-    q1 = q1.astype(np.float64)
-    blend = blend.astype(np.float64)
-    cos_half_theta = np.sum(q0 * q1, axis=-1)
-    q1 = np.where((cos_half_theta < 0.0)[..., None], -q1, q1)
-    cos_half_theta = np.clip(np.abs(cos_half_theta)[..., None], -1.0, 1.0)
-    half_theta = np.arccos(cos_half_theta)
-    sin_half_theta = np.sqrt(np.maximum(1.0 - cos_half_theta * cos_half_theta, 0.0))
-    safe_sin = np.where(np.abs(sin_half_theta) < 1e-12, 1.0, sin_half_theta)
-    ratio_a = np.sin((1.0 - blend) * half_theta) / safe_sin
-    ratio_b = np.sin(blend * half_theta) / safe_sin
-    result = ratio_a * q0 + ratio_b * q1
-    result = np.where(np.abs(sin_half_theta) < 0.001, 0.5 * q0 + 0.5 * q1, result)
-    result = np.where(cos_half_theta >= 1.0, q0, result)
-    return result.astype(dtype)
+def _axis_angle_to_quat_xyzw(axis_angle: NDArray[np.float64]) -> NDArray[np.float64]:
+    """Axis-angle -> XYZW quaternion, matching ``scipy.spatial.transform`` output."""
+    angle = np.linalg.norm(axis_angle, axis=-1)
+    half = 0.5 * angle
+    small = angle < 1e-8
+    scale = np.where(small, 0.5 - angle**2 / 48.0, np.sin(half) / np.where(small, 1.0, angle))
+    return np.concatenate([axis_angle * scale[..., None], np.cos(half)[..., None]], axis=-1)

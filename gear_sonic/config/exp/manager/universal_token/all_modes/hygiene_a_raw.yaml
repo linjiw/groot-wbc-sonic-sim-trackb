@@ -45,7 +45,14 @@ manager_env:
     motion:
       motion_lib_cfg:
         # --- KNOB 1: the bank (arm B and arm C move this) --------------------
-        # Arm A value: the untouched 4950-clip release bank. Real path, exists.
+        # Arm A value: the untouched 4950-clip release bank, written as the
+        # canonical relative path every other config and the README use.
+        # CHECK BEFORE LAUNCH: this path is NOT materialised in this checkout
+        # (`data/` holds only `splits/`). The 4950-clip bank on this machine is
+        # /data/robotixx/groot-wbc-sonic-research/datasets/
+        #   bones_seed_official_headline_scale4950/robot_filtered
+        # Stage or symlink it to the path below — do not edit the path in one
+        # arm only, or the arms stop sharing a bank.
         motion_file: data/motion_lib_bones_seed/robot_filtered
         # The SMPL bank is looked up per robot motion key
         # (motion_lib_base.py:283-291); keys absent from it resolve to None. So
@@ -91,7 +98,10 @@ manager_env:
 # identify the arm without parsing paths.
 hygiene_matrix:
   matrix_id: hygiene_v1
-  arm: a_raw
+  # `arm` is spelled exactly as scripts/research/analyze_hygiene_matrix.py
+  # requires it (REQUIRED_ARMS, :112), so a run maps to an analysis column
+  # without a translation table.
+  arm: A_raw
   factor: none_control
   bank: raw
   bank_is_placeholder: false

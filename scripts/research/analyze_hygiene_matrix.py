@@ -519,7 +519,12 @@ def concentration_signature(
 ) -> dict[str, Any]:
     """The volume-confound control: does the gain concentrate where hygiene predicts it should?"""
     worst = stratum_delta(
-        baseline_means, arm_means, strata.worst_decile, nperm=nperm, seed=seed, alternative="greater"
+        baseline_means,
+        arm_means,
+        strata.worst_decile,
+        nperm=nperm,
+        seed=seed,
+        alternative="greater",
     )
     best = stratum_delta(baseline_means, arm_means, strata.best_half, nperm=nperm, seed=seed)
     easy = stratum_delta(baseline_means, arm_means, strata.easy, nperm=nperm, seed=seed)
@@ -736,7 +741,9 @@ def analyze(
     eval_info = _check_eval_set(stratified, baseline=baseline)
     eval_info["clip_sets_intersected"] = bool(allow_clip_mismatch)
     eval_info["feasibility_source"] = (
-        "eval screen CSV" if eval_flags is not None else "ASSUMED all-feasible (--assume-all-feasible)"
+        "eval screen CSV"
+        if eval_flags is not None
+        else "ASSUMED all-feasible (--assume-all-feasible)"
     )
 
     base_eval = stratified[baseline]
@@ -769,7 +776,9 @@ def analyze(
 
     arms: dict[str, Any] = {}
     for arm, ev in sorted(stratified.items()):
-        role = ARM_ROLES.get(arm, {"axis": "unregistered", "confound_status": "unknown", "note": ""})
+        role = ARM_ROLES.get(
+            arm, {"axis": "unregistered", "confound_status": "unknown", "note": ""}
+        )
         record: dict[str, Any] = {
             "source": ev.source,
             "axis": role["axis"],
@@ -814,8 +823,9 @@ def analyze(
                 exposure[arm], infeasible_frac=(screens or {}).get(arm)
             )
             record["exposure"]["flags_source"] = (
-                "per-arm training-bank screen" if (screens or {}).get(arm) else "NONE (wasted "
-                "exposure not computable without a --screen for this arm)"
+                "per-arm training-bank screen"
+                if (screens or {}).get(arm)
+                else "NONE (wasted " "exposure not computable without a --screen for this arm)"
             )
         if torque and arm in torque:
             record["torque_health"] = torque_metrics(torque[arm])
@@ -828,7 +838,11 @@ def analyze(
                 continue
             record["torque_health_delta_vs_baseline"] = {
                 key: record["torque_health"][key] - base_torque[key]
-                for key in ("saturation_frac_mean", "saturation_frac_p95", "contact_force_jump_N_p95")
+                for key in (
+                    "saturation_frac_mean",
+                    "saturation_frac_p95",
+                    "contact_force_jump_N_p95",
+                )
                 if key in record["torque_health"] and key in base_torque
             }
 
@@ -933,8 +947,10 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- permutation: sign-flip over clips, nperm={report['analysis']['nperm']}, "
         f"{report['analysis']['rng']}, p = {report['analysis']['p_value_convention']}"
     )
-    lines.append(f"- eval set: {report['eval_set']['n_clips']} clips at start offsets "
-                 f"{report['eval_set']['start_offsets_s']} s; {report['eval_set']['raw_eval_guarantee']}")
+    lines.append(
+        f"- eval set: {report['eval_set']['n_clips']} clips at start offsets "
+        f"{report['eval_set']['start_offsets_s']} s; {report['eval_set']['raw_eval_guarantee']}"
+    )
     lines.append(f"- feasibility: {report['eval_set']['feasibility_source']}")
     lines.append(f"- strata sizes: {report['strata']['sizes']}")
     lines.append("")
@@ -1040,8 +1056,10 @@ def render_markdown(report: dict[str, Any]) -> str:
     lines.append("")
     for arm in sorted(report["arms"]):
         record = report["arms"][arm]
-        lines.append(f"- `{arm}` ({record['axis']} axis, {record['confound_status']}): "
-                     f"{record['design_note']}")
+        lines.append(
+            f"- `{arm}` ({record['axis']} axis, {record['confound_status']}): "
+            f"{record['design_note']}"
+        )
     lines.append("")
     lines.append("## What a reviewer should challenge")
     lines.append("")
@@ -1049,3 +1067,647 @@ def render_markdown(report: dict[str, Any]) -> str:
         lines.append(f"- {caveat}")
     lines.append("")
     return "\n".join(lines)
+
+
+# --------------------------------------------------------------------------- synthetic dry-run
+
+#: Start-offset grid the fabricated eval tables use. Seven offsets, so the split-half control has a
+#: 4/3 partition of the grid to re-rank on.
+SYNTHETIC_OFFSETS: tuple[float, ...] = (0.0, 1.0, 2.0, 3.0, 4.0, 6.0, 8.0)
+
+#: Per-offset survival wobble. Constructed to sum to EXACTLY zero over the full offset grid, so a
+#: clip's sealed offset-mean is exactly its designed level -- while any HALF of the grid does not,
+#: which is what gives the split-half control something real to disagree about.
+SYNTHETIC_JITTER_AMPLITUDE = 0.012
+
+#: Larger wobble for clips near the survival floor. This is not decoration: a clip that barely
+#: survives is exactly the clip whose survival depends most on where the episode starts, and it is
+#: the low end that the worst decile is selected from. Without heteroscedastic noise there the
+#: selection step is noiseless, the split-half control reproduces the sealed column exactly, and the
+#: regression-to-the-mean column would look reassuring for the wrong reason.
+SYNTHETIC_SELECTION_NOISE = 0.10
+SYNTHETIC_NOISY_BELOW = 0.5
+
+SYNTHETIC_EVAL_BANK = "raw_heldout_v1"
+SYNTHETIC_TRAIN_CLEAN = 170
+SYNTHETIC_TRAIN_FLAGGED = 30
+
+#: Sampling weight the fabricated ledger gives a FLAGGED training clip, per arm. ``E_raw_cap``'s 17
+#: is not arbitrary: 17 / (170 + 30*17) = 0.025 = 5x the 1/200 fair share, i.e. the cap binds
+#: exactly. ``B_pruned`` has no flagged clips in its bank at all.
+SYNTHETIC_FLAGGED_WEIGHT: dict[str, float | None] = {
+    "A_raw": 8.0,
+    "B_pruned": None,
+    "C_repaired": 1.6,
+    "D_raw_uniform": 1.0,
+    "E_raw_cap": 17.0,
+}
+
+#: (mean actuator-saturation fraction, mean contact-force jump [N]) per arm, fabricated.
+SYNTHETIC_TORQUE: dict[str, tuple[float, float]] = {
+    "A_raw": (0.184, 61.0),
+    "B_pruned": (0.132, 38.0),
+    "C_repaired": (0.129, 35.0),
+    "D_raw_uniform": (0.171, 52.0),
+    "E_raw_cap": (0.166, 49.0),
+}
+
+#: effect name -> (expected concentration verdict, expected direction label).
+SYNTHETIC_EXPECTATIONS: dict[str, tuple[bool, str]] = {
+    "concentrated": (True, "improves-worst"),
+    "uniform": (False, "uniform-lift"),
+    "flat": (False, "null"),
+    "harmful": (False, "harm"),
+    "perverse_ratio": (False, "harm"),
+}
+
+_TREATMENT_ARMS = ("B_pruned", "C_repaired", "D_raw_uniform", "E_raw_cap")
+
+
+def _all_arms(effect: str) -> dict[str, str]:
+    return dict.fromkeys(_TREATMENT_ARMS, effect)
+
+
+#: (branch id, what it fabricates, arm -> effect). The first four are the required branches; the
+#: last two exist because they are the two ways the SEALED rule alone would misfire.
+SYNTHETIC_BRANCHES: tuple[tuple[str, str, dict[str, str]], ...] = (
+    (
+        "i_hygiene_works",
+        "worst decile lifts (+0.25), best half and easy stratum barely move (+0.008)",
+        _all_arms("concentrated"),
+    ),
+    (
+        "ii_volume_confound",
+        "every stratum lifts by the same +0.06 -- what training on less data looks like",
+        _all_arms("uniform"),
+    ),
+    (
+        "iii_null",
+        "nothing moves (+/-0.004 alternating); the honest empty result",
+        _all_arms("flat"),
+    ),
+    (
+        "iv_harm",
+        "worst decile DROPS (-0.15) while the rest drifts -0.01",
+        _all_arms("harmful"),
+    ),
+    (
+        "v_mixed_matrix",
+        "four different outcomes inside one matrix; no arm may contaminate another",
+        {
+            "B_pruned": "concentrated",
+            "C_repaired": "flat",
+            "D_raw_uniform": "uniform",
+            "E_raw_cap": "harmful",
+        },
+    ),
+    (
+        "vi_perverse_ratio",
+        "worst -0.05, rest -0.10: the SEALED ratio test alone would PASS this; the "
+        "materiality floor is what refuses it",
+        _all_arms("perverse_ratio"),
+    ),
+)
+
+
+def _synthetic_jitter(clip_index: int, offset_index: int, level: float) -> float:
+    """Zero-mean-over-the-grid per-offset wobble (stride coprime with the 7-offset grid).
+
+    Amplitude is larger below :data:`SYNTHETIC_NOISY_BELOW` so the worst decile is selected out of
+    a noisy tail, as it will be in the real eval.
+    """
+    stride = (clip_index % 6) + 1
+    amplitude = (
+        SYNTHETIC_SELECTION_NOISE if level < SYNTHETIC_NOISY_BELOW else SYNTHETIC_JITTER_AMPLITUDE
+    )
+    return amplitude * (((offset_index * stride) % 7) - 3) / 3.0
+
+
+def synthetic_eval_bank() -> tuple[dict[str, float], dict[str, float], tuple[str, ...]]:
+    """Fabricated raw held-out eval set: designed offset-mean survival, flags, ground-contact keys.
+
+    76 feasible clips (so the worst decile is 7 and the best half is 38) plus 8 clips the screen
+    flags, which are evaluated but excluded from the concentration strata by construction.
+    """
+    levels: dict[str, float] = {}
+    for i, value in enumerate(np.linspace(0.30, 0.90, 60)):
+        levels[f"FEAS_{i:02d}"] = float(value)
+    for i, value in enumerate(np.linspace(0.955, 0.975, 10)):
+        levels[f"EASY_{i:02d}"] = float(
+            value
+        )  # sits above the 0.95 easy-stratum cut, with headroom
+    for i, value in enumerate(np.linspace(0.327, 0.807, 6)):
+        levels[f"GROUND_{i:02d}"] = float(value)
+    for i in range(8):
+        levels[f"FLAG_{i:02d}"] = 0.40 + 0.01 * i
+    flags = {key: (0.45 if key.startswith("FLAG_") else 0.02) for key in levels}
+    ground = tuple(f"GROUND_{i:02d}" for i in range(6))
+    return levels, flags, ground
+
+
+def synthetic_gains(
+    effect: str, levels: dict[str, float], flags: dict[str, float]
+) -> dict[str, float]:
+    """Per-clip survival shift for one fabricated outcome, keyed off the baseline ranking."""
+    feasible = [k for k in sorted(levels) if flags.get(k, 0.0) <= FLAG_INFEASIBLE_FRAC]
+    order = sorted(feasible, key=lambda c: (levels[c], c))
+    worst = set(order[: max(1, len(order) // 10)])
+    gains: dict[str, float] = {}
+    for index, key in enumerate(sorted(levels)):
+        in_worst = key in worst
+        if effect == "concentrated":
+            gain = 0.25 if in_worst else 0.008
+        elif effect == "uniform":
+            gain = 0.06
+        elif effect == "flat":
+            gain = 0.004 if index % 2 == 0 else -0.004
+        elif effect == "harmful":
+            gain = -0.15 if in_worst else -0.01
+        elif effect == "perverse_ratio":
+            gain = -0.05 if in_worst else -0.10
+        else:
+            raise ValueError(f"unknown synthetic effect {effect!r}")
+        gains[key] = gain
+    return gains
+
+
+def synthetic_stratified_csv(
+    levels: dict[str, float],
+    gains: dict[str, float] | None = None,
+    *,
+    eval_bank: str = SYNTHETIC_EVAL_BANK,
+    omit_clips: Sequence[str] = (),
+    ragged_clip: str | None = None,
+) -> str:
+    """Render one arm's stratified-start eval CSV, including the summary rows the reader skips."""
+    gains = gains or {}
+    rows = ["clip,offset_s,survival,mean_survival_s,n,window_s,eval_bank"]
+    for index, key in enumerate(sorted(levels)):
+        if key in set(omit_clips):
+            continue
+        values = []
+        for offset_index, offset in enumerate(SYNTHETIC_OFFSETS):
+            if key == ragged_clip and offset_index == 0:
+                continue  # a hole in the grid: the reader must refuse, not average over it
+            level = levels[key]
+            wobble = _synthetic_jitter(index, offset_index, level)
+            survival = float(np.clip(level + wobble + gains.get(key, 0.0), 0.0, 1.0))
+            values.append(survival)
+            rows.append(f"{key},{offset:g},{survival:.6f},2.5,8,3.0,{eval_bank}")
+        rows.append(f"{key},mean,{float(np.mean(values)):.6f},,56,3.0,{eval_bank}")
+    return "\n".join(rows) + "\n"
+
+
+def synthetic_screen_csv(levels: dict[str, float], flags: dict[str, float]) -> str:
+    rows = ["motion_key,infeasible_frac,airborne_frac"]
+    for key in sorted(levels):
+        rows.append(f"{key},{flags[key]:.4f},{flags[key] * 0.5:.4f}")
+    return "\n".join(rows) + "\n"
+
+
+def synthetic_training_bank() -> tuple[tuple[str, ...], tuple[str, ...]]:
+    clean = tuple(f"TRAIN_{i:03d}" for i in range(SYNTHETIC_TRAIN_CLEAN))
+    flagged = tuple(f"TFLAG_{i:02d}" for i in range(SYNTHETIC_TRAIN_FLAGGED))
+    return clean, flagged
+
+
+def synthetic_exposure_csv(arm: str) -> str:
+    """One arm's sampling ledger. ``A_raw`` emits raw counts to exercise the count fallback."""
+    clean, flagged = synthetic_training_bank()
+    weight = SYNTHETIC_FLAGGED_WEIGHT[arm]
+    uniform = arm == "D_raw_uniform"
+    pairs: list[tuple[str, float]] = []
+    for i, key in enumerate(clean):
+        pairs.append((key, 1.0 if uniform else 1.0 + 0.4 * ((i % 5) / 4.0)))
+    if weight is not None:
+        for i, key in enumerate(flagged):
+            # one clip absorbs 5x what its already-inflated peers do: the single impossible clip
+            pairs.append((key, weight * (5.0 if (i == 0 and arm == "A_raw") else 1.0)))
+    column = "count" if arm == "A_raw" else "prob"
+    total = sum(value for _, value in pairs)
+    rows = [f"motion_key,{column}"]
+    for key, value in pairs:
+        rows.append(f"{key},{value:.8f}" if column == "count" else f"{key},{value / total:.10f}")
+    return "\n".join(rows) + "\n"
+
+
+def synthetic_bank_screen_csv(*, repaired: bool) -> str:
+    """Training-bank screen. ``repaired=True`` is C's bank: the same clips, re-screened after repair."""
+    clean, flagged = synthetic_training_bank()
+    rows = ["motion_key,infeasible_frac"]
+    for key in clean:
+        rows.append(f"{key},0.0200")
+    for key in flagged:
+        rows.append(f"{key},{0.0300 if repaired else 0.4000:.4f}")
+    return "\n".join(rows) + "\n"
+
+
+def synthetic_torque_csv(arm: str, levels: dict[str, float]) -> str:
+    saturation, jump = SYNTHETIC_TORQUE[arm]
+    rows = ["motion_key,saturation_frac,contact_force_jump_N"]
+    for index, key in enumerate(sorted(levels)):
+        sat = saturation + 0.012 * (((index * 3) % 7) - 3) / 3.0
+        jmp = jump * (1.0 + 0.10 * (((index * 5) % 7) - 3) / 3.0)
+        rows.append(f"{key},{max(sat, 0.0):.6f},{max(jmp, 0.0):.4f}")
+    return "\n".join(rows) + "\n"
+
+
+def _write(path: Path, text: str) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+    return path
+
+
+def materialize_branch(
+    root: Path,
+    effects: dict[str, str],
+    *,
+    eval_bank_overrides: dict[str, str] | None = None,
+    ragged_arm: str | None = None,
+    drop_clip_from: str | None = None,
+) -> dict[str, Any]:
+    """Write a whole fabricated matrix to ``root`` and return the paths, arm by arm.
+
+    Everything goes through real files and the real readers -- a dry-run that bypassed the parsers
+    would not be a dry-run of this script.
+    """
+    levels, flags, ground = synthetic_eval_bank()
+    banks = eval_bank_overrides or {}
+    strat: dict[str, str] = {}
+    for arm in (BASELINE_ARM, *_TREATMENT_ARMS):
+        gains = None if arm == BASELINE_ARM else synthetic_gains(effects[arm], levels, flags)
+        text = synthetic_stratified_csv(
+            levels,
+            gains,
+            eval_bank=banks.get(arm, SYNTHETIC_EVAL_BANK),
+            omit_clips=("FEAS_07",) if arm == drop_clip_from else (),
+            ragged_clip="FEAS_09" if arm == ragged_arm else None,
+        )
+        strat[arm] = str(_write(root / f"strat_{arm}.csv", text))
+    paths: dict[str, Any] = {
+        "strat": strat,
+        "eval_screen": str(_write(root / "eval_screen.csv", synthetic_screen_csv(levels, flags))),
+        "ground": str(
+            _write(
+                root / "ground_clips.txt",
+                "# ground contact / kneel / crawl\n" + "\n".join(ground) + "\n",
+            )
+        ),
+        "exposure": {
+            arm: str(_write(root / f"exposure_{arm}.csv", synthetic_exposure_csv(arm)))
+            for arm in (BASELINE_ARM, *_TREATMENT_ARMS)
+        },
+        "torque": {
+            arm: str(_write(root / f"torque_{arm}.csv", synthetic_torque_csv(arm, levels)))
+            for arm in (BASELINE_ARM, *_TREATMENT_ARMS)
+        },
+        "screen": {
+            "all": str(
+                _write(root / "screen_raw_bank.csv", synthetic_bank_screen_csv(repaired=False))
+            ),
+            "C_repaired": str(
+                _write(root / "screen_repaired_bank.csv", synthetic_bank_screen_csv(repaired=True))
+            ),
+        },
+    }
+    return paths
+
+
+def expand_screens(
+    raw: dict[str, dict[str, float]], arms: Iterable[str]
+) -> dict[str, dict[str, float]]:
+    """``all=<csv>`` supplies the training-bank screen for every arm that has no screen of its own."""
+    default = raw.get("all")
+    out: dict[str, dict[str, float]] = {}
+    for arm in arms:
+        if arm in raw:
+            out[arm] = raw[arm]
+        elif default is not None:
+            out[arm] = default
+    return out
+
+
+def load_case(paths: dict[str, Any], **overrides: Any) -> dict[str, Any]:
+    """Turn a path bundle from :func:`materialize_branch` into ``analyze()`` keyword arguments."""
+    stratified = {arm: read_stratified(path) for arm, path in paths["strat"].items()}
+    exposure = {arm: read_exposure(path) for arm, path in paths.get("exposure", {}).items()}
+    torque = {arm: read_torque(path) for arm, path in paths.get("torque", {}).items()}
+    screens = expand_screens(
+        {arm: read_screen(path) for arm, path in paths.get("screen", {}).items()}, stratified
+    )
+    kwargs: dict[str, Any] = {
+        "stratified": stratified,
+        "eval_flags": read_screen(paths["eval_screen"]) if paths.get("eval_screen") else None,
+        "exposure": exposure or None,
+        "torque": torque or None,
+        "screens": screens or None,
+        "ground_clips": read_clip_list(paths["ground"]) if paths.get("ground") else (),
+    }
+    kwargs.update(overrides)
+    return kwargs
+
+
+def _expect_refusal(label: str, thunk: Any) -> tuple[bool, str]:
+    try:
+        thunk()
+    except AnalysisInputError as exc:
+        return True, str(exc).splitlines()[0][:96]
+    except Exception as exc:  # noqa: BLE001 - any other exception is itself the failure
+        return False, f"raised {type(exc).__name__} instead of AnalysisInputError: {exc}"
+    return False, "returned normally -- the bad input was accepted"
+
+
+def _run_guards(root: Path) -> list[tuple[str, bool, str]]:
+    """Every way an incomplete or self-serving input must be refused rather than quietly dropped."""
+    results: list[tuple[str, bool, str]] = []
+    base = materialize_branch(root / "guards", _all_arms("concentrated"))
+
+    def missing_arm() -> None:
+        kwargs = load_case(base)
+        kwargs["stratified"] = {a: v for a, v in kwargs["stratified"].items() if a != "C_repaired"}
+        kwargs["exposure"] = {a: v for a, v in kwargs["exposure"].items() if a != "C_repaired"}
+        kwargs["torque"] = {a: v for a, v in kwargs["torque"].items() if a != "C_repaired"}
+        analyze(**kwargs)
+
+    def partial_exposure() -> None:
+        kwargs = load_case(base)
+        kwargs["exposure"] = {a: v for a, v in kwargs["exposure"].items() if a != "E_raw_cap"}
+        analyze(**kwargs)
+
+    def no_eval_screen() -> None:
+        analyze(**load_case(base, eval_flags=None))
+
+    def repaired_eval_bank() -> None:
+        paths = materialize_branch(
+            root / "guard_repaired_eval",
+            _all_arms("concentrated"),
+            eval_bank_overrides={"C_repaired": "repaired_heldout_v1"},
+        )
+        analyze(**load_case(paths))
+
+    def ragged_grid() -> None:
+        paths = materialize_branch(
+            root / "guard_ragged", _all_arms("concentrated"), ragged_arm="B_pruned"
+        )
+        load_case(paths)
+
+    def clip_set_mismatch() -> None:
+        paths = materialize_branch(
+            root / "guard_mismatch", _all_arms("concentrated"), drop_clip_from="B_pruned"
+        )
+        analyze(**load_case(paths))
+
+    def missing_file() -> None:
+        read_stratified(root / "does_not_exist.csv")
+
+    for label, thunk in (
+        ("missing arm (C_repaired absent)", missing_arm),
+        ("exposure ledger given for only some arms", partial_exposure),
+        ("no --eval-screen and no --assume-all-feasible", no_eval_screen),
+        ("an arm graded on a REPAIRED eval bank", repaired_eval_bank),
+        ("ragged start-offset grid", ragged_grid),
+        ("arms evaluate different clip sets", clip_set_mismatch),
+        ("missing input file", missing_file),
+    ):
+        ok, detail = _expect_refusal(label, thunk)
+        results.append((label, ok, detail))
+    return results
+
+
+def run_synthetic(
+    *,
+    nperm: int = DEFAULT_NPERM,
+    seed: int = DEFAULT_SEED,
+    out_json: str | None = None,
+    out_md: str | None = None,
+) -> int:
+    """Fabricate outcomes for every decision branch and check the verdicts. No real data is read.
+
+    Returns a POSIX exit status: 0 only if every branch and every input guard behaves as sealed.
+    """
+    print("=" * 100)
+    print("analyze_hygiene_matrix.py --synthetic : decision-logic dry-run on FABRICATED outcomes")
+    print(f"  no training log, no checkpoint, no GPU. sha256(this script) = {_self_sha256()}")
+    print(f"  permutation: sign-flip over clips, nperm={nperm}, numpy.random.default_rng({seed})")
+    levels, flags, _ = synthetic_eval_bank()
+    n_feasible = sum(1 for k in levels if flags[k] <= FLAG_INFEASIBLE_FRAC)
+    print(
+        f"  fabricated eval set: {len(levels)} clips ({n_feasible} feasible, "
+        f"{len(levels) - n_feasible} flagged) x {len(SYNTHETIC_OFFSETS)} start offsets"
+    )
+    print("=" * 100)
+
+    failures = 0
+    first_report: dict[str, Any] | None = None
+    with tempfile.TemporaryDirectory(prefix="hygiene_synthetic_") as tmp:
+        root = Path(tmp)
+        for branch, blurb, effects in SYNTHETIC_BRANCHES:
+            paths = materialize_branch(root / branch, effects)
+            report = analyze(**load_case(paths), nperm=nperm, seed=seed)
+            if first_report is None:
+                first_report = report
+            json.dumps(report)  # the JSON endpoint must actually serialize, not just look like it
+            markdown = render_markdown(report)
+            print(f"\nbranch {branch}  --  {blurb}")
+            for arm in _TREATMENT_ARMS:
+                conc = report["arms"][arm]["concentration"]
+                want_pass, want_dir = SYNTHETIC_EXPECTATIONS[effects[arm]]
+                got_pass, got_dir = bool(conc["pass"]), conc["direction"]
+                ok = got_pass == want_pass and got_dir == want_dir
+                failures += 0 if ok else 1
+                split = report["arms"][arm]["concentration_split_half"]
+                print(
+                    f"  {'PASS' if ok else 'FAIL'}  {arm:<14s} "
+                    f"d_worst={conc['delta_worst_decile']:+.4f} "
+                    f"d_best={conc['delta_best_half']:+.4f} "
+                    f"d_easy={conc['delta_easy']:+.4f} | "
+                    f"ratio={'y' if conc['ratio_pass'] else 'n'} "
+                    f"material={'y' if conc['materiality_pass'] else 'n'} "
+                    f"easy_flat={'y' if conc['easy_flat_pass'] else 'n'} "
+                    f"-> claim={'PASSES' if got_pass else 'fails'} ({got_dir}); "
+                    f"expected {'PASSES' if want_pass else 'fails'} ({want_dir}); "
+                    f"split-half d_worst={split['delta_worst_decile']:+.4f}"
+                )
+            for check, ok in (
+                ("markdown renders", bool(markdown) and "Concentration signature" in markdown),
+                ("every arm in table", all(f"`{a}`" in markdown for a in report["arms"])),
+                ("seed echoed", f"default_rng({seed})" in json.dumps(report["analysis"])),
+                ("n=1-seed caveat present", "NO seed-level inference" in report["inference_note"]),
+            ):
+                failures += 0 if ok else 1
+                if not ok:
+                    print(f"  FAIL  output contract: {check}")
+            print(f"        headline: {report['decision']['headline']}")
+
+        print(
+            "\nnote on the split-half column above: in fabricated data the sealed ranking is exactly "
+            "the designed level,\n     so its selection step is noise-free and the printed "
+            "regression-to-the-mean gap is a LOWER bound on the real one."
+        )
+        print("\ninput guards (an incomplete matrix must be a loud error, never a dropped column)")
+        for label, ok, detail in _run_guards(root):
+            failures += 0 if ok else 1
+            print(f"  {'PASS' if ok else 'FAIL'}  refuses: {label}\n          -> {detail}")
+
+    assert first_report is not None
+    exposure = first_report["arms"]
+    print("\nexposure ledger + torque health (reported, never adjudicated) -- branch i:")
+    for arm in (BASELINE_ARM, *_TREATMENT_ARMS):
+        exp = exposure[arm]["exposure"]
+        tq = exposure[arm]["torque_health"]
+        print(
+            f"  {arm:<14s} bank={exp['n_clips']:4d}  H_norm={exp['normalized_entropy']:.4f}  "
+            f"top1={exp['top1_share']:.4f} ({exp['top1_over_fair_share']:.1f}x fair)  "
+            f"wasted={exp['wasted_exposure_frac']:.4f}  sat_mean={tq['saturation_frac_mean']:.4f}"
+        )
+
+    if out_json:
+        Path(out_json).write_text(json.dumps(first_report, indent=1), encoding="utf-8")
+        print(f"\nwrote synthetic branch-i JSON to {out_json}")
+    if out_md:
+        Path(out_md).write_text(render_markdown(first_report), encoding="utf-8")
+        print(f"wrote synthetic branch-i markdown to {out_md}")
+
+    print("\n" + "=" * 100)
+    if failures:
+        print(f"SYNTHETIC DRY-RUN FAILED: {failures} check(s) reached the wrong verdict.")
+        return 1
+    print(
+        f"SYNTHETIC DRY-RUN OK: {len(SYNTHETIC_BRANCHES)} fabricated branches x "
+        f"{len(_TREATMENT_ARMS)} arms all decide as designed, and all 7 input guards refuse."
+    )
+    print("No real data was touched: every table above was fabricated in a temporary directory.")
+    print("=" * 100)
+    return 0
+
+
+# --------------------------------------------------------------------------- CLI
+
+
+def _parse_pairs(items: Sequence[str], *, flag: str) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for item in items:
+        if "=" not in item:
+            raise AnalysisInputError(f"{flag} expects ARM=PATH, got {item!r}")
+        arm, path = item.split("=", 1)
+        if arm in out:
+            raise AnalysisInputError(f"{flag}: arm {arm!r} given twice")
+        out[arm] = path
+    return out
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "--synthetic",
+        action="store_true",
+        help="dry-run the decision logic on fabricated outcomes; touches no real data",
+    )
+    parser.add_argument(
+        "--strat",
+        nargs="*",
+        default=[],
+        metavar="ARM=CSV",
+        help="stratified-start eval CSV per arm",
+    )
+    parser.add_argument(
+        "--eval-screen",
+        default=None,
+        help="hygiene screen of the RAW eval bank; defines the feasible strata",
+    )
+    parser.add_argument(
+        "--assume-all-feasible",
+        action="store_true",
+        help="run without --eval-screen and record that choice in the output",
+    )
+    parser.add_argument("--exposure", nargs="*", default=[], metavar="ARM=CSV")
+    parser.add_argument(
+        "--screen",
+        nargs="*",
+        default=[],
+        metavar="ARM|all=CSV",
+        help="training-bank screen per arm; 'all' is the default for unlisted arms",
+    )
+    parser.add_argument("--torque", nargs="*", default=[], metavar="ARM=CSV")
+    parser.add_argument(
+        "--ground-clips",
+        default=None,
+        help="newline-delimited motion keys for the ground/kneel/crawl stratum",
+    )
+    parser.add_argument("--baseline", default=BASELINE_ARM)
+    parser.add_argument(
+        "--require-arms",
+        default=",".join(REQUIRED_ARMS),
+        help="comma-separated arms that must be present; refuses otherwise",
+    )
+    parser.add_argument(
+        "--allow-clip-mismatch",
+        action="store_true",
+        help="intersect the arms' eval clip sets on purpose, and record it",
+    )
+    parser.add_argument("--nperm", type=int, default=DEFAULT_NPERM)
+    parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
+    parser.add_argument("--out-json", default=None)
+    parser.add_argument("--out-md", default=None)
+    args = parser.parse_args(argv)
+
+    try:
+        if args.synthetic:
+            return run_synthetic(
+                nperm=args.nperm, seed=args.seed, out_json=args.out_json, out_md=args.out_md
+            )
+        if not args.strat:
+            raise AnalysisInputError(
+                "--strat ARM=CSV is required (or --synthetic for the fabricated dry-run)"
+            )
+        stratified = {
+            arm: read_stratified(path)
+            for arm, path in _parse_pairs(args.strat, flag="--strat").items()
+        }
+        exposure = {
+            arm: read_exposure(path)
+            for arm, path in _parse_pairs(args.exposure, flag="--exposure").items()
+        }
+        torque = {
+            arm: read_torque(path)
+            for arm, path in _parse_pairs(args.torque, flag="--torque").items()
+        }
+        screens = expand_screens(
+            {
+                arm: read_screen(path)
+                for arm, path in _parse_pairs(args.screen, flag="--screen").items()
+            },
+            stratified,
+        )
+        report = analyze(
+            stratified=stratified,
+            eval_flags=read_screen(args.eval_screen) if args.eval_screen else None,
+            exposure=exposure or None,
+            torque=torque or None,
+            screens=screens or None,
+            ground_clips=read_clip_list(args.ground_clips) if args.ground_clips else (),
+            baseline=args.baseline,
+            required_arms=tuple(a for a in args.require_arms.split(",") if a),
+            nperm=args.nperm,
+            seed=args.seed,
+            allow_clip_mismatch=args.allow_clip_mismatch,
+            assume_all_feasible=args.assume_all_feasible,
+        )
+    except AnalysisInputError as exc:
+        print(f"ERROR (refusing to analyze an incomplete matrix): {exc}", file=sys.stderr)
+        return 2
+
+    print(render_markdown(report))
+    if args.out_json:
+        Path(args.out_json).write_text(json.dumps(report, indent=1), encoding="utf-8")
+        print(f"wrote {args.out_json}", file=sys.stderr)
+    if args.out_md:
+        Path(args.out_md).write_text(render_markdown(report), encoding="utf-8")
+        print(f"wrote {args.out_md}", file=sys.stderr)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -252,6 +252,15 @@ footer p{max-width:none}
     </tbody>
   </table></div>
 
+  <h3 style="margin-top:2.4rem">The corpus, drawn honestly</h3>
+  <p>Four distributions that decide whether this is usable: what behaviours it covers, why episodes
+  are refused, how close the accepted ones come, and how much of each commanded edit survived the
+  controller. The thin parts are drawn at the same scale as the thick ones.</p>
+  <img src="media/corpus_stats.png" alt="Four panels: behaviour coverage, refusal reasons, closest-approach histogram, and commanded against executed amplitude" style="width:100%;display:block;border:1px solid var(--line);background:#fff;margin-top:1rem">
+  <p style="margin-top:.9rem;font-size:.85rem;color:var(--muted)">Bottom right is the dataset-quality
+  claim in one picture: every point sits below the diagonal, and the leg edits sit furthest below it.
+  Regenerate with <code>render_corpus_stats.py</code>.</p>
+
   <h3 style="margin-top:2rem">Behaviour spread across the screened motions</h3>
   <div class="bars" id="bars">
     <div class="brow"><span class="label">Turn</span><div class="btrack"><div class="bfill" style="--w:100%"></div></div><span class="bnum">67</span></div>

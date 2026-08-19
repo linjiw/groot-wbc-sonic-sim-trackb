@@ -19,8 +19,12 @@ ships the normalised uniform mixture, and it ships it at exactly ``a = 0.10``.
 ``gear_sonic/config/manager_env/commands/terms/motion.yaml:26`` (``0.1``). The bin
 weights are built at ``:2447-2451`` as
 ``w_i = (bin_length_i / mean_bin_length) / num_peer_bins_motion``, so ``w`` scales as
-one over the number of bins in the clip and the per-MOTION weight sum is a constant --
-the shipped comment calls this "each sequence is sampled equally".
+one over the number of bins in the clip and the per-MOTION weight sum is *nearly* a
+constant -- the shipped comment at ``:2450`` calls this "each sequence is sampled equally".
+It is only exactly equal for clips whose frame count is a multiple of ``bin_size``; the
+remainder bin costs a ``k*bin_size + 1`` clip a third of its exposure, and on a realistic
+length mix the t=0 prior already spans 1.49x across clips. See
+:meth:`BinLayout.motion_weight_sums`.
 
 The useful question is therefore not "is there a floor" but "what does the floor buy".
 A uniform floor bounds each bin's probability FROM BELOW. It bounds nothing from above.
@@ -157,11 +161,22 @@ class BinLayout:
         return int(self.motion_lengths_frames.size)
 
     def motion_weight_sums(self) -> FloatArray:
-        """Total bin weight per motion.
+        """Total bin weight per motion -- what "each sequence is sampled equally" delivers.
 
-        Constant across motions when ``sequence_length_agnostic`` and every clip is an
-        exact multiple of ``bin_size``; the remainder bin makes short-tailed clips carry
-        slightly less. This is what "each sequence is sampled equally" means in practice.
+        Constant across motions ONLY when ``sequence_length_agnostic`` is on AND every clip
+        is an exact multiple of ``bin_size``. The final remainder bin breaks it: a clip of
+        ``k * bin_size + r`` frames has ``k + 1`` peer bins but only ``k * bin_size + r``
+        frames of weight, so its sum is ``(k * bin_size + r) / (k + 1)`` instead of
+        ``bin_size``. A 101-frame clip therefore carries 0.673x the weight of a 100-frame
+        one -- a third less exposure for one extra frame of mocap.
+
+        On a realistic 800-clip retargeted-mocap length mix only ~2% of clips are exact
+        multiples of 50, and the t=0 prior already spans 1.49x between the least- and
+        most-exposed clip (0.74x to 1.10x fair share), biased against SHORT clips. Quote
+        that as the floor of any fairness claim about this sampler; it is present before
+        any adaptive signal exists. Pinned by
+        ``tests/research/test_hygiene_sampler_diagnostics.py::
+        test_release_prior_is_not_exactly_fair_across_motions``.
         """
         sums = np.zeros(self.num_motions, dtype=np.float64)
         np.add.at(sums, self.motion_index, self.bin_weights)
@@ -193,7 +208,9 @@ def build_bins(
     """
     lengths = np.asarray(motion_lengths_frames)
     if lengths.ndim != 1 or lengths.size == 0:
-        raise ValueError(f"motion_lengths_frames must be a non-empty 1-D array, got {lengths.shape}")
+        raise ValueError(
+            f"motion_lengths_frames must be a non-empty 1-D array, got {lengths.shape}"
+        )
     if not np.issubdtype(lengths.dtype, np.integer):
         if not np.all(np.isfinite(lengths)) or not np.all(lengths == np.floor(lengths)):
             raise ValueError("motion_lengths_frames must be whole frame counts")
@@ -276,7 +293,9 @@ class SamplerConfig:
         if not 0.0 <= float(self.uniform_rate) <= 1.0:
             raise ValueError(f"uniform_rate must be in [0, 1], got {self.uniform_rate}")
         if not math.isfinite(float(self.failure_rate_cap)) or float(self.failure_rate_cap) <= 0:
-            raise ValueError(f"failure_rate_cap must be positive and finite, got {self.failure_rate_cap}")
+            raise ValueError(
+                f"failure_rate_cap must be positive and finite, got {self.failure_rate_cap}"
+            )
         for name in ("max_prob_per_bin", "max_prob_per_motion"):
             value = getattr(self, name)
             if value is None or value == "auto":
@@ -927,7 +946,9 @@ class CheckpointSamplerState:
         return payload
 
 
-def summarize_checkpoint_sampler_state(state: dict[str, Any], **kwargs: Any) -> CheckpointSamplerState:
+def summarize_checkpoint_sampler_state(
+    state: dict[str, Any], **kwargs: Any
+) -> CheckpointSamplerState:
     """Structure one already-extracted checkpoint state dict.
 
     Delegates every derived quantity to

@@ -1,0 +1,132 @@
+# @package _global_
+# HYGIENE MATRIX — arm E: raw bank, per-clip exposure cap.
+#
+# FACTOR THAT DIFFERS FROM hygiene_a_raw: one key,
+# adaptive_sampling.max_prob_per_motion, null -> 1.0101e-3. The bank is the same
+# raw bank as arm A, byte for byte. num_envs, iterations, seed handling,
+# callbacks and the resident-set size are inherited unchanged from arm A.
+#
+# CONTRAST IDENTIFIED: A vs E = does the config-only remedy buy what cleaning the
+# bank buys? The cap already exists in motion_lib_base.py:2462 and is null in
+# every shipped yaml, so it costs one line and no GPU. It is the cheap
+# competitor arms B and C have to beat (docs/plan_feasibility_hygiene_v1.md §2,
+# docs/prediction_register.md P11).
+#
+# With signal=failure_rate (the release value, inherited), setting this key
+# non-null changes NOTHING except the clamp: compare the skip path at
+# motion_lib_base.py:3285-3292 with the tail at :3350-3356, and :3411-3421 with
+# :3445-3470. The ZPD tripwire branches in both are inert here because they only
+# fire for signal in {learnability, advantage_mass}.
+
+defaults:
+  - /exp/manager/universal_token/all_modes/hygiene_a_raw
+  - _self_
+
+exp_var: e_cap
+
+manager_env:
+  commands:
+    motion:
+      motion_lib_cfg:
+        adaptive_sampling:
+          # =================================================================
+          # THE NUMBER IS BANK-SIZE SPECIFIC. RECOMPUTE IT IF THE BANK CHANGES.
+          #
+          #     fair share   = 1 / num_motions
+          #     5x fair share = 5 / num_motions
+          #     num_motions  = 4950  (the raw bones-seed bank this arm loads)
+          #     5 / 4950     = 1.0101e-3
+          #
+          # There is no relative spec in the code: max_prob_per_motion is read
+          # as an absolute probability (motion_lib_base.py:3327-3329, :3462-3464).
+          # Arm E is a raw-bank arm, so 4950 is the only count that applies here;
+          # do NOT copy this value into an overlay that points at the pruned or
+          # repaired bank without redoing the division.
+          #
+          # WHY NOT "auto". The code accepts the string "auto" (:3320, :3457) and
+          # resolves it to adp_samp_failure_rate_max_over_mean / num_motions.
+          # sonic_release.yaml pins that knob to 200 (motion.yaml ships 50), so
+          # "auto" is 200/4950 = 4.04e-2 — a 200x-fair-share ceiling. The guard
+          # at :3467 passes (4950 > 24.75) so the clamp really does run; it just
+          # never binds, because the worst measured single-clip share on this
+          # sampler is 3.4-4.5% of the mass (34-45x fair share,
+          # docs/plan_feasibility_hygiene_v1.md §2), which is below 4.04e-2.
+          # "auto" is therefore inert, not conservative.
+          #
+          # TWO SCOPES READ THIS ONE NUMBER, AND THEY HAVE DIFFERENT N.
+          #
+          # (1) Residency draw — the scope this value is sized for.
+          #     _sampling_prob is over all num_motions=4950 clips (:3445-3470)
+          #     and is consumed by
+          #         torch.multinomial(self._sampling_prob, 1024, replacement=True)
+          #     at :1116-1118. WITH REPLACEMENT: a clip holding mass p takes
+          #     ~1024*p of the 1024 resident slots, and every duplicate copy
+          #     re-appends that clip's bins to the active-bin list (:3486-3501),
+          #     multiplying its frame-selection mass by the number of copies.
+          #     That compounding is the dominant concentration channel, and the
+          #     cap binds on it: guard 4950 > 1/1.0101e-3 = 990 holds, and a
+          #     capped clip gets at most 1024 * 1.0101e-3 = 1.03 expected slots
+          #     against a fair share of 1024/4950 = 0.207 — exactly 5x. Uncapped,
+          #     a clip at 4% of the mass takes ~41 of the 1024 slots.
+          #
+          # (2) Frame draw — WHERE THIS VALUE DOES NOT ENGAGE. SAY IT OUT LOUD.
+          #     The same key is read again over the resident set only, with
+          #     N = num_active_motions = the number of UNIQUE clips among the
+          #     1024 draws (:3296), and the clamp is guarded by
+          #     num_active_motions > 1/max_prob_per_motion (:3332).
+          #     Drawing 1024 times with replacement from 4950 clips yields
+          #     925.3 +- 8.6 unique clips (400-trial simulation; analytic
+          #     4950*(1-(1-1/4950)^1024) = 925.1). At t=0 that draw is exactly
+          #     uniform — init_num_failures=1 puts every bin at failure rate 1
+          #     and the length-agnostic bin weights give every clip equal mass —
+          #     so 925 is the CEILING; any later concentration lowers it. The
+          #     guard needs 990. It never passes. The frame-stage clamp is dead
+          #     code at this value, by arithmetic rather than by accident.
+          #
+          # AND THAT CANNOT BE FIXED FROM YAML. For the frame stage to clamp at
+          # all you need max_prob_per_motion > 1/925 = 1.081e-3, i.e. > 5.35x
+          # fair share of the 4950-clip bank; and at that value the ceiling
+          # equals the resident set's own fair share, which flattens the resident
+          # distribution to uniform-over-clips and turns arm E into arm D. While
+          # the resident window (1024) is smaller than the bank (4950), no single
+          # absolute number is both "5x of bank fair share" and a non-degenerate
+          # cap inside the window. This file takes the residency reading, and the
+          # write-up must say so: arm E bounds how OFTEN a clip is resident, not
+          # how hard the sampler leans on it once it is. Expect the exposure
+          # ledger's top-1 share to stay above 5x fair share in this arm.
+          #
+          # The other reading, if a later run wants the frame stage capped:
+          # 5/1024 = 4.8828e-3 = 5x fair share of the resident WINDOW (4.5x
+          # realized against ~925 unique), which is 24.2x fair share of the bank
+          # end to end. It is a defensible arm; it is not this arm, and the two
+          # must never both be labelled "5x fair share".
+          #
+          # WATCH THIS IF override_num_motions_to_load MOVES. The frame-stage
+          # guard switches ON once the expected unique count exceeds 990, i.e.
+          # once the resident size passes ~1105 (solve 4950*(1-exp(-n/4950))=990).
+          # Above that, arm E silently changes mechanism mid-matrix. Lowering the
+          # resident size — which hygiene_a_raw.yaml warns may be needed for the
+          # pruned bank — only pushes it further off, so it is safe for arm E.
+          #
+          # FOLLOW-UP, NOT DONE HERE: expressing this as a relative value (e.g.
+          # max_prob_per_motion: {fair_share_multiple: 5}) needs a code change at
+          # motion_lib_base.py:2462, :3319-3329 and :3456-3464. This matrix does
+          # not touch shipped training code, so it stays a follow-up.
+          # =================================================================
+          max_prob_per_motion: 1.0101e-3
+
+          # max_prob_per_bin stays unset (it is absent from every shipped yaml
+          # and reaches :2461 as None), so only the per-motion sub-block runs;
+          # the per-bin clamp at :3299-3316 / :3427-3440 is skipped. Arm E caps
+          # clips, not moments inside a clip.
+          #
+          # Left at arm A's release value on purpose: arm E changes the ceiling,
+          # not the shape. Moving both would confound E with D.
+          uniform_sampling_rate: 0.1
+
+hygiene_matrix:
+  arm: E_raw_cap
+  factor: sampler_cap
+  bank: raw
+  bank_is_placeholder: false
+  sampler: max_prob_per_motion_5x_fair_share_of_4950

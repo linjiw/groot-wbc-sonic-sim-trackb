@@ -218,9 +218,7 @@ def test_realized_uniform_mass_tracks_the_nominal_knob(bank: sd.BinLayout) -> No
     # uniform_sampling_rate must raise the realized share monotonically, and hit 1.0 at a=1.
     rates = _one_impossible_clip(bank, int(np.argmax(bank.motion_lengths_frames)))
     realized = [
-        sd.realized_uniform_mass(
-            bank, failure_rates=rates, config=sd.SamplerConfig(uniform_rate=a)
-        )
+        sd.realized_uniform_mass(bank, failure_rates=rates, config=sd.SamplerConfig(uniform_rate=a))
         for a in (0.0, 0.1, 0.5, 1.0)
     ]
     assert realized[0] == pytest.approx(0.0, abs=1e-9)
@@ -387,7 +385,7 @@ def test_clipping_a_lone_outlier_fires_but_changes_nothing() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_shannon_and_effective_num_bins_agree_only_on_the_uniform(bank: sd.BinLayout) -> None:
+def test_shannon_and_effective_num_bins_agree_only_on_the_uniform() -> None:
     uniform = np.full(512, 1.0 / 512)
     assert sd.normalized_shannon_entropy(uniform) == pytest.approx(1.0)
     assert sd.effective_num_bins(uniform) == pytest.approx(512.0)

@@ -23,8 +23,10 @@ manager_env:
   commands:
     motion:
       motion_lib_cfg:
-        # PLACEHOLDER PATH — this bank does not exist yet.
-        # Produced by scripts/research/hygiene_screen_bank.py: it screens the
+        # PLACEHOLDER PATH — this bank does not exist yet, and neither does
+        # the script that makes it (only hygiene_repair_bank.py is on disk as of
+        # this file's writing).
+        # To be produced by scripts/research/hygiene_screen_bank.py: it screens the
         # raw bank with gear_sonic/research/hygiene/screen.py and writes the
         # surviving clips (or symlinks to them) into this directory. Until that
         # script has run, this arm will fail at motion-library load.
@@ -40,7 +42,7 @@ manager_env:
         # is to lower the key in ALL FIVE files, not just this one.
 
 hygiene_matrix:
-  arm: b_pruned
+  arm: B_pruned
   factor: bank_pruned
   bank: pruned
   bank_is_placeholder: true

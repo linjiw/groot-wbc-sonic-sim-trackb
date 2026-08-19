@@ -162,11 +162,24 @@ def episode_row(cell_dir: Path, family_id: str, videos: Path | None) -> dict | N
         return None
 
     cell_role, motion_role = role_of(cell_dir.name)
-    operator = (
-        "local_crouch"
-        if "crouch" in cell_dir.name
-        else "local_arm_tuck" if "tuck" in cell_dir.name else ""
-    )
+    # The operator is named in the cell for sweep cells (w_crouch08) and in the family for the
+    # counterfactual ones (duck_003/adapted_easy), so both are consulted. Leaving it blank because
+    # only one convention was checked made every counterfactual episode read as "other" in the
+    # corpus figures, which is where the arms-against-legs result is supposed to be visible.
+    haystack = f"{family_id} {cell_dir.name}".lower()
+    if "crouch" in haystack or "duck" in haystack:
+        operator = "local_crouch"
+    elif "tuck" in haystack:
+        operator = "local_arm_tuck"
+    elif "ceiling" in haystack:
+        # Banded families are named for their obstacle, not their operator. Only lowering the
+        # robot relieves a ceiling and only retracting an arm relieves a wall, which is the same
+        # pairing the criticality map encodes, so the obstacle determines the operator.
+        operator = "local_crouch"
+    elif "wall" in haystack:
+        operator = "local_arm_tuck"
+    else:
+        operator = ""
     scene_id = scene_of(cell_dir)
     row = {c: "" for c in EPISODE_COLUMNS}
     row.update(
