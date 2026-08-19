@@ -180,6 +180,23 @@ width at `min_window_m = 0.02`:
 the run-to-run variation of the executed body, so a scene placed inside it is not reliably placeable
 at all — which is what the chest family shows.
 
+### It is the minimum-edit rule, not the excursion cap
+
+The obvious suspect for an under-powered tuck is `MAX_TUCK_EXCURSION_RAD = 0.40`. It is not the
+cause. The chest configuration commands **0.0635 rad**, an order of magnitude below the cap, so the
+cap never binds.
+
+The cause is the objective. `m*(S) = argmin_m D(m, m₀)` asks for the smallest edit that clears the
+obstacle *as predicted*, and the prediction over-states what reaches the binding surface by about
+2.6×. A minimum computed against an optimistic model is itself optimistic by the same factor, so the
+rule reliably specifies an edit too small to work — and does so most severely exactly where the
+window is narrowest and the margin for error least.
+
+Joint-space survival and clearance delivery are not the same ratio: the chest tuck retains 64% of
+its commanded joint amplitude while delivering 38% of its predicted window. Both numbers are
+consistent with the operator acting distally on a constraint that binds proximally, and the gap
+between them is the part a joint-space cap could never fix.
+
 ### P7, registered before the remaining twelve configurations report
 
 1. **No chest-band configuration produces a verified family.** Falsified by any one of the five.

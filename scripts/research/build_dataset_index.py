@@ -89,7 +89,36 @@ EPISODE_COLUMNS = [
     "video_front",
     "video_top",
     "n_videos",
+    # What the operator asked for, and what the controller actually did. A label names the
+    # commanded behaviour; only the executed amplitude says how much of it happened, and a consumer
+    # filtering for real crouches needs the second. Blank where the cell has no matched nominal.
+    "commanded_amplitude_rad",
+    "executed_amplitude_rad",
+    "operator_survival",
+    "survival_drift_margin",
 ]
+
+
+def survival_columns(cell_dir: Path) -> dict:
+    """Commanded vs executed amplitude for an adapted cell, or blanks.
+
+    Reuses measure_operator_survival so the release and the paper cannot disagree: one
+    implementation, one definition of which joints and frames count.
+    """
+    from scripts.research.measure_operator_survival import nominal_for, survival
+
+    nominal = nominal_for(cell_dir)
+    if nominal is None:
+        return {}
+    result = survival(cell_dir, nominal)
+    if result is None:
+        return {}
+    return {
+        "commanded_amplitude_rad": round(result["commanded_rad"], 4),
+        "executed_amplitude_rad": round(result["executed_rad"], 4),
+        "operator_survival": round(result["survival"], 3),
+        "survival_drift_margin": round(result["margin"], 1),
+    }
 
 
 def behaviour_of(text: str) -> str:
@@ -154,6 +183,8 @@ def episode_row(cell_dir: Path, family_id: str, videos: Path | None) -> dict | N
     )
     if scene_id and (SCENES / f"{scene_id}.usda").exists():
         row["scene_path"] = str(SCENES / f"{scene_id}.usda")
+
+    row.update(survival_columns(cell_dir))
 
     if payload is None:
         row["outcome"] = "unevaluable"
