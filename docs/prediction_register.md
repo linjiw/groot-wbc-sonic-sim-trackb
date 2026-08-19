@@ -226,6 +226,39 @@ The waist family failed the same way as the chest family — its adapted motion 
 despite a predicted window more than twice as wide. That is the outcome P7.2 did not expect, and it
 weakens the reading that narrow windows alone explain the chest failure.
 
+### The walls are fixable; the ceiling is not
+
+Inverting the delivery ratio gives the edit each configuration would have needed to clear its own
+hard scene, which is the number that decides whether the method is repairable or the band must go:
+
+| config | commanded | delivered | needed | required command | operator cap | reachable |
+|---|---|---|---|---|---|---|
+| ceiling / overhead | 0.614 rad | 27.5 mm | 90.2 mm | **2.013 rad** | 0.98 rad | **no — 2.1× over** |
+| wall / chest | 0.064 rad | 14.0 mm | 23.8 mm | 0.108 rad | 0.40 rad | yes |
+| wall / waist | 0.064 rad | 12.9 mm | 51.4 mm | 0.253 rad | 0.40 rad | yes |
+
+**The wall families are a calibration error.** Both need edits comfortably inside the tuck's cap —
+1.7× and 4× what the minimum-edit rule asked for. Correcting the delivery model would make them
+reachable without touching the cap, the gate, or the journey. The tuck also tracks better than the
+nominal it modifies, so there is trackability headroom to spend.
+
+**The ceiling families are not repairable by scaling.** Clearing that hard scene needs 2.013 rad of
+commanded crouch against a 0.98 rad cap, and the crouch already fails the endpoint gate at 0.614 rad
+by consuming 0.524 m of a 0.35 m budget. Both limits bind, and neither is an artefact of
+calibration. An overhead family in this batch cannot be made to hold by asking for a deeper crouch.
+
+That leaves the overhead band with two honest options, both scene-side rather than operator-side:
+place its hard face at a margin the crouch can actually deliver, or drop the band. Deciding that
+needs the remaining `n_064` and `n_065` overhead configurations, which will show whether 2× over cap
+is typical or particular to `n_013`.
+
+One caveat holds this whole table together and should not be silently assumed: it treats delivery as
+proportional to commanded amplitude. Survival is not quite linear — crouch survival rises from 46%
+to 58% as amplitude grows, and small tucks survive better than large ones — so the required commands
+above are estimates, not solutions. For the walls the conclusion is robust because the required
+edits sit far inside the cap; for the ceiling it is robust because 2.1× over cap does not close
+under any plausible curvature.
+
 ### P7, registered before the remaining twelve configurations report
 
 1. **No chest-band configuration produces a verified family.** Falsified by any one of the five.
