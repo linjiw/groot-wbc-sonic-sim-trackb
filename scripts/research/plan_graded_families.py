@@ -31,6 +31,7 @@ from gear_sonic.dataset_generation.criticality_map import (  # noqa: E402
 )
 from gear_sonic.dataset_generation.local_adaptation import (  # noqa: E402
     active_frames,
+    delivery_corrected_target,
     local_arm_tuck,
     local_crouch,
 )
@@ -115,12 +116,19 @@ def main() -> int:
         # Apply the operator that relieves this part, then measure both clips over the frames where
         # that adaptation is fully active. A fixed slice of route progress instead takes its maximum
         # from the ramp edges and reported 2.4 mm for a window the verified family measures at 95.
+        # The target is what must arrive at the binding surface, not what is commanded. Commanding
+        # the bare requirement produced adaptations that reached roughly a third to a half of it and
+        # struck the obstacles they were built to clear, so it is divided by the measured delivery
+        # ratio for this operator and band before being asked for.
+        band_for_delivery = constraint.band if wall else "overhead"
         if operator == "local_crouch":
-            adapted, _report = local_crouch(nominal, args.station, target_drop_m=0.08)
+            target, ratio = delivery_corrected_target(0.08, operator, band_for_delivery)
+            adapted, _report = local_crouch(nominal, args.station, target_drop_m=target)
         else:
             side = constraint.side if constraint.side in ("left", "right") else "both"
+            target, ratio = delivery_corrected_target(0.06, operator, band_for_delivery)
             adapted, _report = local_arm_tuck(
-                nominal, args.station, target_reduction_m=0.06, window=0.30, side=side
+                nominal, args.station, target_reduction_m=target, window=0.30, side=side
             )
         mask = active_frames(nominal, adapted)
 
@@ -153,6 +161,13 @@ def main() -> int:
                 "nominal_reach_m": round(reach, 4),
                 "adapted_reach_m": round(adapted_reach, 4),
                 "window_m": round(window, 4),
+                # What was asked for, and the measured shortfall it was scaled against. Recorded so
+                # a later reader can tell a wide window produced by a correct model from one
+                # produced by a large correction, and so the ratios can be re-derived when more
+                # families report.
+                "commanded_target_m": round(target, 4),
+                "delivery_ratio_used": ratio,
+                "predicted_delivered_m": round(window * ratio, 4),
                 "easy_face_m": round(reach + DEFAULT_LADDER[0], 4),
                 "hard_face_m": round(reach - window / 2.0, 4),
                 "usable": bool(window >= 0.020),

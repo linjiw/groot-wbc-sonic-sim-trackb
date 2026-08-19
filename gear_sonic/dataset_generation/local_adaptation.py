@@ -110,6 +110,47 @@ MAX_CROUCH_EXCURSION_RAD = 0.98
 MAX_JOINT_EXCURSION_RAD = MAX_TUCK_EXCURSION_RAD
 
 
+#: Fraction of a commanded adaptation that reaches the surface an obstacle binds against, measured
+#: per operator and band on the position-aligned scorer. These are *not* the joint-space survival
+#: ratios: an edit can survive in the joints and still arrive short at the binding surface, because
+#: the operators act distally while several obstacles bind proximally. Chest is the shared upper-arm
+#: capsule, waist the wrist, overhead the torso.
+#:
+#: That realisation falls short of prediction was already known -- ``MIN_WINDOW_M`` records
+#: "23-82% of the predicted one". What is new is that the shortfall is reproducible per band, so it
+#: can be divided out instead of absorbed as a gate margin.
+DELIVERY_RATIO = {
+    ("local_crouch", "overhead"): 0.455,   # 43% and 48% on two nominals
+    ("local_arm_tuck", "chest"): 0.70,
+    ("local_arm_tuck", "waist"): 0.30,
+}
+
+#: Multiplier on the corrected target. The ratios come from few families and vary by band, so a
+#: correction that only just reaches the obstacle would land on the wrong side of its own error bar
+#: half the time. Overshooting costs a slightly larger edit; undershooting costs four rollouts.
+DELIVERY_SAFETY = 1.2
+
+#: Used where an operator and band have no measured ratio yet. Deliberately the worst measured
+#: value rather than the mean: an unmeasured combination should be assumed to deliver as poorly as
+#: the worst one that has been measured, not typically.
+DELIVERY_RATIO_UNMEASURED = 0.30
+
+
+def delivery_corrected_target(needed_m: float, operator: str, band: str) -> tuple[float, float]:
+    """Scale a required clearance up by what the operator actually delivers.
+
+    The minimum-edit rule asks for the smallest adaptation that clears the obstacle *as predicted*.
+    Since prediction over-states what arrives at the binding surface, the minimum computed against
+    it is short by the same factor, and reliably so: the wall families of the 2026-08-19 batch each
+    asked for roughly a third to a half of what they needed and struck the obstacle they were built
+    to clear. Dividing by the measured ratio is what the rule was always meant to mean.
+
+    Returns the corrected target and the ratio used, so a caller can record which one applied.
+    """
+    ratio = DELIVERY_RATIO.get((operator, band), DELIVERY_RATIO_UNMEASURED)
+    return needed_m / ratio * DELIVERY_SAFETY, ratio
+
+
 @dataclass(frozen=True)
 class LocalCrouchReport:
     """What the operator achieved, and what it left alone."""
