@@ -226,6 +226,28 @@ The waist family failed the same way as the chest family — its adapted motion 
 despite a predicted window more than twice as wide. That is the outcome P7.2 did not expect, and it
 weakens the reading that narrow windows alone explain the chest failure.
 
+### The shortfall was already known, and the gate is the wrong lever
+
+`MIN_WINDOW_M` carries its own comment: *"the realised window ran 23-82% of the predicted one."* The
+delivery shortfall was measured before this batch was planned, and the gate was set to 20 mm anyway.
+The three measurements here — 25%, 30%, 59% — fall inside that range and confirm it rather than
+discover it. What is new is the consequence, which the earlier note did not draw.
+
+That makes the fix I suggested under P7 the wrong one. Raising the gate so predicted × worst-case
+delivery clears 20 mm would require about 87 mm of predicted window, and of the fourteen planned
+configurations only the three overhead ones clear that — the same three the transport cost already
+disqualifies. A gate strict enough to be honest selects nothing this batch can use.
+
+The other lever is the edit itself. The minimum-edit rule asks for exactly what an optimistic model
+says will clear the obstacle; asking instead for that divided by the delivery ratio makes the
+*delivered* edit the minimum, which is what the rule was always meant to mean. The required commands
+are then 0.108 and 0.253 rad for chest and waist, both far inside the 0.40 rad cap, and the gate can
+stay where it is because the window it protects is now real.
+
+This is one line of arithmetic in the operator, not a change to the cap, the gate, the journey, or
+the acceptance thresholds — which is what makes it the right lever. It is still not applied while
+the batch that would test the current behaviour is running.
+
 ### The walls are fixable; the ceiling is not
 
 Inverting the delivery ratio gives the edit each configuration would have needed to clear its own
