@@ -1,0 +1,327 @@
+<title>SweepCF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+/* A deck deliberately committed to one visual world: the simulation viewport it reports on.
+   Every colour is painted explicitly so the page holds on either host ground. */
+:root{
+  --ground:#0E1418; --surface:#161E24; --surface-2:#1D272E;
+  --ink:#E8EDF0; --ink-dim:#B4C1C9; --muted:#8A9AA5; --line:#26333B;
+  --accent:#E8A33D;                 /* sodium amber: measurement, not decoration */
+  --reject:#C0453B; --accept:#3E8E6E;   /* taken from the renders, so page and physics agree */
+  --step--1:clamp(.78rem,.75rem + .2vw,.9rem);
+  --step-0:clamp(1rem,.95rem + .3vw,1.15rem);
+  --step-1:clamp(1.25rem,1.1rem + .7vw,1.6rem);
+  --step-2:clamp(1.7rem,1.3rem + 1.8vw,2.6rem);
+  --step-3:clamp(2.3rem,1.5rem + 3.6vw,4.6rem);
+  --step-4:clamp(3rem,1.6rem + 6vw,7rem);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:Newsreader,Georgia,serif; font-size:var(--step-0); font-weight:300;
+  line-height:1.6; -webkit-font-smoothing:antialiased;
+}
+.deck{scroll-snap-type:y proximity}
+section{
+  min-height:100svh; scroll-snap-align:start; display:flex; align-items:center;
+  padding:clamp(2rem,6vh,5rem) clamp(1.25rem,6vw,7rem); position:relative;
+  border-bottom:1px solid var(--line);
+}
+.wrap{width:100%; max-width:1180px; margin:0 auto}
+h1,h2,h3,.eyebrow,.stat,.label{font-family:Archivo,system-ui,sans-serif}
+h1{font-size:var(--step-4); font-weight:800; line-height:.95; letter-spacing:-.03em; margin:0; text-wrap:balance}
+h2{font-size:var(--step-3); font-weight:800; line-height:1.02; letter-spacing:-.025em; margin:0 0 1rem; text-wrap:balance}
+h3{font-size:var(--step-1); font-weight:700; letter-spacing:-.01em; margin:0 0 .4rem}
+p{max-width:62ch; margin:0 0 1rem; color:var(--ink-dim)}
+p.lead{font-size:var(--step-1); color:var(--ink); line-height:1.45}
+strong{color:var(--ink); font-weight:400; font-style:italic}
+.eyebrow{
+  font-size:var(--step--1); font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--accent); margin:0 0 1.5rem; display:flex; align-items:center; gap:.75rem;
+}
+.eyebrow::after{content:""; flex:1; height:1px; background:var(--line); max-width:8rem}
+.mono{font-family:"JetBrains Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums}
+
+/* reveal */
+.r{opacity:0; transform:translateY(18px); transition:opacity .7s cubic-bezier(.2,.7,.3,1), transform .7s cubic-bezier(.2,.7,.3,1)}
+.in .r{opacity:1; transform:none}
+.in .r:nth-child(2){transition-delay:.08s}
+.in .r:nth-child(3){transition-delay:.16s}
+.in .r:nth-child(4){transition-delay:.24s}
+.in .r:nth-child(5){transition-delay:.32s}
+
+/* hero */
+.hero-lines span{display:block; overflow:hidden}
+.hero-lines b{
+  display:block; font-weight:800; transform:translateY(105%);
+  animation:rise .95s cubic-bezier(.16,.84,.28,1) forwards;
+}
+.hero-lines span:nth-child(2) b{animation-delay:.1s}
+.hero-lines span:nth-child(3) b{animation-delay:.2s}
+@keyframes rise{to{transform:none}}
+.hero-sub{margin-top:2rem; opacity:0; animation:fade 1s ease .55s forwards}
+@keyframes fade{to{opacity:1}}
+.accent{color:var(--accent)}
+
+/* 2x2 */
+.grid2{display:grid; grid-template-columns:repeat(2,1fr); gap:clamp(.6rem,1.4vw,1.1rem); margin-top:1.25rem}
+.cell{background:var(--surface); border:1px solid var(--line); border-radius:2px; overflow:hidden; position:relative}
+.cell video{width:100%; display:block; aspect-ratio:936/526; object-fit:cover; background:var(--surface-2)}
+.cell.rej{border-color:color-mix(in srgb,var(--reject) 55%,var(--line))}
+.cell.acc{border-color:color-mix(in srgb,var(--accept) 45%,var(--line))}
+.cap{display:flex; justify-content:space-between; align-items:baseline; gap:.5rem; padding:.55rem .7rem; border-top:1px solid var(--line)}
+.cap .label{font-size:var(--step--1); font-weight:700; letter-spacing:.06em; text-transform:uppercase}
+.verdict{font-family:"JetBrains Mono",monospace; font-size:var(--step--1); font-weight:700}
+.rej .verdict{color:var(--reject)} .acc .verdict{color:var(--accept)}
+.axis{display:grid; grid-template-columns:repeat(2,1fr); gap:clamp(.6rem,1.4vw,1.1rem); margin-top:.55rem}
+.axis span{font-family:Archivo,sans-serif; font-size:var(--step--1); font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); text-align:center}
+
+/* force bars */
+.bars{display:flex; flex-direction:column; gap:1.4rem; margin-top:1.5rem; max-width:44rem}
+.bar-row{display:grid; grid-template-columns:9rem 1fr; gap:1rem; align-items:center}
+.bar-row .label{font-size:var(--step--1); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:700}
+.track{height:2.4rem; background:var(--surface); border:1px solid var(--line); position:relative; overflow:hidden}
+.fill{position:absolute; inset:0 auto 0 0; width:0; transition:width 1.4s cubic-bezier(.2,.75,.25,1)}
+.in .fill{width:var(--w)}
+.fill.r-{background:linear-gradient(90deg,color-mix(in srgb,var(--reject) 75%,black),var(--reject))}
+.fill.a-{background:linear-gradient(90deg,color-mix(in srgb,var(--accept) 70%,black),var(--accept))}
+.bar-val{position:absolute; right:.7rem; top:50%; transform:translateY(-50%); font-family:"JetBrains Mono",monospace; font-weight:700; font-size:var(--step--1); color:var(--ink)}
+
+/* stat strip */
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); margin-top:2rem}
+.stats div{background:var(--ground); padding:1.1rem 1rem}
+.stat{display:block; font-size:var(--step-2); font-weight:800; letter-spacing:-.02em; line-height:1; font-variant-numeric:tabular-nums}
+.stats small{display:block; margin-top:.45rem; font-family:Archivo,sans-serif; font-size:var(--step--1); color:var(--muted); letter-spacing:.08em; text-transform:uppercase; font-weight:500}
+
+/* tables */
+.tbl{width:100%; overflow-x:auto; margin-top:1.25rem}
+table{border-collapse:collapse; width:100%; min-width:34rem; font-family:"JetBrains Mono",monospace; font-size:var(--step--1)}
+th,td{text-align:left; padding:.6rem .8rem; border-bottom:1px solid var(--line); font-variant-numeric:tabular-nums}
+th{font-family:Archivo,sans-serif; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); font-size:calc(var(--step--1)*.92)}
+td.up{color:var(--accept)} td.dn{color:var(--reject)}
+
+/* two-col */
+.cols{display:grid; grid-template-columns:repeat(auto-fit,minmax(19rem,1fr)); gap:clamp(1.2rem,3vw,2.6rem); margin-top:1.5rem}
+.card{background:var(--surface); border:1px solid var(--line); padding:1.3rem 1.4rem; border-radius:2px}
+.card h3{color:var(--ink)}
+.card p{font-size:var(--step--1); margin-bottom:0; color:var(--muted)}
+.rule{height:2px; width:2.2rem; background:var(--accent); margin-bottom:.9rem}
+
+/* steps */
+ol.steps{list-style:none; counter-reset:s; padding:0; margin:1.5rem 0 0; display:grid; gap:.1rem}
+ol.steps li{counter-increment:s; display:grid; grid-template-columns:3.2rem 1fr; gap:1rem; padding:1rem 0; border-top:1px solid var(--line); align-items:baseline}
+ol.steps li::before{content:counter(s,decimal-leading-zero); font-family:"JetBrains Mono",monospace; font-weight:700; color:var(--accent); font-size:var(--step--1)}
+ol.steps b{font-family:Archivo,sans-serif; font-weight:700; display:block; margin-bottom:.2rem; font-size:var(--step-0)}
+ol.steps span{color:var(--muted); font-size:var(--step--1)}
+.date{color:var(--accent); font-family:"JetBrains Mono",monospace; font-size:var(--step--1)}
+
+footer{padding:3rem clamp(1.25rem,6vw,7rem) 4rem; color:var(--muted); font-size:var(--step--1)}
+footer a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .r,.fill{transition:none} .hero-lines b{animation:none; transform:none} .hero-sub{animation:none; opacity:1}
+}
+@media (max-width:640px){ .grid2{grid-template-columns:1fr} .axis{display:none} }
+</style>
+
+<div class="deck">
+
+<section id="s1">
+  <div class="wrap">
+    <p class="eyebrow">Physics-verified counterfactual traversal · Unitree G1 · frozen SONIC</p>
+    <h1 class="hero-lines">
+      <span><b>Same journey.</b></span>
+      <span><b>Two rooms.</b></span>
+      <span><b>Physics <em class="accent">decides</em>.</b></span>
+    </h1>
+    <div class="hero-sub">
+      <p class="lead">A dataset that teaches a robot <strong>why</strong> a motion had to change —
+      not just that rooms look different.</p>
+      <p>Every episode is a matched pair: one journey, one obstacle, two motions. The simulator
+      says which one survives. Nobody labels it.</p>
+    </div>
+  </div>
+</section>
+
+<section id="s2">
+  <div class="wrap">
+    <p class="eyebrow r">The gap we are closing</p>
+    <h2 class="r">Scene variation is not scene-conditioned behaviour.</h2>
+    <p class="lead r">Generate a thousand rooms and a policy learns that rooms vary. It does not
+    learn <strong>which part of its body the room binds, or what to do about it.</strong></p>
+    <div class="cols">
+      <div class="card r">
+        <div class="rule"></div>
+        <h3>What everyone has</h3>
+        <p>Scene diversity. A corpus of traversals through different geometry, each one labelled
+        with whether it succeeded. The supervision says <em>succeeded here</em>, never
+        <em>succeeded because it ducked</em>.</p>
+      </div>
+      <div class="card r">
+        <div class="rule"></div>
+        <h3>What is missing</h3>
+        <p>The contrast. A second episode, identical in every respect except the one edit the
+        geometry forced — so the difference in outcome has exactly one cause, and a learner can
+        attribute it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s3">
+  <div class="wrap">
+    <p class="eyebrow r">The mechanism</p>
+    <h2 class="r">One journey, four rollouts, one cause.</h2>
+    <p class="r">The same walk, run twice in an easy room and twice in a hard one — once as
+    generated, once with a single local edit. Three survive. <strong>One does not.</strong></p>
+    <div class="axis r"><span>Easy room</span><span>Hard room</span></div>
+    <div class="grid2 r">
+      <div class="cell acc"><video src="@@nominal_easy@@" muted loop playsinline preload="metadata"></video>
+        <div class="cap"><span class="label">As generated</span><span class="verdict">ACCEPTED</span></div></div>
+      <div class="cell rej"><video src="@@nominal_hard@@" muted loop playsinline preload="metadata"></video>
+        <div class="cap"><span class="label">As generated</span><span class="verdict">REJECTED</span></div></div>
+      <div class="cell acc"><video src="@@adapted_easy@@" muted loop playsinline preload="metadata"></video>
+        <div class="cap"><span class="label">One local edit</span><span class="verdict">ACCEPTED</span></div></div>
+      <div class="cell acc"><video src="@@adapted_hard@@" muted loop playsinline preload="metadata"></video>
+        <div class="cap"><span class="label">One local edit</span><span class="verdict">ACCEPTED</span></div></div>
+    </div>
+    <p class="r" style="margin-top:1.1rem; font-size:var(--step--1); color:var(--muted)">
+      Fixed camera in the room, so gait is legible. Red is the cell the physics refused.
+      Family <span class="mono">duck_003</span>, from the released corpus.</p>
+  </div>
+</section>
+
+<section id="s4">
+  <div class="wrap">
+    <p class="eyebrow r">Why it is a label you can trust</p>
+    <h2 class="r">The verdict is a contact force, not an opinion.</h2>
+    <p class="r">In one of our banded families the unedited walk drives its torso into the ceiling.
+    The edited one clears the same ceiling. Nobody adjudicated that — <strong>the simulator
+    reported it in newtons.</strong></p>
+    <div class="bars r">
+      <div class="bar-row"><span class="label">As generated</span>
+        <div class="track"><div class="fill r-" style="--w:100%"></div><span class="bar-val">1543.6 N</span></div></div>
+      <div class="bar-row"><span class="label">One local edit</span>
+        <div class="track"><div class="fill a-" style="--w:3.2%"></div><span class="bar-val">49 N</span></div></div>
+    </div>
+    <p class="r" style="margin-top:1.4rem">Peak overhead contact on <span class="mono">torso_link</span>,
+    same route, same controller, same four seconds. The only difference is the edit.</p>
+  </div>
+</section>
+
+<section id="s5">
+  <div class="wrap">
+    <p class="eyebrow r">A result we did not go looking for</p>
+    <h2 class="r">Arms are free. Legs are charged.</h2>
+    <p class="lead r">Running the corpus through the frozen controller measured something about
+    <strong>the controller itself</strong>, useful whether or not you believe our dataset thesis.</p>
+    <div class="tbl r">
+      <table>
+        <thead><tr><th>What the edit moves</th><th>Survives execution</th><th>Costs forward progress</th><th>Headroom</th></tr></thead>
+        <tbody>
+          <tr><td>Arms (tuck)</td><td class="up">88–105%</td><td class="up">falls as edit grows</td><td class="up">none used to 0.87 rad</td></tr>
+          <tr><td>Legs (crouch)</td><td class="dn">46–67%</td><td class="dn">rises with depth</td><td class="dn">gate binds near 5 cm</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="r">Ask the robot to pull its arms in and the controller delivers nearly all of it, and
+    walks <em>better</em> while doing so — endpoint error falls from 0.257 m to 0.084 m as the tuck
+    grows. Ask it to crouch and it delivers about half, and pays for every centimetre.</p>
+  </div>
+</section>
+
+<section id="s6">
+  <div class="wrap">
+    <p class="eyebrow r">The measurement that changed our pipeline</p>
+    <h2 class="r">Commanded is not delivered.</h2>
+    <p class="r">We asked for the smallest edit that clears each obstacle. Then we measured what
+    actually arrived at the surface the obstacle binds against — and it was
+    <strong>a third to two thirds of it.</strong></p>
+    <div class="tbl r">
+      <table>
+        <thead><tr><th>Obstacle</th><th>Binds on</th><th>Asked for</th><th>Arrived</th><th>Ratio</th></tr></thead>
+        <tbody>
+          <tr><td>Ceiling</td><td>torso</td><td>90.2 mm</td><td>39.0 mm</td><td class="dn">43%</td></tr>
+          <tr><td>Wall, chest</td><td>upper arm</td><td>23.8 mm</td><td>16.7 mm</td><td>70%</td></tr>
+          <tr><td>Wall, waist</td><td>wrist</td><td>51.4 mm</td><td>15.5 mm</td><td class="dn">30%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="r">A minimum computed against an optimistic model is optimistic by the same factor,
+    so the rule reliably asked for an edit too small to work. Dividing by the measured ratio is
+    what it always meant. On the same nominal the usable window goes from
+    <span class="mono">23.8 → 75.2 mm</span> at chest and <span class="mono">51.4 → 103.3 mm</span>
+    at waist.</p>
+  </div>
+</section>
+
+<section id="s7">
+  <div class="wrap">
+    <p class="eyebrow r">What it cost, and what it bought</p>
+    <h2 class="r">Every wasted rollout was predictable on a laptop.</h2>
+    <p class="r">Our last scale-up spent 21 GPU rollouts and produced zero usable families. We
+    stopped it, diagnosed four separate defects — and then checked whether any of them needed a GPU
+    to find. <strong>None did.</strong></p>
+    <div class="stats r">
+      <div><span class="stat" style="color:var(--reject)">56/56</span><small>cells the new preflight refuses</small></div>
+      <div><span class="stat">0</span><small>GPU seconds to decide that</small></div>
+      <div><span class="stat">4</span><small>defects, each with a named cause</small></div>
+      <div><span class="stat" style="color:var(--accept)">2</span><small>fixed by one line each</small></div>
+    </div>
+    <p class="r" style="margin-top:1.6rem">A batch now launches only from a signed manifest. Routes
+    that leave their room, edits that exceed what the controller will spend, windows that vanish
+    after delivery — all rejected before anything is scheduled.</p>
+  </div>
+</section>
+
+<section id="s8">
+  <div class="wrap">
+    <p class="eyebrow r">Where this goes</p>
+    <h2 class="r">The experiment runs on August 24.</h2>
+    <p class="lead r">Not when the corpus is big enough. <strong>The question needs contrast, not
+    scale</strong> — so the date is fixed and pre-registered, and whatever is verified by then is
+    what it runs on.</p>
+    <ol class="steps">
+      <li class="r"><span class="date">Aug 19–23</span><div><b>Corrected batch, nights</b>
+        <span>Room fix and delivery correction landed with tests. Batches launch behind a passing preflight.</span></div></li>
+      <li class="r"><span class="date">Aug 24–27</span><div><b>The A/B/C experiment</b>
+        <span>Four input tiers — privileged, depth, RGB, blind — ten seeds, exact binomial intervals, closed-loop scoring.</span></div></li>
+      <li class="r"><span class="date">Aug 28</span><div><b>Branch decision</b>
+        <span>Written to the board. If intervals are wide at this corpus size, we report the width and proceed.</span></div></li>
+      <li class="r"><span class="date">Sep 15</span><div><b>ICRA 2027</b>
+        <span>One pre-declared expanded re-analysis if six more families verify by Sep 3. Both reported.</span></div></li>
+    </ol>
+    <p class="r" style="margin-top:2rem">The one thing no engineering substitutes for: a
+    hundred-episode human review, two raters, running this week. <strong>That row is
+    submission-blocking.</strong></p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>SweepCF · frozen released SONIC checkpoint, never fine-tuned · Isaac Lab 2.3.2 · Unitree G1 29-DoF.
+  Every figure on this page is generated from the release index and the prediction register, not typed by hand.</p>
+</footer>
+
+<script>
+const io = new IntersectionObserver((es) => {
+  es.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, {threshold: 0.18});
+document.querySelectorAll('section').forEach(s => io.observe(s));
+
+/* Play the 2x2 only while it is on screen, and keep the four clips in step so the comparison is
+   honest -- a viewer must be able to trust that all four are at the same instant of the journey. */
+const cells = [...document.querySelectorAll('.grid2 video')];
+const sync = () => { const t = cells[0].currentTime; cells.forEach(v => {
+  if (Math.abs(v.currentTime - t) > 0.12) v.currentTime = t; }); };
+const vio = new IntersectionObserver((es) => es.forEach(e => {
+  if (e.isIntersecting) { cells.forEach(v => v.play().catch(() => {})); }
+  else { cells.forEach(v => v.pause()); }
+}), {threshold: 0.3});
+if (cells.length) { vio.observe(document.querySelector('.grid2')); cells[0].addEventListener('timeupdate', sync); }
+</script>
