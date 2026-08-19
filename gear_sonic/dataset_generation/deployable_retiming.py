@@ -182,7 +182,7 @@ def retime_ratio(
     return float(min(ratio, 1.0)), False
 
 
-def _slerp(q0: np.ndarray, q1: np.ndarray, t: np.ndarray) -> np.ndarray:
+def slerp(q0: np.ndarray, q1: np.ndarray, t: np.ndarray) -> np.ndarray:
     """Shortest-arc interpolation between unit quaternions, in MuJoCo's (w, x, y, z) order.
 
     Componentwise interpolation of a quaternion is wrong twice over: it leaves the unit sphere, and
@@ -231,7 +231,7 @@ def resample_clip(qpos: np.ndarray, source_index: np.ndarray) -> np.ndarray:
     out[:, linear] = (1.0 - frac)[:, None] * clip[low][:, linear] + frac[:, None] * clip[high][
         :, linear
     ]
-    out[:, 3:7] = _slerp(clip[low][:, 3:7], clip[high][:, 3:7], frac)
+    out[:, 3:7] = slerp(clip[low][:, 3:7], clip[high][:, 3:7], frac)
     return out
 
 
@@ -288,12 +288,13 @@ def deployable_clip(
     nominal = np.asarray(nominal_qpos, dtype=np.float64)
     adapted = np.asarray(adapted_qpos, dtype=np.float64)
     alpha = departure_profile(nominal, adapted)
-    window_m = weighted_route_length(nominal[:, :2], alpha)
+    # The adapted clip's own route, not the nominal's. For a matched pair they are the same line
+    # to within the precision the clips were written at, and taking it from the clip being retimed
+    # keeps the correction independent of which copy of the nominal a caller happened to load.
+    window_m = weighted_route_length(adapted[:, :2], alpha)
 
     if ratio is None:
-        chosen, floored = retime_ratio(
-            float(excess_lag_m), window_m, safety=safety, floor=floor
-        )
+        chosen, floored = retime_ratio(float(excess_lag_m), window_m, safety=safety, floor=floor)
         lag = float(excess_lag_m)
     else:
         if not 0.0 < float(ratio) <= 1.0:

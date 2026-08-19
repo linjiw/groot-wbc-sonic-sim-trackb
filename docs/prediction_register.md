@@ -6,7 +6,118 @@ quietly becomes a "finding we always suspected".
 
 ## Open
 
-*(none)*
+### P9: retiming the adapted clip pays back the transport cost, and pays back the right amount
+
+**Registered 2026-08-19, before the retimed clip has been rolled out.**
+
+[The crouch cannot pay its own transport cost](#the-crouch-cannot-pay-its-own-transport-cost) left
+two responses open and took neither mid-batch: retime the adapted reference so a crouched robot is
+asked for a crouched pace, or judge adapted clips on progress ratio rather than endpoint error. The
+first is now taken, and taken in a way that does not touch the thing the gate is measured on: the
+causal reference is unchanged and remains what the 2x2 is reported from, and a *second* artifact --
+the deployable skill -- is written beside it by `gear_sonic/dataset_generation/deployable_retiming.py`.
+The gate is not moved. The pre-registration is not amended, because the matched pair it describes is
+not the clip being changed.
+
+The correction is arithmetic on a measurement, not a model. `n_013_ceiling_overhead_left`'s adapted
+cell missed its endpoint by 0.524 m where its own nominal missed by 0.217 m; the adaptation was
+active over 1.478 m of alpha-weighted arclength; so the window is commanded at
+`1 - 1.2 * 0.307 / 1.478 = 0.751` of nominal pace and the clip runs 120 -> 131 frames. Route, start,
+goal, joint angles at each route position and the shelf's station in route progress are all held.
+
+1. **The adapted cells pass the tracking gate.** `adapted_easy` and `adapted_hard` both record
+   endpoint error below 0.35 m. Falsified by either staying above it.
+2. **The correction lands where its arithmetic says, not merely on the right side of the gate.**
+   `adapted_easy`'s endpoint error falls to within 0.06 m of the nominal's 0.217 m. Falsified by an
+   error that clears 0.35 m but sits above 0.28 m -- outcome right, mechanism wrong.
+3. **The 2x2 survives the retiming.** `nominal_hard` still strikes the ceiling and `adapted_hard`
+   still clears it, so the family verifies as a minimum-edit reversal.
+
+Prediction 2 is the sharp one, and it is the one I expect to be least safe. Predictions 1 and 3
+could both come out right while the linear reading of the shortfall -- that it accrues in proportion
+to how active the adaptation is, and that commanding that stretch slower returns it one for one --
+is wrong; a slowdown that overshoots would satisfy both and teach nothing.
+
+**The named risk, registered rather than discovered later.** A slower crouch spends *more* frames
+under the shelf than the causal reference did, so the obstacle sees a longer exposure. If
+`adapted_hard` now fails on contact where it previously cleared at 49 N, the retiming has bought
+tracking at the price of clearance, and the honest reading is that the deployable clip needs a
+deeper crouch as well as a slower one -- not that retiming failed. `delivered_window_m` is expected
+to change for the same reason and is not evidence either way.
+
+**What refutation would mean.** If 1 fails, transport is not what rejected the clip and the
+diagnosis below is wrong. If 1 holds and 2 fails, retiming is a usable engineering fix whose
+magnitude cannot be predicted, which puts every future deployable clip on a sweep rather than a
+single measured correction.
+
+**Amendment, 2026-08-19, same day, before any rollout: the geometric half of the risk is closed and
+the prediction is not amended.** The risk above has two halves — that the retimed clip presents a
+different silhouette to the shelf, and that a longer exposure lets the controller drift out from
+under it. The first is now measured on CPU and does not occur. Within the shelf's actual footprint
+(0.5 m of a 5.296 m route, so 0.094 of route progress centred at 0.553) the peak silhouette is
+1.2995 m nominal, 1.2093 m causal adapted, 1.2091 m deployable — the first two reproducing the
+family plan's own `nominal_reach_m` and `adapted_reach_m` to four decimals, and the retiming moving
+the peak by **0.18 mm**, 1.65 mm pointwise. `screen_reference` returns no notes on the retimed clip.
+
+What remains of the risk is therefore only the second half: the deployable clip spends 69 frames
+below the hard face against the causal clip's 58 (2.30 s against 1.93 s), at the same clearance. If
+`adapted_hard` now fails on contact, it is drift over a longer crouch, not a shallower one, and that
+distinction is worth more than the verdict.
+
+### P10 — BONES-SEED is much cleaner than the AMASS bank, and the screen will mostly find nothing
+
+**Registered 2026-08-19, before the dynamic-feasibility screen has been run over BONES-SEED and
+before any arm of `plan_feasibility_hygiene_v1.md` has been trained.**
+
+The sibling project measured 22.8% of a 10,705-clip AMASS-derived bank as dynamically infeasible
+for more than 10% of frames. BONES-SEED reaches SONIC through a different retargeter and through a
+filtering step that is named in the directory itself (`robot_filtered`, from
+`filter_and_copy_bones_data.py`).
+
+Prediction: **under 10% of `bones_seed_official_headline_scale4950` will exceed
+`infeasible_frac > 0.10`**, and the flagged clips will concentrate in a few source subsets rather
+than spreading evenly — the sibling measurement ranged 0.1% to 100% per source.
+
+If the rate comes in at or above 10%, the "already filtered" premise is wrong and the release
+filter is passing references that no controller can track. That is the more interesting outcome and
+the one that justifies the rest of the pipeline. A low rate means arms B and C are near-identical
+to A, and the ablation should be descoped rather than run at full cost.
+
+### P11 — the per-motion cap is a cheap substitute for data hygiene, and mostly wins
+
+**Registered 2026-08-19, before any arm has run. This predicts against work I have already built,
+which is the reason to write it down now.**
+
+`max_prob_per_motion` already exists (`motion_lib_base.py:2461-2462`) and is `None` in every shipped
+yaml, so the constraint block early-returns. Setting it to 5x fair share brings a maximally-failing
+clip from 43x its fair share down to 5.2x, measured by driving the real code path over the real
+BONES-SEED length inventory (1,006 motions, 7,863 bins). That costs
+nothing: no screen, no repair, no bank rebuild.
+
+Prediction: **arm E (raw bank + per-motion cap) recovers at least half of arm C's worst-decile
+survival gain over arm A**, at zero data-pipeline cost.
+
+If it does, the honest recommendation to this codebase is a one-line config change, and the screen
+and the repair operator are worth keeping only for what a cap cannot do. The falsifier that would
+save the data pipeline is specific: **C well above E on the ground-contact/kneel/crawl stratum**,
+because capping exposure to a bad clip limits waste but does not recover a pose the bank never
+contained in trackable form. If C and E are equal there too, the data-side work has not earned its
+cost and I should say so in those words.
+
+### P12 — repair beats pruning exactly where the discarded clips were rare
+
+**Registered 2026-08-19, before any arm has run.**
+
+Pruning removes flagged clips; repair replaces them, keeping N, the clip names, the durations and
+the fps identical.
+
+Prediction: **C exceeds B on the ground-contact/kneel/crawl stratum by more than C and B differ on
+the easy stratum**, and the easy-stratum difference stays within +/-0.02.
+
+If C is indistinguishable from B everywhere, repair does nothing that deletion does not, and the
+operator is unjustified complexity — the 65.8% recovery rate the sibling project measured would
+then be a statement about file counts rather than about anything the policy learns.
+
 
 ## P6, refuted — and it exposed a worse error
 

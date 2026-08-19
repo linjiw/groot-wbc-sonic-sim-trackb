@@ -29,6 +29,30 @@ class RecordersCfg(recorder_manager.RecorderManagerBaseCfg):
     trajectory = None
 
 
+def _as_viewable(buffer):
+    """Turn a camera annotator buffer into frames a video encoder accepts.
+
+    Depth arrives as float metres with an infinite sky and segmentation as integer ids. Both are
+    written as 8-bit images so a reviewer can watch them; the authoritative values stay in the
+    trajectory capture, because a video is lossy and a training signal must not be read off one.
+    """
+    array = buffer.detach().cpu().numpy() if hasattr(buffer, "detach") else np.asarray(buffer)
+    if array.ndim == 4 and array.shape[-1] == 1:
+        array = array[..., 0]
+    if array.dtype.kind == "f":
+        finite = np.isfinite(array)
+        array = np.where(finite, array, 0.0)
+        top = float(array[finite].max()) if finite.any() else 1.0
+        return (np.clip(array / top if top > 0 else array, 0.0, 1.0) * 255).astype(np.uint8)
+    if array.dtype.kind in "iu":
+        # Stable pseudo-colour: an id keeps its colour across frames and across episodes.
+        ids = array.astype(np.int64)
+        return np.stack(
+            [((ids * 67) % 255), ((ids * 149) % 255), ((ids * 223) % 255)], axis=-1
+        ).astype(np.uint8)
+    return array.astype(np.uint8)
+
+
 class RenderEnvsRecorderTerm(recorder_manager.RecorderTerm):
     """Recorder term for rendering environments with advanced features like text overlay and frame skipping."""
 
@@ -46,6 +70,11 @@ class RenderEnvsRecorderTerm(recorder_manager.RecorderTerm):
         # Create directory if it doesn't exist
         os.makedirs(self.save_dir, exist_ok=True)
         self.video_writers = []
+        # One writer per extra modality the camera was asked for. A navigation corpus needs depth
+        # and segmentation as much as colour, and the camera already accepts them through
+        # cameras.camera_data_types -- they were captured and dropped, because this recorder only
+        # ever read output["rgb"].
+        self.modality_writers: dict[str, list] = {}
         self._writers_closed = False
         self.frame_id = 0
         self.first_render = True
@@ -76,6 +105,20 @@ class RenderEnvsRecorderTerm(recorder_manager.RecorderTerm):
                 pixelformat="yuv420p",
             )
             self.video_writers.append(writer)
+            for modality in self._extra_modalities():
+                self.modality_writers.setdefault(modality, []).append(
+                    imageio.get_writer(
+                        f"{self.save_dir}/{self.start_idx+i:06d}__{modality}.mp4",
+                        fps=self.fps,
+                        macro_block_size=1,
+                    )
+                )
+
+    def _extra_modalities(self) -> tuple[str, ...]:
+        """Camera outputs to encode beside colour, as the camera was configured."""
+        config = getattr(getattr(self.env, "wrapper", None), "config", {}) or {}
+        cameras = config.get("cameras", {}) or {}
+        return tuple(n for n in tuple(cameras.get("camera_data_types", ("rgb",))) if n != "rgb")
 
     def record_post_step(self) -> tuple[str | None, torch.Tensor | dict | None]:
         """Record video frames after each step with frame skipping and text overlay support."""
@@ -131,6 +174,11 @@ class RenderEnvsRecorderTerm(recorder_manager.RecorderTerm):
 
         # Get RGB data
         rgb_viewer = cam.data.output["rgb"].clone()
+        extra_frames = {
+            modality: _as_viewable(cam.data.output[modality])
+            for modality in self._extra_modalities()
+            if modality in cam.data.output
+        }
 
         # Get render info if available
         cur_render_info = None
@@ -160,6 +208,9 @@ class RenderEnvsRecorderTerm(recorder_manager.RecorderTerm):
                     )
 
             self.video_writers[i].append_data(frame)
+            for modality, writers in self.modality_writers.items():
+                if i < len(writers) and modality in extra_frames:
+                    writers[i].append_data(extra_frames[modality][i])
         self.first_render = False
 
         self.frame_id += 1
@@ -174,6 +225,13 @@ class RenderEnvsRecorderTerm(recorder_manager.RecorderTerm):
                     logger.info(f"Closed video writer {i}")
                 except Exception as e:  # noqa: BLE001
                     logger.info(f"Error closing video writer {i}: {e}")
+            for writers in self.modality_writers.values():
+                for writer in writers:
+                    try:
+                        writer.close()
+                    except Exception as error:  # noqa: BLE001
+                        logger.info(f"Error closing modality writer: {error}")
+            self.modality_writers.clear()
             self.video_writers.clear()
             self._writers_closed = True
             self.frame_id = 0

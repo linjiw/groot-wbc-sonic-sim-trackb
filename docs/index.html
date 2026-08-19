@@ -177,16 +177,48 @@ footer p{max-width:none}
   The rejected cell drives its torso into the shelf; the physics reports the strike in newtons and
   the label follows from it.</p>
 
-  <h3 style="margin-top:2.6rem">Every episode is recorded from five viewpoints</h3>
-  <p>Because a dataset that can only be inspected one way can only be trusted one way. Ego for
-  perception, room and third-person for behaviour, overhead for route, side for clearance.</p>
+  <h3 style="margin-top:2.8rem">The same second, from every camera we record</h3>
+  <p>One episode, four synchronised viewpoints. Ego is what a policy would see; chase and overhead
+  are what a reviewer needs; wrist is there for the manipulation phase that follows this one.</p>
+  <div class="grid2">
+    <div class="cell"><video src="media/cam_ego.mp4" muted loop playsinline preload="metadata"></video>
+      <div class="cap"><span class="label">Ego · head camera</span><span class="verdict mono">policy input</span></div></div>
+    <div class="cell"><video src="media/cam_chase.mp4" muted loop playsinline preload="metadata"></video>
+      <div class="cap"><span class="label">Chase</span><span class="verdict mono">review</span></div></div>
+    <div class="cell"><video src="media/cam_overhead.mp4" muted loop playsinline preload="metadata"></video>
+      <div class="cap"><span class="label">Overhead</span><span class="verdict mono">route</span></div></div>
+    <div class="cell"><video src="media/cam_wrist.mp4" muted loop playsinline preload="metadata"></video>
+      <div class="cap"><span class="label">Wrist</span><span class="verdict mono">manipulation</span></div></div>
+  </div>
+
+  <h3 style="margin-top:2.8rem">Rooms the corpus actually contains</h3>
+  <p>117 scenes across 11 packages — hand-authored rooms, procedurally cluttered ones, a density
+  ladder from sparse to tight, and the counterfactual pairs. Every one is a USD file shipped beside
+  the episode, so the geometry a claim rests on is the geometry you can load.</p>
   <div class="grid3">
-    <div class="cell"><video src="media/view_ego.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">Ego · head camera</span><span class="verdict mono">640×480</span></div></div>
-    <div class="cell"><video src="media/view_thirdperson.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">Third person</span><span class="verdict mono">RGB</span></div></div>
-    <div class="cell"><video src="media/view_overhead.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">Overhead · route</span><span class="verdict mono">RGB</span></div></div>
+    <div class="cell"><video src="media/scene_factory.mp4" muted loop playsinline preload="metadata"></video>
+      <div class="cap"><span class="label">Factory aisle</span><span class="verdict mono">authored</span></div></div>
+    <div class="cell"><video src="media/scene_curved.mp4" muted loop playsinline preload="metadata"></video>
+      <div class="cap"><span class="label">Curved route</span><span class="verdict mono">clutter</span></div></div>
+    <div class="cell"><video src="media/scene_waypoints.mp4" muted loop playsinline preload="metadata"></video>
+      <div class="cap"><span class="label">Waypoint route</span><span class="verdict mono">clutter</span></div></div>
+    <div class="cell"><video src="media/scene_household.mp4" muted loop playsinline preload="metadata"></video>
+      <div class="cap"><span class="label">Household room</span><span class="verdict mono">authored</span></div></div>
+    <div class="cell"><video src="media/density_sparse.mp4" muted loop playsinline preload="metadata"></video>
+      <div class="cap"><span class="label">Density · sparse</span><span class="verdict mono">ladder</span></div></div>
+    <div class="cell"><video src="media/density_tight.mp4" muted loop playsinline preload="metadata"></video>
+      <div class="cap"><span class="label">Density · tight</span><span class="verdict mono">ladder</span></div></div>
+  </div>
+
+  <h3 style="margin-top:2.8rem">And the route itself, drawn</h3>
+  <p>A camera shows what a traversal looked like; the route view shows what it <em>was</em> —
+  executed against commanded, with the frame of closest approach marked. The left pair is the cell
+  that struck the shelf, the right pair the one that cleared it.</p>
+  <div class="grid2">
+    <div class="cell rej"><img src="media/route_nominal_hard.png" alt="Route of the rejected cell: executed path stops short, contact marked at frame 155" style="width:100%;display:block;background:#fff">
+      <div class="cap"><span class="label">As generated · hard room</span><span class="verdict">STRUCK</span></div></div>
+    <div class="cell acc"><img src="media/route_adapted_hard.png" alt="Route of the accepted cell: executed path completes with no contact" style="width:100%;display:block;background:#fff">
+      <div class="cap"><span class="label">One local edit · hard room</span><span class="verdict">CLEARED</span></div></div>
   </div>
 </div></section>
 

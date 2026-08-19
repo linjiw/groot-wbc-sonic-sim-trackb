@@ -1,0 +1,98 @@
+# @package _global_
+# HYGIENE MATRIX — arm A (control): raw bank, release sampler.
+#
+# FACTOR THAT DIFFERS FROM hygiene_a_raw: none. This IS hygiene_a_raw, the
+# reference arm the other four are read against.
+#
+# The matrix asks one question: when a motion bank contains references no
+# controller could execute, is it cheaper to delete them, to fix them, or to
+# stop the sampler from chasing them? Arms B and C treat the bank; arms D and E
+# treat the sampler; arm A leaves both alone.
+#
+# STRUCTURE. This file is sonic_release plus the four knobs the matrix needs to
+# see, pinned at their release values. Arms B-E inherit THIS file and override
+# exactly one of them. "Everything else identical" is therefore enforced by
+# construction — there is no second copy of the recipe to drift.
+#
+# COMPUTE MATCH — identical in all five arms; never override per arm:
+#   num_envs                             4096
+#   algo.config.num_learning_iterations  100000
+#   algo.config.num_steps_per_env        24        -> 9.8e9 env steps per arm
+#   seed                                 base.yaml `seed: 0`; pass `seed=<s>`
+#                                        identically to every arm of a replicate
+#   callbacks                            read_eval + im_resample
+#                                        (motion_resample_frequency: 250)
+#   override_num_motions_to_load         1024      (see the comment on the key)
+# Every arm therefore spends the same rollout budget and takes the same number
+# of gradient steps. What differs is which frames those samples land on.
+
+defaults:
+  - /exp/manager/universal_token/all_modes/sonic_release
+  - _self_
+
+project_name: HYGIENE_G1_Track
+exp_var: a_raw
+
+# Pinned here rather than inherited from /algo: ppo_im_phc so that the
+# compute-match claim is auditable in one file instead of two.
+algo:
+  config:
+    num_learning_iterations: 100000
+    num_steps_per_env: 24
+
+manager_env:
+  commands:
+    motion:
+      motion_lib_cfg:
+        # --- KNOB 1: the bank (arm B and arm C move this) --------------------
+        # Arm A value: the untouched 4950-clip release bank. Real path, exists.
+        motion_file: data/motion_lib_bones_seed/robot_filtered
+        # The SMPL bank is looked up per robot motion key
+        # (motion_lib_base.py:283-291); keys absent from it resolve to None. So
+        # pruning the robot bank prunes SMPL exposure for free and arm B does
+        # not touch this key. Arm C does, because repair moves the root.
+        smpl_motion_file: data/bones_seed_smpl
+
+        # --- KNOB 2: resident-set size (no arm moves it; all five share it) ---
+        # Only `override_num_motions_to_load` clips are resident at a time;
+        # im_resample redraws the resident set every 250 steps. Left unset, the
+        # size comes from `min(num_envs, 1024)` in the command
+        # (commands.py:242), so 1024 here is byte-identical to release for a
+        # 4950-clip bank.
+        #
+        # LOUD WARNING FOR ARM B. If a bank has FEWER clips than this number,
+        # load_motions_for_training takes the `max_num_seqs >= num_unique`
+        # branch (motion_lib_base.py:1000-1002), sets all_motions_loaded=True,
+        # and every later resample returns immediately
+        # (motion_lib_base.py:983-985) — the resident set stops rotating for the
+        # rest of the run and the initial load switches from a multinomial draw
+        # to a deterministic arange. That is a mechanism change stacked on top
+        # of the bank change, and it would be invisible in the logs.
+        # BEFORE LAUNCHING: set this key, in ALL FIVE FILES, to a value strictly
+        # less than the clip count of the SMALLEST bank in the matrix.
+        override_num_motions_to_load: 1024
+
+        adaptive_sampling:
+          # --- KNOB 3: sampler weighting (arm D moves this) -----------------
+          # Release default from manager_env/commands/terms/motion.yaml. 10% of
+          # the per-bin mass is uniform, 90% follows the clipped failure rate.
+          uniform_sampling_rate: 0.1
+
+          # --- KNOB 4: per-clip exposure cap (arm E moves this) -------------
+          # null is exactly equivalent to omitting the key: both reach
+          # motion_lib_base.py:2462 as None, which selects the legacy skip path
+          # at :3285 (frame selection) and :3411 (residency selection) and
+          # applies no cap at all. Release ships it unset; it is written out
+          # here so arm E is a one-line diff.
+          max_prob_per_motion: null
+
+# Research-only metadata. Training code ignores this block; it is written into
+# the run's .hydra/config.yaml so scripts/research/analyze_hygiene_matrix.py can
+# identify the arm without parsing paths.
+hygiene_matrix:
+  matrix_id: hygiene_v1
+  arm: a_raw
+  factor: none_control
+  bank: raw
+  bank_is_placeholder: false
+  sampler: release_default

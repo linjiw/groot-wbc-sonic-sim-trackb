@@ -1,0 +1,47 @@
+# @package _global_
+# HYGIENE MATRIX — arm B: pruned bank, release sampler.
+#
+# FACTOR THAT DIFFERS FROM hygiene_a_raw: the bank. One key,
+# motion_lib_cfg.motion_file, points at the screened bank instead of the raw
+# one. Sampler, num_envs, iterations, seed handling, callbacks and every other
+# value are inherited unchanged from arm A.
+#
+# CONTRAST IDENTIFIED: A vs B = does deleting the references the dynamic screen
+# marks unsupportable buy anything, given the same rollout budget? B trains on
+# fewer clips for the same number of env steps, so per-clip exposure rises. That
+# is the treatment, not a confound — but it does mean B cannot separate "removed
+# bad clips" from "saw the surviving clips more often". Arm C (repair, same clip
+# count as A) is the arm that breaks that tie.
+
+defaults:
+  - /exp/manager/universal_token/all_modes/hygiene_a_raw
+  - _self_
+
+exp_var: b_pruned
+
+manager_env:
+  commands:
+    motion:
+      motion_lib_cfg:
+        # PLACEHOLDER PATH — this bank does not exist yet.
+        # Produced by scripts/research/hygiene_screen_bank.py: it screens the
+        # raw bank with gear_sonic/research/hygiene/screen.py and writes the
+        # surviving clips (or symlinks to them) into this directory. Until that
+        # script has run, this arm will fail at motion-library load.
+        motion_file: data/motion_lib_hygiene/pruned/robot_filtered
+        # smpl_motion_file is deliberately NOT overridden: the SMPL bank is
+        # keyed by robot motion key, so dropping a clip from the robot bank
+        # drops its SMPL conditioning with it (motion_lib_base.py:283-291).
+        #
+        # BEFORE LAUNCH, check the pruned clip count against
+        # override_num_motions_to_load (inherited: 1024). If the pruned bank is
+        # smaller than that number, the resident set stops rotating for this arm
+        # only — see the long warning on that key in hygiene_a_raw.yaml. The fix
+        # is to lower the key in ALL FIVE files, not just this one.
+
+hygiene_matrix:
+  arm: b_pruned
+  factor: bank_pruned
+  bank: pruned
+  bank_is_placeholder: true
+  sampler: release_default

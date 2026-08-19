@@ -1,0 +1,60 @@
+# @package _global_
+# HYGIENE MATRIX — arm D: raw bank, uniform sampler.
+#
+# FACTOR THAT DIFFERS FROM hygiene_a_raw: one number,
+# adaptive_sampling.uniform_sampling_rate, 0.1 -> 1.0. The bank is the same raw
+# bank as arm A, byte for byte. num_envs, iterations, seed handling, callbacks
+# and the resident-set size are inherited from arm A.
+#
+# CONTRAST IDENTIFIED: A vs D = how much of the raw bank's cost is the sampler
+# chasing unsupportable clips? If a hygiene problem is really a sampler problem,
+# D recovers most of what B and C recover, without touching the data.
+
+defaults:
+  - /exp/manager/universal_token/all_modes/hygiene_a_raw
+  - _self_
+
+exp_var: d_uniform
+
+manager_env:
+  commands:
+    motion:
+      motion_lib_cfg:
+        adaptive_sampling:
+          # 1.0 sends ALL of the per-bin mass through the uniform term and none
+          # through the clipped failure rate (motion_lib_base.py:3235-3241 for
+          # frame selection, :3399-3404 for residency selection). The
+          # length-agnostic bin weights still apply afterwards, and those are
+          # built so that every CLIP carries equal total mass regardless of its
+          # length (:2446-2451). So arm D is "every clip gets an equal share of
+          # exposure", which is the honest counterpart to arm A's "clips that
+          # fail get more".
+          #
+          # WHY NOT adaptive_sampling.enable=false — READ THIS BEFORE "SIMPLIFYING".
+          # Disabling the adaptive path would ALSO change the start-time
+          # distribution, and that is a second factor moving at the same time:
+          #   * adaptive path (enable=true, this arm): draw a bin, draw a frame
+          #     uniformly inside that bin, then shift back by a uniform integer
+          #     in [0, pre_failure_sample_window=200) frames, clamped at 0
+          #     (motion_lib_base.py:3529-3548). The clamp piles mass on the
+          #     first frames, and the bin grid quantizes the rest.
+          #   * plain path (enable=false): draw a clip, then draw a continuous
+          #     uniform phase over the WHOLE clip, no bin grid and no backward
+          #     shift (motion_lib_base.py:2249-2258, selected at
+          #     commands.py:3091-3101).
+          # Setting the rate to 1.0 keeps the start-time machinery bit-for-bit
+          # identical to arm A and changes only the weighting, which is the one
+          # thing this arm is supposed to change.
+          #
+          # Note for the analysis: at iteration 0 arms A and D are the same
+          # sampler. init_num_failures=1 makes every bin's failure rate exactly
+          # 1.0, so A's failure term starts uniform too; the arms separate only
+          # as episode outcomes accumulate.
+          uniform_sampling_rate: 1.0
+
+hygiene_matrix:
+  arm: d_uniform
+  factor: sampler_uniform_rate
+  bank: raw
+  bank_is_placeholder: false
+  sampler: uniform_rate_1.0
