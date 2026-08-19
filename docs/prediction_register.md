@@ -157,6 +157,50 @@ operator is unjustified complexity — the 65.8% recovery rate the sibling proje
 then be a statement about file counts rather than about anything the policy learns.
 
 
+## The room-sizing fix landed, and the scenes it invalidates are still on disk
+
+*Measured 2026-08-19, after [`7d7f88b`](#), and it re-derives that fix rather than finding it.*
+
+**The diagnosis is not new and is not claimed as new.** `7d7f88b` — *size the room to contain its
+route, not a route of that size* — already establishes it, on the same nominal, with sharper
+numbers than these: n_064 began 418 mm beyond the wall, 183.5 N of lateral contact, a foot against a
+vertical surface, in a scene whose only intended obstacle was a ceiling. This section exists for
+three things that measurement adds on top.
+
+**First, the fixed builder has not been run.** Every `gf_*` scene on disk carries an mtime of
+**12:37**; the fix was committed at **14:31**. The builder is repaired and the assets are not, so
+the void scenes are still the ones any re-roll will load.
+
+**Second, the scope is wider than n_064.** Measuring each obstacle box against its own walls' inner
+faces, across all 48 counterfactual scenes:
+
+| nominal | scenes | obstacle inside its room |
+|---|---|---|
+| `gf_013_*` | 8 | **100%** — all eight |
+| `gf_064_*` | 10 | 27–57% |
+| `gf_065_*` | 10 | 40%, and **0%** for the four `*_right` scenes |
+| `mf_x002_c08_*` | 2 | 73% |
+| `mf_x003_c08_*` | 2 | 98% |
+
+`gf_065` is affected as heavily as `gf_064`, and the four `gf_065_*_right` scenes place their
+obstacle at y ∈ [−4.47, −4.23] against a room spanning y ∈ [−3.97, 3.97] — **entirely outside**.
+Those cells cannot test anything and did not. So 10 of the 14 queued configurations are void, and
+any yield computed over 14 has a denominator of 4. `n_013`'s four configurations stand, and with
+them [P9](#p9-retiming-the-adapted-clip-pays-back-the-transport-cost-and-pays-back-the-right-amount)
+and the transport diagnosis, both of which rest on `n_013_ceiling_overhead_left` alone.
+
+**Third, it was reached from the other end, which is the reusable part.** Not by reading the
+builder. The per-frame constraint record (`constraint_distance.py`) was cross-checked against the
+recorded physics verdicts and agreed on 16 of 20 cells; every disagreement was a cell where physics
+recorded a contact the shelf could not account for. Chasing those four produced the same conclusion
+the builder fix reached independently. A record reporting only the intended obstacle's clearance
+would have agreed with itself and found nothing. That two independent routes — reading the geometry
+code, and asking a second question of the executed episodes — land on the same defect is the useful
+fact here, because only the second one is available when the defect is in data rather than code.
+
+**Remedy, not yet taken.** Regenerate the `gf_*` scenes with the post-`7d7f88b` builder and re-roll.
+Not a re-grade: the old cells are discarded as unevaluable, not re-scored.
+
 ## P6, refuted — and it exposed a worse error
 
 **P6 — the arm tuck's collisions are the wrist reaching the floor (registered 2026-08-18, before

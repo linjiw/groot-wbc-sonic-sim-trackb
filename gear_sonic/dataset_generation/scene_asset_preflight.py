@@ -888,6 +888,32 @@ class SceneObstacleMap:
         return all(min_x <= x <= max_x and min_y <= y <= max_y for x, y in points)
 
 
+def scene_solid_boxes(scene_path: str | Path) -> dict[str, tuple[float, float, float, float, float, float]]:
+    """Every collision-enabled cube in one scene file, as a world axis-aligned box.
+
+    The same parser the preflight gate uses, reduced to the shape a clearance measurement wants:
+    ``{prim path: (x0, y0, z0, x1, y1, z1)}``. Exposed because a constraint record that can only see
+    the obstacle it was told about cannot explain a contact with a wall -- and on one family every
+    cell recorded a contact the shelf could not account for.
+
+    Unlike `load_scene_obstacle_map` this needs no package manifest and applies no height band: the
+    caller is measuring against solids, not planning a route past them.
+    """
+    errors: list[str] = []
+    text = Path(scene_path).read_text(encoding="utf-8")
+    records = _parse_prim_records(text, errors)
+    boxes: dict[str, tuple[float, float, float, float, float, float]] = {}
+    for record in records:
+        if record.type_name != "Cube":
+            continue
+        cube = _parse_cube(record, errors)
+        if cube is None or not cube.collision_enabled:
+            continue
+        low, high = cube.min_corner, cube.max_corner
+        boxes[record.path] = (low[0], low[1], low[2], high[0], high[1], high[2])
+    return boxes
+
+
 def load_scene_obstacle_map(
     scene_id: str, package_dir: str | Path = DEFAULT_SCENE_PACKAGE_DIR
 ) -> SceneObstacleMap:
