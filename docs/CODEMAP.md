@@ -21,13 +21,16 @@ grouped by the stage of the pipeline they serve.
 | `gear_sonic/dataset_generation/reference_gate.py` | Decide whether a generated reference deserves a rollout, before spending one. |
 | `gear_sonic/dataset_generation/retarget_reference.py` | Make a generated crouch reachable, since asking for a reachable one does not work. |
 | `scripts/research/analyze_kimodo_rollout_batch.py` | Summarise a batch of Kimodo+SONIC rollouts: validation, acceptance, latent parity. |
+| `scripts/research/analyze_reference_motions.py` | Measure the behaviour spread of generated reference motions, before any rollout. |
 | `scripts/research/build_kimodo_provenance_bundle.py` | Build a typed EpisodeRequest -> GenerationResult -> ConversionResult bundle. |
 | `scripts/research/build_prompt_taxonomy.py` | Emit the prompt taxonomy as a prompts file plus an auditable coverage report. |
 | `scripts/research/encode_kimodo_prompts.py` | Encode motion prompts once into a cache that generation can reuse. |
 | `scripts/research/export_kimodo_dataset_batch.sh` | Export every accepted rollout in a placement batch to a LeRobot synthetic_g1 dataset. |
+| `scripts/research/gate_references_for_rollout.py` | Decide which generated references deserve GPU time, before any is spent. |
 | `scripts/research/generate_codemap.py` | Generate the code map from the modules themselves, so it cannot drift. |
 | `scripts/research/generate_kimodo_motions.py` | Generate G1 motions from prompts, writing the 36-column qpos CSVs the corpus ingests. |
 | `scripts/research/plan_kimodo_placements.py` | Plan scene placements for Kimodo G1 reference motions and emit a rollout manifest. |
+| `scripts/research/run_behaviour_library_batch.sh` | Take a directory of generated motions all the way to analysed rollouts, resumably. |
 | `scripts/research/run_kimodo_placement_batch.sh` | Convert and roll out every config in a placements.json produced by |
 | `scripts/research/run_kimodo_sonic_rollout.sh` | Run one SONIC physics rollout of a converted Kimodo G1 reference in a repo-owned scene. |
 | `scripts/research/screen_kimodo_motions.py` | Screen generated motions for configurations the G1 cannot reach. |
@@ -233,30 +236,17 @@ grouped by the stage of the pipeline they serve.
 | `scripts/research/run_sim_d1_all_motion_eval.py` | Run the fail-closed SIM-D1 all-motion evaluation and classification. |
 | `scripts/research/run_sim_d2_root_xy_diagnostic.py` | Run the isolated, diagnostic-only SIM-D2 root-XY evaluation. |
 
-## Unclassified
-
-*Not matched by any stage pattern. Listed rather than dropped: a map that silently
-omits files is worse than no map.*
-
-| file | what it does |
-|---|---|
-| `scripts/research/analyze_reference_motions.py` | Measure the behaviour spread of generated reference motions, before any rollout. |
-| `scripts/research/gate_references_for_rollout.py` | Decide which generated references deserve GPU time, before any is spent. |
-| `scripts/research/run_behaviour_library_batch.sh` | Take a directory of generated motions all the way to analysed rollouts, resumably. |
-
 ## How to read this
 
 The eight stages above the *Adjacent* sections are SweepCF. The three below are other work sharing
-this repository — LACE, SONIC controller training, and superseded phases — and are listed so that
-neither gets read as part of the other, and so this pipeline's file count is not quoted as if all
-153 files were one project.
+this repository — LACE, SONIC controller training, and superseded phases — listed so neither gets
+read as part of the other, and so this pipeline's file count is not quoted as if all 153 files were
+one project.
 
-The pipeline runs left to right through the stages: a motion is generated and qualified, an
-adaptation operator builds a matched variant, a scene is designed to bind a chosen body part at a
-chosen margin, physics decides whether the pair forms a counterfactual, verified families are
-assembled into the release, and the selector is trained and evaluated on them.
-
-Entry points worth knowing:
+The pipeline runs in stage order: a motion is generated and qualified, an operator builds a matched
+variant, a scene is designed to bind a chosen body part at a chosen margin, physics decides whether
+the pair forms a counterfactual, verified families are assembled into the release, and the selector
+is trained and evaluated on them.
 
 | to do this | run |
 |---|---|
@@ -264,7 +254,7 @@ Entry points worth knowing:
 | place a scene to an exact margin | `build_graded_scene.py` |
 | roll a motion out through SONIC | `run_kimodo_sonic_rollout.sh` |
 | grade a family's cells | `report_dataset_counts.py` |
-| check no rollout was spent on a scene the robot misses | `audit_wall_proximity.py`, `scene_route_check.py` |
+| check no rollout was spent on a scene the robot misses | `audit_wall_proximity.py` |
 | assemble the release folder | `build_dataset_release.py` |
 | render it for people | `render_release_page.py`, `render_room_camera.py` |
 | validate the selector's controls | `evaluate_selector.py` |
