@@ -115,6 +115,31 @@ plausibly governs, where a collision is governed by geometry. If x002 or x003 is
 is not the variable for the crouch either, and per-clip rollout screening is the only method for
 both operators.
 
+## Parked under the timebox rule
+
+**mf_x002_c08 — parked at 10 rollouts (2026-08-19).** The rule is five rollouts or half a day on one
+motion; x002 has taken ten across three attempts, and the third attempt succeeded only in narrowing
+the question rather than answering it.
+
+| shelf | nominal | crouch |
+|---|---|---|
+| 1.3478 m (easy) | accepted | accepted |
+| 1.3000 m | accepted | accepted |
+| 1.2567 m | rejected | rejected |
+
+So both boundaries lie inside a 43 mm band, and a family needs the shelf between them. Two more
+probes would bisect it. That is cheap and it is still the wrong call: the same two rollouts spent on
+a fresh screened nominal buy a whole configuration rather than one contested family, and the point
+of the timebox is that this trade is invisible while you are inside the rabbit hole.
+
+The first four rollouts were void for the coordinate-frame bug, so only six carried information.
+That does not change the decision — the rule counts rollouts spent, not rollouts that worked, because
+otherwise every failure buys an extension.
+
+**Not a finding about x002.** Its window may well be real and merely narrow. If the family count
+falls short at the end of Workstream A, this is the cheapest place to return to, and the band is
+recorded here so the return costs two rollouts rather than ten.
+
 ## Resolved
 
 | # | prediction | outcome |
