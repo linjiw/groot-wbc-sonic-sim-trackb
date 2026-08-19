@@ -177,6 +177,50 @@ footer p{max-width:none}
   The rejected cell drives its torso into the shelf; the physics reports the strike in newtons and
   the label follows from it.</p>
 
+  <h3 style="margin-top:2.8rem">How close is close? Down to the millimetre.</h3>
+  <p>Difficulty here is not a word, it is a measured distance. Between the easy room and the hard
+  one the shelf drops <strong>178 mm</strong> — and that is the whole difference between a walk that
+  passes and one that does not.</p>
+  <img src="media/difficulty.png" alt="Left: the shelf at 1.391 m in the easy room and 1.212 m in the hard room. Right: headroom per cell, from +193.4 mm down to -0.0 mm" style="width:100%;display:block;border:1px solid var(--line);background:#fff;margin-top:1rem">
+  <div class="tbl"><table>
+    <thead><tr><th>Room</th><th>Shelf underside</th><th>As generated</th><th>One local edit</th></tr></thead>
+    <tbody>
+      <tr><td>easy</td><td>1.3906 m</td><td class="g">+89.7 mm · clears</td><td class="g">+193.4 mm · clears</td></tr>
+      <tr><td>hard</td><td>1.2125 m</td><td class="r">−0.0 mm · strikes</td><td class="g">+55.6 mm · clears</td></tr>
+    </tbody>
+  </table></div>
+  <p>The edited motion clears the hard shelf by <strong>55.6 mm</strong> — about two finger widths.
+  That is the margin the whole dataset is built on, and it is why the labels have to come from
+  physics: no annotator watching a video can call 55 mm from 0 mm reliably.</p>
+
+  <h3 style="margin-top:2.8rem">Where the obstacle goes, and why that is the hard part</h3>
+  <p>Putting an obstacle <em>near</em> a trajectory is easy. Putting it where exactly one of two
+  motions survives is a measurement problem, and it is the part of this work that took longest to
+  get right. Nothing is sampled or hand-placed:</p>
+  <ol class="steps">
+    <li><div><b>Roll the motion out in an empty room</b>
+      <span>The reference clip is not the robot. Placement is measured against the body the
+      controller actually produced, because the two differ by centimetres.</span></div></li>
+    <li><div><b>Sweep the body into a volume</b>
+      <span>29 collision capsules over 14 links, every frame. This is the space the robot really
+      occupies, not a bounding cylinder.</span></div></li>
+    <li><div><b>Ask which part binds, at each height</b>
+      <span>Within a height band the criticality map finds the body part that reaches furthest:
+      torso overhead, upper arm at chest, wrist at waist. A ceiling and a wall bind different
+      parts of the same walk, so the same clip poses several distinct problems.</span></div></li>
+    <li><div><b>Apply the edit and measure again</b>
+      <span>The adapted clip is swept the same way, giving a second reach. The gap between them is
+      the <em>window</em> — the band of obstacle positions where the original strikes and the
+      edited one clears.</span></div></li>
+    <li><div><b>Place the easy face above it, the hard face inside it</b>
+      <span>Easy sits 50 mm clear of the original's reach; hard sits at the window's centre. Both
+      are then verified against the executed body before any rollout is spent.</span></div></li>
+  </ol>
+  <div class="note"><p><strong>The windows are genuinely narrow.</strong> Measured across bands they
+  run 21–105 mm wide, and what the controller actually delivers is 30–70% of what the geometry
+  predicts. A batch of fourteen configurations was refused entirely by preflight on that basis —
+  which is the point: the difficulty is real enough to be hard to manufacture.</p></div>
+
   <h3 style="margin-top:2.8rem">The same second, from every camera we record</h3>
   <p>One episode, three synchronised viewpoints. Ego is what a policy would see, chase is what a
   reviewer needs, and wrist is there for the manipulation phase that follows this one. The overhead

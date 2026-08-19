@@ -179,7 +179,9 @@ def save_motion(motion: Motion, path: str | Path) -> None:
     """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    handle, tmp_name = tempfile.mkstemp(dir=str(path.parent), prefix=f".{path.name}.", suffix=".tmp")
+    handle, tmp_name = tempfile.mkstemp(
+        dir=str(path.parent), prefix=f".{path.name}.", suffix=".tmp"
+    )
     os.close(handle)
     tmp_path = Path(tmp_name)
     try:
@@ -218,7 +220,9 @@ def validate_motion(motion: Motion) -> list[str]:
             continue
         expected = _EXPECTED_SHAPES[name]
         if array.ndim != len(expected) + 1 or tuple(array.shape[1:]) != expected:
-            problems.append(f"{name} has shape {array.shape}, expected (T, {', '.join(map(str, expected))})")
+            problems.append(
+                f"{name} has shape {array.shape}, expected (T, {', '.join(map(str, expected))})"
+            )
             continue
         frame_counts[name] = int(array.shape[0])
         if array.dtype != np.float32:
@@ -242,7 +246,9 @@ def validate_motion(motion: Motion) -> list[str]:
             f"root_rot is not unit norm: max |‖q‖-1| = {worst_norm:.3e} > {QUAT_NORM_ATOL:.1e}"
         )
 
-    expected_pose = DOF_AXIS.astype(np.float64)[None, :, :] * motion.dof.astype(np.float64)[:, :, None]
+    expected_pose = (
+        DOF_AXIS.astype(np.float64)[None, :, :] * motion.dof.astype(np.float64)[:, :, None]
+    )
     residual = np.abs(motion.pose_aa.astype(np.float64)[:, 1:, :] - expected_pose)
     worst = float(residual.max())
     if worst > POSE_AA_DOF_ATOL:
@@ -333,14 +339,20 @@ def resample_to(motion: Motion, target_fps: int = DEFAULT_TARGET_FPS) -> Motion:
     with torch.no_grad():
         pose_quaternion = axis_angle_to_quaternion(pose)
         duration = (source_frames - 1) * 1.0 / float(motion.fps)
-        times = torch.arange(0, duration, 1.0 / target_fps, dtype=torch.float32, device=torch.device("cpu"))
+        times = torch.arange(
+            0, duration, 1.0 / target_fps, dtype=torch.float32, device=torch.device("cpu")
+        )
         phase = times / duration
         coordinates = phase * (source_frames - 1)
         index_0 = torch.floor(coordinates).to(dtype=torch.long)
         index_1 = torch.minimum(index_0 + 1, torch.tensor(source_frames - 1, dtype=torch.long))
         blend = coordinates - index_0
-        out_quaternion = slerp(pose_quaternion[index_0], pose_quaternion[index_1], blend[:, None, None])
-        out_translation = translation[index_0] * (1.0 - blend[:, None]) + translation[index_1] * blend[:, None]
+        out_quaternion = slerp(
+            pose_quaternion[index_0], pose_quaternion[index_1], blend[:, None, None]
+        )
+        out_translation = (
+            translation[index_0] * (1.0 - blend[:, None]) + translation[index_1] * blend[:, None]
+        )
         out_pose_aa = quaternion_to_angle_axis(out_quaternion)
         out_dof = out_pose_aa[:, 1:, :].sum(dim=-1)
         out_root_rot_wxyz = matrix_to_quaternion(quaternion_to_matrix(out_quaternion)[:, 0])

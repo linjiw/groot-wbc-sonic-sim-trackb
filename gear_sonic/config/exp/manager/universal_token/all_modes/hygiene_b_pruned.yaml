@@ -23,13 +23,16 @@ manager_env:
   commands:
     motion:
       motion_lib_cfg:
-        # PLACEHOLDER PATH — this bank does not exist yet, and neither does
-        # the script that makes it (only hygiene_repair_bank.py is on disk as of
-        # this file's writing).
-        # To be produced by scripts/research/hygiene_screen_bank.py: it screens the
-        # raw bank with gear_sonic/research/hygiene/screen.py and writes the
-        # surviving clips (or symlinks to them) into this directory. Until that
-        # script has run, this arm will fail at motion-library load.
+        # PLACEHOLDER PATH — this bank does not exist yet, and NOTHING BUILDS
+        # IT TODAY. scripts/research/hygiene_screen_bank.py screens the raw bank
+        # with gear_sonic/research/hygiene/screen.py, but it emits one JSON per
+        # clip, not a directory of motions. Materialising this path is a
+        # selection over the raw bank — symlinks are the right shape for a
+        # selection, because LACE's verify_partition_subset resolves each entry
+        # back to its recorded source (throughput.py:401-407) — and whoever
+        # builds it owns the cut: the plan prunes infeasible_frac > 0.10
+        # (scripts/research/analyze_hygiene_matrix.py:15). Until then this arm
+        # fails at motion-library load.
         motion_file: data/motion_lib_hygiene/pruned/robot_filtered
         # smpl_motion_file is deliberately NOT overridden: the SMPL bank is
         # keyed by robot motion key, so dropping a clip from the robot bank

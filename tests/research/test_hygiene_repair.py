@@ -39,12 +39,14 @@ from gear_sonic.research.hygiene.repair import (  # noqa: E402
     REASON_OUT_OF_SCOPE_NOT_AIRBORNE,
     REASON_REPAIRED,
     REASON_SMPL_JOINTS_ABSOLUTE_FRAME,
+    REASON_UNSCOREABLE,
     RepairBudget,
     apply_root_offset,
     floor_clearance,
     gaussian_smooth,
     plan_root_offset,
     repair_motion,
+    screen_infeasible_frac,
     smpl_joints_are_root_relative,
 )
 from gear_sonic.research.hygiene.screen import ScreenThresholds, load_model  # noqa: E402
@@ -141,11 +143,23 @@ def test_plan_root_offset_ignores_frames_already_in_contact():
 
 
 def test_plan_root_offset_never_raises_and_never_penetrates():
+    """Two invariants, over a profile that flies, then scuffs the floor, then flies again.
+
+    The floor invariant is *do no harm*, not *end up above the clearance*: frames that already
+    penetrate (negative clearance) are the retarget's problem, and lifting them is out of scope for
+    an operator whose whole licence is "never raise".
+    """
+
     rng = np.random.default_rng(0)
     clearance = np.concatenate([np.full(30, 0.20), rng.uniform(-0.02, 0.02, 30), np.full(30, 0.30)])
     offset = plan_root_offset(clearance, FPS, gap_m=0.06, clearance_m=0.003, smooth_s=0.24)
+    after = clearance - offset
     assert offset.min() >= 0.0, "the operator must never lift the root"
-    assert np.all(clearance - offset >= 0.003 - 1e-9), "smoothing must not push a geom through the floor"
+    assert np.all(after >= np.minimum(clearance, 0.003) - 1e-9), "the blend must not deepen a penetration"
+    # The blend does bleed into the contact band -- that is what makes the touchdown smooth rather
+    # than a step -- but only ever down to the clearance, never through it.
+    assert offset[30:60].max() > 0.0
+    assert np.all(after[30:60] >= np.minimum(clearance[30:60], 0.003) - 1e-9)
 
 
 def test_apply_root_offset_touches_only_the_z_column():
@@ -253,6 +267,36 @@ def test_in_contact_but_infeasible_is_reported_out_of_scope(model, ground_root_z
     assert repaired is motion
 
 
+def test_an_unscoreable_screen_never_passes_the_gate(model, ground_root_z, monkeypatch):
+    """``screen_motion`` returns ``infeasible_frac=None`` when every LP failed.
+
+    That is the *most* infeasible state the screen can report, so it must not slip through the
+    ``<= max_infeasible_frac_after`` comparison -- which is exactly what ``float(None)`` or a
+    ``None or 0.0`` coercion would do.
+    """
+
+    class _Unscoreable:
+        airborne_frac = 0.0
+        infeasible_frac = None
+
+    monkeypatch.setattr(repair_module, "screen_motion", lambda *a, **k: _Unscoreable())
+    _, result = repair_motion(make_motion(root_z=ground_root_z), model=model)
+
+    assert not result.success
+    assert result.reason == REASON_UNSCOREABLE
+    assert np.isnan(result.infeasible_frac_before)
+    assert result.to_dict()["infeasible_frac_before"] is None, "null, never a fake 0.0"
+
+
+def test_screen_infeasible_frac_maps_none_to_nan():
+    class _S:
+        infeasible_frac = None
+
+    assert np.isnan(screen_infeasible_frac(_S()))
+    _S.infeasible_frac = 0.25
+    assert screen_infeasible_frac(_S()) == pytest.approx(0.25)
+
+
 # --------------------------------------------------------------------------------------
 # smpl_joints frame decision
 # --------------------------------------------------------------------------------------
@@ -354,6 +398,8 @@ def test_needs_repair_defaults_to_yes_when_the_screen_is_silent(bank_script):
     assert bank_script.needs_repair({"infeasible_frac": 0.9}, 0.05) is True
     assert bank_script.needs_repair({"infeasible_frac": 0.01}, 0.05) is False
     assert bank_script.needs_repair({"infeasible_frac": "not a number"}, 0.05) is True
+    assert bank_script.needs_repair({"infeasible_frac": None}, 0.05) is True, "null means unscoreable"
+    assert bank_script.needs_repair({"infeasible_frac": float("nan")}, 0.05) is True
 
 
 def test_read_screen_reports_accepts_per_clip_and_aggregate_json(bank_script, tmp_path):

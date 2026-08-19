@@ -53,18 +53,37 @@ contact — friction-cone or actuator-torque reasons — offers this operator no
 zero offset, and would otherwise be recorded as an operator failure.  That is a category error, so
 it gets its own reason string, ``out_of_scope_not_airborne``: the clip needs a stronger operator
 (IK, time warp, retarget), not a better root projection.
+
+Two more honesty notes about that word "airborne":
+
+* The screen's ``airborne_frac`` counts frames with no *foot* near the floor; this operator's
+  trigger counts frames with no *collision geom of any kind* near the floor.  The operator is
+  deliberately the stricter of the two, because a kneeling or prone reference has its feet in the
+  air and its knees on the ground, and lowering the root there would drive the knee through the
+  floor.  Such a clip reads as airborne in the screen record and lands in
+  ``out_of_scope_not_airborne`` here.  That disagreement is the point, not a bug.
+* The screen may report ``infeasible_frac=None`` -- it refuses to score a clip whose every frame had
+  contacts and whose every torque LP failed.  That travels through here as ``NaN``, fails every
+  comparison, and is reported as ``unscoreable_screen`` rather than being coerced to a number the
+  screen declined to produce.
 """
 
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+import math
 from typing import Any
 
 import mujoco
 import numpy as np
 
 from gear_sonic.research.hygiene.motion_io import Motion
-from gear_sonic.research.hygiene.screen import ScreenThresholds, load_model, screen_motion
+from gear_sonic.research.hygiene.screen import (
+    FLOOR_GEOM_NAME,
+    ScreenThresholds,
+    load_model,
+    screen_motion,
+)
 
 REPAIR_SCHEMA_VERSION = 1
 
@@ -81,6 +100,7 @@ REASON_OFFSET_OVER_BUDGET = "offset_over_budget"
 REASON_RESIDUAL_INFEASIBLE = "residual_infeasible"
 REASON_REGRESSED = "regressed"
 REASON_SMPL_JOINTS_ABSOLUTE_FRAME = "smpl_joints_absolute_frame"
+REASON_UNSCOREABLE = "unscoreable_screen"
 
 REPAIR_REASONS = (
     REASON_ALREADY_FEASIBLE,
@@ -90,6 +110,7 @@ REPAIR_REASONS = (
     REASON_RESIDUAL_INFEASIBLE,
     REASON_REGRESSED,
     REASON_SMPL_JOINTS_ABSOLUTE_FRAME,
+    REASON_UNSCOREABLE,
 )
 
 
@@ -131,16 +152,50 @@ class RepairResult:
     offset_mean_m: float
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        """JSON-ready dict.  Unmeasurable metrics become ``null``, never ``0.0``.
+
+        ``screen_motion`` returns ``infeasible_frac=None`` when every frame had contacts and every
+        torque-limited LP failed, i.e. the clip is so far outside the actuator envelope that the
+        solver cannot even quantify how far.  That travels through this dataclass as ``NaN`` so the
+        gate arithmetic stays float, and leaves it as ``null`` so no reader mistakes "could not be
+        scored" for "scored zero".
+        """
+
+        payload = asdict(self)
+        for name, value in payload.items():
+            if isinstance(value, float) and math.isnan(value):
+                payload[name] = None
+        return payload
+
+
+def screen_infeasible_frac(screen: Any) -> float:
+    """``screen.infeasible_frac`` as a float, with the screen's ``None`` mapped to ``NaN``.
+
+    Every comparison against ``NaN`` is False, so a clip the screen could not score can never pass
+    the success gate by accident -- which is the behaviour we want, since ``None`` there means
+    "contacts existed and every LP failed", the most infeasible state the screen can report.
+    """
+
+    value = getattr(screen, "infeasible_frac", None)
+    return float("nan") if value is None else float(value)
 
 
 def floor_geom_id(model: Any) -> int:
-    """Return the geom id of the ground plane (the screen and the repair must agree on it)."""
+    """Return the geom id of the ground plane.
 
-    for geom_id in range(model.ngeom):
-        if model.geom_type[geom_id] == mujoco.mjtGeom.mjGEOM_PLANE:
-            return geom_id
-    raise ValueError("robot model has no plane geom to serve as the floor")
+    Reproduces ``screen._build_layout``'s rule exactly -- the geom named
+    :data:`~gear_sonic.research.hygiene.screen.FLOOR_GEOM_NAME`, else the last plane geom -- because
+    a repair that measures clearance against one plane while the screen scores contacts against
+    another would be scored on physics it never performed.
+    """
+
+    named = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, FLOOR_GEOM_NAME)
+    if named >= 0:
+        return int(named)
+    planes = [i for i in range(model.ngeom) if model.geom_type[i] == mujoco.mjtGeom.mjGEOM_PLANE]
+    if not planes:
+        raise ValueError(f"model has no geom named {FLOOR_GEOM_NAME!r} and no plane geom to fall back on")
+    return int(planes[-1])
 
 
 def contact_geom_ids(model: Any) -> list[int]:
@@ -299,16 +354,18 @@ def repair_motion(
             reason=reason,
             airborne_frac_before=float(before.airborne_frac),
             airborne_frac_after=float(after.airborne_frac),
-            infeasible_frac_before=float(before.infeasible_frac),
-            infeasible_frac_after=float(after.infeasible_frac),
+            infeasible_frac_before=screen_infeasible_frac(before),
+            infeasible_frac_after=screen_infeasible_frac(after),
             offset_max_m=float(offset.max()) if offset.size else 0.0,
             offset_mean_m=float(offset.mean()) if offset.size else 0.0,
         )
 
     zero = np.zeros(int(motion.root_trans_offset.shape[0]), dtype=np.float64)
+    infeasible_before = screen_infeasible_frac(before)
 
     # Nothing to fix: leave a passing clip bit-identical rather than spend a second screen on it.
-    if before.infeasible_frac <= budget.max_infeasible_frac_after:
+    # NaN (the screen could not score the clip at all) never satisfies this, by design.
+    if infeasible_before <= budget.max_infeasible_frac_after:
         return motion, _result(True, REASON_ALREADY_FEASIBLE, before, zero)
 
     clearance = floor_clearance(motion, model)
@@ -320,10 +377,14 @@ def repair_motion(
         smooth_s=budget.smooth_s,
     )
 
-    # The clip is infeasible but never airborne: friction cone or torque limits, not float. The
-    # projection has no lever here, so say so instead of blaming the operator.
+    # The clip is infeasible but nothing is liftable: friction cone or torque limits, not float.
+    # The projection has no lever here, so say so instead of blaming the operator.  Note the
+    # asymmetry with the screen's ``airborne_frac``, which is a *foot* statistic: a kneeling clip
+    # reads as airborne there while a knee geom is on the floor here, and lands in this branch.
+    # That is the right answer -- lowering the root would drive the knee through the ground.
     if float(offset.max()) <= ZERO_OFFSET_EPS_M:
-        return motion, _result(False, REASON_OUT_OF_SCOPE_NOT_AIRBORNE, before, zero)
+        reason = REASON_UNSCOREABLE if math.isnan(infeasible_before) else REASON_OUT_OF_SCOPE_NOT_AIRBORNE
+        return motion, _result(False, reason, before, zero)
 
     if not smpl_joints_are_root_relative(motion):
         return motion, _result(False, REASON_SMPL_JOINTS_ABSOLUTE_FRAME, before, zero)
@@ -331,14 +392,17 @@ def repair_motion(
     repaired = apply_root_offset(motion, offset)
     after = screen_motion(repaired, model=model, thresholds=thresholds)
 
+    infeasible_after = screen_infeasible_frac(after)
     offset_ok = float(offset.max()) <= budget.max_offset_m
-    feasible_ok = float(after.infeasible_frac) <= budget.max_infeasible_frac_after
+    feasible_ok = infeasible_after <= budget.max_infeasible_frac_after
     if offset_ok and feasible_ok:
         return repaired, _result(True, REASON_REPAIRED, after, offset)
     if not offset_ok:
         # Over the deviation licence: the after-metrics are still reported so the census can answer
         # "would a larger budget have worked?", but the original clip is what ships.
         return motion, _result(False, REASON_OFFSET_OVER_BUDGET, after, offset)
-    if after.infeasible_frac > before.infeasible_frac:
+    if math.isnan(infeasible_after):
+        return motion, _result(False, REASON_UNSCOREABLE, after, offset)
+    if infeasible_after > infeasible_before:
         return motion, _result(False, REASON_REGRESSED, after, offset)
     return motion, _result(False, REASON_RESIDUAL_INFEASIBLE, after, offset)

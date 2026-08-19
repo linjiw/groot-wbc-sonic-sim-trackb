@@ -1092,16 +1092,19 @@ SYNTHETIC_EVAL_BANK = "raw_heldout_v1"
 SYNTHETIC_TRAIN_CLEAN = 170
 SYNTHETIC_TRAIN_FLAGGED = 30
 
-#: Sampling weight the fabricated ledger gives a FLAGGED training clip, per arm. ``E_raw_cap``'s 17
-#: is not arbitrary: 17 / (170 + 30*17) = 0.025 = 5x the 1/200 fair share, i.e. the cap binds
-#: exactly. ``B_pruned`` has no flagged clips in its bank at all.
+#: Sampling weight the fabricated ledger gives a FLAGGED training clip, per arm. ``B_pruned`` has no
+#: flagged clips in its bank at all, so it gets ``None``. ``E_raw_cap`` is absent on purpose: it is
+#: not a weight choice, it is ``A_raw``'s own ledger with the per-motion cap applied to it, which is
+#: what ``max_prob_per_motion`` actually does to a run.
 SYNTHETIC_FLAGGED_WEIGHT: dict[str, float | None] = {
     "A_raw": 8.0,
     "B_pruned": None,
     "C_repaired": 1.6,
     "D_raw_uniform": 1.0,
-    "E_raw_cap": 17.0,
 }
+
+#: ``max_prob_per_motion``, expressed the way the intervention config sets it: a multiple of fair share.
+SYNTHETIC_CAP_MULTIPLE = 5.0
 
 #: (mean actuator-saturation fraction, mean contact-force jump [N]) per arm, fabricated.
 SYNTHETIC_TORQUE: dict[str, tuple[float, float]] = {
@@ -1271,8 +1274,7 @@ def synthetic_training_bank() -> tuple[tuple[str, ...], tuple[str, ...]]:
     return clean, flagged
 
 
-def synthetic_exposure_csv(arm: str) -> str:
-    """One arm's sampling ledger. ``A_raw`` emits raw counts to exercise the count fallback."""
+def _synthetic_weights(arm: str) -> list[tuple[str, float]]:
     clean, flagged = synthetic_training_bank()
     weight = SYNTHETIC_FLAGGED_WEIGHT[arm]
     uniform = arm == "D_raw_uniform"
@@ -1283,6 +1285,40 @@ def synthetic_exposure_csv(arm: str) -> str:
         for i, key in enumerate(flagged):
             # one clip absorbs 5x what its already-inflated peers do: the single impossible clip
             pairs.append((key, weight * (5.0 if (i == 0 and arm == "A_raw") else 1.0)))
+    return pairs
+
+
+def apply_per_motion_cap(
+    pairs: Sequence[tuple[str, float]], *, multiple: float = SYNTHETIC_CAP_MULTIPLE
+) -> list[tuple[str, float]]:
+    """Bound every motion at ``multiple`` x fair share and water-fill the excess pro rata.
+
+    Written out rather than hand-waved because the result is the point of arm E: the cap is a bound
+    on the TOP of the distribution, so it collapses top-1 share while barely touching the aggregate
+    mass spent on flagged clips. An arm-E ledger that showed both improving would have been a
+    fabricated result quietly arguing for its own intervention.
+    """
+    keys = [key for key, _ in pairs]
+    probs = np.array([value for _, value in pairs], dtype=float)
+    probs = probs / probs.sum()
+    cap = multiple / probs.size
+    for _ in range(64):
+        over = probs > cap + 1e-12
+        if not over.any():
+            break
+        excess = float((probs[over] - cap).sum())
+        probs[over] = cap
+        under = ~over
+        probs[under] += excess * probs[under] / probs[under].sum()
+    return list(zip(keys, (probs / probs.sum()).tolist()))
+
+
+def synthetic_exposure_csv(arm: str) -> str:
+    """One arm's sampling ledger. ``A_raw`` emits raw counts to exercise the count fallback."""
+    if arm == "E_raw_cap":
+        pairs = apply_per_motion_cap(_synthetic_weights("A_raw"))
+    else:
+        pairs = _synthetic_weights(arm)
     column = "count" if arm == "A_raw" else "prob"
     total = sum(value for _, value in pairs)
     rows = [f"motion_key,{column}"]

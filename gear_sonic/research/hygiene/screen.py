@@ -71,10 +71,16 @@ checks it three ways and :func:`load_model` raises if any of them fails:
    permutation (e.g. the IsaacLab ordering via ``MJ_TO_IL``) breaks it, because
    the pitch/roll/yaw axis pattern differs under that permutation.
 
-Empirically this also shows up in the physics: driving the model with ``dof``
-verbatim puts the feet on the floor (median foot-to-floor clearance ~1 cm over
-the release bank), while the ``MJ_TO_IL`` permutation puts them tens of
-centimetres off.  See the verification numbers in the build report.
+Empirically it also shows up in the physics, which is the check that would have
+caught a plausible-looking but wrong mapping.  Driving the model with ``dof``
+verbatim over the full 4950-clip release bank puts the feet on the floor (median
+foot-to-floor clearance -3.8 mm, i.e. the light uniform penetration a
+ground-aligned retarget leaves behind) and the median clip is fully supportable
+(``infeasible_frac`` median 0.000).  Re-run on the same clips with the columns
+permuted by ``MJ_TO_IL`` - the IsaacLab ordering, the one plausible way to get
+this wrong - the median ``infeasible_frac`` jumps to 0.354, and to 0.148 under
+the inverse permutation.  A wrong DOF order is not a subtle bias here; it makes
+a third of every clip physically unsupportable.
 """
 
 from __future__ import annotations
@@ -232,7 +238,9 @@ def load_model(mjcf_path: str | Path = DEFAULT_G1_MJCF) -> mujoco.MjModel:
     model.opt.disableflags |= mujoco.mjtDisableBit.mjDSBL_CONTACT
     problems = verify_dof_order(model)
     if problems:
-        raise ValueError(f"{path}: MJCF DOF layout does not match the motion pkl contract: {problems}")
+        raise ValueError(
+            f"{path}: MJCF DOF layout does not match the motion pkl contract: {problems}"
+        )
     _MODEL_SHA256[id(model)] = _sha256_file(path)
     return model
 
@@ -245,7 +253,9 @@ def model_sha256(model: mujoco.MjModel) -> str:
 def verify_dof_order(model: mujoco.MjModel) -> list[str]:
     """Check that MJCF joint order == the pkl ``dof`` column order.  See module docstring."""
     problems: list[str] = []
-    joint_names = [mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, i) or "" for i in range(model.njnt)]
+    joint_names = [
+        mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, i) or "" for i in range(model.njnt)
+    ]
     if model.njnt != NUM_DOF + 1:
         return [f"expected {NUM_DOF + 1} joints (1 free + {NUM_DOF} hinge), got {model.njnt}"]
     if model.jnt_type[0] != mujoco.mjtJoint.mjJNT_FREE:
@@ -262,12 +272,18 @@ def verify_dof_order(model: mujoco.MjModel) -> list[str]:
     expected_names = [name[: -len("_dof")] for name in BONES_CSV_JOINT_NAMES]
     if joint_names[1:] != expected_names:
         mismatch = [
-            (i, got, want) for i, (got, want) in enumerate(zip(joint_names[1:], expected_names)) if got != want
+            (i, got, want)
+            for i, (got, want) in enumerate(zip(joint_names[1:], expected_names))
+            if got != want
         ]
         problems.append(f"MJCF joint names differ from the pkl column order at {mismatch[:5]}")
 
-    if not np.allclose(np.asarray(model.jnt_axis[1:], dtype=np.float64), DOF_AXIS.astype(np.float64), atol=1e-9):
-        bad = np.where(~np.isclose(np.asarray(model.jnt_axis[1:]), DOF_AXIS, atol=1e-9).all(axis=1))[0]
+    if not np.allclose(
+        np.asarray(model.jnt_axis[1:], dtype=np.float64), DOF_AXIS.astype(np.float64), atol=1e-9
+    ):
+        bad = np.where(
+            ~np.isclose(np.asarray(model.jnt_axis[1:]), DOF_AXIS, atol=1e-9).all(axis=1)
+        )[0]
         problems.append(f"MJCF joint axes differ from DOF_AXIS at joint indices {bad.tolist()}")
 
     if model.nq != NUM_DOF + 7 or model.nv != NUM_DOF + 6:
@@ -292,16 +308,22 @@ class _RobotLayout:
 def _build_layout(model: mujoco.MjModel) -> _RobotLayout:
     floor = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, FLOOR_GEOM_NAME)
     if floor < 0:
-        planes = [i for i in range(model.ngeom) if model.geom_type[i] == mujoco.mjtGeom.mjGEOM_PLANE]
+        planes = [
+            i for i in range(model.ngeom) if model.geom_type[i] == mujoco.mjtGeom.mjGEOM_PLANE
+        ]
         if not planes:
-            raise ValueError(f"model has no geom named {FLOOR_GEOM_NAME!r} and no plane geom to fall back on")
+            raise ValueError(
+                f"model has no geom named {FLOOR_GEOM_NAME!r} and no plane geom to fall back on"
+            )
         floor = planes[-1]
 
     def geom_name(index: int) -> str:
         return (mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, index) or "").lower()
 
     def body_name(index: int) -> str:
-        return (mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, int(model.geom_bodyid[index])) or "").lower()
+        return (
+            mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, int(model.geom_bodyid[index])) or ""
+        ).lower()
 
     collision = tuple(
         i
@@ -314,7 +336,9 @@ def _build_layout(model: mujoco.MjModel) -> _RobotLayout:
         if any(token in geom_name(i) or token in body_name(i) for token in FOOT_NAME_TOKENS)
     )
     if not feet:
-        raise ValueError(f"no foot collision geoms matched {FOOT_NAME_TOKENS} - airborne_frac would be meaningless")
+        raise ValueError(
+            f"no foot collision geoms matched {FOOT_NAME_TOKENS} - airborne_frac would be meaningless"
+        )
 
     limits = np.empty(model.nu, dtype=np.float64)
     for actuator in range(model.nu):
@@ -328,7 +352,9 @@ def _build_layout(model: mujoco.MjModel) -> _RobotLayout:
     if not np.isfinite(limits).any():
         raise ValueError("no actuator torque limits found on either the actuators or the joints")
 
-    rows = np.array([int(model.jnt_dofadr[int(model.actuator_trnid[i, 0])]) - 6 for i in range(model.nu)])
+    rows = np.array(
+        [int(model.jnt_dofadr[int(model.actuator_trnid[i, 0])]) - 6 for i in range(model.nu)]
+    )
     mass = float(model.body_mass.sum())
     return _RobotLayout(
         floor_geom=int(floor),
@@ -370,7 +396,11 @@ def standing_root_height(model: mujoco.MjModel) -> float:
     mujoco.mj_forward(model, data)
     fromto = np.zeros(6)
     lowest = min(
-        float(mujoco.mj_geomDistance(model, data, geom, layout.floor_geom, _FOOT_PROBE_DISTMAX, fromto))
+        float(
+            mujoco.mj_geomDistance(
+                model, data, geom, layout.floor_geom, _FOOT_PROBE_DISTMAX, fromto
+            )
+        )
         for geom in layout.foot_geoms
     )
     return -lowest
@@ -436,7 +466,9 @@ def screen_motion(
         for geom in layout.collision_geoms:
             is_foot = geom in layout.foot_geoms
             distmax = _FOOT_PROBE_DISTMAX if is_foot else candidate_distmax
-            distance = float(mujoco.mj_geomDistance(model, data, geom, layout.floor_geom, distmax, fromto))
+            distance = float(
+                mujoco.mj_geomDistance(model, data, geom, layout.floor_geom, distmax, fromto)
+            )
             if is_foot:
                 lowest_foot = min(lowest_foot, distance)
             if distance <= gap:
@@ -469,7 +501,10 @@ def screen_motion(
         saturation = np.abs(nnls_tau[act_rows]) / torque_limit
         tau_ratio[frame] = float(np.max(saturation))
 
-        if float(np.linalg.norm(nnls_residual)) <= _TRIVIAL_RESIDUAL_TOL and float(saturation.max()) <= 1.0:
+        if (
+            float(np.linalg.norm(nnls_residual)) <= _TRIVIAL_RESIDUAL_TOL
+            and float(saturation.max()) <= 1.0
+        ):
             # The NNLS solution is already LP-feasible with objective 0, so the
             # LP optimum is exactly 0.  Skipping it here is an identity, not an
             # approximation, and it removes most of the LP cost on clean clips.
@@ -502,7 +537,9 @@ def screen_motion(
         unsupported_force_N_p50=(float(np.percentile(values, 50)) if n_evaluable else None),
         unsupported_force_N_p95=(float(np.percentile(values, 95)) if n_evaluable else None),
         unsupported_force_N_max=(float(values.max()) if n_evaluable else None),
-        unsupported_impulse_per_weight_s=(float((values / weight).sum() * dt) if n_evaluable else None),
+        unsupported_impulse_per_weight_s=(
+            float((values / weight).sum() * dt) if n_evaluable else None
+        ),
         max_tau_ratio_p95=float(np.percentile(tau_ratio, 95)),
         torque_infeasible_frac=float(np.mean(lp_failed)),
         schema_version=SCREEN_SCHEMA_VERSION,

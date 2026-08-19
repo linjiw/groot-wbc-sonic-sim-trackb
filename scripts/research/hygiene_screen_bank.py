@@ -61,7 +61,17 @@ def _csv_columns() -> list[str]:
 
 
 def _init_worker(mjcf: str, thresholds: dict[str, float], target_fps: int | None) -> None:
-    """Compile the robot once per worker process; MjModel compilation is not free."""
+    """Compile the robot once per worker process; MjModel compilation is not free.
+
+    Thread caps are set here, before anything imports torch, because the resample
+    step is BLAS/OpenMP-parallel by default: on a 20-core box one worker will
+    happily burn 10 cores on a 90k-element interpolation and then fight the other
+    workers for them.  Screening is embarrassingly parallel *across* clips, so one
+    thread per worker and ``--workers`` as the only knob is both faster and makes
+    the per-clip CPU numbers mean something.
+    """
+    for variable in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
+        os.environ.setdefault(variable, "1")
     _WORKER["model"] = load_model(mjcf)
     _WORKER["thresholds"] = ScreenThresholds(**thresholds)
     _WORKER["target_fps"] = target_fps
@@ -137,15 +147,23 @@ def _write_csv(out_dir: Path, clip_dir: Path) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--bank", help="directory of motion-library .pkl clips")
     source.add_argument("--motions", nargs="+", help="explicit list of clip .pkl paths")
-    parser.add_argument("--pattern", default="*.pkl", help="glob used with --bank (default: %(default)s)")
+    parser.add_argument(
+        "--pattern", default="*.pkl", help="glob used with --bank (default: %(default)s)"
+    )
     parser.add_argument("--out", required=True, help="output directory")
-    parser.add_argument("--workers", type=int, default=1, help="worker processes (default: %(default)s)")
+    parser.add_argument(
+        "--workers", type=int, default=1, help="worker processes (default: %(default)s)"
+    )
     parser.add_argument("--limit", type=int, default=None, help="screen at most N clips")
-    parser.add_argument("--force", action="store_true", help="re-screen clips that already have a JSON")
+    parser.add_argument(
+        "--force", action="store_true", help="re-screen clips that already have a JSON"
+    )
     parser.add_argument(
         "--target-fps",
         type=int,
@@ -158,7 +176,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--mjcf", default=None, help="override the G1 MJCF path")
     parser.add_argument("--gap-m", type=float, default=ScreenThresholds.gap_m)
     parser.add_argument("--mu", type=float, default=ScreenThresholds.mu)
-    parser.add_argument("--unsupported-force-frac", type=float, default=ScreenThresholds.unsupported_force_frac)
+    parser.add_argument(
+        "--unsupported-force-frac", type=float, default=ScreenThresholds.unsupported_force_frac
+    )
     return parser
 
 
@@ -180,7 +200,10 @@ def main(argv: list[str] | None = None) -> int:
     paths = _resolve_inputs(args)
     pending = [p for p in paths if args.force or not (clip_dir / f"{p.stem}.json").exists()]
     skipped = len(paths) - len(pending)
-    print(f"[hygiene-screen] {len(paths)} clips, {skipped} already done, {len(pending)} to screen", flush=True)
+    print(
+        f"[hygiene-screen] {len(paths)} clips, {skipped} already done, {len(pending)} to screen",
+        flush=True,
+    )
 
     completed = 0
     failed: list[str] = []
@@ -190,8 +213,12 @@ def main(argv: list[str] | None = None) -> int:
             init_args = (mjcf, thresholds.to_dict(), target_fps)
             if args.workers > 1:
                 context = mp.get_context("spawn")
-                with context.Pool(args.workers, initializer=_init_worker, initargs=init_args) as pool:
-                    stream = pool.imap_unordered(_screen_one, [str(p) for p in pending], chunksize=1)
+                with context.Pool(
+                    args.workers, initializer=_init_worker, initargs=init_args
+                ) as pool:
+                    stream = pool.imap_unordered(
+                        _screen_one, [str(p) for p in pending], chunksize=1
+                    )
                     for index, (key, payload, error) in enumerate(stream, start=1):
                         _record(clip_dir, error_dir, key, payload, error, failed)
                         completed += payload is not None

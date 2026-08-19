@@ -109,10 +109,15 @@ mid-matrix. Lowering it is safe.
 `hygiene_b_pruned` and `hygiene_c_repaired` point at banks that **do not exist yet**, and both files
 say so at the key:
 
-- `data/motion_lib_hygiene/pruned/robot_filtered` — to be produced by
-  `scripts/research/hygiene_screen_bank.py`, which is not on disk yet either.
+- `data/motion_lib_hygiene/pruned/robot_filtered` — **nothing builds this today.**
+  `scripts/research/hygiene_screen_bank.py` emits one JSON per clip, not a bank. Materialising the
+  pruned directory is a selection over the raw bank (symlinks are the right shape: LACE's
+  `verify_partition_subset` resolves every entry back to its recorded source,
+  `throughput.py:401-407`), and whoever builds it owns the cut — the plan prunes
+  `infeasible_frac > 0.10`.
 - `data/motion_lib_hygiene/repaired/robot_filtered` — produced by
-  `scripts/research/hygiene_repair_bank.py`, which is on disk.
+  `scripts/research/hygiene_repair_bank.py`, which exists. It writes real files, not symlinks, and
+  passes every clip through so the key set matches the raw bank.
 
 Arm A's own path, `data/motion_lib_bones_seed/robot_filtered`, is the canonical release path used by
 the README and every shipped config, and it is **also not materialised in this checkout**; the

@@ -154,14 +154,20 @@ def read_screen_reports(screen_dir: Path) -> dict[str, dict[str, Any]]:
 
 
 def needs_repair(report: dict[str, Any] | None, max_infeasible_frac_after: float) -> bool:
-    """True when the screen says this clip is over the bar (or said nothing about it)."""
+    """True when the screen says this clip is over the bar, or said nothing usable about it.
+
+    ``infeasible_frac`` is ``null`` in a screen record whose every LP failed -- the screen refuses
+    to coerce an unsolved frame to zero.  ``float(None)`` raises, which lands here as "screen it
+    again", which is the safe reading: an unscoreable clip is not a clean clip.
+    """
 
     if report is None:
         return True
     try:
-        return float(report["infeasible_frac"]) > max_infeasible_frac_after
+        value = float(report["infeasible_frac"])
     except (KeyError, TypeError, ValueError):
         return True
+    return not (value <= max_infeasible_frac_after)  # NaN falls through to True
 
 
 def _copy_through(source: Path, destination: Path) -> None:
@@ -246,7 +252,11 @@ def process_clip(
     return row
 
 
-def _worker(payload: tuple[str, str, str, dict[str, Any] | None, dict[str, float], dict[str, float]]) -> dict[str, Any]:
+#: (source, out_bank, out_reports, screen_report, budget_kwargs, threshold_kwargs)
+WorkPayload = tuple[str, str, str, "dict[str, Any] | None", dict[str, float], dict[str, float]]
+
+
+def _worker(payload: WorkPayload) -> dict[str, Any]:
     """Module-level entry point so ``joblib`` can pickle the unit of work."""
 
     source, out_bank, out_reports, screen_report, budget_kw, threshold_kw = payload
@@ -360,10 +370,18 @@ def main(argv: list[str] | None = None) -> int:
         from joblib import Parallel, delayed
 
         payloads = [
-            (str(source), str(args.out_bank), str(args.out_reports), screen_reports.get(source.stem), budget_kw, threshold_kw)
+            (
+                str(source),
+                str(args.out_bank),
+                str(args.out_reports),
+                screen_reports.get(source.stem),
+                budget_kw,
+                threshold_kw,
+            )
             for source in pending
         ]
-        rows.extend(Parallel(n_jobs=args.workers, backend="loky", verbose=5)(delayed(_worker)(p) for p in payloads))
+        pool = Parallel(n_jobs=args.workers, backend="loky", verbose=5)
+        rows.extend(pool(delayed(_worker)(payload) for payload in payloads))
     else:
         for index, source in enumerate(pending, start=1):
             rows.append(

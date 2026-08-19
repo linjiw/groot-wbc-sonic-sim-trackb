@@ -33,6 +33,7 @@ from scripts.research.analyze_hygiene_matrix import (
     SYNTHETIC_EXPECTATIONS,
     AnalysisInputError,
     analyze,
+    apply_per_motion_cap,
     build_strata,
     classify_direction,
     exposure_metrics,
@@ -430,12 +431,36 @@ def test_exposure_ledger_separates_the_arms_the_design_predicts_it_should(branch
     _effects, report = branch_reports["i_hygiene_works"]
     ledgers = {arm: report["arms"][arm]["exposure"] for arm in REQUIRED_ARMS}
     assert ledgers["D_raw_uniform"]["normalized_entropy"] == pytest.approx(1.0)
-    assert ledgers["E_raw_cap"]["top1_over_fair_share"] == pytest.approx(5.0, abs=0.3)
+    assert ledgers[BASELINE_ARM]["top1_over_fair_share"] > 5.0
     assert (
         ledgers["A_raw"]["wasted_exposure_frac"] > ledgers["D_raw_uniform"]["wasted_exposure_frac"]
     )
     assert ledgers["B_pruned"]["wasted_exposure_frac"] == pytest.approx(0.0)
-    assert ledgers[BASELINE_ARM]["top1_over_fair_share"] > 5.0
+
+
+def test_the_per_motion_cap_bounds_top_one_without_fixing_aggregate_waste(branch_reports) -> None:
+    """Arm E's honest limitation, visible in the fabricated ledger rather than argued in prose.
+
+    ``max_prob_per_motion`` bounds each motion from above. Thirty capped motions can still hold most
+    of the mass between them, so top-1 share collapses to the cap while wasted exposure hardly
+    moves. If this test ever passes trivially, the fabricated ledger has stopped being adversarial.
+    """
+    _effects, report = branch_reports["i_hygiene_works"]
+    capped = report["arms"]["E_raw_cap"]["exposure"]
+    raw = report["arms"]["A_raw"]["exposure"]
+    assert capped["top1_over_fair_share"] == pytest.approx(5.0, abs=0.05)
+    assert capped["top1_over_fair_share"] < raw["top1_over_fair_share"] / 3.0
+    assert capped["wasted_exposure_frac"] < raw["wasted_exposure_frac"]
+    assert capped["wasted_exposure_frac"] > 0.9 * raw["wasted_exposure_frac"]
+
+
+def test_the_cap_water_fill_is_a_redistribution_not_a_truncation() -> None:
+    pairs = [("a", 0.90), ("b", 0.04), ("c", 0.03), ("d", 0.02), ("e", 0.01)]
+    capped = dict(apply_per_motion_cap(pairs, multiple=2.0))  # cap = 2/5 = 0.4
+    assert sum(capped.values()) == pytest.approx(1.0)  # mass is moved, never discarded
+    assert capped["a"] == pytest.approx(0.4)
+    assert all(value <= 0.4 + 1e-9 for value in capped.values())
+    assert capped["b"] > 0.04  # the excess lands on the others in proportion
 
 
 # --------------------------------------------------------------------------- the CLI itself
