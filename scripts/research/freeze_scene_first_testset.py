@@ -73,18 +73,17 @@ class TestScene:
     route_length_m: float
 
 
-def sample(regime: str, count: int, rng: np.random.Generator) -> list[TestScene]:
+def sample(regime: str, count: int, rng: np.random.Generator, tag: str = "") -> list[TestScene]:
     ranges = RANGES[regime]
     scenes = []
     for index in range(count):
         route = float(rng.uniform(3.5, 5.5))
         parameters = {
-            name: round(float(rng.uniform(low, high)), 4)
-            for name, (low, high) in ranges.items()
+            name: round(float(rng.uniform(low, high)), 4) for name, (low, high) in ranges.items()
         }
         scenes.append(
             TestScene(
-                scene_id=f"sf_{regime}_{index:03d}",
+                scene_id=f"sf{tag}_{regime}_{index:03d}",
                 regime=regime,
                 parameters=parameters,
                 route_length_m=round(route, 4),
@@ -102,8 +101,18 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--per-regime", type=int, default=10)
+    # A second vintage exists so an ambiguous first result can be adjudicated without
+    # re-drawing the batch that produced it. It is generated with the analysis pre-registration
+    # and left unlabelled; labelling it is a declared decision, not a convenience.
+    parser.add_argument("--seed", type=int, default=SEED)
+    # The vintage is part of the scene id, not only of the manifest. Two batches drawn with
+    # different seeds produce entirely different parameters but the same positional names, and
+    # rendering the second would silently overwrite the first on disk.
+    parser.add_argument("--tag", default="", help="vintage suffix, e.g. v2")
     parser.add_argument(
-        "--regimes", nargs="+", default=["overhead", "lateral", "floor"],
+        "--regimes",
+        nargs="+",
+        default=["overhead", "lateral", "floor"],
         choices=sorted(RANGES),
     )
     args = parser.parse_args()
@@ -117,14 +126,15 @@ def main() -> int:
         print("  in a commit that says why, if it genuinely has to change.")
         return 2
 
-    rng = np.random.default_rng(SEED)
+    tag = f"_{args.tag}" if args.tag else ""
+    rng = np.random.default_rng(args.seed)
     scenes: list[TestScene] = []
     for regime in args.regimes:
-        scenes.extend(sample(regime, args.per_regime, rng))
+        scenes.extend(sample(regime, args.per_regime, rng, tag))
 
     manifest = {
         "schema_version": 1,
-        "seed": SEED,
+        "seed": args.seed,
         "regimes": args.regimes,
         "per_regime": args.per_regime,
         "scenes": [asdict(s) for s in scenes],
@@ -147,8 +157,10 @@ def main() -> int:
         group = [s for s in scenes if s.regime == regime]
         key = next(iter(RANGES[regime]))
         values = [s.parameters[key] for s in group]
-        print(f"  {regime:9s} {len(group):2d} scenes, {key} spans "
-              f"{min(values):.3f} to {max(values):.3f}")
+        print(
+            f"  {regime:9s} {len(group):2d} scenes, {key} spans "
+            f"{min(values):.3f} to {max(values):.3f}"
+        )
     print(f"\nfingerprint {manifest['fingerprint']}")
     print(f"wrote {args.out}")
     return 0
