@@ -197,6 +197,34 @@ its commanded joint amplitude while delivering 38% of its predicted window. Both
 consistent with the operator acting distally on a constraint that binds proximally, and the gap
 between them is the part a joint-space cap could never fix.
 
+## The reference-side planning is not what misaligns
+
+*Screened 2026-08-19 across all fourteen configurations, no GPU.*
+
+The obstacle station is a constant: `build_graded_scene.py --station` defaults to **0.55**, the same
+fraction of the route for every configuration, while each configuration's adaptation window is its
+own. That looked like the cause of the misalignment found on `n_013_wall_waist_right`, and it is
+cheap to check on the reference clips alone.
+
+It is not the cause. Every one of the fourteen configurations places 0.55 inside its own window:
+
+| nominal | window (route fraction) |
+|---|---|
+| `n_013` | 0.43–0.69, and 0.48–0.63 for the ceiling |
+| `n_064` | 0.39–0.70, and 0.46–0.61 for the ceiling |
+| `n_065` | 0.40–0.68, and 0.46–0.62 for the ceiling |
+
+**0 of 14 configurations place the obstacle outside their own adaptation window.** So the claim in
+the previous entry — that this is the old "shelf placed where the duck had not yet begun" failure —
+is wrong at the level it was stated. On the reference clips the two coincide everywhere.
+
+What remains true is the measurement: at the place its obstacle binds, `n_013_wall_waist_right` has
+its adapted arm 24.9 mm further out than the nominal's, and the same tuck retracts 10.6 mm over the
+episode. The discrepancy is therefore between the reference window and where the *executed* body
+actually is when it meets the solid — a gap the reference-side screen cannot see, and one this
+entry does not explain. Parked under the timebox at eight probes on one family, with the screen
+recorded so the reference-side explanation does not get proposed again.
+
 ## Negative delivery is a diagnostic, not noise
 
 *Found 2026-08-19 on the fourth family, after two measurement bugs of my own.*
