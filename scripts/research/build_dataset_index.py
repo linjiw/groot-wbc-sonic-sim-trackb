@@ -322,6 +322,12 @@ def main() -> int:
         writer.writerows(families)
 
     motions = []
+    if not args.screen:
+        # Without the screen there is no qualification view, and an index whose motions.csv is
+        # silently empty looks complete. Say so rather than write a headerless file.
+        print("no --screen given: motions.csv will not be written (qualification view omitted)")
+    elif not args.screen.exists():
+        print(f"--screen {args.screen} does not exist: motions.csv will not be written")
     if args.screen and args.screen.exists():
         for record in json.loads(args.screen.read_text()).get("records", []):
             stem = re.sub(r"(_s\d+)+$", "", record["csv"][:-4])
