@@ -241,6 +241,41 @@ tuck's unrelated failure.
 For the tuck, no such predictor exists. Two were built and refuted, so its yield is a **budget
 line** — roughly three rollouts per usable lateral clip, plus one to screen each nominal.
 
+### The lower-body operator cannot pay its own transport cost
+
+The two operators differ on a second axis, and this one bounds which obstacles the method can
+address at all. `local_crouch` lowers the reference root by about 0.14 m and leaves the forward
+schedule untouched: the adapted reference still commands the same displacement over the same four
+seconds. A crouched G1 cannot walk that fast, so it arrives short, and the acceptance gate reads the
+shortfall as a tracking failure.
+
+Endpoint lag rises monotonically with crouch depth:
+
+| clip | endpoint lag | verdict |
+|---|---|---|
+| `w_nominal` | 0.257 m | accepted |
+| `w_tuckcap30` | 0.218 m | rejected on contact, not tracking |
+| `w_crouch05` | 0.313 m | rejected |
+| `w_crouch08` | 0.399 m | rejected |
+| `w_crouch11` | 0.509 m | rejected |
+
+The decisive row is the first. **The nominal already spends 0.257 m of the 0.35 m budget**, leaving
+roughly 90 mm for an adaptation to consume, and every crouch tested deeper than about 5 cm exceeds
+it. The arm tuck has the opposite sign — it tracks *better* than the nominal it modifies — which is
+the same asymmetry survival measures from the other direction.
+
+The consequence is structural rather than incidental. Only lowering the robot relieves a ceiling, so
+overhead-band families require a crouch, and a crouch deep enough to clear a ceiling costs more
+forward progress than the gate allows. The first completed banded family shows exactly this: its
+nominal walks the torso into the ceiling at 1543.6 N and its adapted motion clears the same ceiling
+at 49 N, and the adapted cells are still rejected — for missing the endpoint by 0.524 m.
+
+Two repairs are available and neither is adopted here. Retiming the adapted reference so a crouched
+robot is asked for a crouched pace would make the reference self-consistent, but it changes the
+journey the counterfactual holds fixed. Judging adapted clips on progress ratio rather than endpoint
+error would admit them, but it is a gate change and belongs in the pre-registration rather than in
+whichever patch happens to rescue the result. The limitation is reported as a limitation.
+
 ### The lateral operator's yield is a measured cost
 
 The arm tuck is accepted on **1 of 3** valid nominals. Two cheap predictors of *which* one were
@@ -284,6 +319,44 @@ how far an adaptation moves a joint — measured within one motion at 0.048, 0.1
 0.224 m/s for knee excursions of 0.000, 0.420, 0.619, 0.980 and 1.000 rad — so drift is a graded
 difficulty score, not merely a threshold. That makes it usable for curriculum ordering and for
 reporting *how hard* a clip is rather than only whether it survived.
+
+### It also says how much of an edit actually happened
+
+A clip named `crouch18` asserts a crouch. What the corpus can honestly claim is that a crouch was
+*commanded*; the frozen controller decides how much of it occurs. The difference is measurable from
+artefacts every rollout already writes, because `reference_g1_qpos` and `dof_pos` land on the same
+frame grid:
+
+> survival = mean |executed_adapted − executed_nominal| ÷ mean |reference_adapted − reference_nominal|
+
+taken over the joints the operator moves and the frames it is active. Over 23 adapted clips with
+matched nominals, survival separates by body region rather than by how much was asked for:
+
+| operator | n | survival | median |
+|---|---|---|---|
+| crouch (lower body) | 11 | 46–67% | **58%** |
+| combo (hip + waist) | 2 | 65% | 65% |
+| tuck (upper body) | 10 | 57–116% | **89%** |
+
+At matched commanded amplitude near 0.3 rad the groups diverge by a factor of two — `x000_crouch015`
+survives at 46% and `x000_crouch030` at 51%, against 105%, 91% and 88% for three tucks commanding
+0.28–0.33 rad. **The controller preserves arm departures and resists leg departures**, which is the
+expected shape for a policy whose legs carry the load and hold balance, and which had not previously
+been measured. The arm's fidelity has its own ceiling: both uncapped large tucks, commanding 0.741
+and 0.869 rad, fall back to 57%.
+
+Two rollouts of one journey drift apart on their own, so every ratio is reported against a drift
+floor measured on the joints the operator never touches; the operator signal stands 4.7×–13.6× clear
+of it. One clip, `w_tuck06win18`, commands only 0.072 rad and survives at 61% where the amplitude
+trend predicts near-total survival; it carries the thinnest margin in its group and is recorded
+rather than explained.
+
+This matters for what a label may claim. A lower-body label overstates the executed departure by
+roughly 40%, so the release carries executed amplitude beside commanded amplitude rather than
+letting a consumer inherit the label's assertion. It also gives semantic validity a numeric partner:
+survival separates a clip whose behaviour the controller discarded from a clip whose behaviour is
+present and merely hard to see — a distinction human review cannot make from a contact sheet, and
+one that has already corrected a reviewer's reading in this project.
 
 ## Generated motion is not free, and it fails where the dataset needs it most
 
