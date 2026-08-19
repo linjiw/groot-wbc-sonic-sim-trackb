@@ -140,6 +140,49 @@ otherwise every failure buys an extension.
 falls short at the end of Workstream A, this is the cheapest place to return to, and the band is
 recorded here so the return costs two rollouts rather than ten.
 
+## The crouch cannot pay its own transport cost
+
+*Found 2026-08-19, diagnosing the first completed banded family.*
+
+`n_013_ceiling_overhead_left` produced the counterfactual it was designed for: `nominal_hard` walks
+its torso into the ceiling at **1543.6 N** on a pure −z vector, and `adapted_hard` clears the same
+ceiling at 49 N. Both adapted cells are nonetheless **rejected**, and not for contact —
+`reference_endpoint_tracking_error`, missing the commanded endpoint by 0.524 m against a 0.35 m
+threshold.
+
+The cause is in the operator, not the controller. `local_crouch` lowers the reference root by about
+0.14 m and leaves the forward schedule untouched: the adapted reference still commands x from −2.00
+to +2.44 over the same four seconds. A crouched G1 cannot walk that fast, so it arrives short. The
+reference is internally inconsistent — it asks for a crouch and for undiminished progress.
+
+Endpoint lag rises monotonically with crouch depth, which is a five-point sweep and not an anecdote:
+
+| clip | endpoint lag | verdict |
+|---|---|---|
+| `w_nominal` | 0.257 m | accepted |
+| `w_tuckcap30` | 0.218 m | rejected (contact, not tracking) |
+| `w_crouch05` | 0.313 m | rejected (path) |
+| `w_crouch08` | 0.399 m | rejected (endpoint + path) |
+| `w_crouch11` | 0.509 m | rejected (endpoint + path) |
+
+The decisive number is the first row. **The nominal already spends 0.257 m of the 0.35 m budget**,
+leaving roughly 90 mm for the adaptation to consume. Every crouch tested deeper than about 5 cm
+trips the gate. The arm tuck has the opposite sign — it tracks *better* than the nominal — which is
+consistent with [operator survival](operator_survival.md), where arm departures pass through at
+88–105% and leg departures at 46–67%.
+
+**This bounds the overhead band structurally.** A ceiling can only be relieved by lowering the
+robot, so overhead families need a crouch, and a crouch deep enough to clear a ceiling costs more
+progress than the gate allows. Three of the fourteen queued configurations are ceiling/overhead; the
+remaining eleven are wall obstacles at chest and waist, which the tuck relieves.
+
+**Not yet a decision to change anything.** Two responses are available and both are consequential:
+retime the adapted reference so a crouched robot is asked for a crouched pace, which changes the
+journey the family holds fixed; or judge adapted clips on progress ratio rather than endpoint error,
+which is a gate change and must go through the pre-registration rather than be adopted because it
+helps. Neither is taken mid-batch, and the batch is left running because the nominal cells are
+producing exactly the strikes the design predicts.
+
 ## Resolved
 
 | # | prediction | outcome |
