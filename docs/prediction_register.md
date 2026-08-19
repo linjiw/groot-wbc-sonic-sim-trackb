@@ -197,6 +197,55 @@ its commanded joint amplitude while delivering 38% of its predicted window. Both
 consistent with the operator acting distally on a constraint that binds proximally, and the gap
 between them is the part a joint-space cap could never fix.
 
+## P8: the path gate is charging a crouch for being behind, not for leaving the route
+
+*Registered 2026-08-19, after measuring cross-track error and before computing which cells flip.*
+
+`path_error_p95` computes ‖executed(t) − reference(t)‖: the distance between two positions at the
+same timestamp. That is one number covering two different failures — leaving the route, and being
+behind on it — and a crouched robot commits only the second. Measured as distance to the reference
+*polyline* instead, the two separate cleanly:
+
+| clip | same-timestamp p95 | cross-track p95 | share that is phase |
+|---|---|---|---|
+| `w_nominal` | 0.222 m | 0.210 m | 5% |
+| `w_crouch05` | 0.284 m | 0.182 m | 36% |
+| `w_crouch08` | 0.379 m | 0.211 m | 44% |
+| `w_crouch11` | 0.487 m | 0.228 m | 53% |
+| `n_013` adapted_hard | 0.507 m | 0.241 m | 53% |
+
+The nominal is 5% phase and every crouch is 36–53%, rising monotonically with depth. **Every
+cross-track value sits under the existing 0.25 m threshold.** The crouches never leave the route.
+
+This is the four-label argument the paper already makes, applied to a metric instead of a corpus:
+one number covering two questions answers neither. Route adherence, schedule adherence and goal
+attainment are three separate facts about a traversal, and a counterfactual family's claim concerns
+obstacle clearance, which happens mid-route.
+
+**Registered before computing the consequence**, because a metric change that rescues previously
+rejected cells is exactly the change that must not be adopted because it helped:
+
+1. **Between 4 and 8 of the currently-rejected cells flip to accepted** when path error is measured
+   cross-track and endpoint error is reported rather than gated. Falsified outside that range.
+2. **No cell that currently passes flips to rejected.** Cross-track error is bounded above by
+   same-timestamp error, so this should be arithmetically impossible; if any cell flips, the
+   implementation is wrong rather than the idea.
+3. **At least one overhead family becomes verifiable**, since the ceiling cells fail on tracking
+   alone while clearing their obstacle at 49 N. Falsified if none does.
+
+**What is not proposed.** The contact gates do not move. Progress ratio does not move. Upright and
+height checks do not move. Endpoint error stops being a rejection reason and becomes a reported
+quality attribute, because a clip that follows its route and clears its obstacle while finishing
+0.5 m short has traversed — it has simply traversed slowly, and the release should say so in a
+column rather than by deletion.
+
+**The alternative considered and not taken.** Retiming the reference so a crouched robot is asked
+for a crouched pace would also close the gap, and it is the more physically honest fix. It is
+rejected here because it changes the journey that the counterfactual holds fixed: nominal and
+adapted would then differ in timing as well as posture, and the single-cause attribution that the
+whole dataset rests on would be gone. Retiming stays available as a future operator variant where
+both cells are retimed identically, which preserves the contrast; it is not a fix for this gate.
+
 ## The room is sized from the route and centred on the origin
 
 *Found 2026-08-19. The batch was stopped on this.*
