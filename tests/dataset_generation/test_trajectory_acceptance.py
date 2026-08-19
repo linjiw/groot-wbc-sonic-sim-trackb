@@ -68,7 +68,9 @@ def test_reports_individual_route_fall_and_contact_failures() -> None:
     report = evaluate_locomotion_trajectory(trajectory)
 
     assert not report.accepted
+    # The endpoint gate stays here; whether it binds for a given episode is gate_policy's call.
     assert "reference_endpoint_tracking_error" in report.rejection_reasons
+    assert report.diagnostics["endpoint_error_m"] > 0.35
     assert "reference_path_tracking_error" in report.rejection_reasons
     assert "fall_root_height" in report.rejection_reasons
     assert "disallowed_robot_contact" in report.rejection_reasons
@@ -181,3 +183,36 @@ def test_thresholds_validate_supported_fraction() -> None:
         assert "between zero and one" in str(exc)
     else:
         raise AssertionError("invalid supported fraction was accepted")
+
+
+def test_route_adherence_ignores_a_clip_that_is_merely_behind() -> None:
+    """A robot on its route but late must not be charged for a deviation it never made.
+
+    This is the defect P8 records: measuring ‖executed(t) − reference(t)‖ conflates leaving the
+    route with being behind on it, and every crouch in the corpus was rejected for the second while
+    committing only that. Here the executed path is the reference path resampled slower, so the
+    cross-track error is zero by construction and the schedule error is not.
+    """
+    trajectory = _acceptable_trajectory()
+    reference = np.asarray(trajectory["reference_g1_qpos"], dtype=np.float64)[:, :3]
+    count = len(reference)
+    # Walk the same polyline at 85% pace: identical route, systematically behind.
+    lagged = np.linspace(0.0, (count - 1) * 0.85, count)
+    for axis in range(3):
+        trajectory["root_pos_w"][:, axis] = np.interp(lagged, np.arange(count), reference[:, axis])
+    trajectory["root_pos_w"][:, 2] = np.asarray(_acceptable_trajectory()["root_pos_w"])[:, 2]
+
+    report = evaluate_locomotion_trajectory(trajectory)
+
+    assert "reference_path_tracking_error" not in report.rejection_reasons
+    assert report.diagnostics["schedule_error_p95_m"] > 0.0
+    assert report.diagnostics["phase_share_of_schedule_error"] > 0.5
+
+
+def test_cross_track_is_never_larger_than_schedule_error() -> None:
+    """Arithmetically guaranteed, and worth pinning: no cell may flip to rejected under P8."""
+    trajectory = _acceptable_trajectory()
+    trajectory["root_pos_w"][:, 0] += 0.4
+    report = evaluate_locomotion_trajectory(trajectory)
+    gate = next(g for g in report.gates if g.name == "path_error_p95")
+    assert gate.value <= report.diagnostics["schedule_error_p95_m"] + 1e-9

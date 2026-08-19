@@ -23,8 +23,8 @@ import pickle
 import numpy as np
 
 from gear_sonic.dataset_generation.contact_decomposition import decompose_contact_forces
+from gear_sonic.dataset_generation.episode_outcome import classify_episode
 from gear_sonic.dataset_generation.swept_volume import G1_COLLISION_CAPSULES, body_capsules_world
-from gear_sonic.dataset_generation.trajectory_acceptance import evaluate_locomotion_trajectory
 from gear_sonic.dataset_generation.trajectory_segments import best_evaluable_payload
 
 CELLS = ("nominal_easy", "adapted_easy", "nominal_hard", "adapted_hard")
@@ -47,13 +47,20 @@ def cell_report(cell: Path) -> dict | None:
         return None
     try:
         with open(found[0], "rb") as handle:
-            payload, _ = best_evaluable_payload(pickle.load(handle))
+            raw_payload = pickle.load(handle)
+        payload, _ = best_evaluable_payload(raw_payload)
     except (Exception,):  # noqa: BLE001
         return None
     if payload is None:
         return None
-    report = evaluate_locomotion_trajectory(payload)
-    reasons = tuple(report.rejection_reasons)
+    # classify_episode, not evaluate_locomotion_trajectory. The raw evaluator runs every gate;
+    # whether a reference gate *binds* depends on how the episode was built, and gate_policy makes
+    # that call. These rooms were built around the executed corridor, so the reference is a
+    # diagnostic rather than the label. Scoring on the raw evaluator counted reference-tracking as
+    # failure and produced a whole day of wrong conclusions: two genuinely verified families read
+    # as unverified, and a banded family read as verified when it is not.
+    outcome = classify_episode(cell.name, raw_payload)
+    reasons = tuple(outcome.rejection_reasons)
 
     endpoint = float("nan")
     if "reference_g1_qpos" in payload and "root_pos_w" in payload:
@@ -71,7 +78,7 @@ def cell_report(cell: Path) -> dict | None:
             peak = float(np.linalg.norm(forces[:, keep, :], axis=2).max())
 
     return {
-        "accepted": report.accepted,
+        "accepted": outcome.outcome == "accepted",
         "reasons": reasons,
         "endpoint_error_m": endpoint,
         "peak_nonfoot_n": peak,

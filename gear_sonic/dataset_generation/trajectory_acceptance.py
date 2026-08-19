@@ -275,6 +275,30 @@ def _validated_contact_evidence(
     return contact_force_vectors, contact_body_names, left_ground_force, right_ground_force, ()
 
 
+def cross_track_error(executed_xy: np.ndarray, reference_xy: np.ndarray) -> np.ndarray:
+    """Distance from each executed position to the reference *path*, not to its position in time.
+
+    ``‖executed(t) − reference(t)‖`` is one number covering two unrelated failures: leaving the
+    route, and being behind on it. A crouched robot commits only the second -- its stride shortens,
+    so it arrives at each place later -- and the combined number then charges it for a deviation it
+    never made. Measured against the polyline, the nominal walk is 5% phase and a deep crouch is
+    53%, and every crouch measured stays inside the route-adherence threshold it was failing.
+
+    Schedule adherence is still worth knowing and is still reported; it is simply a different fact
+    from route adherence, and one gate cannot answer both.
+    """
+    starts, ends = reference_xy[:-1], reference_xy[1:]
+    spans = ends - starts
+    lengths = np.einsum("ij,ij->i", spans, spans)
+    lengths[lengths < 1e-12] = 1e-12
+    out = np.empty(len(executed_xy), dtype=np.float64)
+    for index, point in enumerate(executed_xy):
+        t = np.clip(np.einsum("ij,ij->i", point - starts, spans) / lengths, 0.0, 1.0)
+        closest = starts + t[:, None] * spans
+        out[index] = float(np.min(np.linalg.norm(point - closest, axis=1)))
+    return out
+
+
 def evaluate_locomotion_trajectory(
     payload: Mapping[str, Any],
     thresholds: LocomotionAcceptanceThresholds | None = None,
@@ -312,7 +336,11 @@ def evaluate_locomotion_trajectory(
     else:
         executed_progress_ratio = 0.0
     endpoint_error = float(path_errors[-1])
-    path_error_p95 = float(np.quantile(path_errors, 0.95))
+    # Route adherence gates; schedule adherence is reported beside it. See cross_track_error.
+    schedule_error_p95 = float(np.quantile(path_errors, 0.95))
+    path_error_p95 = float(
+        np.quantile(cross_track_error(root_pos[:, :2], reference_root[:, :2]), 0.95)
+    )
     min_root_height = float(np.min(root_pos[:, 2]))
     # Sinking below the commanded pelvis height is a fall whatever the absolute
     # value; a low absolute height is only a fall when nothing commanded it.
@@ -391,6 +419,15 @@ def evaluate_locomotion_trajectory(
     diagnostics: dict[str, Any] = {
         "contact_decomposition": decomposition.to_dict(),
         "raw_max_nonfoot_contact_force_n": raw_max_nonfoot_force,
+        # Reported beside the gates. Whether a reference gate *binds* is not this function's call:
+        # gate_policy.py decides that per episode, because an episode whose room was built around
+        # the executed corridor is not being asked to hug its reference. Demoting here instead
+        # would silently disarm the endpoint test for scene-first episodes, where it is the label.
+        "schedule_error_p95_m": schedule_error_p95,
+        "endpoint_error_m": endpoint_error,
+        "phase_share_of_schedule_error": (
+            float(1.0 - path_error_p95 / schedule_error_p95) if schedule_error_p95 > 1e-9 else 0.0
+        ),
     }
     if max_nonfoot_force > 0.0:
         diagnostics.update(

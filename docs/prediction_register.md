@@ -197,6 +197,70 @@ its commanded joint amplitude while delivering 38% of its predicted window. Both
 consistent with the operator acting distally on a constraint that binds proximally, and the gap
 between them is the part a joint-space cap could never fix.
 
+## Retraction: a day of family conclusions came from the wrong verdict function
+
+*Found 2026-08-19, reconciling the pitch page against the scorer.*
+
+`score_family_batch.py` called `evaluate_locomotion_trajectory` directly. That function runs every
+gate. Whether a *reference* gate should bind is not its decision — `gate_policy.py` makes that call
+per episode, and these rooms were built around the executed corridor, so under `SCENE_AROUND_MOTION`
+the reference is a diagnostic and not the label. `classify_episode` applies the policy; the scorer
+bypassed it.
+
+The correction runs in both directions, which is how it was caught:
+
+| family | scored (raw) | correct (policy) |
+|---|---|---|
+| `duck_002` | not verified | **verified** |
+| `duck_003` | not verified | **verified** |
+| `n_013_ceiling_overhead_left` | verified | **not verified** |
+
+So the project has **2 verified families, not 0 and not 1** — the number the release index reported
+all along, and the reason the pitch page shows `duck_003` clearing its obstacle with three cells
+accepted. The pitch was right and the scorer was wrong.
+
+### What this retracts
+
+**"The crouch cannot pay its own transport cost", as a claim about gating.** Endpoint error never
+gated these episodes; the policy demotes it. The register entry, the paper subsection and the
+preflight check built on it all assumed a gate that was not binding.
+
+**P8 in its entirety.** It argued that the path gate charges a crouch for lag. Under the policy
+these episodes ran with, the path gate is demoted too, so it was not charging them anything.
+P8.1 was falsified on its own terms as well — 11 cells flipped against a predicted 4–8, because I
+counted family cells and forgot the sweep corpora.
+
+**The three-miss-mode taxonomy**, which named a structural transport cost as one of three. Two modes
+survive: an under-calibrated edit, and a nominal that fails its own easy scene.
+
+### What survives, and why it is worth separating
+
+The *measurements* are untouched, because none of them asked a gate anything:
+
+* Endpoint lag rises with crouch depth, 0.257 → 0.509 m. Still true, still a real property of the
+  controller, and still the right thing to report as a quality column. It is simply not a rejection.
+* Operator survival by body region, 46–67% against 88–105%.
+* Delivery ratio by band, 30–70%.
+* The room-centring defect and its 418 mm.
+
+### The real blocker for the banded ceiling family
+
+Under the correct policy `n_013_ceiling_overhead_left` fails on **`unstable_reference_drift`** in
+all three non-nominal cells — a gate nothing today had looked at. That is the thing to investigate
+next for the overhead band, and it is not what any of today's analysis was about.
+
+### Why this went unnoticed for a day
+
+Every number was internally consistent, so nothing looked wrong. The scorer, the preflight and the
+paper all agreed with each other because they all shared the same wrong assumption, and the release
+index — which used `classify_episode` and reported two verified families — was the one artefact
+disagreeing. I read that disagreement as the release being stale rather than the scorer being
+wrong, and only checked when a published page contradicted a fresh score.
+
+**The rule this earns:** one verdict function, reached one way. `classify_episode` is that function.
+Anything calling `evaluate_locomotion_trajectory` for a pass/fail is asking a question it does not
+have the standing to answer.
+
 ## P8: the path gate is charging a crouch for being behind, not for leaving the route
 
 *Registered 2026-08-19, after measuring cross-track error and before computing which cells flip.*
