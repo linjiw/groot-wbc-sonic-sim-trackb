@@ -197,6 +197,39 @@ its commanded joint amplitude while delivering 38% of its predicted window. Both
 consistent with the operator acting distally on a constraint that binds proximally, and the gap
 between them is the part a joint-space cap could never fix.
 
+## Negative delivery is a diagnostic, not noise
+
+*Found 2026-08-19 on the fourth family, after two measurement bugs of my own.*
+
+`n_013_wall_waist_right` reports **−58% delivery**: at the place its obstacle binds, the adapted
+arm sits 24.9 mm *further out* than the nominal's. Two false explanations were checked and
+discarded first, and both were mine:
+
+* **Not an operator sign error.** Over the whole episode the right tuck retracts the right wrist by
+  10.6 mm, against the left tuck's 18.9 mm. Both pull inward.
+* **Not the measurement's sign.** Lateral extent does need the obstacle's side — measuring +y on a
+  right-side configuration measures the *left* arm, which that tuck never touches — but fixing it
+  made the number more negative, not less.
+
+The cause is alignment. The left family's obstacle binds at x = −0.27 m, inside the tuck's active
+window, and the arm is 11.2 mm retracted there. The right family's binds at x = +0.40 m, after the
+window has closed, where the arm has already swung back out. The operator did its job in the wrong
+place.
+
+The external forces say the same thing from the other side: the left family's nominal strikes at
+**608.3 N**, the right family's at **31.2 N**. One is an obstacle in the route; the other is a graze
+the robot half-misses on its way past.
+
+This is the failure `build_family_report.py` already names — *"a shelf placed where the duck had not
+yet begun"* — recurring in the banded planner, which sizes windows from reach without checking that
+the reach and the obstacle occur at the same point along the route. Both bands measure the right
+quantity at the wrong place.
+
+**So a negative delivery ratio is worth reporting rather than clipping.** It means the adaptation and
+the obstacle do not coincide, which no amount of scaling the edit will fix — and which the
+repairability arithmetic would silently mis-answer, since dividing by a negative ratio yields a
+negative required command.
+
 ### Superseded by the automated measurement
 
 The hand figures below (30%, 59%, 25%) were point samples. `score_family_batch.py --plans` now

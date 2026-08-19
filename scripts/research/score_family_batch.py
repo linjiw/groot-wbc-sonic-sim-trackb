@@ -22,6 +22,7 @@ import pickle
 
 import numpy as np
 
+from gear_sonic.dataset_generation.contact_decomposition import decompose_contact_forces
 from gear_sonic.dataset_generation.swept_volume import G1_COLLISION_CAPSULES, body_capsules_world
 from gear_sonic.dataset_generation.trajectory_acceptance import evaluate_locomotion_trajectory
 from gear_sonic.dataset_generation.trajectory_segments import best_evaluable_payload
@@ -93,6 +94,10 @@ def delivered_window(family: Path, plan: dict) -> float | None:
     obstacle is not. Both runs are therefore sampled where each one reaches the binding x.
     """
     body, vertical = plan["binding_body"], plan["obstacle"] == "ceiling"
+    # Lateral extent has a sign, and the obstacle decides it. Measuring +y on a right-side
+    # configuration measures the *left* arm -- which that tuck never touches -- and reported a
+    # correct 10.6 mm retraction as -33% delivery.
+    outward = -1.0 if plan.get("side") == "right" else 1.0
 
     def reach(cell: Path, frames: slice | None) -> float | None:
         found = sorted(cell.glob("trajectories/*.trajectory.pkl"))
@@ -129,7 +134,7 @@ def delivered_window(family: Path, plan: dict) -> float | None:
         for k in keep:
             for P in (starts, ends):
                 delta = P[:, k, :] - root
-                lateral = sin * delta[:, 0] + cos * delta[:, 1] + radii[k]
+                lateral = outward * (sin * delta[:, 0] + cos * delta[:, 1]) + radii[k]
                 best = max(best, float(lateral[window].max()))
         return best
 
@@ -141,20 +146,22 @@ def delivered_window(family: Path, plan: dict) -> float | None:
         payload, _ = best_evaluable_payload(pickle.load(handle))
     if payload is None or "robot_contact_force_w" not in payload:
         return None
-    # The binding moment is found from whatever the robot actually struck, not from the body the
-    # plan names. Those differ routinely: a plan naming left_elbow_link describes a capsule the
-    # elbow shares with left_shoulder_yaw_link, and the contact is reported against the shoulder.
-    # Reach is still measured on the named body -- only the timing comes from the strike.
-    names = list(payload["contact_body_names"])
-    feet = set(payload.get("allowed_foot_contact_body_names", ()))
-    keep = [i for i, name in enumerate(names) if name not in feet]
-    if not keep:
+    # The binding moment comes from the decomposed *external* contact, never from raw force
+    # magnitude. Two reasons, both met in this batch. A plan naming left_elbow_link describes a
+    # capsule the elbow shares with left_shoulder_yaw_link, so the strike is reported against a
+    # body the plan does not name -- timing therefore cannot be read off the named body. And every
+    # episode here carries a standing 45 N self-contact at the hip, which is larger than a real
+    # 31 N graze against a wall; thresholding raw magnitude finds the self-contact and misses the
+    # obstacle entirely. Reach is still measured on the body the plan names.
+    decomposition = decompose_contact_forces(
+        np.asarray(payload["robot_contact_force_w"], dtype=np.float64),
+        list(payload["contact_body_names"]),
+        foot_body_names=list(payload.get("allowed_foot_contact_body_names", ())),
+    )
+    external = decomposition.external_contact_by_frame
+    if not external.size or float(external.max()) <= 1.0:
         return None
-    magnitudes = np.linalg.norm(np.asarray(payload["robot_contact_force_w"])[:, keep, :], axis=2)
-    per_frame = magnitudes.max(axis=1)
-    if per_frame.max() <= 50.0:
-        return None
-    peak = int(per_frame.argmax())
+    peak = int(external.argmax())
     binding_x = float(np.asarray(payload["root_pos_w"], dtype=np.float64)[peak, 0])
 
     def near_binding_x(cell: Path) -> slice | None:
