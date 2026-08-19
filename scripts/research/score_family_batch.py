@@ -85,10 +85,13 @@ def miss_mode(cells: dict[str, dict]) -> str:
     if cells["nominal_hard"]["accepted"]:
         return "hard scene did not stop the nominal"
     adapted = [c for c in ("adapted_easy", "adapted_hard") if not cells[c]["accepted"]]
-    if adapted and all(cells[c]["tracking_failed"] for c in adapted):
-        return "adaptation cost more progress than the gate allows"
+    # Contact is checked first on purpose. A cell that both struck the obstacle and drifted has
+    # failed at the thing the family is about, and reporting it as a tracking cost would credit
+    # the adaptation with a clearance it did not achieve.
     if adapted and any(cells[c]["contact_failed"] for c in adapted):
         return "adapted motion still struck the obstacle"
+    if adapted and all(cells[c]["tracking_failed"] for c in adapted):
+        return "adaptation cost more progress than the gate allows"
     if not cells["nominal_easy"]["accepted"]:
         return "nominal does not survive the easy scene"
     return "other"
