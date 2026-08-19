@@ -128,7 +128,10 @@ def main() -> int:
     ap.add_argument("--rollout", type=Path, required=True, help="executed nominal, for placement")
     ap.add_argument("--prefix", required=True)
     ap.add_argument("--station", type=float, default=0.55)
-    ap.add_argument("--margins", type=float, nargs="+", default=[0.050, 0.010])
+    # "centre" is not a fixed margin: it resolves per configuration to half that configuration's
+    # own window, which is where the calibration says a hard shelf belongs. A single number cannot
+    # express it, because each configuration has a different window.
+    ap.add_argument("--margins", nargs="+", default=["0.050", "centre"])
     ap.add_argument("--write", action="store_true")
     args = ap.parse_args()
 
@@ -150,7 +153,13 @@ def main() -> int:
     print(f"{'scene':>34s}{'margin':>9s}{'measured':>11s}{'binds':>22s}")
     written = 0
     for plan in usable:
-        for margin in args.margins:
+        for spec in args.margins:
+            if spec == "centre":
+                margin = -plan["window_m"] / 2.0
+                tag_override = "hard"
+            else:
+                margin = float(spec)
+                tag_override = None
             # Placement from a projected extent lands 5-36 mm short, because a box meets the body
             # at its corners rather than along the lateral axis and no simple projection accounts
             # for that. Rather than derive the corner geometry, the placement is corrected against
@@ -175,8 +184,14 @@ def main() -> int:
                 error = margin - gap
                 if abs(error) < 0.001:
                     break
+                # Clearance saturates once a capsule is wholly inside the solid: the distance
+                # clamps to zero and the reading becomes -radius, about -50 mm for a wrist. A
+                # requested margin deeper than that cannot be hit and the loop would chase it
+                # forever. Deep overlaps only need the nominal to fail, which they do, so stop.
+                if gap <= -0.049 and margin < gap:
+                    break
                 adjust += error
-            tag = "easy" if margin > 0.03 else f"m{int(round(margin * 1000)):+d}"
+            tag = tag_override or ("easy" if margin > 0.03 else f"m{int(round(margin*1000)):+d}")
             scene_id = f"{args.prefix}_{plan['obstacle']}_{plan['band']}_{plan['side']}_{tag}"
             print(
                 f"{scene_id[:34]:>34s}{margin * 1000:8.0f}mm{gap * 1000:10.1f}mm"
