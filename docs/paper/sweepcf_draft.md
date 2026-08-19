@@ -251,6 +251,7 @@ shortfall as a tracking failure.
 
 Endpoint lag rises monotonically with crouch depth:
 
+<!-- generated:transport-table -->
 | clip | endpoint lag | verdict |
 |---|---|---|
 | `w_nominal` | 0.257 m | accepted |
@@ -258,6 +259,7 @@ Endpoint lag rises monotonically with crouch depth:
 | `w_crouch05` | 0.313 m | rejected |
 | `w_crouch08` | 0.399 m | rejected |
 | `w_crouch11` | 0.509 m | rejected |
+<!-- /generated:transport-table -->
 
 The decisive row is the first. **The nominal already spends 0.257 m of the 0.35 m budget**, leaving
 roughly 90 mm for an adaptation to consume, and every crouch tested deeper than about 5 cm exceeds
@@ -332,11 +334,13 @@ frame grid:
 taken over the joints the operator moves and the frames it is active. Over 23 adapted clips with
 matched nominals, survival separates by body region rather than by how much was asked for:
 
+<!-- generated:survival-table -->
 | operator | n | survival | median |
 |---|---|---|---|
 | crouch (lower body) | 11 | 46–67% | **58%** |
-| combo (hip + waist) | 2 | 65% | 65% |
+| combo (hip + waist) | 2 | 65–65% | 65% |
 | tuck (upper body) | 10 | 57–116% | **89%** |
+<!-- /generated:survival-table -->
 
 At matched commanded amplitude near 0.3 rad the groups diverge by a factor of two — `x000_crouch015`
 survives at 46% and `x000_crouch030` at 51%, against 105%, 91% and 88% for three tucks commanding
