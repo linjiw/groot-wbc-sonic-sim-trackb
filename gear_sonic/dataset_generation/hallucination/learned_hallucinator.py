@@ -19,6 +19,19 @@ and the adaptation clear is the closed-form interval `[R_adapted + delta, R_nomi
 each station. So we can measure coverage against ground truth instead of guessing at it.
 
 Nothing here proposes a scene for physics. The surrogate is a study instrument.
+
+**RETRACTION NOTICE (2026-08-26).** The first result produced with this module is withdrawn; see
+`docs/hallucination/REPORT_LFLH_COMPARISON.md`. Three defects made it an artifact and are now
+documented in place rather than quietly fixed, so the retraction stays reproducible:
+
+* `Hallucinator.min_log_sigma` clamps the variance, and the retracted headline was exactly the
+  clamp floor. `clamp` has no gradient outside its range, so the parameter was dead.
+* `train` optimises a convex reconstruction loss with **no entropy or KL term**, so `sigma -> 0`
+  is a theorem of the objective, not an experimental finding. Pass `kl_weight` to add the term.
+* The coordinate is anchored on `adapted.mean()`, which is the feasible window's lower edge, so a
+  perfect `valid_rate` is the parameterisation talking rather than the model.
+
+This module must not be cited as evidence about learned hallucinators until those are addressed.
 """
 
 from __future__ import annotations
@@ -153,6 +166,7 @@ def train(
     learning_rate: float = 3e-3,
     samples: int = 8,
     prior_weight: float = 1.0,
+    kl_weight: float = 0.0,
     seed: int = 0,
     decoder: SurrogateDecoder | None = None,
 ) -> tuple[Hallucinator, TrainingReport]:
@@ -188,6 +202,12 @@ def train(
             coordinate - adapted.mean(dim=-1)
         ).pow(2).mean()
         loss = loss + prior_weight * prior
+        if kl_weight:
+            # The term LfLH's location loss omits and whose absence makes the collapse a theorem:
+            # a proper Gaussian KL carries -log sigma, which opposes contraction. With it, the
+            # same model class trades a little validity for an order of magnitude of coverage.
+            kl = 0.5 * (mean.pow(2) + sigma.pow(2) - 1.0) - log_sigma
+            loss = loss + kl_weight * kl.mean()
         optimiser.zero_grad()
         loss.backward()
         optimiser.step()
@@ -258,21 +278,31 @@ def coverage(
     low_edge = float(lower[finite].min())
     high_edge = float(upper[finite].max())
     span = max(high_edge - low_edge, 1e-9)
+
+    # Numerator and denominator must use the *same* cell rule. Admitting a feasible cell by its
+    # centre while admitting a visited cell by containment let `visited` contain cells absent from
+    # `feasible_cells`, and occupancy then exceeded 1 -- measured at 124.7% for a uniform sampler
+    # at six bins. A cell now counts as feasible when it overlaps the window at all.
+    def _cell_of(value: float) -> int:
+        return int(np.clip((value - low_edge) / span * bins, 0, bins - 1))
+
     for index in np.flatnonzero(finite):
-        for cell in range(bins):
-            value = low_edge + (cell + 0.5) * span / bins
-            if lower[index] <= value <= upper[index]:
-                feasible_cells.add((int(index), cell))
+        for cell in range(_cell_of(lower[index]), _cell_of(upper[index]) + 1):
+            feasible_cells.add((int(index), cell))
     for station, coordinate in placements:
         index = int(np.clip(round(station), 0, stations - 1))
         if not finite[index]:
             continue
         if lower[index] <= coordinate <= upper[index]:
             valid += 1
-            cell = int(np.clip((coordinate - low_edge) / span * bins, 0, bins - 1))
-            visited.add((index, cell))
+            visited.add((index, _cell_of(coordinate)))
+    occupied = len(visited & feasible_cells)
     return {
         "valid_rate": valid / max(len(placements), 1),
-        "occupancy": len(visited) / max(len(feasible_cells), 1),
+        "occupancy": occupied / max(len(feasible_cells), 1),
         "feasible_cells": len(feasible_cells),
+        "visited_cells": occupied,
+        # Occupancy saturates as 1 - exp(-N/K) for a uniform sampler, so it is only comparable at
+        # equal sample budgets and is properly reported as a curve in N.
+        "samples": len(placements),
     }

@@ -47,6 +47,10 @@ from gear_sonic.dataset_generation.local_adaptation import (  # noqa: E402
 from gear_sonic.dataset_generation.reference_payload import (  # noqa: E402
     payload_from_reference,
 )
+from gear_sonic.dataset_generation.swept_volume import (  # noqa: E402
+    box_clearance_to_cloud,
+    swept_point_cloud,
+)
 from scripts.research.hallucination.prepare_probe_candidates import DATA_ROOT  # noqa: E402
 from scripts.research.hallucination.screen_crouch_ladder import (  # noqa: E402
     STATION_FRACTION,
@@ -77,26 +81,65 @@ def _numbers(values) -> str:
     return " ".join(f"{float(value):.6f}" for value in values)
 
 
+def _obb_overlap(
+    centre_a, size_a, yaw_a, centre_b, size_b, yaw_b, *, margin_m: float = 0.0
+) -> bool:
+    """Separating-axis test for two yaw-only oriented boxes, inflated by ``margin_m``."""
+    if abs(centre_a[2] - centre_b[2]) > (size_a[2] + size_b[2]) / 2.0 + margin_m:
+        return False
+    centres = np.asarray(centre_b[:2]) - np.asarray(centre_a[:2])
+    axes = []
+    for yaw in (yaw_a, yaw_b):
+        axes.append(np.asarray((math.cos(yaw), math.sin(yaw))))
+        axes.append(np.asarray((-math.sin(yaw), math.cos(yaw))))
+    for axis in axes:
+        reach_a = sum(
+            abs(float(np.dot(axis, direction))) * extent / 2.0
+            for direction, extent in (
+                (np.asarray((math.cos(yaw_a), math.sin(yaw_a))), size_a[0]),
+                (np.asarray((-math.sin(yaw_a), math.cos(yaw_a))), size_a[1]),
+            )
+        )
+        reach_b = sum(
+            abs(float(np.dot(axis, direction))) * extent / 2.0
+            for direction, extent in (
+                (np.asarray((math.cos(yaw_b), math.sin(yaw_b))), size_b[0]),
+                (np.asarray((-math.sin(yaw_b), math.cos(yaw_b))), size_b[1]),
+            )
+        )
+        if abs(float(np.dot(axis, centres))) > reach_a + reach_b + margin_m:
+            return False
+    return True
+
+
 def sample_context(
-    tracks_xy: np.ndarray,
     station: tuple[float, float],
     yaw: float,
     *,
     count: int,
     keepout_m: float,
     rng: np.random.Generator,
-    sweep_points: np.ndarray,
+    cloud_points: np.ndarray,
+    cloud_radii: np.ndarray,
+    binding: dict,
 ) -> list[dict]:
     """Sample keep-out-certified context obstacles in the route frame.
 
-    Shape, size, along/lateral position and yaw are all drawn; the only hard constraint is that no
-    part of the item may come within ``keepout_m`` of either swept body. Context is refused rather
-    than moved, so a rejected draw simply does not appear.
+    Shape, size, along/lateral position and yaw are all drawn; a draw is kept only if it clears
+    both swept bodies by ``keepout_m`` **and** does not intersect the binding obstacle. Rejected
+    draws are refused rather than moved.
+
+    Clearance uses the repository's own swept-volume primitive, which densifies along each capsule
+    axis and subtracts capsule radii. An earlier version of this function measured against capsule
+    *endpoints only* with a circumscribing-radius bound, discarding radii and capsule interiors;
+    that under-measured the body by up to 165 mm and certified placements as clear at 131.8 mm
+    that were actually 84.0 mm away. The box is yaw-rotated, so the cloud is transformed into the
+    box frame and the query box becomes axis-aligned there.
     """
     forward = np.asarray((math.cos(yaw), math.sin(yaw)))
     lateral = np.asarray((-math.sin(yaw), math.cos(yaw)))
     placed: list[dict] = []
-    for _ in range(count * 12):
+    for _ in range(count * 40):
         if len(placed) >= count:
             break
         name, (along, across, vertical), mount = CONTEXT_INVENTORY[
@@ -109,23 +152,39 @@ def sample_context(
         offset_lateral = side * float(rng.uniform(0.75, 2.4))
         centre_xy = np.asarray(station) + forward * offset_along + lateral * offset_lateral
         base_z = 0.0 if mount == "floor" else float(rng.uniform(1.55, 2.10))
-        centre_z = base_z + size[2] / 2.0
+        centre = (float(centre_xy[0]), float(centre_xy[1]), base_z + size[2] / 2.0)
         item_yaw = yaw + float(rng.normal(0.0, 0.35))
-        # Conservative separation: the item's circumscribing radius against every sampled point of
-        # both swept bodies. Cheap, and it errs towards refusing a legal placement.
-        radius = 0.5 * math.hypot(size[0], size[1])
-        planar = np.linalg.norm(sweep_points[:, :2] - centre_xy[None, :], axis=1)
-        vertical_gap = np.maximum(0.0, np.abs(sweep_points[:, 2] - centre_z) - size[2] / 2.0)
-        clearance = np.hypot(np.maximum(0.0, planar - radius), vertical_gap)
-        if float(clearance.min()) < keepout_m:
+
+        # Context must not fuse into the binding face: an orange box welded to the blue plank is
+        # exactly the second, unlabelled cause the keep-out discipline exists to prevent.
+        if _obb_overlap(
+            centre,
+            size,
+            item_yaw,
+            binding["center_m"],
+            binding["full_size_m"],
+            binding["yaw_rad"],
+            margin_m=keepout_m,
+        ):
+            continue
+
+        cos, sin = math.cos(-item_yaw), math.sin(-item_yaw)
+        rotation = np.asarray(((cos, -sin), (sin, cos)))
+        local = cloud_points - np.asarray(centre)[None, :]
+        local = np.concatenate((local[:, :2] @ rotation.T, local[:, 2:3]), axis=1)
+        half = np.asarray(size) / 2.0
+        clearance = box_clearance_to_cloud(
+            local, cloud_radii, (-half[0], -half[1], -half[2], half[0], half[1], half[2])
+        )
+        if clearance < keepout_m:
             continue
         placed.append(
             {
                 "name": f"{name}_{len(placed)}",
-                "center_m": (float(centre_xy[0]), float(centre_xy[1]), centre_z),
+                "center_m": centre,
                 "full_size_m": size,
                 "yaw_rad": item_yaw,
-                "min_clearance_m": float(clearance.min()),
+                "min_clearance_m": float(clearance),
             }
         )
     return placed
@@ -397,29 +456,39 @@ def main() -> int:
         usable = [rung for rung in usable if rung.get("reference_gate")] or case["rungs"]
         rung = max(usable, key=lambda r: r.get("predicted_window_mm", 0.0))
         proposal = proposal_for(qpos, predict, rung["target_drop_mm"] / 1000.0)
-        # Both swept bodies, sampled, so context can be certified clear of each.
-        sweep = np.concatenate(
-            [
-                np.concatenate((tracks.starts.reshape(-1, 3), tracks.ends.reshape(-1, 3)), axis=0)
-                for tracks in (
-                    extract_keypoints(payload_from_reference(qpos)),
-                    extract_keypoints(payload_from_reference(proposal["adapted_qpos"])),
-                )
-            ],
-            axis=0,
-        )
+        # Both swept bodies as a densified point cloud with radii, so clearance is conservative.
+        clouds = []
+        for clip in (qpos, proposal["adapted_qpos"]):
+            payload = payload_from_reference(clip)
+            points, radii = swept_point_cloud(
+                np.asarray(payload["body_pos_w"], dtype=np.float64),
+                np.asarray(payload["body_quat_w"], dtype=np.float64),
+                list(payload["body_names"]),
+            )
+            clouds.append((points.reshape(-1, 3), radii.reshape(-1)))
+        cloud_points = np.concatenate([item[0] for item in clouds], axis=0)
+        cloud_radii = np.concatenate([item[1] for item in clouds], axis=0)
         context = sample_context(
-            qpos[:, :2],
             proposal["station_xy_m"],
             proposal["yaw_rad"],
             count=args.context,
             keepout_m=args.keepout_mm / 1000.0,
             rng=np.random.default_rng(args.seed + index),
-            sweep_points=sweep,
+            cloud_points=cloud_points,
+            cloud_radii=cloud_radii,
+            binding=proposal["obstacle"],
         )
         out_path = args.out_dir / f"case_{index:03d}_{case['body_mode']}.mp4"
+        # The caption must say whether the case study admitted this rung, so a viewer cannot
+        # mistake a refused proposal for a family. 55 of the 94 clips are refused.
+        verdict = (
+            "PROPOSED"
+            if case["decision"] == "propose"
+            else "REFUSED (" + ", ".join(case["refusal_reasons"]) + ")"
+        )
         shared = [
-            f"{index:03d} {case['body_mode']}  {case['route']['turn_sign']}  "
+            f"{index:03d} {case['body_mode']}  {case['route']['turn_sign']}  {verdict}",
+            f"straightness {case['route']['straightness']:.2f}  "
             f"straightness {case['route']['straightness']:.2f}",
             f"route yaw {math.degrees(proposal['yaw_rad']):+.0f} deg  "
             f"context {len(context)}  "

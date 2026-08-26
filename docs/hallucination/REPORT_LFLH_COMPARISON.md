@@ -1,119 +1,133 @@
-# Does a learned hallucinator recover the humanoid inverse set, or collapse onto it?
+# RETRACTED: "Does a learned hallucinator recover the humanoid inverse set?"
 
-**Date:** 2026-08-26
-**Code:** `gear_sonic/dataset_generation/hallucination/learned_hallucinator.py`,
-`scripts/research/hallucination/run_lflh_comparison.py`
-**Artifact:** `docs/hallucination/lflh_comparison.json` · **Tests:** 8
+**Date:** 2026-08-26 · **Status: the headline result of this report is withdrawn.**
+
+An adversarial review of the first version found that every number in it was an artifact of the
+setup rather than a measurement. The numbers reproduce exactly; they do not mean what the report
+said they meant. This file now records what was claimed, why it was wrong, and the one part that
+survives.
+
+The retracted claims were: that a learned LfLH-style hallucinator's `sigma_coordinate` collapses
+from 87.89 mm to 0.248 mm ("354x"), that this reproduces LfLH's reported mode collapse on humanoid
+data, and that it therefore constitutes *evidence* for computing the support in closed form rather
+than learning it.
 
 ---
 
-## 1. The question, and why it is answerable here
+## 1. Why the result was invalid
 
-LfLH learns `q_psi(C | p)` by sampling obstacles, pushing them through a **fixed differentiable
-planner**, and reconstructing the trajectory. Both LfLH and Dyna-LfLH report that the learned
-distribution **mode-collapses** — it finds one obstacle configuration that explains the trajectory
-and cannot cover the many others that would do equally well. Dyna-LfLH names this as a performance
-limitation.
+**The "learned" model is a constant function of its input.** Across all 16 clips the latent means
+have standard deviation 0.0015, which is **0.15 mm** of clip-to-clip variation, against feasible
+windows that differ by tens of millimetres between clips and whose lower edge moves 45–136 mm
+*within* a clip. Controls settle it:
 
-In the 2-D mobile-robot setting that is hard to quantify, because the true inverse set
-
-```
-C(p) = { C : p in argmin_p' J(p'; C) }
-```
-
-is not known. **In the humanoid overhead case it is.** The set of face coordinates that make the
-nominal strike and the adaptation clear is exactly
-
-```
-[ R_adapted(u) + delta , R_nominal(u) - delta ]   at every route station u
-```
-
-So a learned distribution can be scored against ground truth instead of against itself. That is
-what this experiment does.
-
-## 2. Setup
-
-Faithful to LfLH's shape, scaled to our constraint:
-
-- **Trajectory `p`**: the pair of overhead reach profiles `R_nominal(u)`, `R_adapted(u)` sampled at
-  24 route stations, measured with the same instrument the window solver uses.
-- **Hallucinator `g_psi`**: three 1-D convolutions over the profile pair, temporal pooling, a fully
-  connected head emitting Gaussian means and log-variances — the same architecture family as
-  LfLH's, emitting two parameters (station, face coordinate) rather than ten ellipses, because the
-  humanoid overhead constraint has two free parameters and not thirty.
-- **Fixed decoder `d`**: a parameter-free differentiable surrogate that answers only what physics
-  answers — at this face, does the nominal strike and does the adaptation clear — read from the
-  reach profiles through a soft station gather. It has **no learnable parameters**, which is what
-  stops encoder and decoder colluding, and a test asserts that.
-- **Objective**: reparameterised sampling, reconstruction (`strike AND clear`), plus station and
-  coordinate priors — LfLH's three terms.
-
-**The surrogate is a study instrument, not a proposal mechanism.** Our real decoder is a frozen
-SONIC policy in Isaac: not differentiable, ~50 s per evaluation, and not even deterministic
-(LFH-E16b measured the same motion accepting at 3/3, 1/3 and 0/3 seeds). The LfLH training loop
-cannot be run against it. The point of the surrogate is to ask whether the *method* would recover
-the inverse set if the decoder were free — and the answer does not depend on the decoder's cost.
-
-## 3. Result: the collapse reproduces, and it is severe
-
-16 clips, 24 stations each, 800 steps, 400 samples per source.
-
-| | start | end | contraction |
-|---|---:|---:|---:|
-| `sigma_coordinate` | **87.89 mm** | **0.248 mm** | **354x** |
-| `sigma_station` | — | 0.0073 | — |
-
-| sampler | valid placements | **occupancy of the feasible set** |
+| arm | valid | occupancy |
 |---|---:|---:|
-| learned LfLH-style hallucinator | **100.0%** | **0.7%** |
-| uniform over the closed-form support | **100.0%** | **83.4%** |
+| trained model | 100.0% | 0.66% |
+| trajectory input replaced by the corpus-mean profile | 100.0% | 0.63% |
+| **no network at all** — constant `adapted.mean() + 4 mm` | 100.0% | **0.50%** |
 
-`valid` is the share of sampled placements that actually separate the pair — LfLH's reconstruction
-success. `occupancy` is the share of the exact feasible set's cells that any sample reaches.
+A constant scores within noise of the trained model. Nothing about `q(C | p)` was tested.
 
-**The learned hallucinator is perfectly correct and almost entirely non-diverse.** It finds a
-placement that explains the motion and puts essentially all its mass there: 0.7% of the space of
-placements that would have explained it equally well. Sampling uniformly over the interval we can
-compute reaches 83.4% of that space at identical validity — a **119x coverage gap with no loss of
-correctness**.
+**The headline sigma is a hard-coded constant.** `learned_hallucinator.py` clamps `log_sigma` at
+`-6.0`; `100 * exp(-6) = 0.24788`, which is the reported value to float32 precision, pinned
+bit-for-bit from step 120 onward. `clamp` has zero gradient outside its range, so the parameter was
+dead. Moving the floor moves the "result": `-3.0 -> 4.98 mm`, `-4.5 -> 1.11 mm`, `-8.0 -> 0.034 mm`.
+The numerator, 87.89 mm, is untrained random initialisation and ranges 87.9–108.4 mm across seeds.
+**"354x" is one seed divided by one magic number.**
 
-This is the same mechanism the user's 2-D toy shows, where the decisive parameter's variance
-contracts to the model's floor while a weakly-coupled parameter keeps some spread. Widening the
-distribution samples faces that fail to separate the pair, which raises expected reconstruction
-loss, so the optimiser has a direct incentive to shrink. Nothing is wrong with the training; the
-objective is simply not a coverage objective.
+**The 100% valid rate is the parameterisation, not the model.** The coordinate is emitted as
+`sample * 0.1 + adapted.mean(dim=-1)`, and the true window's lower edge is `adapted + margin`. The
+anchor is the answer, handed to the model by hand. This is exactly the "affine identity, cannot
+fail" criticism the audit levelled at the 400/400 in-support check — it applies with equal force
+here, and the report did not say so.
 
-## 4. What this establishes for the paper
+**The collapse is a theorem, not an experiment.** `-log sigmoid(z)` is `softplus(-z)`, which is
+convex, so `E[L(mu + sigma * eps)]` is strictly increasing in `sigma` for every temperature, and
+there is no entropy or KL term opposing it. `sigma -> 0` is provable before any data is loaded.
+Confirmed by ablation: temperature (0.004 → 0.5) does not change it; `prior_weight = 0` does not
+change it; **adding the missing KL does**:
 
-1. **The design choice is now evidence, not assertion.** We do not fit a distribution over face
-   placement because, measured on our own data against known ground truth, fitting one costs 119x
-   coverage for no gain in validity. Computing the support and sampling inside it dominates.
-2. **The mode collapse is not specific to 2-D navigation.** It reproduces on humanoid reach
-   profiles with a two-parameter obstacle, which is the smallest inverse problem where it could
-   have gone away.
-3. **It sharpens where a learned component *does* belong.** The failure is coverage of a
-   *solvable* set. Where the set is not solvable in closed form — which station, which constraint
-   axis, how many obstacles, dynamic obstacles — a learned distribution is the right tool, and the
-   coverage metric here is how it should be judged.
-4. **`valid_rate` alone is a misleading metric**, and this is the general lesson. A collapsed
-   sampler scores 100% on it. Any future hallucinator in this project must report occupancy of the
-   feasible set beside it, exactly as this comparison does.
+| | sigma | valid | occupancy |
+|---|---:|---:|---:|
+| as implemented | 0.248 mm | 100.0% | 0.66% |
+| + KL, weight 0.01 | 3.15 mm | 99.7% | 5.80% |
+| + KL, weight 0.1 | 7.19 mm | 92.2% | **34.3%** |
 
-## 5. Limits, stated plainly
+**So the report's central claim is falsified by its own model class.** "A single Gaussian cannot
+hold both high" is untrue: hand-setting sigma gives 97.4% valid at 9.5% occupancy and 89.1% at
+28.3%. The 0.66% was the *objective's* choice under a missing regulariser, not the family's limit.
 
-- The surrogate decoder is not physics. It reproduces the *geometric* decision (strike / clear)
-  and nothing about controller delivery, contact dynamics, or seed sensitivity. A hallucinator
-  that looked good here would still have to face the real decoder.
-- Single Gaussian only. A mixture or a normalizing flow would cover more; the comparison here is
-  against the model class LfLH actually uses, and the point is that the *objective* rewards
-  collapse regardless of the family's capacity.
-- 16 clips, reference-side reach profiles, one commanded amplitude, overhead axis only.
-- Occupancy is measured on a 24 x 24 cell discretisation of the feasible set; the absolute number
-  moves with the binning, the 119x ratio does not.
+**The occupancy metric is broken.** Feasible cells are admitted by their centre, visited cells by
+containment, so the two use different rules and occupancy can exceed 1 — measured at **124.7%** for
+the uniform sampler at 6 bins. And 83.4% is `1 - exp(-N/K)`, a coupon-collector reading of
+`--samples 400`, not a property of the sampler.
 
-## Reproduce
+**The report's own robustness claim was false.** §5 stated "the absolute number moves with the
+binning, the 119x ratio does not." Measured, the ratio moves 58x–137x with binning and 22x–158x
+with sample budget. It is a free parameter of the report.
 
-```bash
-env -u PYTHONPATH ~/miniconda3/envs/env_isaaclab/bin/python \
-  scripts/research/hallucination/run_lflh_comparison.py --clips 16 --steps 800 --samples 400
-```
+## 2. The citation was also wrong
+
+- **LfLH (arXiv 2108.09793) does not report mode collapse.** The words "collapse", "diversity",
+  "mode", "entropy" and "KL" do not appear. The claim belongs to **Dyna-LfLH v2**
+  (arXiv 2403.17231) §IV-E, in a single-obstacle dynamic regime.
+- **LfH-CP (arXiv 2509.26513) states the opposite of what was implied**: "LfLH, in comparison, can
+  partially overcome mode collapse by hallucinating more obstacles in static environments." The
+  reduction to one obstacle with two parameters removes the very mechanism the literature credits
+  with mitigating collapse — and then reports collapse.
+- LfLH emits **10 ellipses = 40 obstacle parameters** (UAV: 15 ellipsoids = 90), not "thirty".
+- The implementation kept only a location-NLL analogue. It omits the trajectory MSE through a
+  differentiable planner, the genuine closed-form `size_kl_loss`, obstacle–obstacle repulsion,
+  the 0.5 m obstacle–plan clearance, loss annealing, and the five extra random obstacles LfLH
+  injects per plan **specifically to increase sample variance**.
+
+Calling it "an LfLH-style hallucinator" was not defensible. It is a two-parameter Gaussian trained
+through a soft indicator of the closed-form window.
+
+## 3. What survives
+
+One claim, and it is worth keeping:
+
+> **`valid_rate` alone is a misleading metric.** A collapsed sampler — indeed a constant — scores
+> 100% on it. Any proposal distribution in this project must report coverage of the feasible set
+> beside validity.
+
+The irony is instructive: the report demonstrated this by accidentally shipping a constant that
+scored 100% valid, and then read its own artifact as a finding about learned models.
+
+The limits paragraph (§5 of the original: surrogate is not physics, single Gaussian, 16 clips,
+one amplitude, overhead only) was accurate. It was simply not sufficient — the flaws were upstream
+of the limits.
+
+## 4. What a defensible version requires
+
+1. **Prove the collapse; do not "measure" it.** Softplus is convex and LfLH's location term is an
+   NLL with no `-log sigma`, so `E[L]` increases in sigma. One paragraph, no seeds, no clamp,
+   unfalsifiable by tuning — a *stronger* claim than the retracted one.
+2. **Remove the clamp from any headline** (`min_log_sigma = -20`) and report where sigma settles,
+   mean ± sd over at least five seeds. Never report a start value drawn from initialisation.
+3. **Fix `coverage`**: one cell rule for numerator and denominator, a test asserting
+   `occupancy <= 1`, occupancy reported *as a curve in N* rather than at a single budget, and the
+   station axis decomposed from the coordinate axis — a single-station sampler's ceiling is ~11%,
+   so most of the retracted gap was the station axis, not the phenomenon.
+4. **Add the controls that decide it**: no-network constant, the same Gaussian with a proper KL, a
+   mixture or flow, and the valid-versus-occupancy Pareto frontier instead of two points.
+5. **Remove the ground-truth leak**: parameterise the coordinate in absolute metres, and report the
+   input-ablation as a standing diagnostic. If replacing the trajectory with the corpus mean does
+   not change the output, the model is not conditional and nothing was learned.
+6. **Implement LfLH's actual loss and multi-obstacle setting, or drop the name.**
+
+Until at least 1–5 are done, this project should make **no claim** about learned hallucinators
+versus closed-form support. The closed-form window remains the right engineering choice here for
+the reasons in `docs/lfh/lflh-relationship-and-3d.md` §2 — a non-differentiable, expensive,
+stochastic decoder — and those reasons stand on their own. They never needed this experiment, and
+they are weakened rather than strengthened by an experiment that does not hold up.
+
+## 5. Disposition of the code
+
+`gear_sonic/dataset_generation/hallucination/learned_hallucinator.py` and
+`scripts/research/hallucination/run_lflh_comparison.py` are retained, with the clamp, the leak and
+the metric documented in place, so the retraction is reproducible. They must not be cited as
+evidence for anything until rebuilt. `docs/hallucination/lflh_comparison.json` is retained as the
+record of the retracted run.

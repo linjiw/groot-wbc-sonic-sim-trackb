@@ -11,7 +11,7 @@ derive from that what the 3D extension has to be.
 | | inverse map | decoder | what is learned |
 |---|---|---|---|
 | **LfH** | hand-built: the executed C-space tube is free, the rest is obstacle | none | nothing |
-| **LfLH** | `q_psi(C \| p)` — Gaussian over ellipse centres and sizes | **fixed differentiable planner** (Ego-Planner as a differentiable layer) | the hallucinator, by trajectory reconstruction |
+| **LfLH** | `q_psi(C \| p)` — Gaussian over **10 ellipses, 40 obstacle parameters** | **fixed differentiable planner** (Ego-Planner as a differentiable layer) | the hallucinator, by trajectory reconstruction |
 | **LfH-CP** | critical configuration, then procedural realisation | classical planner | the critical constraint only |
 | **SweepCF (ours)** | **closed-form interval** over face coordinate | **frozen SONIC + Isaac physics** | `D_phi` (executed reach), and nothing about the verdict |
 
@@ -58,10 +58,25 @@ an exact interval, computed from two executed reaches, with no sampling and no f
 
 ## 3. Why this dodges the mode-collapse the walkthrough diagnoses
 
+**Correction, 2026-08-26.** An earlier version of this section attributed the mode-collapse report
+to LfLH itself. That is wrong: arXiv 2108.09793 does not discuss collapse, diversity, entropy or
+KL at all. The finding belongs to **Dyna-LfLH v2** (arXiv 2403.17231) §IV-E, in a single-obstacle
+*dynamic* regime. And **LfH-CP** (arXiv 2509.26513) states that "LfLH ... can partially overcome
+mode collapse by hallucinating more obstacles in static environments" — so multi-obstacle
+hallucination is credited as a *mitigation*, which any single-obstacle reduction forecloses by
+construction. A retracted experiment of ours made exactly that mistake; see
+`docs/hallucination/REPORT_LFLH_COMPARISON.md`.
+
 The walkthrough's toy shows `sigma_cy -> 0.0186` — the parameter that decides which side the
 obstacle goes collapses almost to the floor, because widening it samples obstacles that push the
-planner the wrong way and raise expected loss. Dyna-LfLH reports the same failure and calls it a
-performance limitation.
+planner the wrong way and raise expected loss.
+
+The mechanism is analytic rather than empirical, and worth stating that way: LfLH's location term
+is a negative log-likelihood with no `-log sigma`, and `-log sigmoid` is convex, so expected loss
+is strictly increasing in sigma and contraction is a property of the objective. LfLH's *size* term
+does carry a genuine Gaussian KL, and LfLH additionally injects five extra random obstacles per
+plan specifically to increase sample variance — both are anti-collapse pressure that a naive
+re-implementation omits.
 
 We do not fit a variance, so there is nothing to collapse. The support is computed exactly and the
 proposal samples inside it. The audit noted that our "400/400 samples in support" check is an
