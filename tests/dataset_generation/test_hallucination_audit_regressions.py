@@ -199,3 +199,101 @@ def Xform "World"
     assert "double B" not in records["/World/Frame/Binding"]
     assert "double size = 4" in records["/World/Frame/Ctx"]
     assert "double C" not in records["/World/Frame/Ctx"]
+
+
+def test_oriented_face_matches_axis_aligned_when_the_route_is_axis_aligned():
+    """A zero-yaw route frame must reproduce the world-axis result exactly."""
+    starts = np.asarray([[[0.0, 0.0, 1.20], [0.30, 0.10, 1.10]]])
+    ends = np.asarray([[[0.05, 0.0, 1.22], [0.34, 0.10, 1.12]]])
+    tracks = SemanticCapsuleTracks(
+        starts=starts,
+        ends=ends,
+        radii=np.asarray([0.06, 0.05]),
+        owners=("torso_link", "left_wrist_yaw_link"),
+        groups=("head_torso", "wrist_left"),
+        root_pos_w=np.asarray([[0.0, 0.0, 0.8]]),
+        root_quat_w=np.asarray([[1.0, 0.0, 0.0, 0.0]]),
+    )
+    axis_aligned = overhead_face_reach(tracks, (0.0, 0.0), "x", 0.4, 3.0, require_all_groups=False)
+    oriented = overhead_face_reach(
+        tracks, (0.0, 0.0), "x", 0.4, 3.0, require_all_groups=False, route_yaw_rad=0.0
+    )
+    assert oriented.reach_m == pytest.approx(axis_aligned.reach_m, abs=1e-12)
+    assert oriented.binding_keypoint == axis_aligned.binding_keypoint
+
+
+def test_oriented_face_is_invariant_to_rotating_the_whole_problem():
+    """Rotating body and face together must not change the measured reach."""
+    base_start = np.asarray([0.0, 0.0, 1.20])
+    base_end = np.asarray([0.30, 0.02, 1.24])
+    yaw = 0.9
+
+    def _rotate(point, angle):
+        cos, sin = math.cos(angle), math.sin(angle)
+        return np.asarray(
+            (cos * point[0] - sin * point[1], sin * point[0] + cos * point[1], point[2])
+        )
+
+    def _tracks(start, end):
+        return SemanticCapsuleTracks(
+            starts=np.asarray([[start]]),
+            ends=np.asarray([[end]]),
+            radii=np.asarray([0.06]),
+            owners=("torso_link",),
+            groups=("head_torso",),
+            root_pos_w=np.asarray([[0.0, 0.0, 0.8]]),
+            root_quat_w=np.asarray([[1.0, 0.0, 0.0, 0.0]]),
+        )
+
+    straight = overhead_face_reach(
+        _tracks(base_start, base_end),
+        (0.0, 0.0),
+        "x",
+        0.20,
+        1.0,
+        require_all_groups=False,
+        route_yaw_rad=0.0,
+    )
+    turned = overhead_face_reach(
+        _tracks(_rotate(base_start, yaw), _rotate(base_end, yaw)),
+        (0.0, 0.0),
+        "x",
+        0.20,
+        1.0,
+        require_all_groups=False,
+        route_yaw_rad=yaw,
+    )
+    assert turned.reach_m == pytest.approx(straight.reach_m, abs=1e-9)
+
+
+def test_axis_aligned_face_mismeasures_a_turned_route():
+    """The reason turning motions are excluded from the corpus.
+
+    The body sits 0.25 m *along the executed route* from the station, so a correctly oriented
+    0.20 m face excludes it. The world-axis face of identical nominal extent still catches it,
+    because 0.25 m along a route yawed 50 degrees is only 0.161 m along world x, and the capsule
+    radius then reaches back inside the world slab. The two instruments answer different
+    questions about the same body, and only one is the question the window solver asks.
+    """
+    yaw = math.radians(50.0)
+    cos, sin = math.cos(yaw), math.sin(yaw)
+    offset = 0.25
+    centre = np.asarray([cos * offset, sin * offset, 1.25])
+    along = np.asarray([cos * 0.03, sin * 0.03, 0.0])
+    tracks = SemanticCapsuleTracks(
+        starts=np.asarray([[centre - along]]),
+        ends=np.asarray([[centre + along]]),
+        radii=np.asarray([0.05]),
+        owners=("torso_link",),
+        groups=("head_torso",),
+        root_pos_w=np.asarray([[float(centre[0]), float(centre[1]), 0.8]]),
+        root_quat_w=np.asarray([[1.0, 0.0, 0.0, 0.0]]),
+    )
+    oriented = overhead_face_reach(
+        tracks, (0.0, 0.0), "x", 0.20, 3.0, require_all_groups=False, route_yaw_rad=yaw
+    )
+    axis_aligned = overhead_face_reach(tracks, (0.0, 0.0), "x", 0.20, 3.0, require_all_groups=False)
+    # Correctly oriented: the body is past the face, so it does not occupy it at all.
+    assert oriented.per_keypoint_reach_m["head_torso"] == -math.inf
+    # World-axis: the same body reports a finite reach against a face it never crosses.
+    assert math.isfinite(axis_aligned.per_keypoint_reach_m["head_torso"])

@@ -27,6 +27,7 @@ deeper *delivered* adaptation (see `CriticalAtom.budget_m`).
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 import math
 
@@ -96,6 +97,10 @@ class CriticalAtom:
         """Separation before engineering margins -- the physics the operator actually bought."""
         return self.reach_nominal_m - self.reach_adapted_m
 
+    def axis_type_or_default(self) -> str:
+        """The constraint axis this atom's window is expressed on."""
+        return "overhead"
+
     def coordinate_at(self, xi: float) -> float:
         """Face coordinate at normalized window position ``xi`` in [0, 1]."""
         if not 0.0 <= xi <= 1.0:
@@ -137,6 +142,98 @@ class CriticalAtom:
         that robustness and pays half the window in regret for it.
         """
         return self.delta_strike_m + self.width_m
+
+
+@dataclass(frozen=True)
+class ObstacleItem:
+    """One entry in an obstacle inventory, described in the route frame of the face it can realise.
+
+    An inventory is a list of real objects of different sizes and shapes. Only some of them can
+    realise a given critical point, and which ones is decidable without physics. All extents are
+    metres in the route frame: ``along`` follows the executed tangent, ``across`` is lateral,
+    ``vertical`` is world up.
+    """
+
+    item_id: str
+    axis_type: str
+    #: Extent of the planar face that can act as the binding surface.
+    face_along_m: float
+    face_across_m: float
+    #: Thickness of the item measured *away* from the binding face, into free space.
+    thickness_m: float
+    #: How far any non-binding part of the item protrudes back past the binding face, towards the
+    #: body. A plain plank protrudes nothing; a lintel's jambs protrude to the floor.
+    protrusion_m: float = 0.0
+    #: Lateral half-gap between the item's protruding parts, if it has any. A door lintel's jambs
+    #: stand this far either side of the route centreline; ``inf`` means nothing protrudes.
+    protrusion_half_gap_m: float = math.inf
+
+    def __post_init__(self) -> None:
+        if min(self.face_along_m, self.face_across_m, self.thickness_m) <= 0:
+            raise ValueError("face extents and thickness must be positive")
+        if self.protrusion_m < 0:
+            raise ValueError("protrusion must be non-negative")
+
+
+@dataclass(frozen=True)
+class Admissibility:
+    """Why an inventory item can or cannot realise a critical point."""
+
+    item_id: str
+    admissible: bool
+    reasons: tuple[str, ...]
+
+
+def item_admissibility(
+    item: ObstacleItem,
+    atom: CriticalAtom,
+    *,
+    body_half_width_m: float,
+    keepout_m: float = 0.050,
+    thickness_prior_m: tuple[float, float] = (0.02, 0.60),
+) -> Admissibility:
+    """Decide whether ``item`` can realise ``atom``'s binding face, without spending physics.
+
+    Four conditions, in the order they matter:
+
+    1. the item offers a face of the right kind for this constraint axis;
+    2. that face spans the crossing footprint -- otherwise the body passes beside it and the
+       window simply does not apply;
+    3. every non-binding part clears both swept volumes, so the item cannot become a second,
+       unlabelled cause;
+    4. the item's own dimensions are plausible.
+
+    Conditions 1-3 are what LfLH spends reconstruction and collision losses on; here they are
+    decidable in closed form because the support already is.
+    """
+    reasons: list[str] = []
+    if item.axis_type != atom.axis_type_or_default():
+        reasons.append("wrong_axis")
+    if item.face_along_m + 1e-12 < atom.face_along_route_m:
+        reasons.append("face_too_short_along_route")
+    if item.face_across_m + 1e-12 < 2.0 * (body_half_width_m + keepout_m):
+        reasons.append("face_too_narrow_across_route")
+    # A protruding part reaches back past the binding face towards the body. It is harmless only
+    # if it stands outside the corridor the body sweeps, with the keep-out margin.
+    if item.protrusion_m > 0 and item.protrusion_half_gap_m < body_half_width_m + keepout_m:
+        reasons.append("protrusion_enters_swept_corridor")
+    if not thickness_prior_m[0] <= item.thickness_m <= thickness_prior_m[1]:
+        reasons.append("implausible_thickness")
+    return Admissibility(item.item_id, not reasons, tuple(reasons))
+
+
+def admissible_items(
+    inventory: Iterable[ObstacleItem],
+    atom: CriticalAtom,
+    *,
+    body_half_width_m: float,
+    keepout_m: float = 0.050,
+) -> list[Admissibility]:
+    """Filter an inventory against one critical atom, keeping the refusals for reporting."""
+    return [
+        item_admissibility(item, atom, body_half_width_m=body_half_width_m, keepout_m=keepout_m)
+        for item in inventory
+    ]
 
 
 @dataclass(frozen=True)

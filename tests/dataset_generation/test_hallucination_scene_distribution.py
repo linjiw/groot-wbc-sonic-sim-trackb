@@ -132,3 +132,62 @@ def test_scorecard_admits_a_tight_realistic_face_and_rejects_a_regretful_one():
     assert not loose.admits(**rule)
     unrealistic = score_atom(atom, archetype="shelf_plank", xi=0.05, thickness_m=0.90, across_m=0.6)
     assert not unrealistic.admits(**rule)
+
+
+def _inventory():
+    from gear_sonic.dataset_generation.hallucination.scene_distribution import ObstacleItem
+
+    return [
+        # A plain plank: wide face, nothing protrudes back towards the body.
+        ObstacleItem("plank", "overhead", 0.40, 3.00, 0.04),
+        # A door lintel: jambs reach the floor, but stand 0.8 m either side of the centreline.
+        ObstacleItem(
+            "lintel", "overhead", 0.20, 1.60, 0.20, protrusion_m=1.2, protrusion_half_gap_m=0.80
+        ),
+        # A narrow gantry whose legs stand inside the corridor the body sweeps.
+        ObstacleItem(
+            "narrow_gantry",
+            "overhead",
+            0.30,
+            1.00,
+            0.15,
+            protrusion_m=1.0,
+            protrusion_half_gap_m=0.25,
+        ),
+        # A face shorter than the required along-route exposure.
+        ObstacleItem("stub", "overhead", 0.05, 3.00, 0.05),
+        # Right shape, absurd thickness.
+        ObstacleItem("slab", "overhead", 0.40, 3.00, 1.80),
+        # Wrong constraint axis entirely.
+        ObstacleItem("side_wall", "lateral_gap", 0.40, 3.00, 0.10),
+    ]
+
+
+def test_inventory_filter_keeps_only_items_that_can_realise_the_atom():
+    from gear_sonic.dataset_generation.hallucination.scene_distribution import admissible_items
+
+    atom = _atom()
+    verdicts = {v.item_id: v for v in admissible_items(_inventory(), atom, body_half_width_m=0.35)}
+    assert verdicts["plank"].admissible
+    assert verdicts["lintel"].admissible, "jambs stand outside the swept corridor"
+    assert not verdicts["narrow_gantry"].admissible
+    assert "protrusion_enters_swept_corridor" in verdicts["narrow_gantry"].reasons
+    assert "face_too_short_along_route" in verdicts["stub"].reasons
+    assert "implausible_thickness" in verdicts["slab"].reasons
+    assert "wrong_axis" in verdicts["side_wall"].reasons
+
+
+def test_a_wider_body_rejects_an_item_a_narrow_body_accepts():
+    """Admissibility is a property of the item *and* the body that must pass it."""
+    from gear_sonic.dataset_generation.hallucination.scene_distribution import item_admissibility
+
+    from gear_sonic.dataset_generation.hallucination.scene_distribution import ObstacleItem
+
+    lintel = ObstacleItem(
+        "lintel", "overhead", 0.20, 1.60, 0.20, protrusion_m=1.2, protrusion_half_gap_m=0.40
+    )
+    atom = _atom()
+    assert item_admissibility(lintel, atom, body_half_width_m=0.30).admissible
+    wide = item_admissibility(lintel, atom, body_half_width_m=0.40)
+    assert not wide.admissible
+    assert "protrusion_enters_swept_corridor" in wide.reasons

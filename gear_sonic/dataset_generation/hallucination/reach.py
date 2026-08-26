@@ -149,6 +149,26 @@ class ReachProfile:
     points: tuple[FaceReach, ...]
 
 
+def route_frame_yaw(
+    tracks: SemanticCapsuleTracks, station_xy_m: tuple[float, float], *, half_window: int = 3
+) -> float:
+    """Heading of the executed route at the frame nearest ``station_xy_m``.
+
+    A face is only "along route" if it is oriented by the route. On a near-straight walk the world
+    axis is a good enough stand-in, which is why the corpus filters to straightness >= 0.95; on a
+    curve it is not, and the mis-orientation is exactly this yaw minus the world axis angle.
+    """
+    root = np.asarray(tracks.root_pos_w[:, :2], dtype=np.float64)
+    station = np.asarray(station_xy_m, dtype=np.float64)
+    index = int(np.argmin(np.linalg.norm(root - station, axis=1)))
+    low = max(0, index - half_window)
+    high = min(len(root) - 1, index + half_window)
+    tangent = root[high] - root[low]
+    if float(np.linalg.norm(tangent)) <= 1e-9:
+        raise ValueError("executed route tangent is degenerate at the requested station")
+    return float(math.atan2(tangent[1], tangent[0]))
+
+
 def overhead_face_reach(
     tracks: SemanticCapsuleTracks,
     station_xy_m: tuple[float, float],
@@ -157,6 +177,7 @@ def overhead_face_reach(
     across_route_m: float,
     *,
     require_all_groups: bool = True,
+    route_yaw_rad: float | None = None,
 ) -> FaceReach:
     """Compute semantic overhead reach for the exact finite face footprint.
 
@@ -171,23 +192,47 @@ def overhead_face_reach(
         raise ValueError("route_axis must be x or y")
     if along_route_m <= 0 or across_route_m <= 0:
         raise ValueError("face extents must be positive")
-    sizes = (
-        (along_route_m, across_route_m) if route_axis == "x" else (across_route_m, along_route_m)
-    )
-    rectangle = (
-        station_xy_m[0] - sizes[0] / 2,
-        station_xy_m[1] - sizes[1] / 2,
-        station_xy_m[0] + sizes[0] / 2,
-        station_xy_m[1] + sizes[1] / 2,
-    )
+    if route_yaw_rad is None:
+        sizes = (
+            (along_route_m, across_route_m)
+            if route_axis == "x"
+            else (across_route_m, along_route_m)
+        )
+        rectangle = (
+            station_xy_m[0] - sizes[0] / 2,
+            station_xy_m[1] - sizes[1] / 2,
+            station_xy_m[0] + sizes[0] / 2,
+            station_xy_m[1] + sizes[1] / 2,
+        )
+        rotation = None
+    else:
+        # Work in the route frame: origin at the station, first axis along the executed tangent.
+        # Rotation is linear, so a transformed capsule is still a capsule and the exact solver
+        # applies unchanged -- only the frame the rectangle lives in has moved.
+        rectangle = (
+            -along_route_m / 2,
+            -across_route_m / 2,
+            along_route_m / 2,
+            across_route_m / 2,
+        )
+        cos, sin = math.cos(-route_yaw_rad), math.sin(-route_yaw_rad)
+        rotation = np.asarray(((cos, -sin), (sin, cos)), dtype=np.float64)
+    origin = np.asarray(station_xy_m, dtype=np.float64)
+
+    def _to_face_frame(point: np.ndarray) -> np.ndarray:
+        if rotation is None:
+            return point
+        planar = rotation @ (np.asarray(point[:2], dtype=np.float64) - origin)
+        return np.asarray((planar[0], planar[1], point[2]), dtype=np.float64)
+
     reaches = {group: -math.inf for group in SEMANTIC_GROUPS}
     frames = {group: -1 for group in SEMANTIC_GROUPS}
     owners = {group: "" for group in SEMANTIC_GROUPS}
     for frame in range(tracks.frames):
         for capsule in range(tracks.capsules):
             value = capsule_height_over_rectangle(
-                tracks.starts[frame, capsule],
-                tracks.ends[frame, capsule],
+                _to_face_frame(tracks.starts[frame, capsule]),
+                _to_face_frame(tracks.ends[frame, capsule]),
                 float(tracks.radii[capsule]),
                 rectangle,
             )
