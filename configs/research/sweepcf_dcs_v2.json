@@ -1,0 +1,120 @@
+{
+  "schema_version": "sweepcf_dcs_v2",
+  "supersedes": "sweepcf_dcs_v1",
+  "target_occupancy_policy": "verified_canonical_family_cells",
+  "feasibility_audit": {
+    "v1_configured_bins": 168,
+    "excluded_v1_bins": 48,
+    "reason": "local_crouch couples only to head_torso; shoulder targets are structurally inadmissible"
+  },
+  "unknown_value": "unknown",
+  "margin_edges_mm": [0, 10, 25, 50, 100],
+  "margin_labels": [
+    "strike",
+    "clear_0_10",
+    "clear_10_25",
+    "clear_25_50",
+    "clear_50_100",
+    "clear_over_100"
+  ],
+  "coordinate_buckets": {
+    "overhead": {
+      "edges_m": [0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5],
+      "labels": [
+        "under_0.9",
+        "0.9_1.0",
+        "1.0_1.1",
+        "1.1_1.2",
+        "1.2_1.3",
+        "1.3_1.4",
+        "1.4_1.5",
+        "at_least_1.5"
+      ]
+    },
+    "lateral_gap": {
+      "edges_m": [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+      "labels": [
+        "under_0.3",
+        "0.3_0.4",
+        "0.4_0.5",
+        "0.5_0.6",
+        "0.6_0.7",
+        "0.7_0.8",
+        "0.8_0.9",
+        "at_least_0.9"
+      ]
+    },
+    "ground_support": {
+      "edges_m": [0.1, 0.2, 0.3, 0.4, 0.5],
+      "labels": [
+        "under_0.1",
+        "0.1_0.2",
+        "0.2_0.3",
+        "0.3_0.4",
+        "0.4_0.5",
+        "at_least_0.5"
+      ]
+    }
+  },
+  "dimensions": {
+    "binding_keypoint": [
+      "head_torso",
+      "shoulder_left",
+      "shoulder_right",
+      "wrist_left",
+      "wrist_right",
+      "pelvis",
+      "knee_left",
+      "knee_right",
+      "foot_left",
+      "foot_right"
+    ],
+    "constraint_axis": ["overhead", "lateral_gap", "ground_support"],
+    "edit_behaviour_class": ["crouch", "arms"],
+    "operator": ["local_crouch", "local_arm_tuck"],
+    "cell_role": [
+      "nominal_easy",
+      "nominal_hard",
+      "adapted_easy",
+      "adapted_hard",
+      "probe"
+    ]
+  },
+  "target_templates": [
+    {
+      "edit_behaviour_class": "arms",
+      "operator": "local_arm_tuck",
+      "constraint_axis": "lateral_gap",
+      "binding_keypoints": [
+        "shoulder_left",
+        "shoulder_right",
+        "wrist_left",
+        "wrist_right"
+      ],
+      "coordinate_buckets": [
+        "0.3_0.4",
+        "0.4_0.5",
+        "0.5_0.6",
+        "0.6_0.7",
+        "0.7_0.8",
+        "0.8_0.9"
+      ],
+      "margin_buckets": ["clear_10_25", "clear_25_50", "clear_0_10", "strike"]
+    },
+    {
+      "edit_behaviour_class": "crouch",
+      "operator": "local_crouch",
+      "constraint_axis": "overhead",
+      "binding_keypoints": ["head_torso"],
+      "coordinate_buckets": [
+        "0.9_1.0",
+        "1.0_1.1",
+        "1.1_1.2",
+        "1.2_1.3",
+        "1.3_1.4",
+        "1.4_1.5"
+      ],
+      "margin_buckets": ["clear_10_25", "clear_25_50", "clear_0_10", "strike"]
+    }
+  ]
+}

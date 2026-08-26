@@ -1,0 +1,8 @@
+iteration	change	metric	baseline	result	decision
+1	conditional_source_balanced_kernel	mean_leave_one_source_out_log_loss	1.6094379124	1.5137267390	keep
+1	conditional_source_balanced_kernel	top3_recall	NA	0.9166666667	keep
+1	bounded_quantile_sampler	geometry_support_valid_rate	NA	1.0	keep
+2	default_mujoco_framebuffer	render_completion	NA	0.0	discard_fix
+3	explicit_offscreen_and_compiled_audit	compiled_max_center_error_m	NA	2.220446049250313e-16	keep
+3	explicit_offscreen_and_compiled_audit	compiled_max_full_size_error_m	NA	0.0	keep
+3	paired_mujoco_cross_render	visually_verified_pairs	NA	2	keep

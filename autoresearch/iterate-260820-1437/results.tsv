@@ -1,0 +1,7 @@
+iteration	change	metric	result	decision
+1	recompute generated golden against exact finite binding AABB	adapted-hard capsule clearance at 1.0811 m depth	-38.914 mm; target requires clear	discard
+2	implement lossless semantic capsule groups and analytic finite-face reach	capsule partition / duck window agreement	29/29 capsules; 176.716 vs 178.125 mm within 5 mm source tolerance	keep
+3	preserve the historical along-route footprint and add the four-sign gate	easy orig/edit; hard orig/edit clearance	+89.577 / +202.302 / -68.000 / +66.663 mm	keep
+4	fit D-phi v0 only from eligible operator pairs	eligible commanded/executed plane rows	0; refused_insufficient_data	keep refusal
+5	emit superseding E1b/probe V2 proposals	authorization / hash integrity	not_authorized; all E1b scene hashes exact	keep
+6	verify KCS plus underlying geometry and coverage regressions	tests passed	36 focused + 75 underlying = 111	keep

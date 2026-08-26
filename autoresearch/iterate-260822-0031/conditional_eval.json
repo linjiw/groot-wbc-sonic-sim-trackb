@@ -1,0 +1,92 @@
+{
+  "decision": "keep",
+  "geometry_samples": 400,
+  "geometry_support_valid_rate": 1.0,
+  "heldout_verified_labels": 12,
+  "log_loss_improvement_over_uniform": 0.09571117340287283,
+  "mean_heldout_log_loss": 1.5137267390312275,
+  "schema_version": "q_lfh_conditional_eval_v1",
+  "source_q_lfh": "docs/hallucination/q_lfh_v1.json",
+  "source_q_lfh_sha256": "sha256:88cbafc6d771669612911e02989297d2611f5464d18060f63773dbd552c1f454",
+  "source_results": [
+    {
+      "heldout_verified_probabilities": {
+        "door_lintel": 0.17810177730489749,
+        "ibeam": 0.32000000000000006,
+        "shelf_plank": 0.32000000000000006
+      },
+      "novelty_probabilities": {
+        "hanging_panel": 0.9500000000000001,
+        "hvac_duct": 0.05
+      },
+      "novelty_top": "hanging_panel",
+      "self_source_excluded": true,
+      "source_pair_id": "cf_005_056",
+      "top3": [
+        "shelf_plank",
+        "ibeam",
+        "door_lintel"
+      ]
+    },
+    {
+      "heldout_verified_probabilities": {
+        "hanging_panel": 0.02,
+        "ibeam": 0.32000000000000006,
+        "shelf_plank": 0.32000000000000006
+      },
+      "novelty_probabilities": {
+        "door_lintel": 0.9500000000000001,
+        "hvac_duct": 0.05
+      },
+      "novelty_top": "door_lintel",
+      "self_source_excluded": true,
+      "source_pair_id": "lfh_086_crouch",
+      "top3": [
+        "door_lintel",
+        "shelf_plank",
+        "ibeam"
+      ]
+    },
+    {
+      "heldout_verified_probabilities": {
+        "door_lintel": 0.18160382437803776,
+        "ibeam": 0.32000000000000006,
+        "shelf_plank": 0.32000000000000006
+      },
+      "novelty_probabilities": {
+        "hanging_panel": 0.9500000000000001,
+        "hvac_duct": 0.05
+      },
+      "novelty_top": "hanging_panel",
+      "self_source_excluded": true,
+      "source_pair_id": "lfh_089_crouch",
+      "top3": [
+        "shelf_plank",
+        "ibeam",
+        "door_lintel"
+      ]
+    },
+    {
+      "heldout_verified_probabilities": {
+        "door_lintel": 0.18160963931962693,
+        "ibeam": 0.32,
+        "shelf_plank": 0.32
+      },
+      "novelty_probabilities": {
+        "hanging_panel": 0.9500000000000001,
+        "hvac_duct": 0.05
+      },
+      "novelty_top": "hanging_panel",
+      "self_source_excluded": true,
+      "source_pair_id": "lfh_090_crouch",
+      "top3": [
+        "shelf_plank",
+        "ibeam",
+        "door_lintel"
+      ]
+    }
+  ],
+  "sources": 4,
+  "top3_recall": 0.9166666666666666,
+  "uniform_compatible_log_loss": 1.6094379124341003
+}
