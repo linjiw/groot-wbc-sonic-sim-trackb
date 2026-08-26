@@ -1,0 +1,103 @@
+{
+  "actual_contended_gpu_hours": 0.029728915456992883,
+  "cells": [
+    {
+      "alpha": 2.0,
+      "commanded_body_window_mm": 116.50385647702689,
+      "executed_body_window_mm": 128.45763491426575,
+      "outcome": "accepted",
+      "pair_id": "lfh_086_arm_tuck_left",
+      "rejection_reasons": [],
+      "role": "strong"
+    },
+    {
+      "alpha": null,
+      "commanded_body_window_mm": null,
+      "executed_body_window_mm": null,
+      "outcome": "rejected",
+      "pair_id": "lfh_094_arm_tuck_left",
+      "rejection_reasons": [
+        "reference_endpoint_tracking_error",
+        "disallowed_robot_contact"
+      ],
+      "role": "nominal"
+    },
+    {
+      "alpha": 2.0,
+      "commanded_body_window_mm": 117.97742473258823,
+      "executed_body_window_mm": null,
+      "outcome": "skipped_dependency",
+      "pair_id": "lfh_094_arm_tuck_left",
+      "rejection_reasons": [
+        "nominal_not_trackable"
+      ],
+      "role": "strong"
+    },
+    {
+      "alpha": 2.5,
+      "commanded_body_window_mm": 95.36914991831877,
+      "executed_body_window_mm": 46.11175015877933,
+      "outcome": "accepted",
+      "pair_id": "lfh_092_arm_tuck_right",
+      "rejection_reasons": [],
+      "role": "strong"
+    },
+    {
+      "alpha": 2.5,
+      "commanded_body_window_mm": 100.15481973582013,
+      "executed_body_window_mm": 23.838828352188422,
+      "outcome": "accepted",
+      "pair_id": "lfh_084_arm_tuck_right",
+      "rejection_reasons": [],
+      "role": "strong"
+    }
+  ],
+  "delivery_model_refusals": {
+    "local_arm_tuck|foot_left|lateral_left": "matched commanded levels are not strictly separated in millimetres",
+    "local_arm_tuck|foot_left|lateral_right": "matched commanded levels are not strictly separated in millimetres",
+    "local_arm_tuck|foot_right|lateral_left": "matched commanded levels are not strictly separated in millimetres",
+    "local_arm_tuck|foot_right|lateral_right": "matched commanded levels are not strictly separated in millimetres",
+    "local_arm_tuck|head_torso|lateral_left": "matched commanded levels are not strictly separated in millimetres",
+    "local_arm_tuck|head_torso|lateral_right": "matched commanded levels are not strictly separated in millimetres",
+    "local_arm_tuck|knee_left|lateral_left": "matched commanded levels are not strictly separated in millimetres",
+    "local_arm_tuck|knee_left|lateral_right": "matched commanded levels are not strictly separated in millimetres",
+    "local_arm_tuck|knee_right|lateral_left": "matched commanded levels are not strictly separated in millimetres",
+    "local_arm_tuck|knee_right|lateral_right": "matched commanded levels are not strictly separated in millimetres",
+    "local_arm_tuck|pelvis|lateral_left": "matched commanded levels are not strictly separated in millimetres",
+    "local_arm_tuck|pelvis|lateral_right": "matched commanded levels are not strictly separated in millimetres",
+    "local_arm_tuck|shoulder_left|lateral_right": "matched commanded levels are not strictly separated in millimetres",
+    "local_arm_tuck|shoulder_right|lateral_left": "matched commanded levels are not strictly separated in millimetres",
+    "local_arm_tuck|wrist_left|lateral_right": "matched commanded levels are not strictly separated in millimetres",
+    "local_arm_tuck|wrist_right|lateral_left": "matched commanded levels are not strictly separated in millimetres"
+  },
+  "delivery_models_fit": 4,
+  "funnel": {
+    "accepted": 3,
+    "proposed": 5,
+    "rejected": 1,
+    "rolled_out": 4,
+    "skipped_dependency": 1
+  },
+  "manifest_sha256": "sha256:4722dc2a15e05b90827c88d6e5e69d2b7537a2698a350e6714776b459febf610",
+  "prediction_status": "partially falsified",
+  "response_rows_cal2": 30,
+  "response_rows_total": 150,
+  "schema_version": "lfh_arm_tuck_strong_calibration_v1",
+  "strong_gates": {
+    "left": {
+      "alpha": 2.0,
+      "cpu_proposal_eligible": false,
+      "status": "refused_insufficient_matched_motions"
+    },
+    "right": {
+      "alpha": 2.5,
+      "commanded_mm": 261.33281878495177,
+      "cpu_proposal_eligible": true,
+      "estimate_mm": 52.79864821233217,
+      "lower_mm": 23.83882835218842,
+      "residual_q90_mm": 28.95981986014375,
+      "status": "adjudicated",
+      "upper_mm": 81.75846807247592
+    }
+  }
+}

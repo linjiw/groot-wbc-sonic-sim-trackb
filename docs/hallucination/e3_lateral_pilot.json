@@ -1,0 +1,137 @@
+{
+  "actual_contended_gpu_hours": 0.03981240491046467,
+  "cells": [
+    {
+      "binding_body": "right_wrist_yaw_link",
+      "binding_bottleneck_frame": 122,
+      "binding_clearance_drift_mm": 1.1976257235039043,
+      "binding_clearance_mm": 37.19583771561831,
+      "cell_id": "cs_lfh_084_arm_tuck_right_cal2__pinch_panels__s00031584__nominal_easy",
+      "cell_role": "nominal_easy",
+      "contact": {
+        "attributed_prim_path": null,
+        "attribution": "none",
+        "drift_onset_frame": null,
+        "external_bodies": [],
+        "first_frame": null,
+        "peak_lateral_force_n": 0.0,
+        "peak_overhead_force_n": 0.0,
+        "runner_up_separation_mm": null
+      },
+      "cpu_clearance_mm": 35.998211992114406,
+      "expected_outcome": "accepted",
+      "outcome": "accepted",
+      "outcome_matches": true
+    },
+    {
+      "binding_body": "right_wrist_yaw_link",
+      "binding_bottleneck_frame": 121,
+      "binding_clearance_drift_mm": 14.563764350485126,
+      "binding_clearance_mm": -18.242492432909824,
+      "cell_id": "cs_lfh_084_arm_tuck_right_cal2__pinch_panels__s00031584__nominal_hard",
+      "cell_role": "nominal_hard",
+      "contact": {
+        "attributed_prim_path": "/World/ConstraintFrame/BindingPinchPanelLeft",
+        "attribution": "binding_constraint",
+        "drift_onset_frame": null,
+        "external_bodies": [
+          "right_hip_roll_link",
+          "right_wrist_yaw_link"
+        ],
+        "first_frame": 118,
+        "peak_lateral_force_n": 122.38396453857423,
+        "peak_overhead_force_n": 1.512289047241211,
+        "runner_up_separation_mm": 349.3866723952074
+      },
+      "cpu_clearance_mm": -32.80625678339495,
+      "expected_outcome": "rejected",
+      "outcome": "rejected",
+      "outcome_matches": true
+    },
+    {
+      "binding_body": "right_wrist_yaw_link",
+      "binding_bottleneck_frame": 121,
+      "binding_clearance_drift_mm": 39.78551398204047,
+      "binding_clearance_mm": 72.33962113049951,
+      "cell_id": "cs_lfh_084_arm_tuck_right_cal2__pinch_panels__s00031584__adapted_easy",
+      "cell_role": "adapted_easy",
+      "contact": {
+        "attributed_prim_path": null,
+        "attribution": "none",
+        "drift_onset_frame": null,
+        "external_bodies": [],
+        "first_frame": null,
+        "peak_lateral_force_n": 0.0,
+        "peak_overhead_force_n": 0.0,
+        "runner_up_separation_mm": null
+      },
+      "cpu_clearance_mm": 112.12513511253998,
+      "expected_outcome": "accepted",
+      "outcome": "accepted",
+      "outcome_matches": true
+    },
+    {
+      "binding_body": "right_wrist_yaw_link",
+      "binding_bottleneck_frame": 122,
+      "binding_clearance_drift_mm": 23.384785171198526,
+      "binding_clearance_mm": 3.034064979711669,
+      "cell_id": "cs_lfh_084_arm_tuck_right_cal2__pinch_panels__s00031584__adapted_hard",
+      "cell_role": "adapted_hard",
+      "contact": {
+        "attributed_prim_path": "/World/ConstraintFrame/BindingPinchPanelLeft",
+        "attribution": "binding_constraint",
+        "drift_onset_frame": 142,
+        "external_bodies": [
+          "right_hip_roll_link",
+          "right_wrist_yaw_link"
+        ],
+        "first_frame": 115,
+        "peak_lateral_force_n": 234.3897462750932,
+        "peak_overhead_force_n": 112.7497329711914,
+        "runner_up_separation_mm": 254.91750745851692
+      },
+      "cpu_clearance_mm": 26.418850150910195,
+      "expected_outcome": "accepted",
+      "outcome": "rejected",
+      "outcome_matches": false
+    }
+  ],
+  "context_conditioned_retry_gate": {
+    "adapted_binding_keypoint": "wrist_right",
+    "adapted_certified_minimum_m": 0.9425771887597684,
+    "adapted_critical_frame": 120,
+    "adapted_required_gap_m": 0.9064891887597684,
+    "adapted_target_excess_mm": 6.489188759768338,
+    "along_route_m": 0.3,
+    "decision": "refuse_target_bin",
+    "evidence_cells": [
+      "nominal_easy",
+      "adapted_easy"
+    ],
+    "evidence_outcomes": [
+      "accepted",
+      "accepted"
+    ],
+    "gap_uncertainty_mm": 36.088,
+    "in_target_bin_certified": false,
+    "nominal_binding_keypoint": "wrist_right",
+    "nominal_critical_frame": 121,
+    "nominal_required_gap_m": 0.9762159443292006,
+    "station_xy_m": [
+      1.2064393758773804,
+      -0.17617939412593842
+    ],
+    "target_upper_m": 0.9,
+    "vertical_band_m": [
+      0.0,
+      2.0
+    ]
+  },
+  "coverage_target_filled": false,
+  "manifest_sha256": "sha256:43833dceb20247e7eaefdd486a05f81556b549987af30368f60ddbd382c2ecda",
+  "outcome_matches": 3,
+  "registered_prediction_confirmed": false,
+  "schema_version": "lfh_e3_lateral_pilot_v1",
+  "secondary_contact": false,
+  "verified_families": 0
+}

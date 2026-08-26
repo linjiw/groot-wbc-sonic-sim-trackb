@@ -1,0 +1,173 @@
+{
+  "ablation": {
+    "changed_variable": "face_along_route_m",
+    "e6c_value_m": 0.1,
+    "failed_e6_value_m": 0.3,
+    "held_fixed": [
+      "motion_pair",
+      "operator",
+      "route_progress",
+      "archetype",
+      "DCS target",
+      "engineering-margin rule"
+    ]
+  },
+  "cells": [
+    {
+      "archetype_id": "shelf_plank",
+      "cell_id": "cs_lfh_086_crouch_cal3_d0100__shelf_plank__s00031886__nominal_hard",
+      "cell_role": "nominal_hard",
+      "expected_source_outcome": "rejected",
+      "hydra_overrides": [
+        "++seed=31886"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_086_crouch/nominal.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:4ea085f6b64f8e8a523c066d5f87e6750244917592bc48ddd66776ea0bcce9ea",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_086_crouch/nominal.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:79ab4d149917615bccfe6b6d326cc633a10ffa7820ff60235f17b2e8fe34322f"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/e6c_crouch_exposure/lfh_086_crouch/nominal_hard",
+      "runtime_seed": 31886,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e6/cs_lfh_086_crouch_cal3_d0100__shelf_plank__s00031886__hard.usda",
+        "scene_id": "cs_lfh_086_crouch_cal3_d0100__shelf_plank__s00031886__hard",
+        "sha256": "sha256:28455763e2293c0209ed703b4495cf7095e309be2680ea2b963d00e04d7d3670"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_family_id": "lfh_086_crouch",
+      "source_variant_id": "cal3_d0100_alpha_1p0"
+    },
+    {
+      "archetype_id": "shelf_plank",
+      "cell_id": "cs_lfh_086_crouch_cal3_d0100__shelf_plank__s00031886__adapted_hard",
+      "cell_role": "adapted_hard",
+      "expected_source_outcome": "accepted",
+      "hydra_overrides": [
+        "++seed=31886"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_086_crouch/adapted.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:b90c52fd4bf23b4db872501fd00c89b65cd62a4905da2c5f1c1ce4f492f78cdb",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_086_crouch/adapted.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:a01df13af9dc7e5f29a05979ece17683b5486f41c992d30486f3aea312599b33"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/e6c_crouch_exposure/lfh_086_crouch/adapted_hard",
+      "runtime_seed": 31886,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e6/cs_lfh_086_crouch_cal3_d0100__shelf_plank__s00031886__hard.usda",
+        "scene_id": "cs_lfh_086_crouch_cal3_d0100__shelf_plank__s00031886__hard",
+        "sha256": "sha256:28455763e2293c0209ed703b4495cf7095e309be2680ea2b963d00e04d7d3670"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_family_id": "lfh_086_crouch",
+      "source_variant_id": "cal3_d0100_alpha_1p0"
+    }
+  ],
+  "context_recertification": {
+    "path": "docs/hallucination/e6c_context_recertification.json",
+    "sha256": "sha256:cec7ab748e7c219b4800796fec7b60759beb3f23934dcbdf7d6b4fc379affa3a"
+  },
+  "cpu_certificate": {
+    "report": "docs/hallucination/e6c_exposure_cpu.json",
+    "report_sha256": "sha256:87c39386f82cb5fd80e02d4b2ccf04b4ac72afc25cbae02bbef2e0ece558e030",
+    "source": {
+      "coverage_target": {
+        "binding_keypoint": "head_torso",
+        "constraint_axis": "overhead",
+        "constraint_coordinate_bucket": "1.2_1.3",
+        "edit_behaviour_class": "crouch",
+        "margin_bucket": "clear_25_50",
+        "operator": "local_crouch",
+        "rank": 103,
+        "reason": "tail behaviour; mid-margin first"
+      },
+      "easy_coordinate_m": 1.3406163751159803,
+      "engineering_window_mm": 33.40968886913198,
+      "hard_coordinate_m": 1.2558675306814142,
+      "keepout": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e6/cs_lfh_086_crouch_cal3_d0100__shelf_plank__s00031886.keepout.json",
+      "keepout_sha256": "sha256:1af014bce30d2bd59346218eef0187968602a6c1d0cb32c2111590e778c8b0d0",
+      "pair_manifest": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e6/cs_lfh_086_crouch_cal3_d0100__shelf_plank__s00031886.manifest.json",
+      "pair_manifest_sha256": "sha256:74d73a653f0da04995d5355779526887f3330e44c2053d97c423ef19aad3464c",
+      "source_pair_id": "lfh_086_crouch",
+      "spec": "specs/hallucination/cs_lfh_086_crouch_cal3_d0100.json",
+      "spec_sha256": "sha256:5f9ae4719dc91d74e4396a992e2f7f8a4ac69715ad3cd6ec5f4fcab7ee6b03a1"
+    }
+  },
+  "execution_policy": {
+    "camera_passes": [
+      "ego"
+    ],
+    "claim5_inputs_untouched": true,
+    "cost_ceiling": {
+      "gpu_hours_contended": 0.208,
+      "peak_gpu_memory_gib_per_serial_rollout": 4.8,
+      "rollouts": 2,
+      "seconds_per_rollout_contended": 375
+    },
+    "default_not_before": "2026-08-25T00:00:00-04:00",
+    "driver": "scripts/research/run_kimodo_sonic_rollout.sh",
+    "forbidden_camera_passes": [
+      "overhead"
+    ],
+    "not_authorized": true,
+    "postflight": [
+      "derive verdict labels only through the existing physics scorer",
+      "report capsule-proxy disagreement without changing the physics verdict",
+      "use a 0.00001 m attribution-resolution floor and refuse ambiguous contact as unattributed",
+      "refuse any contact attributed to non-binding authored geometry as secondary_contact"
+    ],
+    "prediction_register_untouched": true,
+    "preflight": [
+      "verify every scene, motion, and provenance hash",
+      "require motion scene_start_xyz to match the cell's expected start exactly",
+      "run only one rollout at a time after the 9000 MiB free-memory gate",
+      "classify missing marker, timeout, OOM, or missing artifact as infrastructure_failure",
+      "classify a completed physics rejection as a scientific outcome, never infrastructure"
+    ],
+    "requires_explicit_user_approval": true,
+    "runtime": {
+      "free_gpu_mib_required": 9000,
+      "hang_timeout_seconds": 1800,
+      "success_requires": [
+        "SONIC_EVAL_SUCCESS marker",
+        "success_manifest.json",
+        "at least one trajectory pickle",
+        "recorded fps=50"
+      ]
+    }
+  },
+  "experiment": "E6c-crouch-exposure-hard",
+  "purpose": "Test whether reducing finite shelf exposure rescues source 086 context trackability.",
+  "schema_version": "lfh_gpu_request_v1",
+  "scope": {
+    "generated_family_enters_claim5": false,
+    "independent_motion_sources": 1,
+    "phase": "hard",
+    "physics_cells": 2
+  },
+  "stop_conditions": [
+    "stop on infrastructure failure and preserve completed captures",
+    "refuse secondary or unattributed authored-geometry contact",
+    "require nominal-hard binding-head/torso rejection before drift",
+    "require adapted-hard acceptance with zero external contact"
+  ]
+}

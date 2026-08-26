@@ -1,0 +1,52 @@
+{
+  "caveats": [
+    "fitted on empty-scene accepted rollouts; it does not describe a drifting execution",
+    "predictive band is the leave-one-motion-out q90, not a calibrated confidence interval",
+    "a predicted window still requires executed physics before any scene is promoted"
+  ],
+  "cross_validation": {
+    "baseline": "identity (executed = commanded reference reach)",
+    "best_model": "linear",
+    "rmse_reduction_vs_identity": 0.3916229275273775,
+    "scheme": "leave-one-motion-out",
+    "scores": {
+      "constant_offset": {
+        "held_out_points": 46,
+        "median_abs_mm": 10.271368813867255,
+        "q90_abs_mm": 22.75030318565774,
+        "rmse_mm": 16.168678112101528
+      },
+      "executed_mean": {
+        "held_out_points": 46,
+        "median_abs_mm": 11.951077986254944,
+        "q90_abs_mm": 35.307657621879926,
+        "rmse_mm": 22.254375535812194
+      },
+      "identity": {
+        "held_out_points": 46,
+        "median_abs_mm": 10.694155144595928,
+        "q90_abs_mm": 22.28700908413628,
+        "rmse_mm": 15.95396079214457
+      },
+      "linear": {
+        "held_out_points": 46,
+        "median_abs_mm": 6.835553485577628,
+        "q90_abs_mm": 16.85479900263764,
+        "rmse_mm": 9.706023961067915
+      }
+    }
+  },
+  "fitted_linear": {
+    "in_sample_residual_q90_abs_mm": 14.917321352438284,
+    "in_sample_residual_sd_mm": 9.211790458283883,
+    "intercept_m": 0.502134800078589,
+    "slope": 0.6046255750728838
+  },
+  "population": {
+    "condition": "accepted rollouts, empty scene only",
+    "distinct_reference_clips": 46,
+    "rows": 46
+  },
+  "role": "proposal-only screening estimate; physics remains the verdict",
+  "schema_version": "lfh_reach_delivery_model_v1"
+}

@@ -1,0 +1,279 @@
+{
+  "all_cpu_preflights_pass": true,
+  "archetypes": [
+    "door_lintel",
+    "ibeam"
+  ],
+  "physics_executed": false,
+  "purpose": "Transfer verified source-specific critical atoms across deterministic archetypes",
+  "schema_version": "lfh_e7_transfer_cpu_v1",
+  "selection_policy": "preserve each source's verified route station, finite exposure, and coordinates",
+  "sources": 3,
+  "variants": 6,
+  "variants_detail": [
+    {
+      "archetype_id": "door_lintel",
+      "binding_geometry_clearance_mm": {
+        "easy": {
+          "edit": 119.45841179101718,
+          "orig": 49.391293324976274
+        },
+        "hard": {
+          "edit": 34.72795955190279,
+          "orig": -34.74887511598029
+        }
+      },
+      "easy_coordinate_m": 1.3406163751159803,
+      "face_across_route_m": 3.0,
+      "face_along_route_m": 0.1,
+      "hard_coordinate_m": 1.2558675306814142,
+      "keepout": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_086_crouch_cal3_d0100__door_lintel__s00032001.keepout.json",
+      "keepout_sha256": "sha256:880b7d71bad6642cc81234e5a7d13085fb5fb4bbcc02cbfd81ff29635b01d66f",
+      "pair_manifest": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_086_crouch_cal3_d0100__door_lintel__s00032001.manifest.json",
+      "pair_manifest_sha256": "sha256:a0b8bfa3fa93d3b2c8e350afadf10b06c8ce5b329474ec42bed38aad638a3f27",
+      "reference_motions": {
+        "adapted": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_086_crouch/adapted.pkl",
+        "nominal": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_086_crouch/nominal.pkl"
+      },
+      "route_axis": "x",
+      "scene_sha256": {
+        "easy": "sha256:e3ecf0469dbdbbf512113ab192692fc62fe07fce9022aab432a6f9f80c95949a",
+        "hard": "sha256:f74ea83606f54b075b9d017d93e256f0e315464c9068d430352a48d73507b78f"
+      },
+      "scenes": {
+        "easy": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_086_crouch_cal3_d0100__door_lintel__s00032001__easy.usda",
+        "hard": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_086_crouch_cal3_d0100__door_lintel__s00032001__hard.usda"
+      },
+      "seed": 32001,
+      "source_pair_id": "lfh_086_crouch",
+      "source_variant_id": "cal3_d0100_alpha_1p0",
+      "spec": "specs/hallucination/cs_lfh_086_crouch_cal3_d0100.json",
+      "spec_sha256": "sha256:5f9ae4719dc91d74e4396a992e2f7f8a4ac69715ad3cd6ec5f4fcab7ee6b03a1",
+      "station_xy_m": [
+        1.981722354888916,
+        -0.03133034333586693
+      ],
+      "variant_id": "lfh_086_crouch__door_lintel"
+    },
+    {
+      "archetype_id": "ibeam",
+      "binding_geometry_clearance_mm": {
+        "easy": {
+          "edit": 119.45841179101718,
+          "orig": 49.391293324976274
+        },
+        "hard": {
+          "edit": 34.72795955190279,
+          "orig": -34.74887511598029
+        }
+      },
+      "easy_coordinate_m": 1.3406163751159803,
+      "face_across_route_m": 3.0,
+      "face_along_route_m": 0.1,
+      "hard_coordinate_m": 1.2558675306814142,
+      "keepout": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_086_crouch_cal3_d0100__ibeam__s00032002.keepout.json",
+      "keepout_sha256": "sha256:1026bfb4a5d6c921ff81b58505370e7ba50803e2444f4eb8229e3dd7b7f651cc",
+      "pair_manifest": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_086_crouch_cal3_d0100__ibeam__s00032002.manifest.json",
+      "pair_manifest_sha256": "sha256:9a20433595fc89a6db3a335fb614ee7d0c843cbb2e24ad4ae6ab4cd997c1bc20",
+      "reference_motions": {
+        "adapted": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_086_crouch/adapted.pkl",
+        "nominal": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_086_crouch/nominal.pkl"
+      },
+      "route_axis": "x",
+      "scene_sha256": {
+        "easy": "sha256:2718dde96ce9e4fcd698c0c5b6ac73950be1fd60879b8de31e1359762291c37d",
+        "hard": "sha256:c8538f97061a2353feffe5dec136ea1a6015234aa0a76e9beff9effc146f81eb"
+      },
+      "scenes": {
+        "easy": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_086_crouch_cal3_d0100__ibeam__s00032002__easy.usda",
+        "hard": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_086_crouch_cal3_d0100__ibeam__s00032002__hard.usda"
+      },
+      "seed": 32002,
+      "source_pair_id": "lfh_086_crouch",
+      "source_variant_id": "cal3_d0100_alpha_1p0",
+      "spec": "specs/hallucination/cs_lfh_086_crouch_cal3_d0100.json",
+      "spec_sha256": "sha256:5f9ae4719dc91d74e4396a992e2f7f8a4ac69715ad3cd6ec5f4fcab7ee6b03a1",
+      "station_xy_m": [
+        1.981722354888916,
+        -0.03133034333586693
+      ],
+      "variant_id": "lfh_086_crouch__ibeam"
+    },
+    {
+      "archetype_id": "door_lintel",
+      "binding_geometry_clearance_mm": {
+        "easy": {
+          "edit": 119.62349573462589,
+          "orig": 50.00001177536634
+        },
+        "hard": {
+          "edit": 34.81169573462589,
+          "orig": -34.81178822463365
+        }
+      },
+      "easy_coordinate_m": 1.3461514882246337,
+      "face_across_route_m": 3.0,
+      "face_along_route_m": 0.1,
+      "hard_coordinate_m": 1.261339746245004,
+      "keepout": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_089_crouch_cal3__door_lintel__s00032101.keepout.json",
+      "keepout_sha256": "sha256:9272e549dfd6bd4b4de88d9cf081ae853ed4ca3c3a915d580d3a3f7e80f41f9f",
+      "pair_manifest": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_089_crouch_cal3__door_lintel__s00032101.manifest.json",
+      "pair_manifest_sha256": "sha256:1e4ece67b89c3acc5b15f5331c8471f6f7d33391f93086bb10f0a487b95addee",
+      "reference_motions": {
+        "adapted": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_089_crouch/adapted.pkl",
+        "nominal": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_089_crouch/nominal.pkl"
+      },
+      "route_axis": "x",
+      "scene_sha256": {
+        "easy": "sha256:1b1e7a9c7390c2fe8412e676ce11298db0ac098462726f13cc9fdd8972bb86a5",
+        "hard": "sha256:4f663a40e5b1697f9bde3b740b6981b18a21a5c8711ad2d4d7a2035426108b26"
+      },
+      "scenes": {
+        "easy": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_089_crouch_cal3__door_lintel__s00032101__easy.usda",
+        "hard": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_089_crouch_cal3__door_lintel__s00032101__hard.usda"
+      },
+      "seed": 32101,
+      "source_pair_id": "lfh_089_crouch",
+      "source_variant_id": "cal3_alpha_1p0",
+      "spec": "specs/hallucination/cs_lfh_089_crouch_cal3.json",
+      "spec_sha256": "sha256:9dea8b92cd5fe91310479e061f6fd1af805730e43d3ae90f1b340bf4c7fa1779",
+      "station_xy_m": [
+        1.8716926574707031,
+        0.13857388496398926
+      ],
+      "variant_id": "lfh_089_crouch__door_lintel"
+    },
+    {
+      "archetype_id": "ibeam",
+      "binding_geometry_clearance_mm": {
+        "easy": {
+          "edit": 119.62349573462589,
+          "orig": 50.00001177536634
+        },
+        "hard": {
+          "edit": 34.81169573462589,
+          "orig": -34.81178822463365
+        }
+      },
+      "easy_coordinate_m": 1.3461514882246337,
+      "face_across_route_m": 3.0,
+      "face_along_route_m": 0.1,
+      "hard_coordinate_m": 1.261339746245004,
+      "keepout": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_089_crouch_cal3__ibeam__s00032102.keepout.json",
+      "keepout_sha256": "sha256:57148c3ec2dfc318f55beff3210cac0aab48cd976eed4157d5eac565e5d4cede",
+      "pair_manifest": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_089_crouch_cal3__ibeam__s00032102.manifest.json",
+      "pair_manifest_sha256": "sha256:3698b609af4a2bb50f19b2f50b9bcc4293e044ecb7543d77eced7cc8358a5730",
+      "reference_motions": {
+        "adapted": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_089_crouch/adapted.pkl",
+        "nominal": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_089_crouch/nominal.pkl"
+      },
+      "route_axis": "x",
+      "scene_sha256": {
+        "easy": "sha256:703614d9305d89835f380abad96060e7c3dc5f1647d38c664d8f909f27c28040",
+        "hard": "sha256:c76f372a98e128fb9784270639b0ac8d81980f7bb6a9b102a6dc854cf1df8aa9"
+      },
+      "scenes": {
+        "easy": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_089_crouch_cal3__ibeam__s00032102__easy.usda",
+        "hard": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_089_crouch_cal3__ibeam__s00032102__hard.usda"
+      },
+      "seed": 32102,
+      "source_pair_id": "lfh_089_crouch",
+      "source_variant_id": "cal3_alpha_1p0",
+      "spec": "specs/hallucination/cs_lfh_089_crouch_cal3.json",
+      "spec_sha256": "sha256:9dea8b92cd5fe91310479e061f6fd1af805730e43d3ae90f1b340bf4c7fa1779",
+      "station_xy_m": [
+        1.8716926574707031,
+        0.13857388496398926
+      ],
+      "variant_id": "lfh_089_crouch__ibeam"
+    },
+    {
+      "archetype_id": "door_lintel",
+      "binding_geometry_clearance_mm": {
+        "easy": {
+          "edit": 109.96666999447515,
+          "orig": 49.380756055680294
+        },
+        "hard": {
+          "edit": 30.218993501871058,
+          "orig": -29.845461732717627
+        }
+      },
+      "easy_coordinate_m": 1.3315587044509285,
+      "face_across_route_m": 3.0,
+      "face_along_route_m": 0.1,
+      "hard_coordinate_m": 1.2505079567106812,
+      "keepout": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_090_crouch_cal3__door_lintel__s00032201.keepout.json",
+      "keepout_sha256": "sha256:0258ea4cbb41ed8fd2251edce3633ad75494cb2bd22c46432cdc8ce9d8f6005a",
+      "pair_manifest": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_090_crouch_cal3__door_lintel__s00032201.manifest.json",
+      "pair_manifest_sha256": "sha256:39704af1bacd12875134246d3b98663b148703d5355c7665b994ef86203cd837",
+      "reference_motions": {
+        "adapted": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_090_crouch/adapted.pkl",
+        "nominal": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_090_crouch/nominal.pkl"
+      },
+      "route_axis": "x",
+      "scene_sha256": {
+        "easy": "sha256:b320e7d91e1dfd55ec7f106c03408a46a2b83c6d7290fb5639e132d8b223fb28",
+        "hard": "sha256:f2dc301f37ee863bebdf8c2f67033085bca5252af6334f35666aebf80bf94d41"
+      },
+      "scenes": {
+        "easy": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_090_crouch_cal3__door_lintel__s00032201__easy.usda",
+        "hard": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_090_crouch_cal3__door_lintel__s00032201__hard.usda"
+      },
+      "seed": 32201,
+      "source_pair_id": "lfh_090_crouch",
+      "source_variant_id": "cal3_alpha_1p0",
+      "spec": "specs/hallucination/cs_lfh_090_crouch_cal3.json",
+      "spec_sha256": "sha256:4abd40fd44acee422d6505707dd5cb10d139f708011f6dbc150e1b6c9960ef56",
+      "station_xy_m": [
+        1.7505419254302979,
+        -0.007086251396685839
+      ],
+      "variant_id": "lfh_090_crouch__door_lintel"
+    },
+    {
+      "archetype_id": "ibeam",
+      "binding_geometry_clearance_mm": {
+        "easy": {
+          "edit": 109.96666999447515,
+          "orig": 49.380756055680294
+        },
+        "hard": {
+          "edit": 30.218993501871058,
+          "orig": -29.845461732717627
+        }
+      },
+      "easy_coordinate_m": 1.3315587044509285,
+      "face_across_route_m": 3.0,
+      "face_along_route_m": 0.1,
+      "hard_coordinate_m": 1.2505079567106812,
+      "keepout": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_090_crouch_cal3__ibeam__s00032202.keepout.json",
+      "keepout_sha256": "sha256:b77cdabd3ebf0b5bbf46e82e7973404746b0487d9756f31447bae25a6770f621",
+      "pair_manifest": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_090_crouch_cal3__ibeam__s00032202.manifest.json",
+      "pair_manifest_sha256": "sha256:246069b0bbd915ea6dd21f4883e448d5ad629ca3c7f9b895267af94b4de1962c",
+      "reference_motions": {
+        "adapted": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_090_crouch/adapted.pkl",
+        "nominal": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_090_crouch/nominal.pkl"
+      },
+      "route_axis": "x",
+      "scene_sha256": {
+        "easy": "sha256:f052dcd11b94126bcd419a2b3c29f2f26fc4439b37d61bf4d1c392a82c680101",
+        "hard": "sha256:8a9ae582b01a69c84a7894e787ed7c5c8840ad15bee639d03bac61ca3a0d8c04"
+      },
+      "scenes": {
+        "easy": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_090_crouch_cal3__ibeam__s00032202__easy.usda",
+        "hard": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_090_crouch_cal3__ibeam__s00032202__hard.usda"
+      },
+      "seed": 32202,
+      "source_pair_id": "lfh_090_crouch",
+      "source_variant_id": "cal3_alpha_1p0",
+      "spec": "specs/hallucination/cs_lfh_090_crouch_cal3.json",
+      "spec_sha256": "sha256:4abd40fd44acee422d6505707dd5cb10d139f708011f6dbc150e1b6c9960ef56",
+      "station_xy_m": [
+        1.7505419254302979,
+        -0.007086251396685839
+      ],
+      "variant_id": "lfh_090_crouch__ibeam"
+    }
+  ]
+}

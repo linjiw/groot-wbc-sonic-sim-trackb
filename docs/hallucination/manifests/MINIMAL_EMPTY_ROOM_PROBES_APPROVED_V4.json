@@ -1,0 +1,307 @@
+{
+  "authorization": {
+    "approved_at": "2026-08-20T15:52:00-04:00",
+    "approved_by": "Codex LFH autonomous researcher",
+    "authority": "docs/hallucination/GOVERNANCE.md",
+    "claim5_isolation_verified": true,
+    "daily_projected_gpu_hours_approval_set": 0.625,
+    "prediction_register_sha256_at_approval": "sha256:424cfa691350633253a301e24992d23fee685662854bde0573eca373b905ed5b",
+    "source_manifest": "docs/hallucination/manifests/MINIMAL_EMPTY_ROOM_PROBES_PROPOSED_V4.json",
+    "source_manifest_sha256": "sha256:a028f08ab7ca1ad6b3c81a9be3baa638e0f5f1c98c3afc1720a815be73756bdf",
+    "status": "self_approved"
+  },
+  "cells": [
+    {
+      "cell_id": "mf_005_c08__probe_nominal",
+      "depends_on_acceptance_of": null,
+      "expectation": {
+        "basis": "historical nonempty-scene executions tracked this nominal motion",
+        "outcome": "accepted",
+        "status": "predicted"
+      },
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/matched/mf_005_c08/motions/w_nominal.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:e27c55d61f981145370c7fc918d28cc4c61bdc83616d75fc3a2cbccfb75f8ff6",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/matched/mf_005_c08/motions/w_nominal.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:3923885bcd2da41785496e3a96d218e86e27fb9349c8fb90fdc8a46bc407a7f6"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/matched/mf_005_c08/probe_nominal_gradeable",
+      "pair_id": "mf_005_c08",
+      "pair_role": "nominal",
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual/screen_empty.usda",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:195b7837cfe79e164f3b642767851fffefa338f42d0f6a6f6dd7020cf7ee476f"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "cell_id": "mf_005_c08__probe_adapted",
+      "depends_on_acceptance_of": "mf_005_c08__probe_nominal",
+      "expectation": {
+        "basis": "no plane execution exists and crouch transport-cost history makes an endpoint-gate failure scientifically plausible",
+        "outcome": null,
+        "status": "measurement_no_prediction"
+      },
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/matched/mf_005_c08/motions/w_crouch08.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:289d5ab1a2df94a13f877bcda4375705086b4e647ab05fbf9385d18e74ad7dec",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/matched/mf_005_c08/motions/w_crouch08.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:d5056535bfa0045ab7f244c316581e3fd8acb20d731787220764ec33e5b5503f"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/matched/mf_005_c08/probe_adapted_gradeable",
+      "pair_id": "mf_005_c08",
+      "pair_role": "adapted",
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual/screen_empty.usda",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:195b7837cfe79e164f3b642767851fffefa338f42d0f6a6f6dd7020cf7ee476f"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "cell_id": "lfh_089_arm_tuck_left__probe_nominal",
+      "coverage_target": "arms/local_arm_tuck/lateral_gap",
+      "cpu_reference_window_m": 0.06000443371111275,
+      "depends_on_acceptance_of": null,
+      "expectation": {
+        "basis": "no accepted empty-room execution exists for this arm-tuck pair; nonempty-scene successes are prioritization evidence only",
+        "outcome": null,
+        "status": "measurement_no_prediction"
+      },
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_probe_candidates/lfh_089_arm_tuck_left__nominal.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:e6cc8b4707a99390b4bbce589b543010e852b186d254ed59026ef9e290d896af",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_probe_candidates/lfh_089_arm_tuck_left__nominal.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:6f90fe95badf3a80dab2b7e7c49f4d28e0948fe9dd93dfe2d3f59118cfd80680"
+      },
+      "operator": "local_arm_tuck",
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/gradeable_empty_probes/lfh_089_arm_tuck_left/nominal",
+      "pair_id": "lfh_089_arm_tuck_left",
+      "pair_role": "nominal",
+      "predicted_delivered_window_m": 0.042003103597778924,
+      "response_alpha": 0.0,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual/screen_empty.usda",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:195b7837cfe79e164f3b642767851fffefa338f42d0f6a6f6dd7020cf7ee476f"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "cell_id": "lfh_089_arm_tuck_left__probe_adapted",
+      "coverage_target": "arms/local_arm_tuck/lateral_gap",
+      "cpu_reference_window_m": 0.06000443371111275,
+      "depends_on_acceptance_of": "lfh_089_arm_tuck_left__probe_nominal",
+      "expectation": {
+        "basis": "no accepted empty-room execution exists for this arm-tuck pair; nonempty-scene successes are prioritization evidence only",
+        "outcome": null,
+        "status": "measurement_no_prediction"
+      },
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_probe_candidates/lfh_089_arm_tuck_left__adapted.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:f6b4a72b939ec7be2a3873c71415a5f7ade62982ce28d8578283543105b0535c",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_probe_candidates/lfh_089_arm_tuck_left__adapted.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:e2dd91bb81b676bd39aeeeb0d94abf5f3baf1741e101c1164f67a7891c389e80"
+      },
+      "operator": "local_arm_tuck",
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/gradeable_empty_probes/lfh_089_arm_tuck_left/adapted",
+      "pair_id": "lfh_089_arm_tuck_left",
+      "pair_role": "adapted",
+      "predicted_delivered_window_m": 0.042003103597778924,
+      "response_alpha": 1.0,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual/screen_empty.usda",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:195b7837cfe79e164f3b642767851fffefa338f42d0f6a6f6dd7020cf7ee476f"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "cell_id": "lfh_092_arm_tuck_right__probe_nominal",
+      "coverage_target": "arms/local_arm_tuck/lateral_gap",
+      "cpu_reference_window_m": 0.05945190262998973,
+      "depends_on_acceptance_of": null,
+      "expectation": {
+        "basis": "no accepted empty-room execution exists for this arm-tuck pair; nonempty-scene successes are prioritization evidence only",
+        "outcome": null,
+        "status": "measurement_no_prediction"
+      },
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_probe_candidates/lfh_092_arm_tuck_right__nominal.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:8e20ae451e5adb95585549ddb4f5a9c9f6d64569269e6783c58f9a245c61e75c",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_probe_candidates/lfh_092_arm_tuck_right__nominal.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:e2e4ff06b748dd0b9a08829d0c80712ec68ff210a2976de2eaee2d6ac1778caf"
+      },
+      "operator": "local_arm_tuck",
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/gradeable_empty_probes/lfh_092_arm_tuck_right/nominal",
+      "pair_id": "lfh_092_arm_tuck_right",
+      "pair_role": "nominal",
+      "predicted_delivered_window_m": 0.04161633184099281,
+      "response_alpha": 0.0,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual/screen_empty.usda",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:195b7837cfe79e164f3b642767851fffefa338f42d0f6a6f6dd7020cf7ee476f"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "cell_id": "lfh_092_arm_tuck_right__probe_adapted",
+      "coverage_target": "arms/local_arm_tuck/lateral_gap",
+      "cpu_reference_window_m": 0.05945190262998973,
+      "depends_on_acceptance_of": "lfh_092_arm_tuck_right__probe_nominal",
+      "expectation": {
+        "basis": "no accepted empty-room execution exists for this arm-tuck pair; nonempty-scene successes are prioritization evidence only",
+        "outcome": null,
+        "status": "measurement_no_prediction"
+      },
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_probe_candidates/lfh_092_arm_tuck_right__adapted.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:ff1497f0c8e3ae54ed087b17a9acc9d541c6de286c2495307d79655cce3c9079",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_probe_candidates/lfh_092_arm_tuck_right__adapted.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:201a0f25107d766caf80336f3291f8567d58456e9af3d46da9e88ba164519614"
+      },
+      "operator": "local_arm_tuck",
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/gradeable_empty_probes/lfh_092_arm_tuck_right/adapted",
+      "pair_id": "lfh_092_arm_tuck_right",
+      "pair_role": "adapted",
+      "predicted_delivered_window_m": 0.04161633184099281,
+      "response_alpha": 1.0,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual/screen_empty.usda",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:195b7837cfe79e164f3b642767851fffefa338f42d0f6a6f6dd7020cf7ee476f"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "execution_policy": {
+    "camera_passes": [
+      "ego"
+    ],
+    "claim5_inputs_untouched": true,
+    "cost_ceiling": {
+      "gpu_hours_contended": 0.625,
+      "peak_gpu_memory_gib_per_serial_rollout": 4.8,
+      "rollouts": 6,
+      "seconds_per_rollout_contended": 375
+    },
+    "default_not_before": "2026-08-25T00:00:00-04:00",
+    "driver": "scripts/research/run_kimodo_sonic_rollout.sh",
+    "forbidden_camera_passes": [
+      "overhead"
+    ],
+    "not_authorized": false,
+    "postflight": [
+      "derive verdict labels only through the existing physics scorer",
+      "report capsule-proxy disagreement without changing the physics verdict",
+      "use a 0.00001 m attribution-resolution floor and refuse ambiguous contact as unattributed",
+      "refuse any contact attributed to non-binding authored geometry as secondary_contact"
+    ],
+    "prediction_register_untouched": false,
+    "preflight": [
+      "verify every scene, motion, and provenance hash",
+      "require motion scene_start_xyz to match the cell's expected start exactly",
+      "run only one rollout at a time after the 9000 MiB free-memory gate",
+      "classify missing marker, timeout, OOM, or missing artifact as infrastructure_failure",
+      "classify a completed physics rejection as a scientific outcome, never infrastructure"
+    ],
+    "requires_explicit_user_approval": false,
+    "runtime": {
+      "free_gpu_mib_required": 9000,
+      "hang_timeout_seconds": 1800,
+      "success_requires": [
+        "SONIC_EVAL_SUCCESS marker",
+        "success_manifest.json",
+        "at least one trajectory pickle",
+        "recorded fps=50"
+      ]
+    },
+    "timing_override": {
+      "authority": "docs/hallucination/GOVERNANCE.md \u00a71",
+      "default_not_before_overridden": true,
+      "reason": "outputs are isolated from claim-5 inputs and execution yields under GPU contention"
+    },
+    "user_owned_prediction_register_entries_untouched": true
+  },
+  "experiment": "LFH-empty-room-probes-1",
+  "purpose": "Close the mf source pair and unlock top-ranked arm-tuck targets in a gradeable empty room.",
+  "response_contract": {
+    "alpha_definition": "dimensionless interpolation from the paired nominal command (0) to the manifest-pinned edited command (1); legacy crouch08 remains blocked until its metadata repair defines the operator amplitude",
+    "append_rule": "append only after both paired plane rollouts are accepted and commanded and executed per-keypoint displacements are evidence-backed",
+    "artifact": "keypoint_response.csv",
+    "columns": [
+      "motion_id",
+      "operator",
+      "\u03b1",
+      "keypoint",
+      "axis",
+      "commanded_mm",
+      "executed_mm"
+    ]
+  },
+  "schema_version": "lfh_gpu_request_v1",
+  "stop_conditions": [
+    "skip an adapted cell when its paired nominal is rejected in physics",
+    "record any completed rejection as a trackability refusal and continue with other pairs",
+    "stop the batch on infrastructure failure; do not spend retry budget without approval",
+    "do not use nonempty-scene successes as substitutes for any refused plane cell"
+  ],
+  "supersedes": "MINIMAL_PLANE_PROBES_PROPOSED_V3.json",
+  "supersession_reason": "D2-006: the bare-plane recorder omits pair-resolved support-floor evidence, so a physically complete rollout is unevaluable for trackability. V4 uses the existing screen_empty scene with a registered floor and remote geometry; motion bytes, cell dependencies, predictions, and abstentions are unchanged"
+}

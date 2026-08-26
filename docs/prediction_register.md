@@ -45,6 +45,28 @@ tracking at the price of clearance, and the honest reading is that the deployabl
 deeper crouch as well as a slower one -- not that retiming failed. `delivered_window_m` is expected
 to change for the same reason and is not evidence either way.
 
+**Void attempt, 2026-08-19, recorded rather than discarded.** The first rollout of the retimed clip
+produced a complete, clean 2x2 that meant nothing. Both adapted cells ran to completion and were
+scored -- `adapted_easy` 0.642 m endpoint with `disallowed_robot_contact`, `adapted_hard` 1.227 m
+and a 2896.9 N torso strike straight down at frame 53 -- and read as a decisive refutation of P9.
+
+It was not. The retimed clip had been converted with `--scene-start 0 0 0` while its causal family
+was converted at `-2.0 0 0`, so it was placed two metres along the route from the shelf it was built
+for and met the ceiling sixty frames early, still upright. That is the same frame-mismatch failure
+`scene_route_check` was written for, in the same direction, at the same -2.0 m, made by the person
+who had read that docstring the same afternoon.
+
+Two things are worth keeping from it. The footprint check does **not** catch this and was tried
+first: the shelf is three metres long across the route, so a two-metre shift along the route still
+enters its footprint. What is exact is the conversion frame, and it is recorded on both sides, so
+`run_deployable_family.preflight_route` now refuses to spend a rollout when a deployable clip's
+`scene_start_xyz` differs from its causal family's. And the failure was invisible at every level a
+person would normally look: exit status zero, success markers present, artifacts written, a scorer
+that produced a well-formed table. Only the frame number of the strike was wrong, and only against
+an expectation of where the crouch was.
+
+The attempt is void, not negative. P9 stands unanswered and its predictions are unchanged.
+
 **What refutation would mean.** If 1 fails, transport is not what rejected the clip and the
 diagnosis below is wrong. If 1 holds and 2 fails, retiming is a usable engineering fix whose
 magnitude cannot be predicted, which puts every future deployable clip on a sweep rather than a
@@ -868,3 +890,1154 @@ The pattern in P1–P4 is one thing: each was an attempt to *infer* trackability
 of measuring it. That is also what forced `family_eligible` out of the Stage 2 report after four
 estimators gave four answers. P5 is the same species of claim, which is why it is registered rather
 than assumed.
+
+## LFH autonomous experiments — Codex-owned
+
+These entries are filed under `docs/hallucination/GOVERNANCE.md`. They are additive: all
+user-owned entries above remain unchanged. Registered 2026-08-20T15:22:06-04:00, before any LFH
+Phase-2 physics outputs.
+
+### LFH-E1a — source repeatability
+
+Manifest: `E1A_REPEATABILITY_PROPOSED.json`, SHA-256
+`cdb718992587554cb1628160dc0a8050bc1b768a5c0646b89c8cebe74d52cbac` (16 serial cells,
+1.667 contended GPU-hour ceiling).
+
+For each of two new seeds, both `duck_003` and `mf_005_c08` will reproduce the source pattern:
+`nominal_easy=accepted`, `nominal_hard=rejected`, `adapted_easy=accepted`, and
+`adapted_hard=accepted`. A clearance noise floor is a measurement, with no numeric prediction.
+Any outcome flip falsifies this entry and triggers the governance stop line before E1b or probes.
+
+### LFH-E1b-V2 — shelf-plank golden physics
+
+Manifest: `E1B_DUCK003_PHYSICS_PROPOSED_V2.json`, SHA-256
+`7809e36bec81f4f0b9b3211725300e7fc8c6d1fe3357716a23b8ada9baf48856` (4 serial cells,
+0.417 contended GPU-hour ceiling), contingent on LFH-E1a completing without a flip.
+
+The physics prediction is the same 2x2 outcome pattern as LFH-E1a, and the hard/nominal strike is
+uniquely attributable to the authored shelf binding primitive; ambiguous or secondary contact
+refuses the golden. The KCS capsule instrument separately predicts binding-geometry clearances
+`easy(orig/edit)=+89.577/+202.302 mm` and `hard(orig/edit)=-68.000/+66.663 mm`. Those millimetre
+values are reported calibration measurements, not outcome gates: the historical boundary-bisection
+instrument recorded hard/orig near `-0.0 mm`, so cross-instrument disagreement is not a refutation.
+
+### LFH-PROBES-1 — minimal plane trackability
+
+Manifest: `MINIMAL_PLANE_PROBES_PROPOSED_V2.json`, SHA-256
+`0cb332765361d57e934a698d4954b4c571d20eb79b972bbee3c998b248d0c0c6` (at most 6 serial cells,
+0.625 contended GPU-hour ceiling).
+
+`mf_005_c08__probe_nominal` is predicted accepted because historical nonempty-scene executions
+tracked the same motion. Its crouch-adapted pair is measurement without prediction: an endpoint-gate
+failure would be a scientific transport-cost finding, not infrastructure. Both left/right arm-tuck
+pairs are also measurement without prediction because no accepted empty-room execution exists.
+Each adapted probe runs only if its nominal is accepted; completed rejections are recorded rather
+than retried or replaced by nonempty-scene evidence.
+
+### LFH-E1a reconciliation — 2026-08-20
+
+**Confirmed: 16/16 outcomes, 0 flips.** Both fresh seeds reproduced the registered 2x2 pattern
+for both source families; all captures were evaluable at 50 Hz. The executed-capsule-to-loaded-USDA
+instrument measured an **18.044 mm source-inclusive clearance noise floor** (11.348 mm between
+the two fresh repeats alone). See `docs/hallucination/REPORT_E1A.md` and
+`docs/hallucination/e1a_repeatability.json`. Actual serial spend was 0.158 contended GPU-hours.
+This discharges the E1b contingency; it does not adjudicate LFH-E1b-V2 or LFH-PROBES-1.
+
+### LFH-E1b-V2 reconciliation — 2026-08-20
+
+**Confirmed on the binding physics gates: 4/4 outcomes and unique contact identity.** The generated
+shelf produced accepted/rejected/accepted/accepted in nominal-easy/nominal-hard/adapted-easy/
+adapted-hard order. Hard/nominal contacted the authored binding primitive at frame 107 on
+`torso_link`, uniquely separated from the next authored cube by 2006.6 mm, before reference drift
+at frame 123. No other cell had external collision contact.
+
+The KCS diagnostic prediction `[+89.577, +202.302, -68.000, +66.663] mm` compared with executed
+`[+89.253, +216.788, -0.107, +80.286] mm`; the three non-penetrating-cell errors are within the
+18.044 mm E1a floor, while hard/orig exhibits the preregistered penetration-instrument mismatch.
+Against the shipped execution itself, both adapted cells lie outside the E1a envelope by at most
+6.625 mm. This is reported—not converted into an outcome gate—and becomes an E2
+context-invariance warning. See `docs/hallucination/REPORT_E1B.md`. Actual spend: 0.039 contended
+GPU-hours.
+
+### LFH-PROBES-1 manifest amendment — before spend, 2026-08-20
+
+The executable record is superseded by `MINIMAL_PLANE_PROBES_PROPOSED_V3.json`, SHA-256
+`10dcd17454b913c0eb6be73ace580db21efe2a4d2b904129320b77a6364e0ed7`. V2 is retired before
+any probe rollout because its arm-tuck motions shared a candidate-level provenance file that did
+not independently record `scene_start_xyz`. V3 supplies hash-pinned per-motion conversion sidecars.
+All six motion bytes, cell IDs, dependencies, predictions, abstentions, and the 0.625 contended
+GPU-hour ceiling are unchanged. The LFH-PROBES-1 prediction above therefore remains in force.
+
+### LFH-PROBES-1 infrastructure reconciliation and V4 amendment — before new spend
+
+V3's first bare-plane nominal capture completed successfully (199 frames at 50 Hz), but the
+verdict is **void/unevaluable**, not rejected: bare-plane recording provides no pair-resolved foot
+ground forces or registered support-floor path, so the physics acceptance gates cannot run. The
+capture is retained as non-verdict swept-volume evidence; it is not rerolled or counted against the
+prediction. Actual infrastructure spend was 0.010 contended GPU-hours.
+
+The executable replacement is `MINIMAL_EMPTY_ROOM_PROBES_PROPOSED_V4.json`, SHA-256
+`a028f08ab7ca1ad6b3c81a9be3baa638e0f5f1c98c3afc1720a815be73756bdf`. V4 changes only the
+environment and output paths: all cells use hash-pinned `screen_empty`, whose registered floor is
+gradeable and whose walls and 5.0 m-high shelf are remote. Motion bytes, dependencies, prediction
+for `mf_005_c08` nominal, five abstentions, and the 0.625 GPU-hour ceiling remain unchanged.
+Scientific acceptance additionally requires zero external collision contact so remote geometry
+cannot masquerade as emptiness. D2-006 records the correction; LFH-PROBES-1 remains in force.
+
+### LFH-PROBES-1 V5 scorer amendment — before spend
+
+V4 is retired without execution because it did not pin which existing acceptance policy defines
+*trackability*. `MINIMAL_EMPTY_ROOM_PROBES_PROPOSED_V5.json`, SHA-256
+`1bae4625fee43821676d49bc78f40152fdee2fa592aff6ddb7942342eb06e560`, binds the raw
+`evaluate_locomotion_trajectory` report after reset splitting: reference-path and endpoint gates
+remain binding, as required when the commanded motion itself is the label. It also binds all
+contact/support/fall gates. The scene, motion hashes, cell order/dependencies, predictions,
+abstentions, and spend ceiling are identical to V4. LFH-PROBES-1 remains unchanged.
+
+### LFH-PROBES-1 reconciliation — 2026-08-20
+
+**The sole prediction is confirmed:** `mf_005_c08` nominal accepted in the gradeable empty room.
+The unpredicted crouch-adapted cell rejected solely on `reference_endpoint_tracking_error`
+(0.396 m against 0.35 m), with zero external collision, confirming a transport-cost failure rather
+than infrastructure. Therefore the `mf_005_c08` pair is not repaired or promoted as an LFH source.
+
+Both unpredicted arm-tuck pairs accepted nominal and adapted with zero external collision. They are
+trackable but **not scene-eligible**: position-aligned executed windows are 4.32 mm left and
+17.41 mm right, below the 20 mm spend floor and far below the 42.00/41.62 mm scalar-prior
+predictions. Twenty per-keypoint response rows are filed; D_phi still refuses with only one command
+level per side. See `docs/hallucination/REPORT_EMPTY_ROOM_PROBES.md` and D2-007. Actual V5 spend:
+0.059 contended GPU-hours (plus 0.010 for the preserved void V3 capture).
+
+### LFH-E2 — one-source overhead variant transfer
+
+Registered before spend against `E2_VARIANT_TRANSFER_PROPOSED.json`, SHA-256
+`cba8997fdd0f041e20be8c325e4da661c8e407be035ab91f183ddd914331b2d7` (12 serial
+cells, 1.250 contended GPU-hour ceiling). The denominator is honestly one extractable source,
+`cf_005_056`; `mf_005_c08` remains refused after its adapted empty-room failure.
+
+The primary prediction is that **at least 2 of 3** CPU-certified variants (`door_lintel`,
+`hvac_duct`, `ibeam`) reproduce the complete accepted/rejected/accepted/accepted pattern with
+hard/nominal contact uniquely attributed to their binding primitive. Geometry predicts the pattern
+for each variant individually; an individual miss is recorded even if the aggregate threshold
+passes. `door_lintel` additionally predicts no jamb/secondary contact because its measured context
+clearance is 924 mm. Falsifiers: at most one full variant, ambiguous/secondary hard-cell contact,
+or a nominal-hard rejection whose tracking drift begins before contact. Clearance drift against
+the 18.044 mm E1a floor is a reported diagnostic, with no directional prediction after E1b's
+adapted-cell warning.
+
+### LFH-E2 reconciliation — 2026-08-20
+
+**The aggregate prediction is confirmed exactly at threshold: 2/3 variants verified.** All 12/12
+cell outcomes reproduced the accepted/rejected/accepted/accepted source pattern. `door_lintel`
+and `ibeam` had unique binding-primitive contact before 0.15 m reference drift. `hvac_duct` is an
+honest individual refusal: its hard/nominal collision was uniquely attributed to the intended duct,
+but drift began at frame 30 before contact at frame 110, activating the preregistered falsifier.
+
+No cell produced secondary contact, and the door-lintel jamb prediction was confirmed. All 12
+executed binding clearances stayed within the 18.044 mm E1a floor (largest per-variant maximum:
+15.507 mm); authored binding-face offsets round to 0.000000 mm. The immutable approved manifest
+SHA-256 is `84d5d6847539343569652fd4db09da7d545d2129158bdb8323963bdaa87232d2`.
+Actual serial spend was 0.112 contended GPU-hours. See `docs/hallucination/REPORT_E2.md`.
+
+### LFH-CAL1 — arm-tuck executed-delivery calibration
+
+Registered before spend against `ARM_TUCK_CALIBRATION_PROPOSED.json`, SHA-256
+`51202f748bf81d33791383a2c4b8fc962537f765dca88c54e3b5c01b4774b830` (12 serial
+empty-room cells, 1.250 contended GPU-hour ceiling). The cohort uses three commanded levels on two
+strict-CPU-gated motions per side. Accepted V5 nominal/full-amplitude captures for `089/left` and
+`092/right` are hash-pinned and reused; only missing levels and the `086/left`, `084/right` pairs
+are rolled out.
+
+The four smaller edits on the already accepted anchor motions are predicted **accepted**, because
+they preserve the same root, legs, and support schedule while strictly reducing arm-joint
+excursion. The other eight cells are registered as measurements with no outcome prediction: their
+references pass the CPU gate, but no empty-room execution exists. The delivery prediction is that
+the conservative fitted 60 mm lower bound remains **below the 20 mm scene-spend floor on both
+sides**, consistent with V5's 4.32/17.41 mm delivery. Falsifiers are any anchor-level rejection, an
+evidence-backed lower bound of at least 20 mm, or failure to obtain the two-motion/three-level
+support needed by D_phi. No calibration result is a scene verdict.
+
+### LFH-CAL1 reconciliation — 2026-08-20
+
+**Both registered predictions are confirmed.** All 12/12 new empty-room cells accepted with zero
+external collision, including all 4/4 predicted reduced anchor edits. Together with the reused V5
+anchors, the cohort contributes 120 position-aligned per-keypoint rows and fits four supported
+D_phi models (left/right shoulder and wrist); nonmoving keypoints remain refused.
+
+At a 60 mm wrist command, the monotone two-motion fits estimate 6.82 mm left and 5.16 mm right.
+Their conservative lower bounds are only **1.60 mm left and 4.29 mm right**, both far below the
+20 mm scene-spend floor. E3 lateral scene instantiation is therefore refused: controller
+trackability is green, but the current arm-tuck operator does not reliably deliver enough executed
+geometry. Actual serial spend was 0.116 contended GPU-hours. The immutable approved manifest
+SHA-256 is `17bd7adf563bdd710a29704540b7577d07835f5d5c6984e685634371eb797eb0`.
+See `docs/hallucination/REPORT_ARM_TUCK_CALIBRATION.md`.
+
+### LFH-CAL1 review correction — 2026-08-20
+
+Independent post-run review found that the first D_phi implementation grouped the two motions by
+exact per-keypoint `commanded_mm`. Nearly equal matched commands were therefore treated as adjacent
+independent x-values; on the right, 60.88 mm -> 5.25 mm and 61.43 mm -> 17.41 mm became an
+artificial steep segment with understated cross-motion uncertainty. Raw captures, response rows,
+acceptance predictions, and the below-20 mm scene refusal are unchanged.
+
+The corrected contract pools commands and responses by preregistered alpha, requires at least two
+motions at every level, and estimates residuals against the matched-level fit. At a 60 mm query the
+revised wrist estimates/lower bounds are **6.66/1.10 mm left** and **10.84/4.76 mm right**. Both
+remain below the 20 mm spend floor, so the original CAL1 delivery prediction remains confirmed.
+This correction supersedes only the four fitted numbers in the reconciliation above.
+
+### LFH-CAL2 — strong-command executed-delivery calibration
+
+Registered before spend against `ARM_TUCK_STRONG_CALIBRATION_PROPOSED.json`, SHA-256
+`d3b0dcf8a370c51405b79cdc88205a71a246b9cdc281811af7ca7764a721ef65` (5 serial
+empty-room cells, 0.521 contended GPU-hour ceiling). Three accepted nominal captures are reused by
+exact reference-CSV identity; `094/left` adds one nominal dependency. The two left motions share
+alpha=2.0 (120 mm operator target; 116.50/117.98 mm body windows), and the two right motions share
+alpha=2.5 (150 mm target; 95.37/100.15 mm windows). Alpha remains scaled to CAL1's 60 mm anchor,
+per D2-010.
+
+All five cell outcomes are registered as measurements with no prediction because CAL1 provides no
+trackability extrapolation beyond alpha=1. The delivery prediction is that the corrected
+matched-level conservative wrist bound remains **below 20 mm on both sides** after CAL2. Either
+side reaching at least 20 mm falsifies that side's refusal and licenses CPU scene proposals (not a
+physics verdict); failure to obtain two accepted motions at a strong level refuses that model.
+
+### LFH-CAL2 reconciliation — 2026-08-20
+
+CAL2 completed its registered funnel: 5 proposed, 4 rolled out, 3 accepted, 1 rejected, and
+1 dependency skip. Every accepted strong edit had zero external contact. Strong-left is refused:
+`094/left` nominal rejected for endpoint tracking and external robot contact, leaving alpha=2 with
+only one accepted motion. Strong-right is replicated at alpha=2.5. Its matched wrist fit estimates
+52.80 mm delivery at a 261.33 mm mean wrist command, with a conservative lower bound of **23.84
+mm**. The registered below-20 prediction is therefore **partially falsified on the right** and not
+evaluable on the left.
+
+This result licenses a CPU all-keypoint scene search, not scene instantiation or a physics verdict.
+The follow-up finite-face audit distinguishes the earlier root-relative selection proxy from the
+authoritative capsule-surface response and records that distinction in D2-011. Actual serial spend
+was 0.030 contended GPU-hours. See `REPORT_ARM_TUCK_STRONG_CALIBRATION.md`.
+
+### LFH-E3-LATERAL-1 — coverage-targeted arm-tuck pilot
+
+Registered 2026-08-20T18:07:58-04:00 before generated-scene physics against
+`E3_LATERAL_PILOT_PROPOSED.json`, SHA-256
+`eab420e271953952eb1aa64c6a7b5f7c522c15a4eb2fde6748ae493360bd28f6` (4 serial cells,
+0.417 contended GPU-hour ceiling).
+
+The fixed CPU funnel evaluated 24 full-gap trials and retained one. `084/right` at executed active
+progress 0.3925 and 0.30 m face depth has a 165.80 mm raw gap-width window and a 56.41 mm
+noise-certified intersection with the empty DCS target `wrist_right × lateral_gap × 0.8_0.9 ×
+clear_25_50`. Exact Tier-2 box clearances are `easy(orig/edit)=+35.998/+112.125 mm` and
+`hard(orig/edit)=-32.806/+26.419 mm`; `092/right` is refused by the temporal/anatomy screen.
+
+The physics prediction is the complete pattern **accepted/rejected/accepted/accepted** for
+nominal-easy/nominal-hard/adapted-easy/adapted-hard. Nominal-hard contact must occur before binding
+tracking drift and be uniquely attributable to one of the two authored binding panels. Any outcome
+mismatch, secondary or ambiguous contact, or drift preceding the nominal-hard contact falsifies the
+pilot. The generated family remains isolated from claim 5 regardless of outcome.
+
+### LFH-E3-LATERAL-1 reconciliation — 2026-08-20
+
+The registered prediction is **falsified**: nominal-easy, nominal-hard, and adapted-easy matched,
+but adapted-hard contacted a binding panel and rejected (3/4 outcomes). Its first contact at frame
+115 was uniquely attributable to the left binding panel and preceded 0.15 m reference drift at
+frame 142, so this is a causal binding failure rather than secondary clutter or post-failure drift.
+The candidate is refused, the rank-48 DCS target remains empty, and no generated family is added.
+
+The accepted easy-scene executions close the retry question without more physics. At the registered
+station and face extent, nominal and adapted required full gaps are 0.976216 m and 0.906489 m. The
+adapted envelope exceeds the `0.8_0.9` target's upper edge by 6.49 gap-mm before uncertainty and
+requires 0.942577 m after the registered 36.088 mm gap uncertainty. No in-bin retry is certified;
+a wider intervention belongs to another bucket and would require a new prediction. Actual serial
+spend was 0.040 contended GPU-hours. See `REPORT_E3_LATERAL_PILOT.md` and D2-015.
+
+### LFH-CAL3 — crouch executed-window calibration
+
+Registered 2026-08-20 before physics against `CROUCH_CALIBRATION_PROPOSED.json`, SHA-256
+`a58019a4d3acb4c23a183b6f35f190bd57e22e69d3d8a86d75cd658aafcd9a2e` (8 serial
+empty-room cells, 0.833 contended GPU-hour ceiling). The fixed CPU funnel evaluated all 15 strict
+stand-to-walk motions at 40/60/80/100 mm target drops (60/60 reference passes) and selected the
+four strongest route-straight 80 mm settings: motions `090`, `086`, `089`, and `095`. All four
+commands are uncapped and preserve the root path. These are properties of the reference edit, not
+executed-delivery or trackability claims.
+
+Every cell outcome is registered as a measurement with no cell-level prediction because prior work
+shows crouch trackability is motion-specific. The cohort-level prediction is that at least **2/4**
+matched pairs will obtain accepted nominal and adapted executions, and at least one accepted pair
+will exhibit a **>=20 mm raw executed head/torso overhead window** in the manifest's fixed
+time-mapped station x 0.1/0.2/0.3/0.4 m finite-face search. Failure of either condition refuses new
+crouch scene synthesis from this cohort. Passing licenses CPU proposal search only; no geometry or
+physics family is implied, and all outputs remain isolated from claim 5.
+
+### LFH-CAL3 reconciliation — 2026-08-20
+
+The cohort prediction is **confirmed**. All four nominals and three adapted motions were accepted;
+`095` adapted was a completed scientific rejection for endpoint tracking, giving 3/4 accepted
+matched pairs. The fixed 36-trial finite-face search found temporally active exact head/torso raw
+windows up to **72.26 mm**, above the registered 20 mm threshold. Actual serial spend was 0.063
+contended GPU-hours.
+
+The stronger E3 coverage gate nevertheless refuses every scene. All uncertainty-cleared feasible
+coordinates lie in the already occupied `head_torso × overhead × 1.2_1.3` region; no matching
+empty target intersects. Empty shoulder targets fail the binding-anatomy contract, and empty
+head/torso coordinate buckets are outside the measured windows. Thus CAL3 is retained as executed
+operator evidence, while its funnel ends at **0 target-matched scene candidates** with no scene
+physics spend. See `REPORT_CROUCH_CALIBRATION.md` and D2-016.
+
+### LFH-CAL3 final-audit correction — 2026-08-20
+
+The preceding zero-candidate reconciliation is superseded, without changing the registered CAL3
+physics result. SweepCF-DCS v1 allowed calibration `probe` rows and refused sibling variants to
+fill causal targets, and 48/168 configured cells paired `local_crouch` with shoulder binders that
+the proposer forbids. D2-017 introduces v2: only canonical cells of exact verified variants occupy
+targets, and the coupling-valid denominator is 120. Replaying the same hash-pinned CAL3 executions
+restores **20 CPU-valid proposals across all three accepted pairs** in the previously probe-only
+`head_torso × overhead × 1.2_1.3 × clear_25_50` target. No family or physics verdict is inferred by
+this correction.
+
+### LFH-E6 — independent-source critical-window pilot
+
+Registered 2026-08-20 before E6 physics. E6 tests one canonical `shelf_plank` family for each of
+`lfh_086_crouch`, `lfh_089_crouch`, and `lfh_090_crouch`. The fixed selected hard coordinates are
+1.257310 m, 1.261340 m, and 1.250508 m. Their symmetric engineering-margin windows are 36.17,
+33.54, and 26.01 mm after subtracting the empirical E1a 18.044 mm envelope on both sides. The
+envelope is a conservative engineering margin with no calibrated confidence level.
+
+The overall primary prediction is that at least **2/3 sources** reproduce the complete pattern
+`nominal-easy=accepted`, `adapted-easy=accepted`, `nominal-hard=rejected`,
+`adapted-hard=accepted`; stretch is 3/3. Nominal-hard contact must be uniquely attributable to the
+head/torso binding primitive, authored secondary contact is forbidden, and face measure-back must
+remain within 0.5 mm. All outputs stay excluded from claim 5.
+
+E6 is staged to enforce D2-015. E6a is the six easy cells in
+`E6A_CROUCH_CONTEXT_PROPOSED.json`, SHA-256
+`0969a48cb83f00594034f234b68d71169818b1e5526eeb3c4c1fa90a22c4835a` (0.625 contended GPU-hour
+ceiling). All six cell outcomes are predicted accepted. The cohort gate is at least **2/3 source
+pairs** with both cells accepted, zero external contact, and the pinned hard coordinate retained
+inside the scene-conditioned symmetric interval; stretch is 3/3. Fewer than two eligible sources
+stops E6. E6b hard cells require a new hash-pinned manifest and reconciliation of E6a before spend.
+
+### LFH-E6a reconciliation and E6b registration — 2026-08-20
+
+E6a completed all six easy cells at 0.091 contended GPU-hours. Five of six predicted outcomes
+matched. `lfh_086_crouch` nominal-easy accepted, but adapted-easy rejected for
+`unstable_reference_drift` despite zero external contact; that source is refused before hard
+physics. Both easy cells accepted with zero external contact for `lfh_089_crouch` and
+`lfh_090_crouch`. Exact scene-conditioned reach retained their pinned hard coordinates inside
+37.62 mm and 33.45 mm symmetric engineering intervals. Thus the E6a primary gate is met at exactly
+2/3 sources and the stretch 3/3 gate is falsified. Evidence:
+`E6A_CROUCH_CONTEXT_APPROVED.json` SHA-256
+`6b5d23c9dd55aab3a819bfc81bc892151d1bdef89563786441cf542dbf64ac24`; run record SHA-256
+`3255ed4150707b5e7a00c95e4a191310bbf3a724eba8a3a5583cacc8742ec2a9`; recertification SHA-256
+`9f7c61747437683ba789f4c26238b3ff61e993e0dd26e08909a0bf41d49e6a94`.
+
+E6b is registered before hard physics against `E6B_CROUCH_HARD_PROPOSED.json`, SHA-256
+`145a8bd14c794c018a6b2e003e57c55c2721196fda09966ffe4c4ec84c642224` (four serial cells,
+0.417 contended GPU-hour ceiling). Predictions are nominal-hard rejected and adapted-hard accepted
+for both 089 and 090. Both complete patterns are required to confirm E6's primary >=2/3 result;
+either source failure falsifies it. Nominal-hard rejection must be uniquely binding-head/torso
+contact, adapted-hard must have no secondary contact, and infrastructure failure remains separate.
+
+### LFH-E6 reconciliation — 2026-08-20
+
+The primary prediction is **confirmed at exactly 2/3 sources**; the 3/3 stretch prediction is
+falsified. E6b reproduced rejected/accepted hard outcomes for both 089 and 090. In both sources the
+first >1 N external contact was uniquely nearest `/World/ConstraintFrame/BindingShelfPlank`, carried
+by `torso_link`, and preceded 0.15 m reference drift (089: contact frame 110, drift frame 118; 090:
+contact frame 99, drift frame 116). Both adapted-hard cells had zero external contact and accepted.
+Together with their E6a easy cells, these are two complete new source families. Source 086 remains
+refused at adapted-easy and received no hard spend.
+
+E6 used 10 rollouts and 0.148 contended GPU-hours. Approved E6b manifest SHA-256:
+`11e8e7cd606aa16fc7163bbf9b40c4dfbe45df74f5435868b40ac63f143cb046`; hard run SHA-256:
+`c6ddd7a16b9240d021a0af54dcf3d34872ba19e1deeb507d8d70e6149b4aa892`; adjudication
+`e6_crouch_pilot.json` SHA-256:
+`b3d76eb9c1b99d2590f7f277a3ec3b9692daa44f865b4977cce7f881fdbf41dc`. No result enters claim 5.
+The extractable source count is now three (`cf_005_056`, 089, 090), so E5 remains blocked. The next
+source-expansion question is whether 086's earlier/shorter valid support atom avoids the observed
+visual-context drift; archetype multiplication must not substitute for that missing source.
+
+### LFH-E6c — source-086 finite-exposure ablation
+
+Registered 2026-08-20 after E6 and before E6c physics. This is an explicitly adaptive follow-up,
+not a retry counted toward E6's already reconciled 2/3 result. It holds source, motion pair,
+operator, route progress 0.543890, `shelf_plank` archetype, DCS target, and symmetric engineering-
+margin rule fixed while reducing along-route face exposure from 0.30 m to 0.10 m. The new exact
+empty-room support retains a 33.41 mm engineering window; hard coordinate is 1.255868 m.
+
+E6c-easy is two cells in `E6C_CROUCH_EXPOSURE_EASY_PROPOSED.json`, SHA-256
+`c1fcb5229a73b1d6f10cc8c94111590d3f895dbd8dd3f273187547b1577fefe9` (0.208 contended GPU-hour
+ceiling). Prediction: nominal-easy and adapted-easy both accept with zero external contact, and the
+pinned hard coordinate remains inside the scene-conditioned symmetric interval. Any easy failure
+refuses the ablation without hard spend and shows that exposure reduction alone is insufficient.
+If the easy gate passes, a separately registered two-cell hard phase predicts nominal rejection by
+the head/torso binding plank and adapted acceptance with zero external contact.
+
+### LFH-E6c-easy reconciliation and hard registration — 2026-08-20
+
+The exposure-ablation easy prediction is **confirmed**. Nominal and adapted both accepted with zero
+external contact; adapted drift fell from 0.15097 m/s in the 0.30 m E6 face to 0.12820 m/s in the
+0.10 m face. The pinned 1.255868 m hard coordinate remains inside a 25.53 mm scene-conditioned
+symmetric interval. Easy approved-manifest SHA-256:
+`07872054d5b43acda65f07c421cad045a170160b33e0da8a5d2277ba82faba71`; run SHA-256:
+`6bfd403c375a71eaf71fd8914ec899e2b9e593e1f763c23d314fb91b6b7ffe1f`; recertification SHA-256:
+`cec7ab748e7c219b4800796fec7b60759beb3f23934dcbdf7d6b4fc379affa3a`.
+
+The two hard cells are registered before physics in
+`E6C_CROUCH_EXPOSURE_HARD_PROPOSED.json`, SHA-256
+`89dee203edeebd8aebcf35de6874842eac4625b186f5e19f6d6d603477fdcab9` (0.208 contended GPU-hour
+ceiling). Prediction: nominal-hard rejects by uniquely attributed head/torso binding contact before
+drift; adapted-hard accepts with zero external contact. Both are required to verify this adaptive
+source family. This result will test finite exposure, not retroactively change E6's 2/3 denominator.
+
+### LFH-E6c final reconciliation — 2026-08-20
+
+The registered hard prediction is **confirmed**. Nominal-hard rejected on uniquely attributed
+`torso_link` contact with `/World/ConstraintFrame/BindingShelfPlank` at frame 124, before reference
+drift at frame 133; the runner-up authored primitive was 3902.1 mm farther away. Adapted-hard
+accepted with zero external contact. Together with the easy gate, the 0.10 m exposure ablation is a
+complete canonical 2x2 source family. It does not alter E6's registered 2/3 result. The paired
+adapted-easy drift change (0.15097 to 0.12820 m/s) is evidence that finite exposure matters for this
+source/seed, not a population causal estimate.
+
+E6c used four rollouts and 0.056 contended GPU-hours. Approved hard-manifest SHA-256:
+`ee1ef7a0cfb7f4187f75edb7468f4059afc3f92c73f7f902d639938e03fbb235`; hard run SHA-256:
+`18b526d56b61a01aa83f46ebbfbfdcff6a208609e02a77539bd7adb808bd01dc`; adjudication
+`e6c_exposure.json` SHA-256:
+`12a7dca98cb421f6eee8686f476518811c2437435ef5360e70e04aecb3dd9105`. The extractable source
+count is now four (`cf_005_056`, 086, 089, 090). E5 remains blocked pending two verified archetype
+transfers per new source; no E6/E6c result enters claim 5.
+
+### LFH-E7 — source-conditioned archetype transfer
+
+Registered 2026-08-21 before E7 physics. E7 preserves each verified source's exact motion pair,
+route station, finite exposure, easy/hard coordinates, and engineering-margin rule while changing
+only the deterministic obstacle archetype to `door_lintel` or `ibeam`. In particular, source 086
+retains the E6c-verified 0.10 m exposure. Six source-archetype variants passed binding-face
+measure-back, route, four-sign geometry, and non-binding keepout gates.
+
+E7a contains the 12 easy cells in `E7A_ARCHETYPE_CONTEXT_PROPOSED.json`, SHA-256
+`f95bfb63f1a403e6bf85b8fef97bb056709f65f589101a23ee75c2228f3c3d45` (1.25 contended GPU-hour
+ceiling). Prediction: at least four of six variants, spanning all three sources, accept both easy
+motions with zero external contact and retain the pinned hard coordinate inside a ≥20 mm
+scene-conditioned engineering interval. Stretch: all six. Only passing variants may enter a
+separately registered hard phase.
+
+Final E7 primary, assessed after hard registration: at least four of six proposed variants produce
+the complete accepted/accepted/rejected/accepted pattern, with at least one verified transfer per
+source. Nominal-hard rejection must be uniquely attributed to the head/torso binding primitive
+before reference drift; every intended-clear cell must have zero external contact. Stretch: 6/6,
+which reaches the four-source × three-archetype E5 readiness gate. Any smaller result remains
+evidence about context survival and does not justify learner training or a learned verdict gate.
+
+### LFH-E7a reconciliation and E7b registration — 2026-08-21
+
+The E7a prediction is **confirmed at the 6/6 stretch level**. All 12 easy cells accepted with zero
+external contact. Every source-archetype variant retains its pinned hard coordinate inside the
+scene-conditioned symmetric interval; widths range from 26.07 to 39.07 mm. Approved easy-manifest
+SHA-256: `98665f87cdcb190fee9f259393af70f1c40bc2386587dbd5f1d2548b584aa64a`;
+easy run SHA-256: `8d51a156e2072bb0bdb0ac31bef9a7ad9c5d76739af38c020ea785148b111661`;
+recertification SHA-256: `fd6cb53f156933cf6dd4ed6550248a38e8ccc2d8b8e25c2984d9345172bbdbd8`.
+E7a used 12 rollouts and 0.171 contended GPU-hours.
+
+E7b contains the 12 hard cells in `E7B_ARCHETYPE_HARD_PROPOSED.json`, SHA-256
+`58243a8a0c8ec7d570d64aa80b33fd77d53d2c2870bbce331cd5bfb387cff4be` (1.25 contended GPU-hour
+ceiling). Prediction: every nominal-hard cell rejects on uniquely attributed `torso_link` contact
+with the archetype's binding primitive before drift, and every adapted-hard cell accepts with zero
+external contact. The registered primary remains ≥4/6 complete variants spanning all sources;
+stretch remains 6/6. Results remain isolated from claim 5.
+
+### LFH-E7 reconciliation and E7c registration — 2026-08-21
+
+The E7 primary is **confirmed at 5/6 variants across all three sources**; the 6/6 stretch is
+falsified. All 24 outcome labels matched and all nominal-hard contacts were uniquely attributed to
+`torso_link` on the binding primitive. Five variants pass contact-before-drift and no-secondary-
+contact gates. Source 086's door-lintel is refused because binding contact at frame 122 followed
+reference drift at frame 95, despite its matching nominal-reject/adapted-accept labels. This is a
+causal refusal, not an infrastructure failure, and leaves source 086 one archetype short of E5
+readiness.
+
+E7 used 24 rollouts and 0.340 contended GPU-hours. Approved E7b manifest SHA-256:
+`e824e13ceb7ebf221b1368ba1baaf0d4ae7d98f8dc653fba0b1433c3ca889fbc`; hard run SHA-256:
+`7877e0038c4105313806d2bfaf0771954e0f171932e49d8d2c93a9331556ca5f`; adjudication
+`e7_transfer.json` SHA-256:
+`048a6e27bae36cbd393c98501ffc91b09ff09c88e186e4e87beaf8ea5a034571`.
+
+E7c is an adaptive replacement, not a change to E7's denominator. It keeps source 086, its exact
+motion pair, route station, 0.10 m exposure, easy/hard coordinates, and margin rule fixed while
+replacing only the refused `door_lintel` with the existing `hanging_panel` archetype. Tier-2
+measure-back, route, four-sign, and keepout checks pass. E7c-easy contains two cells in
+`E7C_REPLACEMENT_EASY_PROPOSED.json`, SHA-256
+`49f2ad83142aa8b88f9f0327ecabd1c3481f2504e1b72a7a2bd32d78332eb16e` (0.208 contended GPU-hour
+ceiling). Prediction: both easy cells accept with zero external contact and the pinned hard
+coordinate remains inside a ≥20 mm scene-conditioned interval. If confirmed, a separately
+registered hard pair predicts nominal rejection on uniquely attributed binding contact before
+drift and adapted acceptance with zero external contact. Both phases are required before E5 opens.
+
+### LFH-E7c-easy reconciliation and hard registration — 2026-08-21
+
+The E7c easy prediction is **confirmed**. Nominal-easy and adapted-easy accepted with zero external
+contact, and the pinned 1.255868 m hard coordinate remains inside a 27.79 mm scene-conditioned
+engineering interval. Approved easy-manifest SHA-256:
+`6653e293e268264d7690c56bd930c2705b4d2554f79ad5e4db58f1bd69fb57ce`; easy run SHA-256:
+`0f76e5a8bb2f66a4d9bcbd6d6a898ca009252aadf7397d663eb389cb881e4796`; recertification SHA-256:
+`e221933da273bbb398685b3f91586fa6740179fd4772982ba50e24591d5da8c6`. The easy phase used two
+rollouts and 0.029 contended GPU-hours.
+
+The two hard cells are registered before physics in `E7C_REPLACEMENT_HARD_PROPOSED.json`, SHA-256
+`6d477ec4bb2108d0c33c1d754ed47fba38a95b0003c441979ff0598ee7e8f125` (0.208 contended GPU-hour
+ceiling). Prediction: nominal-hard rejects on uniquely attributed `torso_link` contact with the
+binding hanging panel before drift; adapted-hard accepts with zero external contact. Both are
+required to verify the replacement and open the four-source × three-archetype readiness gate.
+
+### LFH-E7c final reconciliation and crossed-gate audit — 2026-08-21
+
+The E7c hard prediction is **confirmed**. Nominal-hard rejected on uniquely attributed
+`torso_link` contact with `/World/ConstraintFrame/BindingHangingPanel` at frame 120, before drift
+at frame 135; adapted-hard accepted with zero external contact. Together with the confirmed easy
+phase, E7c is a complete replacement without changing E7's registered 5/6 denominator. Hard-run
+SHA-256: `6a00b3cf1758260dd8790efc7b8b4f41d6e7bf884497bcb767267af85b010ece`;
+final `e7c_replacement.json` SHA-256:
+`55552511ccfc62933f6ce119e8e57d4de63ffdf181ff0e84cb32a80bf3d791df`. E7c used four rollouts
+and 0.057 contended GPU-hours; E7 plus E7c used 28 rollouts and 0.398 contended GPU-hours.
+
+The earlier “four sources × three archetypes” language is now recorded as a **count-only gate**,
+not E5 authorization. The realized support has 12 verified source-archetype pairs, but only
+`shelf_plank` and `ibeam` are common across all four sources. A held-out source × archetype test
+requires a complete cross with at least three common archetypes. E5 therefore remains closed; the
+next evidence target is a staged E8 transfer of `hanging_panel` to `cf_005_056`, 089, and 090.
+
+### LFH-E9a — fresh motion to trajectory-frame calibration — 2026-08-21
+
+Registered before E9a physics. Kimodo-G1-RP freshly generated a 120-frame motion from “A person
+walks at a steady pace curving gently to the left.” with seed 45001 and 100 denoising steps. The
+strict CPU gate passes. The existing `local_crouch` operator is applied at route progress 0.55;
+its reference capsule silhouette drops 79.999 mm while preserving the root path, and the adapted
+reference also passes embodiment and self-collision gates.
+
+E9a contains the two empty-scene cells in `E9A_MOTION_SCENE_CALIBRATION_PROPOSED.json`, SHA-256
+`c1722d3cb72d2622c1e83aed0c97b2243bb9993cd508dd4b94f45310192b5f4d` (0.208 contended GPU-hour
+ceiling). Primary prediction: both nominal and adapted motions accept in `screen_empty` with zero
+external contact. Only then may executed trajectories define a 3D route frame and finite-face
+support. Stretch: an overhead engineering interval of at least 20 mm survives symmetric 18.044 mm
+engineering margins. Lateral, floor, and oblique axes remain unsupported unless those same
+executions show a corresponding paired separation; the route frame alone is not evidence.
+
+### LFH-E9a reconciliation and E10 registration — 2026-08-21
+
+The E9a primary and stretch predictions are **falsified**. The fresh nominal motion accepted with
+zero external contact, 0.08377 m endpoint error, and 0.11147 m p95 path error. The crouch twin had
+zero external contact but rejected on endpoint and path tracking: 0.37573 m endpoint error and
+0.41021 m p95 path error. The loop stops before geometry authoring, as registered. This is a
+controller-delivery failure, not evidence against an overhead obstacle and not a physics retry.
+
+E10 tests a different, already verified source to make scene composition explicit. It keeps the
+source-086 motion pair, hanging-panel binding atom, finite exposure, face coordinates, and seed
+policy fixed, then adds four deterministic context obstacles at route progress 0.22–0.83 on both
+lateral sides, at floor level, and overhead. These faces are context only: they do not establish
+critical lateral, floor, or oblique support. The CPU certificate preserves the four binding signs,
+measures each face back, and reports 288.78 mm minimum context-to-sweep clearance against the
+required 50 mm.
+
+`E10_CONTEXT_RICH_PROPOSED.json`, SHA-256
+`deb3ceba0c99b52a7559544dc18c44b54e40089f054236acf1d35fdc953e936c`, contains four cells with a
+0.417 contended GPU-hour ceiling. Primary prediction: the original
+accepted/accepted/rejected/accepted pattern survives. Nominal-hard contact must remain uniquely
+attributed to the hanging-panel binding primitive before drift; the three intended-clear cells
+must have zero external contact. Any context contact refuses the scene. E10 is a multi-obstacle
+context-survival and visualization pilot, not evidence that the LFH critical proposal distribution
+already supports all directions.
+
+### LFH-E10 reconciliation and E10b seed control — 2026-08-21
+
+E10’s primary is **falsified**: nominal-easy accepted, but adapted-easy rejected on reference drift;
+nominal-hard and adapted-hard rejected. Both adapted cells had zero external contact and identical
+0.15274 m/s drift, so no context obstacle struck the robot. Nominal-hard contacted `torso_link`.
+E10 spent four rollouts and 0.0575 contended GPU-hours.
+
+E10 does not identify a context effect because its seed 33101 differed from the verified E7c seed
+32301 and the seed also controls the hanging-panel non-binding thickness. E10b corrects this by
+holding the original motion pair, binding geometry seed 32301, face coordinates, exposure, and
+four route-relative context obstacles fixed. Its CPU certificate again reports 288.78 mm minimum
+context clearance. `E10B_CONTEXT_RICH_SEED_CONTROL_PROPOSED.json`, SHA-256
+`962af6a87de018cad19c6b040c764d4b49694cd1c7b238cfd00d162e5b875447`, contains four cells with a
+0.417 contended GPU-hour ceiling. Primary: the verified accepted/accepted/rejected/accepted pattern
+survives at the exact source seed, with zero external contact in intended-clear cells and unique
+binding contact before drift in nominal-hard. If either adapted cell still rejects without contact,
+context invariance is falsified for this source; if all four match, E10 is assigned to seed
+sensitivity rather than context.
+
+### LFH-E10b final reconciliation — 2026-08-21
+
+The seed-matched E10b primary is **confirmed**. The five-obstacle scene reproduces
+accepted/accepted/rejected/accepted. All three intended-clear cells have zero external contact.
+Nominal-hard contact is uniquely attributed to `torso_link` on
+`/World/ConstraintFrame/BindingHangingPanel` at frame 120, before reference drift at frame 135;
+none of the four context obstacles becomes causal. E10b used four rollouts and 0.0586 contended
+GPU-hours. Approved-manifest SHA-256:
+`7dd953b45e768a15c5915d21c84cdfe6575532f93d541a2979876232e1b9c0db`; run SHA-256:
+`93321dc778297c019b0a332ec110b309499ac69783521b8b89bb6c0236f0bbea`; adjudication SHA-256:
+`210ceda7f8db28b252d3eca37bafa4bd8879e95683a57a753a90e262e6f73ec6`.
+
+The contrast with E10 establishes seed sensitivity for this source/context pair; it does not prove
+population-level context invariance. E10b verifies multi-obstacle composition with a single causal
+binding obstacle. Critical lateral, floor, and oblique proposal support remains unverified.
+
+### LFH audit corrections — 2026-08-26
+
+An audit of the geometry, scene-authoring, and model layers ran every claim against executed code.
+Full report: `docs/hallucination/REPORT_AUDIT_2026-08-26.md`. Three entries in this register are
+affected, and the corrections are recorded here rather than by editing the original entries.
+
+**1. `q_LFH_conditional_v1`'s conditioning is refuted at this scale.** The retained mechanism check
+compared 1.51373 nats against a uniform prior at 1.60944 and credited the gap to trajectory
+conditioning. Replacing the kernel with a constant — same source balancing, same 0.10 exploration
+floor — scores **1.46416 nats**. Feature-blind archetype counting beats the fitted model, so the
+kernel *costs* 0.0496 nats and the entire gain over uniform belongs to marginal frequency. Top-3
+recall 11/12 and 400/400 in-support sampling are true by construction (two archetypes are verified
+for every source and tie at 0.32; the coordinate sampler maps a bounded quantile affinely onto the
+interval the check tests). This is a **refutation of the mechanism claim**, not a partial
+confirmation. The evaluation does not leak; the learning target is wrong. The executed pair
+determines where the face must be — closed form, deliberately unlearned — and does not determine
+what the face looks like.
+
+**2. LFH-E9a's conclusion is confounded and does not support its stated finding.** E9a is recorded
+as evidence that a freshly generated motion failed on controller delivery. The fresh motion has
+route straightness **0.747**, measured from the stored clip, against the `MIN_ROUTE_STRAIGHTNESS =
+0.95` that the CAL3 selection itself imposes; the three verified sources are 0.985–0.991. It was
+also commanded at 80 mm, the top of the CPU ladder, which CAL3 swept and then discarded in favour
+of the single historically verified value. E9a therefore varied straightness and amplitude
+together and outside the calibrated envelope. The recorded physics is valid; the inference "a fresh
+generated motion is not yet a valid LFH source" is not supported by it. E12 re-tests it inside the
+envelope.
+
+**3. The E10/E10b seed mechanism as stated does not hold.** The E10b entry attributes E10's failure
+partly to the seed also controlling the hanging panel's non-binding thickness. That coupling is
+real — `archetypes.py:172` draws the binding-cube thickness from the field the manifest calls
+`visual_seed`, and it feeds `PhysicsCollisionAPI` — but measured, seeds 33101 and 32301 give
+0.41799 m and 0.41784 m, a **0.15 mm** difference. That cannot explain a four-cell pattern change.
+E10's failure is a simulator-seed effect with no geometric difference to speak of. The E10b
+conclusion (seed sensitivity, not context) is unchanged; only the offered mechanism is withdrawn.
+
+Seven fail-open code defects were fixed under regression test, one of which (`lateral_face_reach`
+measuring whole-capsule endpoints after an AABB test, up to 8× overestimate) combined with
+`solve_window` emitting `+inf` margins meant **no lateral window could ever populate a spec**. The
+recorded claim that lateral critical support is empty is therefore confounded between the E3
+physics observation and a broken instrument, and must be re-derived on fixed code before it is
+reported as a negative result. The overhead path is unaffected: after all fixes, recomputing
+`lfh_089_crouch`'s support from the stored trajectories reproduces `critical_support_cal3.json`
+bit-exact, and the full offline suite passes at 828.
+
+### LFH-E12 — crouch amplitude ladder and source supply — registered before spend, 2026-08-26
+
+**Question.** Does a freshly screened motion source a critical window when the crouch amplitude is
+chosen per motion rather than fixed at 80 mm, and how many independent sources does the existing
+clip pool actually hold?
+
+**Why now.** Every downstream claim scales with independent sources, and the recorded count is 4.
+The pool holds 150 clips, 94 gated worth-a-rollout, **58 with straightness ≥ 0.95** across ten body
+modes; four have ever reached a crouch calibration. CAL3 swept a 40/55/70/85 mm ladder on CPU and
+then recommended only the 80 mm rung, so no evidence exists about whether shallower commands
+deliver where 80 mm does not.
+
+**Protocol.** `screen_crouch_ladder.py` screens every eligible clip at all four rungs, recording
+delivered reference drop, joint excursion, cap status, and lateral coupling per rung. A rung is
+*usable* only if the strict reference gate passes, the root path is preserved, the excursion is
+uncapped, and at least 90% of the commanded drop is delivered on the reference. Physics then runs
+empty-scene cells for a cohort selected from that screen: the nominal first, then **every** usable
+rung of an accepted nominal. The largest accepted rung is the motion's delivered amplitude.
+
+**Design amendment, before any spend.** The rungs were first chained, each depending on the
+acceptance of the one below, so a motion's ladder stopped at its first rejection. That saves at
+most a handful of rollouts — the cohort is a fixed size either way — and it makes prediction 3
+untestable, because a deeper rung is never rolled after a shallower one is rejected and a
+non-monotone motion therefore cannot be observed. Every rung now depends on the nominal alone, so
+the amplitude-acceptance curve is measured rather than assumed.
+
+**Predictions, registered before any rollout.**
+
+1. **Primary.** At least 8 clips outside the four existing sources yield an accepted
+   nominal *and* at least one accepted crouch rung.
+2. The median largest-accepted amplitude lies between 40 and 70 mm — i.e. below the fixed 80 mm
+   command that CAL3 standardised on.
+3. Acceptance is monotone in amplitude within a motion: no motion accepts a deeper rung after
+   rejecting a shallower one. A violation would falsify the ladder's stopping rule and is worth
+   more than a confirmation.
+4. At least 6 of the accepted pairs clear a 20 mm engineering window after symmetric 18.044 mm
+   margins, and so enter `P_feas` as new sources.
+5. Lateral coupling above 20 mm on the deepest usable rung predicts rejection. This is a
+   one-observation hypothesis from motion 095 and is registered so it can be refuted.
+
+**Failure interpretation.** If prediction 1 fails, the binding constraint is the operator rather
+than the pool, and the ladder is the evidence for saying so; the paper's yield figure becomes the
+headline and the equal-budget learner comparison is dropped for this submission. A null result is
+retained either way.
+
+**Scope.** Empty-scene cells only. No scene is authored from any of these motions in E12; that
+requires the accepted executed pair first, per the standing execution order. Generated-motion
+families remain excluded from claim 5 unless a separate explicit scope decision is made.
+
+### LFH lateral re-derivation on fixed code — exploratory, 2026-08-26
+
+Not a physics batch: this re-measures **existing immutable executions** on the repaired instrument,
+which the governance charter places under "CPU analysis of any depth". No rollout was spent and no
+prediction is adjudicated. It is filed because it changes what the standing lateral claim means.
+
+Before the audit, `lateral_face_reach` measured whole-capsule endpoints after an AABB test (up to
+8x overestimate) and `solve_window` emitted `+inf` margins for any group that never occupied the
+face, which fail to serialise. A lateral window therefore could not reach a `ConstraintSpec` even
+where the geometry allowed one. Both defects are fixed under regression test.
+
+Re-deriving the eight accepted empty-scene arm-tuck pairs with `lateral_gap_reach` — the exact
+two-face gap contract from D2-012, not the one-sided diagnostic — over a grid of height bands
+(0.55–1.30 m, widths 0.20/0.30/0.40 m) and exposures (0.10/0.20/0.30 m) at route progress 0.55:
+
+| pair | commanded one-sided reduction | best band / exposure | raw gap window |
+|---|---:|---|---:|
+| `lfh_089_arm_tuck_left` a067 | 20.0 mm | [0.65, 0.85] / 0.10 | **51.4 mm** |
+| `lfh_084_arm_tuck_right` a100 | 10.9 mm | [0.55, 0.75] / 0.30 | **48.2 mm** |
+| `lfh_084_arm_tuck_right` a067 | 8.3 mm | [0.55, 0.75] / 0.30 | 42.4 mm |
+| `lfh_084_arm_tuck_right` a033 | 5.9 mm | [0.55, 0.75] / 0.30 | 33.0 mm |
+| `lfh_092_arm_tuck_right` | 7.7 mm | [0.75, 0.95] / 0.20 | 28.8 mm |
+| `lfh_086_arm_tuck_left` a033 | 14.7 mm | [1.10, 1.30] / 0.30 | 13.7 mm |
+| `lfh_086_arm_tuck_left` a100 | 45.2 mm | [1.10, 1.30] / 0.20 | 12.7 mm |
+| `lfh_086_arm_tuck_left` a067 | 29.6 mm | [1.10, 1.30] / 0.20 | 8.3 mm |
+
+**All eight refuse with `window_below_min`.** The raw separations are non-trivial — the top two are
+comparable to the overhead raw windows of 52–72 mm — but the symmetric 18.044 mm engineering
+margin removes 36.1 mm from every one, leaving the best candidate at 12.1 mm against a 20 mm floor.
+
+**The standing claim changes shape.** "Lateral critical support is empty" was recorded as a
+property of the axis. On the repaired instrument it is not empty; it is **margin-limited**, and the
+margin in question is an overhead number imported wholesale. E1a measured it as the maximum
+three-run *in-scene clearance* range across eight **overhead** cells. Nothing has ever measured
+lateral repeatability, and the paired null control in `REPORT_DELIVERY_MODEL.md` shows the
+empty-scene overhead estimator reproducing to within 2.73 mm — six times tighter — so the imported
+value is plausibly wrong for this use in both axes.
+
+**Two things this is not.** It is not evidence that a lateral family exists: the E3 physics
+observation stands unchanged, and a binding lateral face may still alter the executed path before
+drift. And every number above is a **maximum over a 36-cell band/exposure grid**, so it is
+optimistically biased by selection in exactly the way a grid-searched overhead window is; these are
+upper bounds on what a pre-registered station and band would find, not certified windows.
+
+**LFH-E14, consequently redesigned and not yet registered for spend.** The next lateral step is
+*not* another E3-style retry. It is a lateral repeatability measurement — the E1a analogue, three
+runs of one accepted tuck pair, measuring the run-to-run spread of the executed gap window — so
+that the axis gets a margin derived from its own noise instead of an overhead import. Only then is
+a pre-registered station, band, and exposure worth a hard cell. Until that exists, lateral remains
+reported as unverified support, and the paper's negative result must be stated as "no lateral
+family survives the current margin rule", never as "the axis admits none".
+
+### LFH-E12 reconciliation — 2026-08-26
+
+E12 spent 47 cells and **0.427 contended GPU-hours**. Run record
+`E12_CROUCH_LADDER_2026-08-26.json`; report `docs/hallucination/REPORT_E12_CROUCH_LADDER.md`;
+machine-readable `docs/hallucination/e12_crouch_ladder.json`.
+
+**The primary prediction is falsified.** Predicted at least 8 new sources with an accepted nominal
+and at least one accepted rung; observed **5**. Prediction 4 is also falsified: predicted at least
+6 pairs clearing a 20 mm engineering window, observed **1**.
+
+Funnel: 12 motions → **8** nominals accepted → **5** with a delivered amplitude → **1** entering
+`P_feas`. Two of the four nominal rejections are gait-specific and clean: `side_step` at 0.454 m
+endpoint error and `backward` at 0.380 m plus a disallowed foot contact, both on routes of
+straightness ≥ 0.99. Body-mode diversity in the clip pool does not survive the controller, and
+`turn_in_place`, `stand_to_walk`, and the second `side_step` accepted their nominals but rejected
+every rung.
+
+**Prediction 2 is confirmed, and it matters.** The median largest-accepted amplitude is **55 mm**,
+inside the predicted [40, 70] and well below the 80 mm that CAL3 standardised on. Delivered
+amplitudes are 40, 40, 55, 70, 70 mm — five different answers for five motions. A single fixed
+command is the wrong instrument; that much of E12's premise holds.
+
+**Prediction 3 is confirmed.** No motion accepted a deeper rung after rejecting a shallower one,
+across all 8 accepted nominals. This was only observable because the design amendment made the
+rungs independent of each other; under the original chained design a violation could not have been
+seen. Prediction 5 is not adjudicable: no motion with an accepted nominal carried more than 20 mm
+of lateral coupling on a graded rung.
+
+**Why the ladder did not rescue supply, which is the real finding.** A shallow crouch tracks but
+does not separate. The five delivered pairs give raw executed windows of 31.5, 43.7, 51.3, 54.5 and
+70.2 mm, and the symmetric 18.044 mm engineering margin removes 36.1 mm from each:
+
+| margin, each side | pairs clearing the 20 mm floor |
+|---|---|
+| **18.044 mm (current)** | **1 / 5** |
+| 10 mm | 4 / 5 |
+| 5 mm | 5 / 5 |
+| 2.73 mm (measured null-control spread) | 5 / 5 |
+
+**So the binding constraint is not the amplitude and not the motion supply — it is the imported
+engineering margin.** Four of the five pairs produce raw windows in the same range as the three
+verified CAL3 sources (52–72 mm) and are refused by a margin rule, not by physics. E1a derived
+18.044 mm as the maximum three-run **in-scene clearance** range across eight **overhead** cells;
+the empty-scene paired null control in `REPORT_DELIVERY_MODEL.md` reproduces a true-zero window to
+within **2.73 mm**. Those are different quantities and the margin is **not** being changed here.
+But it is now the single highest-value question in the pipeline, and it is answerable cheaply.
+
+**Registered next step, not yet spent: LFH-E16, a margin measurement.** Take the three E12 pairs
+with the widest raw windows, re-roll each accepted nominal/adapted pair at three simulator seeds in
+the empty scene, and measure the run-to-run spread of the *executed window* directly. That yields
+an empty-scene-calibrated margin for the quantity the margin is actually applied to, replacing an
+in-scene overhead import. Predictions will be filed before spend. At 24 rollouts this costs roughly
+0.2 GPU-h and, if the spread is anywhere near the null control's 2.73 mm, converts four refused
+pairs into sources — a larger yield gain than any amount of further motion generation.
+
+**What E12 does not show.** It does not show that fresh or diverse motions cannot source families:
+it tested 12 clips from one pool with one operator at one station, and 5 produced executed windows.
+It does not license changing the margin. And it does not adjudicate E9a, whose confound is
+straightness and amplitude together; E12's cohort was straightness-filtered by construction.
+
+### LFH-E16 — empty-scene window repeatability — registered before spend, 2026-08-26
+
+**Question.** What is the run-to-run spread of the *executed critical window* in the empty scene,
+under simulator seed alone, with motion, operator, amplitude and station held fixed?
+
+**Why.** E12 refused 4 of its 5 delivered pairs on the margin rule rather than on physics. The
+margin in force, 18.044 mm each side, is E1a's maximum three-run **in-scene clearance** range over
+eight overhead cells. The window it is applied to is an **empty-scene reach difference**. Nothing
+has ever measured the repeatability of that quantity, and the paired arm-tuck null control in
+`REPORT_DELIVERY_MODEL.md` reproduces a true-zero window to within 2.73 mm — a factor of six
+tighter. E16 measures the right quantity so the margin can be derived rather than imported.
+
+**Protocol.** Three E12 pairs with the widest raw executed windows — `ladder_138` (70.2 mm),
+`ladder_148` (54.5 mm), `ladder_034` (51.3 mm) — each re-rolled at **three simulator seeds** for
+both nominal and its deepest accepted rung, in `screen_empty`. Motion files, operator, amplitude,
+station, face extent and scorer are byte-identical to E12; only `++seed` changes. 18 cells.
+Executed window is recomputed by the same `overhead_face_reach` instrument at the same commanded
+station, and the statistic is the **range across the three seeds** per pair — the same statistic
+E1a reported, so the two are directly comparable.
+
+**Predictions, filed before any rollout.**
+
+1. **Primary.** The maximum across the three pairs of the three-seed executed-window range is
+   **below 18.044 mm**. This is the claim that the in-scene margin is over-conservative for the
+   empty-scene quantity.
+2. The maximum three-seed range is **at or below 10 mm**. Stronger, and it is the threshold at
+   which 4 of E12's 5 pairs clear the 20 mm floor.
+3. All 18 cells accept with zero external contact. A rejection at a seed that E12 accepted would
+   itself be a finding about seed sensitivity and is retained, not retried.
+4. Per-pair seed ranges do not scale with window width: the widest pair is not the noisiest.
+
+**Failure interpretation.** If prediction 1 is falsified, the 18.044 mm margin is vindicated for
+this use, E12's yield of 1/5 stands as a real physical result, and the supply problem is genuinely
+about motion and operator rather than bookkeeping. That outcome is retained and reported; it would
+redirect effort to a deeper or second edit operator rather than to margin arithmetic.
+
+**Scope and standing rules.** Empty-scene only; no geometry is authored in E16. The margin is
+**not** changed by this experiment — E16 measures, a separate registered decision would apply. The
+E1a value stays in force for every existing artifact regardless of outcome, so no published window
+is retroactively re-graded.
+
+### LFH-E16 partial reconciliation — 2026-08-26
+
+E16 spent 0.580 contended GPU-hours and stopped at **6 of 18 cells** with
+`status: infrastructure_failure`. The cause is external GPU contention, not the experiment: another
+user's training job took 23.8 GB of the 32 GB card mid-batch, the seventh cell stalled in Isaac
+startup with 1.7 GB free, and the runner's 1800 s hang timeout fired and stopped the line as its
+stop conditions require. **No cell was scored as rejected because of it** — the infrastructure /
+science split held. The remaining 12 cells are resumable against the same run record when the card
+frees.
+
+The six completed cells are one full pair, `ladder_138` at three seeds, and they falsify a
+prediction and displace the experiment's own primary.
+
+**Prediction 3 is falsified.** All 18 cells were predicted to accept; the nominal accepted 3/3 but
+the adapted rung accepted **1/3**.
+
+**The primary measurement is not available for this pair, and that is the finding.** E16 set out to
+measure the three-seed range of the executed *window*. A window needs both cells accepted at the
+same seed, and only one seed qualifies, so no range exists to report. The experiment assumed
+acceptance was a property of the motion; it is not.
+
+| cell | endpoint error across four seeds (E12 + E16) | range | gate |
+|---|---|---:|---|
+| `ladder_138` nominal | 0.0705, 0.0852, 0.1105, 0.1214 m | **50.9 mm** | 0.35 m |
+| `ladder_138` d070 (adapted) | 0.3298, 0.3300, 0.3823, 0.4355 m | **105.7 mm** | 0.35 m |
+
+The adapted cell sits **directly on the acceptance threshold** and straddles it: two of four seeds
+below 0.35 m, two above. Its seed-to-seed endpoint spread is 105.7 mm, twice the nominal's, and the
+gate is 20 mm from the median. Acceptance at this amplitude is close to a coin flip.
+
+**What this does to the preceding results.** E12's "delivered amplitude" is a single-seed point
+estimate taken at the edge of a cliff. `ladder_138` was E12's best new source — widest window,
+70.2 mm, the only pair clearing the current margin — and it is the pair that fails to reproduce.
+The honest reading of E12 is therefore weaker than its reconciliation stated: its five delivered
+amplitudes are seed-optimistic, and the yield of 1/5 entering `P_feas` may itself not reproduce.
+Nothing in E12 is withdrawn — every recorded cell stands — but "delivered amplitude" must be
+redefined as *accepted at k of n seeds*, and no single-rollout amplitude should be promoted again.
+
+**This also reorders the margin question.** E16 was registered because the engineering margin
+looked like the binding constraint. It may still be, but a prior constraint has appeared: the
+deepest accepted rung is not a stable operating point, so a window measured there is not a stable
+window. Choosing the amplitude with *margin below* the tracking cliff now matters more than
+trimming millimetres off the placement margin.
+
+**Registered next, before spend: LFH-E16b.** Re-scope from window repeatability to **acceptance
+repeatability**. For three pairs, roll each of the three usable rungs at three seeds — 27 cells,
+about 0.3 GPU-h — and report, per motion and per amplitude, the fraction of seeds accepted and the
+endpoint-error distribution. The delivered amplitude becomes the deepest rung accepted at 3/3
+seeds, and the window is measured only there. Predictions: (1) at least one rung per motion accepts
+3/3; (2) the 3/3 amplitude is at least one rung shallower than E12's single-seed answer; (3) among
+rungs that accept 3/3, the three-seed window range is below 18.044 mm — E16's original primary,
+asked where it is answerable. Do not resume the original E16 manifest; its design conditions on an
+assumption now known to be false.
+
+### LFH-E17 — first family from a ladder-discovered source — registered before spend, 2026-08-26
+
+**What.** The counterfactual 2x2 for `ladder_138`, a `reach_walk` clip that became a source through
+the LFH-E12 amplitude ladder rather than through the CAL3 cohort. Its executed pair gives a
+70.2 mm raw window, 34.1 mm after symmetric 18.044 mm margins, binding `head_torso`. A
+`shelf_plank` is authored at the window centre (hard, 1.2671 m) and 50 mm above the nominal's
+executed reach (easy, 1.3521 m). Tier-2 keep-out passed at authoring.
+
+**Why it matters.** Every verified family to date descends from the CAL3 `stand_to_walk` cohort.
+This is the first test of whether the pipeline generalises to a source found by a different
+selection route and a different body mode.
+
+**Seed policy.** The simulator seed is pinned to E12's `34007`, at which this adapted rung was
+observed to accept. LFH-E16 showed the same rung straddles the tracking gate across seeds
+(endpoint error 0.3298 / 0.3300 / 0.3823 / 0.4355 m against a 0.35 m threshold), so an unpinned
+seed would confound a scene result with a delivery coin flip. This is a seed-matched test in the
+sense E10b established, and it is **not** a population claim about the source.
+
+**Predictions.**
+
+1. **Primary.** The canonical pattern: `easy/nominal` accepted, `easy/adapted` accepted,
+   `hard/nominal` rejected, `hard/adapted` accepted.
+2. `hard/nominal` is rejected for `disallowed_robot_contact` with contact attributed to the binding
+   plank, and that contact occurs **before** any reference drift.
+3. The three intended-clear cells record zero external contact.
+4. `hard/adapted` endpoint error stays within 20 mm of its empty-scene value at the same seed
+   (0.3298 m); a larger excursion would mean the scene, not the operator, is spending the budget.
+
+**Failure interpretation.** If `hard/adapted` rejects, the 34.1 mm engineering window is not
+deliverable in an authored scene for this source and the pair is refused — which would be evidence
+that the margin is *not* over-conservative after all, and would cut directly against the E12
+reconciliation's reading. If `hard/nominal` is accepted, the closed-form window over-states the
+separation for this source and the window solver needs re-examination for `reach_walk` geometry.
+Either outcome is retained and reported.
+
+**Scope.** One source, one archetype, one seed. This does not establish that ladder-discovered
+sources generalise; it tests whether this one produces a family at all.
+
+### LFH-E17 reconciliation — 2026-08-26
+
+**All four predictions are confirmed.** E17 spent 4 cells and **0.078 contended GPU-hours**. Run
+record `E17_LADDER_FAMILY_2026-08-26.json`.
+
+| cell | verdict | endpoint | peak external | attribution |
+|---|---|---:|---:|---|
+| `easy/nominal` | accepted | 0.1214 m | 0.0 N | — |
+| `easy/adapted` | accepted | 0.3298 m | 0.0 N | — |
+| `hard/nominal` | **rejected** | 0.3464 m | **415.9 N** | `torso_link`, frame 101 |
+| `hard/adapted` | accepted | 0.3298 m | 0.0 N | — |
+
+1. **Primary confirmed.** The canonical accepted/accepted/rejected/accepted pattern, from a source
+   the CAL3 cohort never contained: `ladder_138` is a `reach_walk` clip discovered by the E12
+   amplitude ladder. This is the first family authored by `synthesize_from_ladder.py`, which
+   generalises the CAL3-bound synthesiser to any accepted executed pair.
+2. **Attribution confirmed, and stronger than predicted.** `hard/nominal` is rejected for
+   `disallowed_robot_contact` **alone** — 415.9 N on `torso_link` at frame 101, of which 369.2 N is
+   the overhead component. No drift reason is recorded at all, so the contact is not merely before
+   drift; drift never crossed its threshold. One plank, one link, one cause.
+3. **Zero external contact in all three intended-clear cells.**
+4. **Endpoint stability confirmed exactly.** `hard/adapted` records 0.3298 m, identical to its
+   empty-scene value at the same seed. The authored scene costs the adaptation nothing.
+
+**The two adapted cells are bit-identical, and that is the result rather than a defect.** Both
+report endpoint 0.3298 m, p95 0.3422 m and the same trajectory SHA-256. The handoff's standing
+check applies here and passes: the two cells ran as separate rollouts at 13:13:00 and 13:18:13,
+took 57.4 s and 68.1 s, wrote different output directories and different rollout logs, and used
+scenes with different SHA-256. The trajectories agree because the simulator is deterministic at a
+fixed seed and **the adapted motion never touches either plank** — the 85 mm difference in plank
+height is causally irrelevant to a robot that crouches under both. That is the counterfactual
+stated as sharply as this corpus can state it: the only thing the scene changes is the nominal's
+fate.
+
+**Scope, unchanged from registration.** One source, one archetype, one pinned seed. LFH-E16 showed
+this adapted rung straddles the tracking gate across seeds, so E17 is a seed-matched demonstration
+that the source can produce a family — not evidence that it does so at a randomly drawn seed. The
+seed-robustness question belongs to E16b.
+
+Visual evidence, kinematic MuJoCo replay of the recorded Isaac states:
+`docs/source/_static/lfh_e17/ladder138-family-2x2.png` (all four cells at their binding frames,
+captioned with the authoritative verdicts), `ladder138-critical-frame.png` (the 35.1 mm that
+decides it), and `verified-hard-nominal.mp4` / `verified-hard-adapted.mp4`.
+
+### LFH-E18 — archetype freedom at a fixed critical point — registered before spend, 2026-08-26
+
+**Question.** Given one executed pair and one face coordinate, is the *appearance* of the binding
+obstacle free? This is the two-stage factorisation LfH-CP proposes — identify the critical
+configuration, then generate diverse realisations through it — tested directly for the first time
+on a ladder-discovered source.
+
+**Design.** `ladder_138`'s window, station, exposure and both face coordinates are held byte-fixed
+at the values LFH-E17 verified. Only the archetype changes: `door_lintel`, `ibeam`,
+`hanging_panel`, each with its own geometry seed. Twelve cells, seed pinned to 34007 for the same
+reason as E17. `shelf_plank` is not re-run; E17 is its result.
+
+**Predictions.**
+
+1. **Primary.** All three archetypes reproduce accepted/accepted/rejected/accepted.
+2. Every `hard/nominal` rejection is attributed to the binding face's own primitive, with no
+   context primitive touched.
+3. The three intended-clear cells of each archetype record zero external contact.
+4. `hard/adapted` endpoint error is within 20 mm of 0.3298 m for every archetype — an obstacle the
+   adaptation clears should cost it nothing regardless of what the obstacle looks like.
+
+**Failure interpretation.** A single archetype failing while others pass would mean appearance is
+*not* free at this coordinate — most likely because a non-binding part of that archetype (a jamb,
+a web, a skirt) intrudes where the swept volume needs room, which the keep-out validator should
+have caught and would then be a Tier-2 gap worth chasing. That outcome is more interesting than a
+clean pass and is retained either way.
+
+**Scope.** One source, one seed, one coordinate. This tests archetype freedom at a point, not
+across the window or across sources.
+
+### LFH-E16b — acceptance repeatability — registered before spend, 2026-08-26
+
+Replaces the original LFH-E16, whose design conditioned on an assumption its own first six cells
+falsified: that a deepest-accepted rung reliably accepts. The E16 manifest is **not** resumed.
+
+**Question.** For a given motion and crouch amplitude, what fraction of simulator seeds accept, and
+how far below the deepest single-seed rung must the operating point sit to be stable?
+
+**Design.** Three E12 pairs — `ladder_034` (single-seed delivered 70 mm), `ladder_148` (55 mm) and
+`ladder_126` (40 mm), chosen to span the delivered range — each rolled at **two fresh seeds**
+(39001, 39002) for the nominal and all three rungs. Combined with the seed each already ran in
+E12, every cell reaches a three-seed cohort for 24 new rollouts rather than 36. Motions, operator,
+station, exposure and scorer are byte-identical to E12; only `++seed` differs.
+
+**Predictions.**
+
+1. **Primary.** Every motion has at least one rung that accepts at **3/3** seeds.
+2. The 3/3 amplitude is at least one rung shallower than E12's single-seed delivered amplitude for
+   at least two of the three motions.
+3. Endpoint-error spread across seeds grows with amplitude: the deepest graded rung of each motion
+   has a larger three-seed range than its nominal.
+4. Among rungs accepting 3/3, the three-seed range of the executed window is below 18.044 mm —
+   the original E16 primary, asked where it is answerable.
+
+**Failure interpretation.** If prediction 1 fails for a motion, that motion has no stable crouch
+amplitude at all and is not a source at any depth, however good its single-seed window looked. If
+prediction 2 fails — the deepest rung is already stable — then `ladder_138`'s coin-flip behaviour
+is specific to it rather than a property of operating at the ladder's top, and E12's delivered
+amplitudes stand as recorded.
+
+**Budget.** 24 cells, roughly 0.35 contended GPU-h.
+
+### LFH-E18 reconciliation — 2026-08-26
+
+E18 spent 12 cells and **0.465 contended GPU-hours** (inflated by repeated GPU contention: another
+user's job cycled between 21 GB and idle, so the runner yielded and resumed six times; every
+yield was a clean refusal, never a mis-scored cell).
+
+**Predictions 1, 3 and 4 are confirmed. Prediction 2 is falsified as worded, and the wording was
+the problem.**
+
+| archetype | easy/nom | easy/adp | hard/nom | hard/adp | binding contact | adapted endpoint |
+|---|---|---|---|---:|---:|---:|
+| `shelf_plank` (E17) | acc | acc | **rej** | acc | 415.9 N `torso_link` f101 | 0.32976 m |
+| `door_lintel` | acc | acc | **rej** | acc | 416.0 N `torso_link` f101 | 0.32976 m |
+| `ibeam` | acc | acc | **rej** | acc | 410.1 N `torso_link` f101 | 0.32976 m |
+| `hanging_panel` | acc | acc | **rej** | acc | 538.5 N `torso_link` f117 | 0.32976 m |
+
+**P1 confirmed.** Four visually distinct obstacles — a 40 mm plank, a lintel with jambs, an I-beam
+with web and top flange, and a 0.42 m-thick panel — placed at the *same* face coordinate inferred
+from the *same* executed pair, all reproduce accepted/accepted/rejected/accepted. This is the
+two-stage factorisation working: the executed pair fixes the critical coordinate, and the object
+realising it is free.
+
+**P4 confirmed to the digit.** `hard/adapted` endpoint error is **0.3297638984283594 m in all
+four**, identical to the empty-scene value at the same seed. The adaptation is completely
+insensitive to what the obstacle is, because it never touches any of them.
+
+**P3 confirmed.** Zero external contact in all twelve intended-clear cells.
+
+**P2 falsified, and the predicate was wrong rather than the result.** I predicted every
+`hard/nominal` rejection would be attributed to the binding face "with no context primitive
+touched", and implemented that as *contact is the only recorded rejection reason*. `ibeam` records
+three reasons — `reference_endpoint_tracking_error`, `reference_path_tracking_error` and
+`disallowed_robot_contact` — with 410.1 N on `torso_link` at frame 101, the same frame and body as
+`door_lintel`. Its endpoint error is 0.4208 m against `door_lintel`'s 0.3432 m. The tracking
+failures are the **consequence** of a harder strike knocking the robot off course, not an
+independent cause: the contact frame is identical and no non-binding primitive is touched. My
+predicate conflated "contact is the cause" with "contact is the only line in the report", and only
+the first is the scientific claim. The corpus's existing standard — contact attributed to the
+binding face, occurring before drift — is met by all four. The predicate is corrected in
+`analyze_ladder_family.py`'s report rather than the result being reinterpreted after the fact.
+
+**One measurement worth keeping.** Peak force varies 410–538 N across archetypes at an identical
+face coordinate, and the peak-force frame moves from 101 to 117 for the thick `hanging_panel`.
+Verdict is invariant; contact *dynamics* are not. Consistent with the corpus's standing position
+that force is not a graded quantity and only the verdict is reported.
+
+Visual evidence: `docs/source/_static/lfh_e17/archetype-gallery.png` — all four obstacles at
+underside 1.2671 m, each striking the nominal by 35.1 mm.
+
+### LFH-E16b reconciliation — 2026-08-26
+
+E16b ran all 24 cells for **0.746 contended GPU-hours** (inflated by repeated contention yields).
+Combined with each cell's E12 seed, every rung reaches a three-seed cohort.
+
+| pair | rung | accepted | endpoint errors (m) | endpoint range |
+|---|---|---:|---|---:|
+| `ladder_034` | nominal | 3/3 | 0.0568 0.0643 0.0736 | 16.8 mm |
+| `ladder_034` | d040 | **3/3** | 0.0445 0.0842 0.1224 | 77.9 mm |
+| `ladder_034` | d055 | **3/3** | 0.0681 0.1071 0.1513 | 83.2 mm |
+| `ladder_034` | d070 | **3/3** | 0.0895 0.1302 0.1867 | 97.2 mm |
+| `ladder_148` | nominal | 3/3 | 0.0661 0.1453 0.1603 | 94.1 mm |
+| `ladder_148` | d040 | 1/3 | 0.2264 0.3818 0.3954 | 169.1 mm |
+| `ladder_148` | d055 | 1/3 | 0.3045 0.4460 0.4576 | 153.1 mm |
+| `ladder_148` | d070 | **0/3** | 0.3528 0.5098 0.5231 | 170.2 mm |
+| `ladder_126` | nominal | 3/3 | 0.1152 0.1693 0.1813 | 66.2 mm |
+| `ladder_126` | d040 | **3/3** | 0.2166 0.3001 0.3309 | 114.3 mm |
+| `ladder_126` | d055 | 1/3 | 0.2824 0.3611 0.3830 | 100.6 mm |
+| `ladder_126` | d070 | 1/3 | 0.3483 0.4049 0.4368 | 88.5 mm |
+
+**P1 falsified.** Two of three motions have a 3/3 rung; `ladder_148` has none at any amplitude,
+despite E12 recording it as delivering 55 mm. Its nominal is stable (3/3) but every rung straddles
+or exceeds the gate. A motion can be trackable and still have no stable crouch.
+
+**P2 falsified, in the informative direction.** I predicted E12's single-seed amplitudes would
+prove optimistic for at least two of three. They were **exactly right for two** — `ladder_034` is
+stable at 70 mm and `ladder_126` at 40 mm, precisely E12's answers — and catastrophically wrong for
+the third. Single-seed delivery is therefore not systematically optimistic; it is *unreliable*, and
+the failure is concentrated in motions whose rungs sit near the gate. `ladder_138`'s coin flip and
+`ladder_148`'s collapse are the same phenomenon, not a general bias.
+
+**P3 confirmed, 3/3 motions.** Seed spread grows with amplitude in every motion: 16.8 → 97.2,
+94.1 → 170.2, 66.2 → 114.3 mm from nominal to deepest rung. Crouching does not merely cost tracking
+budget on average — it makes tracking *less predictable*, which is why an operating point near the
+gate is unsafe even when its mean sits below it.
+
+**P4 confirmed — and it settles the question E16 was created to ask.** On rungs that accept 3/3,
+the three-seed range of the executed window is:
+
+| pair / rung | windows across seeds | **range** |
+|---|---|---:|
+| `ladder_034` d040 | 27.03, 27.72, 28.21 mm | **1.18 mm** |
+| `ladder_034` d055 | 41.06, 38.40, 39.81 mm | **2.66 mm** |
+| `ladder_034` d070 | 51.26, 51.10, 54.50 mm | **3.39 mm** |
+| `ladder_126` d040 | 43.67, 42.16, 35.73 mm | **7.94 mm** |
+
+**The executed window is highly reproducible at a stable amplitude — worst observed range
+7.94 mm, against an engineering margin of 18.044 mm applied to *each* side.** This is the same
+order as the 2.73 mm paired null control in `REPORT_DELIVERY_MODEL.md`, measured now by the
+statistic E1a used and on the quantity the margin is actually applied to. The margin currently
+removes 36.1 mm from every window to guard a quantity that moves by at most 8 mm.
+
+**Two things this licenses, and one it does not.** It licenses a registered proposal to derive an
+empty-scene margin from empty-scene repeatability, and it establishes `ladder_034` (`walk_look`,
+70 mm at 3/3, window 51–55 mm) and `ladder_126` (`carry_walk`, 40 mm at 3/3, window 36–44 mm) as
+**stable sources** in a sense no earlier source has been shown to be. It does **not** license
+changing the margin here: E16b measured, and a margin change is a separate registered decision
+affecting every existing artifact.
+
+**Delivered amplitude is redefined, with effect.** From now the delivered amplitude of a motion is
+the deepest rung accepted at 3/3 seeds, and a window is measured only there. Under the old
+single-seed definition E12 reported five delivered pairs; under the new one, of the three re-tested,
+two survive. `docs/hallucination/e12_crouch_ladder.json` is not rewritten — its cells stand — but
+its yield figure should be read as an upper bound.

@@ -1,0 +1,139 @@
+{
+  "binding": {
+    "axis_type": "lateral_gap",
+    "critical_frames": {
+      "edit": 122,
+      "orig": 121
+    },
+    "expected_link_group": "wrist_right",
+    "keypoint": "wrist_right",
+    "per_keypoint_margins": {
+      "foot_left": {
+        "edit_m": 0.4228333763046201,
+        "orig_m": 0.4377829381220786
+      },
+      "foot_right": {
+        "edit_m": 0.5262062218322011,
+        "orig_m": 0.4372902541116131
+      },
+      "head_torso": {
+        "edit_m": 0.42393923935948513,
+        "orig_m": 0.36801781250838594
+      },
+      "knee_left": {
+        "edit_m": 0.312567027395689,
+        "orig_m": 0.32907218204963806
+      },
+      "knee_right": {
+        "edit_m": 0.22284335743492734,
+        "orig_m": 0.18894571243873792
+      },
+      "pelvis": {
+        "edit_m": 0.45792963940475007,
+        "orig_m": 0.42746330241225516
+      },
+      "shoulder_left": {
+        "edit_m": 0.1792574458662466,
+        "orig_m": 0.1851548023318461
+      },
+      "shoulder_right": {
+        "edit_m": 0.148816932592178,
+        "orig_m": 0.031700591199820605
+      },
+      "wrist_left": {
+        "edit_m": 0.07569125835000368,
+        "orig_m": 0.09459595085097694
+      },
+      "wrist_right": {
+        "edit_m": 0.06429073316021405,
+        "orig_m": -0.10151174531936957
+      }
+    },
+    "reach_edit_m": 0.8075065336795719,
+    "reach_orig_m": 0.9733090121591556,
+    "window_mm": 165.8024784795836
+  },
+  "binding_station_xy_m": [
+    1.2064393758773804,
+    -0.17617939412593842
+  ],
+  "crossing": {
+    "frames": {
+      "edit": [
+        101,
+        117
+      ],
+      "orig": [
+        99,
+        116
+      ]
+    }
+  },
+  "face_extent": {
+    "across_route_m": 8.747,
+    "along_route_m": 0.3,
+    "binding_thickness_m": 0.12,
+    "vertical_m": 2.0
+  },
+  "faces": {
+    "easy_m": 1.0733090121591555,
+    "hard_m": 0.871797266839786
+  },
+  "keepout": {
+    "delta_mm": 50.0,
+    "exempt_roles": [
+      "support_floor",
+      "room_shell"
+    ]
+  },
+  "material_provenance": "runtime_default",
+  "motions": {
+    "edit": {
+      "empty_room_rollout": {
+        "adjudication": {
+          "cell_id": "lfh_084_arm_tuck_right__cal2_strong",
+          "path": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/run_records/ARM_TUCK_STRONG_CALIBRATION_2026-08-20.json",
+          "sha256": "sha256:27057df093b2002941bce6dab0b78603e6d389dbfc96949cfa0400bb9db044f2"
+        },
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/arm_tuck_strong_calibration/lfh_084_arm_tuck_right/strong/trajectories/000000.trajectory.pkl",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:8b60bbdaa7a619aeda36bf9ba2386f2d52c6a54f1416efcb5b3c7dcf75c3b66d"
+      },
+      "motion_id": "lfh_084_arm_tuck_right_strong",
+      "operator": "local_arm_tuck"
+    },
+    "orig": {
+      "empty_room_rollout": {
+        "adjudication": {
+          "cell_id": "lfh_084_arm_tuck_right__cal_nominal",
+          "path": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/run_records/ARM_TUCK_CALIBRATION_2026-08-20.json",
+          "sha256": "sha256:66fb4642e04ada263e564a60392bf39f33fb5bffebaf4d69d66746d9f558f386"
+        },
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/arm_tuck_calibration/lfh_084_arm_tuck_right/nominal/trajectories/000000.trajectory.pkl",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:a94ef7fdc16c2e414d3fd78833e4ed1b2c71aa4bd74d909ead3f91a4d9044f80"
+      },
+      "motion_id": "lfh_084_arm_tuck_right_nominal",
+      "operator": "local_arm_tuck"
+    }
+  },
+  "room": {
+    "size_xy_m": [
+      12.3,
+      8.747
+    ],
+    "wall_height_m": 2.8
+  },
+  "route_axis": "x",
+  "source": {
+    "family_id": "lfh_084_arm_tuck_right",
+    "kind": "inverse_synthesis",
+    "variant_id": "cal2_alpha_2p5"
+  },
+  "source_scenes": {
+    "easy": "screen_empty",
+    "hard": "screen_empty"
+  },
+  "spec_id": "cs_lfh_084_arm_tuck_right_cal2",
+  "spec_version": "0.1"
+}

@@ -1,0 +1,127 @@
+{
+  "binding": {
+    "axis_type": "overhead",
+    "critical_frames": {
+      "edit": 98,
+      "orig": 129
+    },
+    "expected_link_group": "head_torso",
+    "keypoint": "head_torso",
+    "per_keypoint_margins": {
+      "foot_left": {
+        "edit_m": 0.9868816317800149,
+        "orig_m": 0.995659825042508
+      },
+      "foot_right": {
+        "edit_m": 0.9700313915121468,
+        "orig_m": 0.9881824945947962
+      },
+      "head_torso": {
+        "edit_m": 0.08816831912998624,
+        "orig_m": -0.08854754007844456
+      },
+      "knee_left": {
+        "edit_m": 0.5314730350958221,
+        "orig_m": 0.5164572005860562
+      },
+      "knee_right": {
+        "edit_m": 0.5001433525157509,
+        "orig_m": 0.5114475192199428
+      },
+      "pelvis": {
+        "edit_m": 0.4542607956247251,
+        "orig_m": 0.452216764733955
+      },
+      "shoulder_left": {
+        "edit_m": 0.26957327228177086,
+        "orig_m": 0.17117048857121286
+      },
+      "shoulder_right": {
+        "edit_m": 0.16345279301511018,
+        "orig_m": 0.1663668403604286
+      },
+      "wrist_left": {
+        "edit_m": 0.6126948058050006,
+        "orig_m": 0.4636651626443391
+      },
+      "wrist_right": {
+        "edit_m": 0.37579562181206194,
+        "orig_m": 0.4786933988800449
+      }
+    },
+    "reach_edit_m": 1.1234374999999999,
+    "reach_orig_m": 1.3015625,
+    "window_mm": 178.12499999999997
+  },
+  "binding_station_xy_m": [
+    2.6739,
+    -0.2632
+  ],
+  "crossing": {
+    "frames": {
+      "edit": [
+        95,
+        95
+      ],
+      "orig": [
+        125,
+        125
+      ]
+    }
+  },
+  "face_extent": {
+    "across_route_m": 3.0,
+    "along_route_m": 0.5,
+    "binding_thickness_m": 0.1,
+    "vertical_m": null
+  },
+  "faces": {
+    "easy_m": 1.3906249999999998,
+    "hard_m": 1.2125
+  },
+  "keepout": {
+    "delta_mm": 50.0,
+    "exempt_roles": [
+      "support_floor",
+      "room_shell"
+    ]
+  },
+  "material_provenance": "runtime_default",
+  "motions": {
+    "edit": {
+      "empty_room_rollout": {
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/probe_adapted/trajectories/000000.trajectory.pkl",
+        "scene_id": "plane",
+        "sha256": "sha256:b69e1e51e4324bb667f8bd5065f535d77190d7a148e7d6d5a3a8ece164ad44fb"
+      },
+      "motion_id": "056_a_person_walks_at_a_steady_pace_and_ducks_down_l_s0.csv"
+    },
+    "orig": {
+      "empty_room_rollout": {
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/probe_nominal/trajectories/000000.trajectory.pkl",
+        "scene_id": "plane",
+        "sha256": "sha256:369a6ba858af153ba20e780ce57a66a80cd02f0caf9ddb99098459d1cb32e3b8"
+      },
+      "motion_id": "005_a_person_walks_at_a_steady_pace_in_a_straight_li_s0.csv"
+    }
+  },
+  "room": {
+    "size_xy_m": [
+      12.882,
+      5.0
+    ],
+    "wall_height_m": 2.8
+  },
+  "route_axis": "x",
+  "source": {
+    "family_id": "cf_005_056",
+    "kind": "verified_family",
+    "variant_id": "duck_003"
+  },
+  "source_scenes": {
+    "easy": "cf_005_056_easy",
+    "hard": "cf_005_056_hard"
+  },
+  "spec_id": "cs_duck_003",
+  "spec_version": "0.1"
+}

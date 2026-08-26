@@ -1,0 +1,139 @@
+{
+  "binding": {
+    "axis_type": "overhead",
+    "critical_frames": {
+      "edit": 122,
+      "orig": 110
+    },
+    "expected_link_group": "head_torso",
+    "keypoint": "head_torso",
+    "per_keypoint_margins": {
+      "foot_left": {
+        "edit_m": 1.0200436545212264,
+        "orig_m": 1.12494296026574
+      },
+      "foot_right": {
+        "edit_m": 1.124706981469644,
+        "orig_m": 1.1236152845550484
+      },
+      "head_torso": {
+        "edit_m": 0.03508395124997232,
+        "orig_m": -0.03508395124997232
+      },
+      "knee_left": {
+        "edit_m": 0.6384544783201209,
+        "orig_m": 0.5660400564884822
+      },
+      "knee_right": {
+        "edit_m": 0.6255262949694649,
+        "orig_m": 0.585607098400675
+      },
+      "pelvis": {
+        "edit_m": 0.5762693271066422,
+        "orig_m": 0.5080768589083046
+      },
+      "shoulder_left": {
+        "edit_m": 0.29764931614637147,
+        "orig_m": 0.21923407895001046
+      },
+      "shoulder_right": {
+        "edit_m": 0.2873200065938315,
+        "orig_m": 0.2265279513669225
+      },
+      "wrist_left": {
+        "edit_m": 0.6255139608134951,
+        "orig_m": 0.5576738964262582
+      },
+      "wrist_right": {
+        "edit_m": 0.6290205491688815,
+        "orig_m": 0.5731998672833003
+      }
+    },
+    "reach_edit_m": 1.2319750979662456,
+    "reach_orig_m": 1.3021430004661902,
+    "window_mm": 70.16790249994465
+  },
+  "binding_station_xy_m": [
+    2.01688814163208,
+    0.02934986539185047
+  ],
+  "crossing": {
+    "frames": {
+      "edit": [
+        115,
+        121
+      ],
+      "orig": [
+        103,
+        108
+      ]
+    }
+  },
+  "face_extent": {
+    "across_route_m": 3.0,
+    "along_route_m": 0.1,
+    "binding_thickness_m": 0.1,
+    "vertical_m": null
+  },
+  "faces": {
+    "easy_m": 1.3521430004661903,
+    "hard_m": 1.267059049216218
+  },
+  "keepout": {
+    "delta_mm": 50.0,
+    "exempt_roles": [
+      "support_floor",
+      "room_shell"
+    ]
+  },
+  "material_provenance": "runtime_default",
+  "motions": {
+    "edit": {
+      "empty_room_rollout": {
+        "adjudication": {
+          "cell_id": "ladder_138__d070",
+          "path": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/run_records/E12_CROUCH_LADDER_2026-08-26.json",
+          "sha256": "sha256:e188b6037a666353fc251656a9d51c6cb61b18847b97829b87928681d7a30c3f"
+        },
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/crouch_ladder/ladder_138/d070/trajectories/000000.trajectory.pkl",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:89dd819e323cc5293309fd1273cf6b37266b0b132f6fac13d9f5790d8db5ae3b"
+      },
+      "motion_id": "ladder_138_adapted",
+      "operator": "local_crouch"
+    },
+    "orig": {
+      "empty_room_rollout": {
+        "adjudication": {
+          "cell_id": "ladder_138__nominal",
+          "path": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/run_records/E12_CROUCH_LADDER_2026-08-26.json",
+          "sha256": "sha256:e188b6037a666353fc251656a9d51c6cb61b18847b97829b87928681d7a30c3f"
+        },
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/crouch_ladder/ladder_138/nominal/trajectories/000000.trajectory.pkl",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:877b13cca1ff91d497811bd558cfb61e3d286b62a856931de1659a31dcfd580c"
+      },
+      "motion_id": "ladder_138_nominal",
+      "operator": "local_crouch"
+    }
+  },
+  "room": {
+    "size_xy_m": [
+      12.3,
+      8.747
+    ],
+    "wall_height_m": 2.8
+  },
+  "route_axis": "x",
+  "source": {
+    "family_id": "ladder_138",
+    "kind": "inverse_synthesis",
+    "variant_id": "ladder_d070"
+  },
+  "source_scenes": {
+    "easy": "screen_empty",
+    "hard": "screen_empty"
+  },
+  "spec_id": "cs_ladder_138_ladder",
+  "spec_version": "0.1"
+}

@@ -1,0 +1,75 @@
+{
+  "all_cpu_preflights_pass": true,
+  "calibration_run": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/run_records/CROUCH_CALIBRATION_2026-08-20.json",
+  "calibration_run_sha256": "sha256:7ac414725bbe81b40e0c801c546917c27b3a876ae1f57789dd0a24f86f80b247",
+  "engineering_margin_confidence_level": null,
+  "engineering_margin_mm_each_side": 18.044,
+  "physics_executed": false,
+  "schema_version": "lfh_e6_crouch_cpu_v1",
+  "selected": [
+    {
+      "binding_geometry_clearance_mm": {
+        "easy": {
+          "edit": 119.45841179101718,
+          "orig": 49.391293324976274
+        },
+        "hard": {
+          "edit": 34.72795955190279,
+          "orig": -34.74887511598029
+        }
+      },
+      "binding_keypoint": "head_torso",
+      "coverage_target": {
+        "binding_keypoint": "head_torso",
+        "constraint_axis": "overhead",
+        "constraint_coordinate_bucket": "1.2_1.3",
+        "edit_behaviour_class": "crouch",
+        "margin_bucket": "clear_25_50",
+        "operator": "local_crouch",
+        "rank": 103,
+        "reason": "tail behaviour; mid-margin first"
+      },
+      "critical_frames": {
+        "adapted": 127,
+        "nominal": 123
+      },
+      "easy_coordinate_m": 1.3406163751159803,
+      "engineering_window_mm": 33.40968886913198,
+      "face_across_route_m": 3.0,
+      "face_along_route_m": 0.1,
+      "hard_coordinate_m": 1.2558675306814142,
+      "keepout": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e6/cs_lfh_086_crouch_cal3_d0100__shelf_plank__s00031886.keepout.json",
+      "keepout_sha256": "sha256:1af014bce30d2bd59346218eef0187968602a6c1d0cb32c2111590e778c8b0d0",
+      "motion_index": 86,
+      "pair_manifest": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e6/cs_lfh_086_crouch_cal3_d0100__shelf_plank__s00031886.manifest.json",
+      "pair_manifest_sha256": "sha256:74d73a653f0da04995d5355779526887f3330e44c2053d97c423ef19aad3464c",
+      "raw_window_mm": 69.49768886913188,
+      "reference_motions": {
+        "adapted": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_086_crouch/adapted.pkl",
+        "nominal": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_086_crouch/nominal.pkl"
+      },
+      "route_axis": "x",
+      "scene_sha256": {
+        "easy": "sha256:3db3dc1090d0c74f12362b98464282f51d1f34bf4226848d31508f3545cb49e9",
+        "hard": "sha256:28455763e2293c0209ed703b4495cf7095e309be2680ea2b963d00e04d7d3670"
+      },
+      "scenes": {
+        "easy": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e6/cs_lfh_086_crouch_cal3_d0100__shelf_plank__s00031886__easy.usda",
+        "hard": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e6/cs_lfh_086_crouch_cal3_d0100__shelf_plank__s00031886__hard.usda"
+      },
+      "seed": 31886,
+      "source_pair_id": "lfh_086_crouch",
+      "source_variant_id": "cal3_d0100_alpha_1p0",
+      "spec": "specs/hallucination/cs_lfh_086_crouch_cal3_d0100.json",
+      "spec_sha256": "sha256:5f9ae4719dc91d74e4396a992e2f7f8a4ac69715ad3cd6ec5f4fcab7ee6b03a1",
+      "station_progress": 0.5438896434545043,
+      "station_xy_m": [
+        1.981722354888916,
+        -0.03133034333586693
+      ]
+    }
+  ],
+  "selected_sources": 1,
+  "source_support": "docs/hallucination/critical_support_cal3.json",
+  "source_support_sha256": "sha256:fceedac5180b33ece489e8a218df410841967b113cdf1d184a48667a7fa99250"
+}

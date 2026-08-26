@@ -1,0 +1,130 @@
+{
+  "actual_contended_gpu_hours": 0.039262595752823266,
+  "binding_contact_unique": true,
+  "cells": [
+    {
+      "binding_clearance_mm": 89.25304794398065,
+      "cell_id": "cs_duck_003__shelf_plank__nominal_easy",
+      "cell_role": "nominal_easy",
+      "contact_attribution": {
+        "attributed_prim_path": null,
+        "attribution": "none",
+        "drift_onset_frame": 195,
+        "external_contact_bodies": [],
+        "first_contact_frame": null,
+        "nearest_runner_up_separation_mm": null,
+        "peak_lateral_force_n": 0.0,
+        "peak_overhead_force_n": 0.0
+      },
+      "drift_within_e1a_floor": true,
+      "executed_minus_kcs_mm": -0.32441197757493967,
+      "expected_outcome": "accepted",
+      "kcs_predicted_clearance_mm": 89.57745992155559,
+      "outcome": "accepted",
+      "outcome_matches": true,
+      "source_clearance_drift_mm": 0.4214965489834839,
+      "source_clearance_mm": 89.67454449296413
+    },
+    {
+      "binding_clearance_mm": -0.10741730457625165,
+      "cell_id": "cs_duck_003__shelf_plank__nominal_hard",
+      "cell_role": "nominal_hard",
+      "contact_attribution": {
+        "attributed_prim_path": "/World/ConstraintFrame/BindingShelfPlank",
+        "attribution": "binding_constraint",
+        "drift_onset_frame": 123,
+        "external_contact_bodies": [
+          "torso_link"
+        ],
+        "first_contact_frame": 107,
+        "nearest_runner_up_separation_mm": 2006.594490447752,
+        "peak_lateral_force_n": 715.0139770507812,
+        "peak_overhead_force_n": 495.86944580078125
+      },
+      "drift_within_e1a_floor": true,
+      "executed_minus_kcs_mm": 67.89258269542376,
+      "expected_outcome": "rejected",
+      "kcs_predicted_clearance_mm": -68.0,
+      "outcome": "rejected",
+      "outcome_matches": true,
+      "source_clearance_drift_mm": 0.0580877927194301,
+      "source_clearance_mm": -0.04932951185682155
+    },
+    {
+      "binding_clearance_mm": 216.78790105706562,
+      "cell_id": "cs_duck_003__shelf_plank__adapted_easy",
+      "cell_role": "adapted_easy",
+      "contact_attribution": {
+        "attributed_prim_path": null,
+        "attribution": "none",
+        "drift_onset_frame": 128,
+        "external_contact_bodies": [],
+        "first_contact_frame": null,
+        "nearest_runner_up_separation_mm": null,
+        "peak_lateral_force_n": 0.0,
+        "peak_overhead_force_n": 0.0
+      },
+      "drift_within_e1a_floor": false,
+      "executed_minus_kcs_mm": 14.486039406899181,
+      "expected_outcome": "accepted",
+      "kcs_predicted_clearance_mm": 202.30186165016644,
+      "outcome": "accepted",
+      "outcome_matches": true,
+      "source_clearance_drift_mm": 23.360682580981376,
+      "source_clearance_mm": 193.42721847608425
+    },
+    {
+      "binding_clearance_mm": 80.28572689064639,
+      "cell_id": "cs_duck_003__shelf_plank__adapted_hard",
+      "cell_role": "adapted_hard",
+      "contact_attribution": {
+        "attributed_prim_path": null,
+        "attribution": "none",
+        "drift_onset_frame": 128,
+        "external_contact_bodies": [],
+        "first_contact_frame": null,
+        "nearest_runner_up_separation_mm": null,
+        "peak_lateral_force_n": 0.0,
+        "peak_overhead_force_n": 0.0
+      },
+      "drift_within_e1a_floor": false,
+      "executed_minus_kcs_mm": 13.622470972473394,
+      "expected_outcome": "accepted",
+      "kcs_predicted_clearance_mm": 66.663255918173,
+      "outcome": "accepted",
+      "outcome_matches": true,
+      "source_clearance_drift_mm": 24.66825112327171,
+      "source_clearance_mm": 55.61747576737468
+    }
+  ],
+  "drift_within_floor_cells": 2,
+  "e1a_noise_floor_mm": 18.04366759277601,
+  "golden_physics_green": true,
+  "hard_nominal_contact_frame": 107,
+  "hard_nominal_drift_frame": 123,
+  "kcs_reference_prediction": {
+    "executed_mm": [
+      89.253,
+      216.788,
+      -0.107,
+      80.286
+    ],
+    "max_nonpenetrating_error_mm": 14.486039406899181,
+    "order": [
+      "nominal_easy",
+      "adapted_easy",
+      "nominal_hard",
+      "adapted_hard"
+    ],
+    "predicted_mm": [
+      89.577,
+      202.302,
+      -68.0,
+      66.663
+    ]
+  },
+  "manifest_sha256": "sha256:62b68d506ed82f525604ebcacfc656c0469995396c7dc74a4c5be8064cc5fde8",
+  "maximum_drift_excess_mm": 6.624583530495698,
+  "outcome_matches": 4,
+  "schema_version": "lfh_e1b_golden_v1"
+}

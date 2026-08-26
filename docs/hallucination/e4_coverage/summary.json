@@ -1,0 +1,45 @@
+{
+  "schema_version": "sweepcf_dcs_v2",
+  "episodes": 76,
+  "graded_episodes": 68,
+  "independent_verified_families": 2,
+  "verified_source_family_ids": [
+    "cf_005_056",
+    "mf_005_c08"
+  ],
+  "verified_variants": 5,
+  "target_bins": 120,
+  "occupied_target_bins": 3,
+  "empty_target_bins": 117,
+  "target_bin_fraction": 0.025,
+  "target_occupancy_policy": "verified_canonical_family_cells",
+  "target_occupancy_episodes": 20,
+  "observed_episode_occupied_target_bins": 3,
+  "unknown_episode_fields": {
+    "source_family_id": 24,
+    "constraint_axis": 24,
+    "constraint_coordinate_bucket": 24,
+    "binding_keypoint": 32,
+    "margin_bucket": 32,
+    "edit_behaviour_class": 14
+  },
+  "evidence_refusals": {
+    "binding_station_mismatch": 2,
+    "route_does_not_reach_obstacle": 7
+  },
+  "binding_station_mismatch": {
+    "variants": [
+      "mf_x002_c08",
+      "mf_x003_c08"
+    ],
+    "max_offset_mm": 2000.0
+  },
+  "motion_gate_counts": {
+    "motions": 150,
+    "reference_semantic_known": 75,
+    "controller_trackable_known": 0,
+    "controller_trackable_true": 0,
+    "accepted_nonempty_only": 45,
+    "fully_gated": 0
+  }
+}

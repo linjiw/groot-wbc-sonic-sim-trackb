@@ -1,0 +1,552 @@
+{
+  "archetype_selection": {
+    "golden_shelf_plank_excluded": true,
+    "rationale": "door_lintel tests licensed jamb context; hvac_duct and ibeam provide distinct overhead context while preserving the exact binding face",
+    "selected": [
+      "door_lintel",
+      "hvac_duct",
+      "ibeam"
+    ]
+  },
+  "authorization": {
+    "approved_at": "2026-08-20T16:02:50-04:00",
+    "approved_by": "Codex LFH autonomous researcher",
+    "authority": "docs/hallucination/GOVERNANCE.md",
+    "claim5_isolation_verified": true,
+    "daily_projected_gpu_hours_approval_set": 1.25,
+    "prediction_register_sha256_at_approval": "sha256:6ad3a5c90897f2fcf70288d5338600e8e52cb204e0af81eded6619a4c7f9edb0",
+    "source_manifest": "docs/hallucination/manifests/E2_VARIANT_TRANSFER_PROPOSED.json",
+    "source_manifest_sha256": "sha256:cba8997fdd0f041e20be8c325e4da661c8e407be035ab91f183ddd914331b2d7",
+    "status": "self_approved"
+  },
+  "cells": [
+    {
+      "archetype_id": "door_lintel",
+      "cell_id": "cs_duck_003__door_lintel__s00000017__nominal_easy",
+      "cell_role": "nominal_easy",
+      "expected_source_outcome": "accepted",
+      "hydra_overrides": [
+        "++seed=31201"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/nominal_easy.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:45b570a5894d6a457bbd5f391d3c2852303b82cca46ef41bb772f3a222022575",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/nominal_easy.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:32c9d61538dc9472f054d1371078f4cda6886742162c762e437cd8490c805241"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/e2_variant_transfer/door_lintel/nominal_easy",
+      "runtime_seed": 31201,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__door_lintel__s00000017__easy.usda",
+        "scene_id": "cs_duck_003__door_lintel__s00000017__easy",
+        "sha256": "sha256:23cdb5268c8e4849d71a72f6de725c351503b3ea0e163c15dddb71ed424feaf1"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_family_id": "cf_005_056",
+      "source_variant_id": "duck_003"
+    },
+    {
+      "archetype_id": "door_lintel",
+      "cell_id": "cs_duck_003__door_lintel__s00000017__nominal_hard",
+      "cell_role": "nominal_hard",
+      "expected_source_outcome": "rejected",
+      "hydra_overrides": [
+        "++seed=31201"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/nominal_hard.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:a1610f2605e20f352d5eb0f56d21bafdb85e07f747f38a1d6bbbdd90ddb3f981",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/nominal_hard.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:4745df2dc6abb902f4c3639cc765cd8bb7fbb41aed3c448f875c0bfa0f8ce1f9"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/e2_variant_transfer/door_lintel/nominal_hard",
+      "runtime_seed": 31201,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__door_lintel__s00000017__hard.usda",
+        "scene_id": "cs_duck_003__door_lintel__s00000017__hard",
+        "sha256": "sha256:a211321f77c2797f1270ededefaccff91dffe66b3a2f303bf50a6bdd8f5246af"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_family_id": "cf_005_056",
+      "source_variant_id": "duck_003"
+    },
+    {
+      "archetype_id": "door_lintel",
+      "cell_id": "cs_duck_003__door_lintel__s00000017__adapted_easy",
+      "cell_role": "adapted_easy",
+      "expected_source_outcome": "accepted",
+      "hydra_overrides": [
+        "++seed=31201"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/adapted_easy.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:9d09501735854bf7251abd86374cc60c862a27cc8b8fb711a022c466ef6a6576",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/adapted_easy.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:946b729b511a2ab4c96db12a009906524a825f433665fa285e2e71d3a17398ee"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/e2_variant_transfer/door_lintel/adapted_easy",
+      "runtime_seed": 31201,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__door_lintel__s00000017__easy.usda",
+        "scene_id": "cs_duck_003__door_lintel__s00000017__easy",
+        "sha256": "sha256:23cdb5268c8e4849d71a72f6de725c351503b3ea0e163c15dddb71ed424feaf1"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_family_id": "cf_005_056",
+      "source_variant_id": "duck_003"
+    },
+    {
+      "archetype_id": "door_lintel",
+      "cell_id": "cs_duck_003__door_lintel__s00000017__adapted_hard",
+      "cell_role": "adapted_hard",
+      "expected_source_outcome": "accepted",
+      "hydra_overrides": [
+        "++seed=31201"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/adapted_hard.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:5a3c65b7460bc7fbe4392112c3b79702673dac4b77b2452e53e8ac76b402ad8f",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/adapted_hard.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:87aa957d4247991dda94bb9267da94a45ae9cea0fa4dfe2bb0ee0a60fe0f6093"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/e2_variant_transfer/door_lintel/adapted_hard",
+      "runtime_seed": 31201,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__door_lintel__s00000017__hard.usda",
+        "scene_id": "cs_duck_003__door_lintel__s00000017__hard",
+        "sha256": "sha256:a211321f77c2797f1270ededefaccff91dffe66b3a2f303bf50a6bdd8f5246af"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_family_id": "cf_005_056",
+      "source_variant_id": "duck_003"
+    },
+    {
+      "archetype_id": "hvac_duct",
+      "cell_id": "cs_duck_003__hvac_duct__s00000017__nominal_easy",
+      "cell_role": "nominal_easy",
+      "expected_source_outcome": "accepted",
+      "hydra_overrides": [
+        "++seed=31202"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/nominal_easy.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:45b570a5894d6a457bbd5f391d3c2852303b82cca46ef41bb772f3a222022575",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/nominal_easy.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:32c9d61538dc9472f054d1371078f4cda6886742162c762e437cd8490c805241"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/e2_variant_transfer/hvac_duct/nominal_easy",
+      "runtime_seed": 31202,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__hvac_duct__s00000017__easy.usda",
+        "scene_id": "cs_duck_003__hvac_duct__s00000017__easy",
+        "sha256": "sha256:4681cda47fc020c7b268b6751cbd021afe764c4269d25dd88e65e6fee759b1b5"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_family_id": "cf_005_056",
+      "source_variant_id": "duck_003"
+    },
+    {
+      "archetype_id": "hvac_duct",
+      "cell_id": "cs_duck_003__hvac_duct__s00000017__nominal_hard",
+      "cell_role": "nominal_hard",
+      "expected_source_outcome": "rejected",
+      "hydra_overrides": [
+        "++seed=31202"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/nominal_hard.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:a1610f2605e20f352d5eb0f56d21bafdb85e07f747f38a1d6bbbdd90ddb3f981",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/nominal_hard.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:4745df2dc6abb902f4c3639cc765cd8bb7fbb41aed3c448f875c0bfa0f8ce1f9"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/e2_variant_transfer/hvac_duct/nominal_hard",
+      "runtime_seed": 31202,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__hvac_duct__s00000017__hard.usda",
+        "scene_id": "cs_duck_003__hvac_duct__s00000017__hard",
+        "sha256": "sha256:8708570b6961192cf1669ccbe058b289f577debc8b5bfc2a13903748b00c73ed"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_family_id": "cf_005_056",
+      "source_variant_id": "duck_003"
+    },
+    {
+      "archetype_id": "hvac_duct",
+      "cell_id": "cs_duck_003__hvac_duct__s00000017__adapted_easy",
+      "cell_role": "adapted_easy",
+      "expected_source_outcome": "accepted",
+      "hydra_overrides": [
+        "++seed=31202"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/adapted_easy.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:9d09501735854bf7251abd86374cc60c862a27cc8b8fb711a022c466ef6a6576",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/adapted_easy.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:946b729b511a2ab4c96db12a009906524a825f433665fa285e2e71d3a17398ee"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/e2_variant_transfer/hvac_duct/adapted_easy",
+      "runtime_seed": 31202,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__hvac_duct__s00000017__easy.usda",
+        "scene_id": "cs_duck_003__hvac_duct__s00000017__easy",
+        "sha256": "sha256:4681cda47fc020c7b268b6751cbd021afe764c4269d25dd88e65e6fee759b1b5"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_family_id": "cf_005_056",
+      "source_variant_id": "duck_003"
+    },
+    {
+      "archetype_id": "hvac_duct",
+      "cell_id": "cs_duck_003__hvac_duct__s00000017__adapted_hard",
+      "cell_role": "adapted_hard",
+      "expected_source_outcome": "accepted",
+      "hydra_overrides": [
+        "++seed=31202"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/adapted_hard.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:5a3c65b7460bc7fbe4392112c3b79702673dac4b77b2452e53e8ac76b402ad8f",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/adapted_hard.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:87aa957d4247991dda94bb9267da94a45ae9cea0fa4dfe2bb0ee0a60fe0f6093"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/e2_variant_transfer/hvac_duct/adapted_hard",
+      "runtime_seed": 31202,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__hvac_duct__s00000017__hard.usda",
+        "scene_id": "cs_duck_003__hvac_duct__s00000017__hard",
+        "sha256": "sha256:8708570b6961192cf1669ccbe058b289f577debc8b5bfc2a13903748b00c73ed"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_family_id": "cf_005_056",
+      "source_variant_id": "duck_003"
+    },
+    {
+      "archetype_id": "ibeam",
+      "cell_id": "cs_duck_003__ibeam__s00000017__nominal_easy",
+      "cell_role": "nominal_easy",
+      "expected_source_outcome": "accepted",
+      "hydra_overrides": [
+        "++seed=31203"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/nominal_easy.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:45b570a5894d6a457bbd5f391d3c2852303b82cca46ef41bb772f3a222022575",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/nominal_easy.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:32c9d61538dc9472f054d1371078f4cda6886742162c762e437cd8490c805241"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/e2_variant_transfer/ibeam/nominal_easy",
+      "runtime_seed": 31203,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__ibeam__s00000017__easy.usda",
+        "scene_id": "cs_duck_003__ibeam__s00000017__easy",
+        "sha256": "sha256:36910a717f47c4d36db24aaa1a3007ba377cdef81672134847240eac476b80d6"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_family_id": "cf_005_056",
+      "source_variant_id": "duck_003"
+    },
+    {
+      "archetype_id": "ibeam",
+      "cell_id": "cs_duck_003__ibeam__s00000017__nominal_hard",
+      "cell_role": "nominal_hard",
+      "expected_source_outcome": "rejected",
+      "hydra_overrides": [
+        "++seed=31203"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/nominal_hard.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:a1610f2605e20f352d5eb0f56d21bafdb85e07f747f38a1d6bbbdd90ddb3f981",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/nominal_hard.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:4745df2dc6abb902f4c3639cc765cd8bb7fbb41aed3c448f875c0bfa0f8ce1f9"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/e2_variant_transfer/ibeam/nominal_hard",
+      "runtime_seed": 31203,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__ibeam__s00000017__hard.usda",
+        "scene_id": "cs_duck_003__ibeam__s00000017__hard",
+        "sha256": "sha256:2dbdf9f3c5203b9fddd0c3dfbcfeebf00e5cb345b9650c3f85156177098cd549"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_family_id": "cf_005_056",
+      "source_variant_id": "duck_003"
+    },
+    {
+      "archetype_id": "ibeam",
+      "cell_id": "cs_duck_003__ibeam__s00000017__adapted_easy",
+      "cell_role": "adapted_easy",
+      "expected_source_outcome": "accepted",
+      "hydra_overrides": [
+        "++seed=31203"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/adapted_easy.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:9d09501735854bf7251abd86374cc60c862a27cc8b8fb711a022c466ef6a6576",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/adapted_easy.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:946b729b511a2ab4c96db12a009906524a825f433665fa285e2e71d3a17398ee"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/e2_variant_transfer/ibeam/adapted_easy",
+      "runtime_seed": 31203,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__ibeam__s00000017__easy.usda",
+        "scene_id": "cs_duck_003__ibeam__s00000017__easy",
+        "sha256": "sha256:36910a717f47c4d36db24aaa1a3007ba377cdef81672134847240eac476b80d6"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_family_id": "cf_005_056",
+      "source_variant_id": "duck_003"
+    },
+    {
+      "archetype_id": "ibeam",
+      "cell_id": "cs_duck_003__ibeam__s00000017__adapted_hard",
+      "cell_role": "adapted_hard",
+      "expected_source_outcome": "accepted",
+      "hydra_overrides": [
+        "++seed=31203"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/adapted_hard.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:5a3c65b7460bc7fbe4392112c3b79702673dac4b77b2452e53e8ac76b402ad8f",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/counterfactual/duck_003/motions/adapted_hard.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:87aa957d4247991dda94bb9267da94a45ae9cea0fa4dfe2bb0ee0a60fe0f6093"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/e2_variant_transfer/ibeam/adapted_hard",
+      "runtime_seed": 31203,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__ibeam__s00000017__hard.usda",
+        "scene_id": "cs_duck_003__ibeam__s00000017__hard",
+        "sha256": "sha256:2dbdf9f3c5203b9fddd0c3dfbcfeebf00e5cb345b9650c3f85156177098cd549"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_family_id": "cf_005_056",
+      "source_variant_id": "duck_003"
+    }
+  ],
+  "cpu_certificates": {
+    "door_lintel": {
+      "binding_geometry_signs": {
+        "easy": {
+          "edit": "+",
+          "orig": "+"
+        },
+        "hard": {
+          "edit": "+",
+          "orig": "-"
+        }
+      },
+      "keepout_report": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__door_lintel__s00000017.keepout.json",
+      "keepout_report_sha256": "sha256:35a3595a46fcb34cb161117577af22a1b1b5c5d81ff2352a31d1b108a269e458",
+      "pair_manifest": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__door_lintel__s00000017.manifest.json",
+      "pair_manifest_sha256": "sha256:9b0045667572ea35d6ab560f058bcf2e69d3455844412f4bedd1ef3ec136fca8"
+    },
+    "hvac_duct": {
+      "binding_geometry_signs": {
+        "easy": {
+          "edit": "+",
+          "orig": "+"
+        },
+        "hard": {
+          "edit": "+",
+          "orig": "-"
+        }
+      },
+      "keepout_report": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__hvac_duct__s00000017.keepout.json",
+      "keepout_report_sha256": "sha256:e239cac98f8a6635c8cd786582065cfe6ea94f43bb6dcd46341983823d0f9264",
+      "pair_manifest": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__hvac_duct__s00000017.manifest.json",
+      "pair_manifest_sha256": "sha256:8127675400054d369840109bc6fa9f2926a4c492cd2a3f6eb6626750a2b8c568"
+    },
+    "ibeam": {
+      "binding_geometry_signs": {
+        "easy": {
+          "edit": "+",
+          "orig": "+"
+        },
+        "hard": {
+          "edit": "+",
+          "orig": "-"
+        }
+      },
+      "keepout_report": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__ibeam__s00000017.keepout.json",
+      "keepout_report_sha256": "sha256:58d113e4e68b9e796c3c22fdf129e28b359a6b4136833f89d19d5d67ed64d42a",
+      "pair_manifest": "gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__ibeam__s00000017.manifest.json",
+      "pair_manifest_sha256": "sha256:df04aade76499adb50eee5a0278c5dfc3d5da6d373fd138e9d49f421723ac2f1"
+    }
+  },
+  "e1a_source_inclusive_noise_floor_mm": 18.04366759277601,
+  "e1b_adapted_drift_warning": true,
+  "execution_policy": {
+    "camera_passes": [
+      "ego"
+    ],
+    "claim5_inputs_untouched": true,
+    "cost_ceiling": {
+      "gpu_hours_contended": 1.25,
+      "peak_gpu_memory_gib_per_serial_rollout": 4.8,
+      "rollouts": 12,
+      "seconds_per_rollout_contended": 375
+    },
+    "default_not_before": "2026-08-25T00:00:00-04:00",
+    "driver": "scripts/research/run_kimodo_sonic_rollout.sh",
+    "forbidden_camera_passes": [
+      "overhead"
+    ],
+    "not_authorized": false,
+    "postflight": [
+      "derive verdict labels only through the existing physics scorer",
+      "report capsule-proxy disagreement without changing the physics verdict",
+      "use a 0.00001 m attribution-resolution floor and refuse ambiguous contact as unattributed",
+      "refuse any contact attributed to non-binding authored geometry as secondary_contact"
+    ],
+    "prediction_register_untouched": false,
+    "preflight": [
+      "verify every scene, motion, and provenance hash",
+      "require motion scene_start_xyz to match the cell's expected start exactly",
+      "run only one rollout at a time after the 9000 MiB free-memory gate",
+      "classify missing marker, timeout, OOM, or missing artifact as infrastructure_failure",
+      "classify a completed physics rejection as a scientific outcome, never infrastructure"
+    ],
+    "requires_explicit_user_approval": false,
+    "runtime": {
+      "free_gpu_mib_required": 9000,
+      "hang_timeout_seconds": 1800,
+      "success_requires": [
+        "SONIC_EVAL_SUCCESS marker",
+        "success_manifest.json",
+        "at least one trajectory pickle",
+        "recorded fps=50"
+      ]
+    },
+    "timing_override": {
+      "authority": "docs/hallucination/GOVERNANCE.md \u00a71",
+      "default_not_before_overridden": true,
+      "reason": "outputs are isolated from claim-5 inputs and execution yields under GPU contention"
+    },
+    "user_owned_prediction_register_entries_untouched": true
+  },
+  "experiment": "E2-variant-transfer-duck_003",
+  "purpose": "Test context invariance across three CPU-certified overhead archetypes.",
+  "schema_version": "lfh_gpu_request_v1",
+  "source_denominator": {
+    "eligible_families": 1,
+    "included": [
+      "cf_005_056"
+    ],
+    "refused": {
+      "mf_005_c08": "gradeable empty-room adapted probe rejected for endpoint transport cost"
+    }
+  },
+  "stop_conditions": [
+    "stop the batch on infrastructure failure and preserve partial outputs",
+    "continue after completed scientific rejections so the 3-variant rate is estimable",
+    "refuse a variant unless all four outcomes match and hard/nominal contact is uniquely binding",
+    "classify ambiguous attribution as unattributed and non-binding contact as secondary_contact",
+    "report clearance drift against E1a; do not turn millimetre drift into a verdict gate"
+  ]
+}

@@ -1,0 +1,320 @@
+{
+  "calibration_candidates": {
+    "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_arm_tuck_strong_calibration/candidates.json",
+    "sha256": "sha256:dcbdaf150a22444fc07f0a5b4c1ab215ce3e4f9ce95b7645d0e9dd7828501df2"
+  },
+  "cells": [
+    {
+      "cell_id": "lfh_086_arm_tuck_left__cal2_strong",
+      "cpu_reference_window_m": 0.11650385647702688,
+      "depends_on_acceptance_of": null,
+      "expectation": {
+        "basis": "strict CPU reference gate passes, but CAL1 establishes no reliable delivery or trackability extrapolation beyond alpha=1",
+        "outcome": null,
+        "status": "measurement_no_prediction"
+      },
+      "hydra_overrides": [
+        "++seed=31401"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_arm_tuck_strong_calibration/lfh_086_arm_tuck_left/strong.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:eca2b04ab10d93cca1c9063b6c10470609f1878d4223de25ac61fe9616df6865",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_arm_tuck_strong_calibration/lfh_086_arm_tuck_left/strong.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:965d544e2ad8b31295f4bcb109a2db80e07b05882c9b0aab1a4abd28423fef24"
+      },
+      "motion_index": 86,
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/arm_tuck_strong_calibration/lfh_086_arm_tuck_left/strong",
+      "pair_id": "lfh_086_arm_tuck_left",
+      "pair_role": "adapted",
+      "response_alpha": 2.0,
+      "runtime_seed": 31401,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual/screen_empty.usda",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:195b7837cfe79e164f3b642767851fffefa338f42d0f6a6f6dd7020cf7ee476f"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "side": "left",
+      "verdict_policy": "reference_trackability"
+    },
+    {
+      "cell_id": "lfh_094_arm_tuck_left__cal2_nominal",
+      "depends_on_acceptance_of": null,
+      "expectation": {
+        "basis": "strict CPU gate only; no empty-room execution exists",
+        "outcome": null,
+        "status": "measurement_no_prediction"
+      },
+      "hydra_overrides": [
+        "++seed=31402"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_arm_tuck_strong_calibration/lfh_094_arm_tuck_left/nominal.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:668ce680a08936b72f2558da3b0dada5ed2a912f91686b784b293ff5925a2c83",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_arm_tuck_strong_calibration/lfh_094_arm_tuck_left/nominal.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:d8e463f70a0dd8e8d4bdb717984ab54709e0cc20c1171f298b8bfd90b44ec754"
+      },
+      "motion_index": 94,
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/arm_tuck_strong_calibration/lfh_094_arm_tuck_left/nominal",
+      "pair_id": "lfh_094_arm_tuck_left",
+      "pair_role": "nominal",
+      "response_alpha": 0.0,
+      "runtime_seed": 31402,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual/screen_empty.usda",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:195b7837cfe79e164f3b642767851fffefa338f42d0f6a6f6dd7020cf7ee476f"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "side": "left",
+      "verdict_policy": "reference_trackability"
+    },
+    {
+      "cell_id": "lfh_094_arm_tuck_left__cal2_strong",
+      "cpu_reference_window_m": 0.11797742473258824,
+      "depends_on_acceptance_of": "lfh_094_arm_tuck_left__cal2_nominal",
+      "expectation": {
+        "basis": "strict CPU reference gate passes, but CAL1 establishes no reliable delivery or trackability extrapolation beyond alpha=1",
+        "outcome": null,
+        "status": "measurement_no_prediction"
+      },
+      "hydra_overrides": [
+        "++seed=31402"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_arm_tuck_strong_calibration/lfh_094_arm_tuck_left/strong.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:07a72636cc345163d09a475d7856f8c0e18078d11dabc50f8cf9939de5bef3b9",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_arm_tuck_strong_calibration/lfh_094_arm_tuck_left/strong.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:9a07b7aadeafe27799ef20dc58a9dc7cb36910ebbf74838f1d7c22485f9c960d"
+      },
+      "motion_index": 94,
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/arm_tuck_strong_calibration/lfh_094_arm_tuck_left/strong",
+      "pair_id": "lfh_094_arm_tuck_left",
+      "pair_role": "adapted",
+      "response_alpha": 2.0,
+      "runtime_seed": 31402,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual/screen_empty.usda",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:195b7837cfe79e164f3b642767851fffefa338f42d0f6a6f6dd7020cf7ee476f"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "side": "left",
+      "verdict_policy": "reference_trackability"
+    },
+    {
+      "cell_id": "lfh_092_arm_tuck_right__cal2_strong",
+      "cpu_reference_window_m": 0.09536914991831877,
+      "depends_on_acceptance_of": null,
+      "expectation": {
+        "basis": "strict CPU reference gate passes, but CAL1 establishes no reliable delivery or trackability extrapolation beyond alpha=1",
+        "outcome": null,
+        "status": "measurement_no_prediction"
+      },
+      "hydra_overrides": [
+        "++seed=31403"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_arm_tuck_strong_calibration/lfh_092_arm_tuck_right/strong.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:70c02606175162717b9f84631731057e4cb6045ed9248a7904730d5b3afd512d",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_arm_tuck_strong_calibration/lfh_092_arm_tuck_right/strong.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:d090c7ae13b0c1e4a3ad496ed7d73b728a8098608ce960ee2c1264d2f7b399e6"
+      },
+      "motion_index": 92,
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/arm_tuck_strong_calibration/lfh_092_arm_tuck_right/strong",
+      "pair_id": "lfh_092_arm_tuck_right",
+      "pair_role": "adapted",
+      "response_alpha": 2.5,
+      "runtime_seed": 31403,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual/screen_empty.usda",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:195b7837cfe79e164f3b642767851fffefa338f42d0f6a6f6dd7020cf7ee476f"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "side": "right",
+      "verdict_policy": "reference_trackability"
+    },
+    {
+      "cell_id": "lfh_084_arm_tuck_right__cal2_strong",
+      "cpu_reference_window_m": 0.10015481973582013,
+      "depends_on_acceptance_of": null,
+      "expectation": {
+        "basis": "strict CPU reference gate passes, but CAL1 establishes no reliable delivery or trackability extrapolation beyond alpha=1",
+        "outcome": null,
+        "status": "measurement_no_prediction"
+      },
+      "hydra_overrides": [
+        "++seed=31404"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_arm_tuck_strong_calibration/lfh_084_arm_tuck_right/strong.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:f5fdd6dda9708a1bedfdc5a616028acbcf68c034a3bcff8597c2f0d794e0519a",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_arm_tuck_strong_calibration/lfh_084_arm_tuck_right/strong.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:cd97f55023cf29e73622f9d31a04cbefb6ce19440cfc9775b29a06bcfeeaca1d"
+      },
+      "motion_index": 84,
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/arm_tuck_strong_calibration/lfh_084_arm_tuck_right/strong",
+      "pair_id": "lfh_084_arm_tuck_right",
+      "pair_role": "adapted",
+      "response_alpha": 2.5,
+      "runtime_seed": 31404,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual/screen_empty.usda",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:195b7837cfe79e164f3b642767851fffefa338f42d0f6a6f6dd7020cf7ee476f"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "side": "right",
+      "verdict_policy": "reference_trackability"
+    }
+  ],
+  "execution_policy": {
+    "camera_passes": [
+      "ego"
+    ],
+    "claim5_inputs_untouched": true,
+    "cost_ceiling": {
+      "gpu_hours_contended": 0.521,
+      "peak_gpu_memory_gib_per_serial_rollout": 4.8,
+      "rollouts": 5,
+      "seconds_per_rollout_contended": 375
+    },
+    "default_not_before": "2026-08-25T00:00:00-04:00",
+    "driver": "scripts/research/run_kimodo_sonic_rollout.sh",
+    "forbidden_camera_passes": [
+      "overhead"
+    ],
+    "not_authorized": true,
+    "postflight": [
+      "derive verdict labels only through the existing physics scorer",
+      "report capsule-proxy disagreement without changing the physics verdict",
+      "use a 0.00001 m attribution-resolution floor and refuse ambiguous contact as unattributed",
+      "refuse any contact attributed to non-binding authored geometry as secondary_contact"
+    ],
+    "prediction_register_untouched": true,
+    "preflight": [
+      "verify every scene, motion, and provenance hash",
+      "require motion scene_start_xyz to match the cell's expected start exactly",
+      "run only one rollout at a time after the 9000 MiB free-memory gate",
+      "classify missing marker, timeout, OOM, or missing artifact as infrastructure_failure",
+      "classify a completed physics rejection as a scientific outcome, never infrastructure"
+    ],
+    "requires_explicit_user_approval": true,
+    "runtime": {
+      "free_gpu_mib_required": 9000,
+      "hang_timeout_seconds": 1800,
+      "success_requires": [
+        "SONIC_EVAL_SUCCESS marker",
+        "success_manifest.json",
+        "at least one trajectory pickle",
+        "recorded fps=50"
+      ]
+    }
+  },
+  "experiment": "LFH-arm-tuck-strong-delivery-calibration-2",
+  "purpose": "Test whether CPU-safe 95-118 mm arm-tuck commands clear the executed scene-spend floor.",
+  "response_contract": {
+    "alpha_semantics": "nonnegative scale relative to CAL1's 60 mm target",
+    "fit": "pool commands/responses by alpha; require two motions at every level",
+    "matched_levels": {
+      "left": 2.0,
+      "right": 2.5
+    },
+    "models_are_proposal_only": true,
+    "scene_spend_floor_mm": 20.0
+  },
+  "reused_nominal_evidence": {
+    "lfh_084_arm_tuck_right": {
+      "execution_artifacts": {
+        "rollout_log": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/arm_tuck_calibration/lfh_084_arm_tuck_right/nominal/rollout.log",
+        "rollout_log_sha256": "sha256:29a64d113acacd1ec68f54b95526d1ec4711be4e9a4d997993c3048d2152ca5b",
+        "success_manifest": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/arm_tuck_calibration/lfh_084_arm_tuck_right/nominal/success_manifest.json",
+        "success_manifest_sha256": "sha256:a49a030d93696db0a824426139d9039d5978caa70e8b6136c2e361bc9edf1081",
+        "trajectory": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/arm_tuck_calibration/lfh_084_arm_tuck_right/nominal/trajectories/000000.trajectory.pkl",
+        "trajectory_sha256": "sha256:a94ef7fdc16c2e414d3fd78833e4ed1b2c71aa4bd74d909ead3f91a4d9044f80"
+      },
+      "reference_csv": "/data/robotixx/groot-wbc-kimodo-m0/lfh_arm_tuck_calibration/lfh_084_arm_tuck_right/nominal.csv",
+      "reference_csv_sha256": "sha256:9b25de9b0fd9cad0e8525bdfeabf3d050d38d8ccbca1198f92f126f920b4e44d",
+      "source": "CAL1"
+    },
+    "lfh_086_arm_tuck_left": {
+      "execution_artifacts": {
+        "rollout_log": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/arm_tuck_calibration/lfh_086_arm_tuck_left/nominal/rollout.log",
+        "rollout_log_sha256": "sha256:b8a8bc1df0fc3dcea6b7a6a53aee95429d92f0f5f4b8bb6412887642553c9992",
+        "success_manifest": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/arm_tuck_calibration/lfh_086_arm_tuck_left/nominal/success_manifest.json",
+        "success_manifest_sha256": "sha256:c2c3a924fc3fc0185590bf227f0756864313cdbce8accd11ec4d250120de8548",
+        "trajectory": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/arm_tuck_calibration/lfh_086_arm_tuck_left/nominal/trajectories/000000.trajectory.pkl",
+        "trajectory_sha256": "sha256:6478c6c738e6b3e8bdd0ef3fe3673ec2e59961f53ea2efa88d4fbbbfdc564971"
+      },
+      "reference_csv": "/data/robotixx/groot-wbc-kimodo-m0/lfh_arm_tuck_calibration/lfh_086_arm_tuck_left/nominal.csv",
+      "reference_csv_sha256": "sha256:5b473f8d7a285ae046bbcdfbd6b321b103c0d961975a61c9284b8317bd893a3c",
+      "source": "CAL1"
+    },
+    "lfh_092_arm_tuck_right": {
+      "execution_artifacts": {
+        "rollout_log": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/gradeable_empty_probes/lfh_092_arm_tuck_right/nominal/rollout.log",
+        "rollout_log_sha256": "sha256:634aaf6be94ed360704935319e4116e3be52c55c6858a156feef5eb493a85285",
+        "success_manifest": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/gradeable_empty_probes/lfh_092_arm_tuck_right/nominal/success_manifest.json",
+        "success_manifest_sha256": "sha256:90210a24895f8ea038277e1308fbdfcb837638b982087f06fd812ca4b34f5ec3",
+        "trajectory": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/gradeable_empty_probes/lfh_092_arm_tuck_right/nominal/trajectories/000000.trajectory.pkl",
+        "trajectory_sha256": "sha256:e742f9d0b281b1b871f7d331453c5b3f1149d4128219f64bf10e653936c1fd46"
+      },
+      "reference_csv": "/data/robotixx/groot-wbc-kimodo-m0/lfh_probe_candidates/lfh_092_arm_tuck_right__nominal.csv",
+      "reference_csv_sha256": "sha256:86fe775a591595126a9d2eccb85ed1f4697290804fa19bb4be8db54f06029f57",
+      "source": "V5"
+    }
+  },
+  "schema_version": "lfh_gpu_request_v1",
+  "stop_conditions": [
+    "skip 094/left strong if its new nominal is rejected",
+    "continue after completed scientific rejections and retain the full response denominator",
+    "stop on infrastructure failure and preserve every completed capture",
+    "do not instantiate a lateral scene unless the corrected matched-level lower bound clears 20 mm"
+  ]
+}

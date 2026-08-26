@@ -1,0 +1,158 @@
+{
+  "authorization": {
+    "approved_at": "2026-08-21T01:08:00-04:00",
+    "approved_by": "Codex LFH autonomous researcher",
+    "authority": "docs/hallucination/GOVERNANCE.md",
+    "claim5_isolation_verified": true,
+    "daily_projected_gpu_hours_approval_set": 0.208,
+    "prediction_register_sha256_at_approval": "sha256:388578123629b7ad6d3ad862a6e4ace262d023ce41e89381bbbf573740ff2c10",
+    "source_manifest": "docs/hallucination/manifests/E9A_MOTION_SCENE_CALIBRATION_PROPOSED.json",
+    "source_manifest_sha256": "sha256:c1722d3cb72d2622c1e83aed0c97b2243bb9993cd508dd4b94f45310192b5f4d",
+    "status": "self_approved"
+  },
+  "cells": [
+    {
+      "cell_id": "lfh_fresh_curve__empty__nominal",
+      "depends_on_acceptance_of": null,
+      "expectation": {
+        "basis": "strict reference and self-collision gates passed",
+        "outcome": "accepted",
+        "status": "registered_trackability_prediction"
+      },
+      "hydra_overrides": [
+        "++seed=45001"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_3d_loop/pair/nominal.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:fd85cef27bedb9d3c3f734f4edebd89b352d9e5e535fe9eaf99b052908e26f27",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_3d_loop/pair/nominal.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:2632cde01cf5d9259bdd1d1fcb9c6924c8fb0cbbb6ac9224071936de1dd59662"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/lfh_3d_loop/empty_scene/nominal",
+      "pair_id": "lfh_fresh_curve",
+      "pair_role": "nominal",
+      "runtime_seed": 45001,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual/screen_empty.usda",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:195b7837cfe79e164f3b642767851fffefa338f42d0f6a6f6dd7020cf7ee476f"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verdict_policy": "reference_trackability"
+    },
+    {
+      "cell_id": "lfh_fresh_curve__empty__adapted",
+      "depends_on_acceptance_of": "lfh_fresh_curve__empty__nominal",
+      "expectation": {
+        "basis": "strict reference and self-collision gates passed",
+        "outcome": "accepted",
+        "status": "registered_trackability_prediction"
+      },
+      "hydra_overrides": [
+        "++seed=45001"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_3d_loop/pair/adapted.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:e7f39a9474a460fbc771313defeded5df99fefffa50f6bec39b4f93ea3ebb0b2",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_3d_loop/pair/adapted.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:7a7e717476d70a215a75e4ef8aae15322c03ef42c46ddcb60df0a7fd88c25867"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/lfh_3d_loop/empty_scene/adapted",
+      "pair_id": "lfh_fresh_curve",
+      "pair_role": "adapted",
+      "runtime_seed": 45001,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual/screen_empty.usda",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:195b7837cfe79e164f3b642767851fffefa338f42d0f6a6f6dd7020cf7ee476f"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verdict_policy": "reference_trackability"
+    }
+  ],
+  "execution_policy": {
+    "camera_passes": [
+      "ego"
+    ],
+    "claim5_inputs_untouched": true,
+    "cost_ceiling": {
+      "gpu_hours_contended": 0.208,
+      "peak_gpu_memory_gib_per_serial_rollout": 4.8,
+      "rollouts": 2,
+      "seconds_per_rollout_contended": 375
+    },
+    "default_not_before": "2026-08-25T00:00:00-04:00",
+    "driver": "scripts/research/run_kimodo_sonic_rollout.sh",
+    "forbidden_camera_passes": [
+      "overhead"
+    ],
+    "not_authorized": false,
+    "postflight": [
+      "derive verdict labels only through the existing physics scorer",
+      "report capsule-proxy disagreement without changing the physics verdict",
+      "use a 0.00001 m attribution-resolution floor and refuse ambiguous contact as unattributed",
+      "refuse any contact attributed to non-binding authored geometry as secondary_contact"
+    ],
+    "prediction_register_untouched": false,
+    "preflight": [
+      "verify every scene, motion, and provenance hash",
+      "require motion scene_start_xyz to match the cell's expected start exactly",
+      "run only one rollout at a time after the 9000 MiB free-memory gate",
+      "classify missing marker, timeout, OOM, or missing artifact as infrastructure_failure",
+      "classify a completed physics rejection as a scientific outcome, never infrastructure"
+    ],
+    "requires_explicit_user_approval": false,
+    "runtime": {
+      "free_gpu_mib_required": 9000,
+      "hang_timeout_seconds": 1800,
+      "success_requires": [
+        "SONIC_EVAL_SUCCESS marker",
+        "success_manifest.json",
+        "at least one trajectory pickle",
+        "recorded fps=50"
+      ]
+    },
+    "timing_override": {
+      "authority": "docs/hallucination/GOVERNANCE.md \u00a71",
+      "default_not_before_overridden": true,
+      "reason": "outputs are isolated from claim-5 inputs and execution yields under GPU contention"
+    },
+    "user_owned_prediction_register_entries_untouched": true
+  },
+  "experiment": "LFH-E9a-fresh-motion-empty-scene",
+  "motion_pair": {
+    "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_3d_loop/pair/motion_pair.json",
+    "sha256": "sha256:f93d3f3561b88d1b05765e1e12bd9dd87ef642edb6f502e689c891daab2c0cc1"
+  },
+  "proposal_contract": {
+    "frame": "route-relative 3D frame carried by motion_pair.json",
+    "geometry_is_proposal_only": true,
+    "physics_supplies_verdict": true
+  },
+  "purpose": "Execute a newly sampled Kimodo motion and its deterministic LFH crouch twin before any scene is proposed.",
+  "schema_version": "lfh_gpu_request_v1",
+  "stop_conditions": [
+    "skip adapted if nominal is rejected",
+    "stop on infrastructure failure and retain completed evidence",
+    "do not author geometry unless both motions accept with zero external contact",
+    "do not call any geometry axis supported until executed finite-face separation exists"
+  ]
+}

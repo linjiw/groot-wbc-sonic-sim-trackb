@@ -1,0 +1,232 @@
+{
+  "cells": [
+    {
+      "body_mode": "reach_walk",
+      "cell_id": "ladder_138__easy__nominal",
+      "depends_on_acceptance_of": null,
+      "expectation": {
+        "basis": "closed-form window from executed reaches; the nominal exceeds the hard face and the adaptation clears it by the engineering margin",
+        "outcome": "accepted",
+        "status": "registered_counterfactual_prediction"
+      },
+      "hydra_overrides": [
+        "++seed=34007"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_ladder/ladder_138/nominal.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:931ac8e4a4d10654a0bf93a0ae7dfdf9b48b47c1e3972a80da4a593540258db2",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_ladder/ladder_138/nominal.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:837fe750431730bc0082ac4f72bbefd8bf7db031799e24d1f4b4cd0c4af2bafe"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/ladder_family/ladder_138/easy_nominal",
+      "pair_id": "ladder_138",
+      "pair_role": "nominal",
+      "runtime_seed": 34007,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e17/cs_ladder_138_ladder__shelf_plank__s00037138__easy.usda",
+        "scene_id": "cs_ladder_138_ladder__shelf_plank__s00037138__easy",
+        "sha256": "sha256:a292511de5a5efe4c0452c8d85f14562599801969837be17e683d6ad399a5fee"
+      },
+      "scene_difficulty": "easy",
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verdict_policy": "reference_trackability"
+    },
+    {
+      "body_mode": "reach_walk",
+      "cell_id": "ladder_138__easy__adapted",
+      "depends_on_acceptance_of": "ladder_138__easy__nominal",
+      "expectation": {
+        "basis": "closed-form window from executed reaches; the nominal exceeds the hard face and the adaptation clears it by the engineering margin",
+        "outcome": "accepted",
+        "status": "registered_counterfactual_prediction"
+      },
+      "hydra_overrides": [
+        "++seed=34007"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_ladder/ladder_138/d070.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:41d555975df6945fcb083c5a8cafc4dd4fe5a6c5ebdcc91b700f68dbce533334",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_ladder/ladder_138/d070.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:6e072c0b95fe1646cdda5b7291485e402bc08b68ae05321d341dd3b6bd7c1204"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/ladder_family/ladder_138/easy_adapted",
+      "pair_id": "ladder_138",
+      "pair_role": "adapted",
+      "runtime_seed": 34007,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e17/cs_ladder_138_ladder__shelf_plank__s00037138__easy.usda",
+        "scene_id": "cs_ladder_138_ladder__shelf_plank__s00037138__easy",
+        "sha256": "sha256:a292511de5a5efe4c0452c8d85f14562599801969837be17e683d6ad399a5fee"
+      },
+      "scene_difficulty": "easy",
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verdict_policy": "reference_trackability"
+    },
+    {
+      "body_mode": "reach_walk",
+      "cell_id": "ladder_138__hard__nominal",
+      "depends_on_acceptance_of": "ladder_138__easy__nominal",
+      "expectation": {
+        "basis": "closed-form window from executed reaches; the nominal exceeds the hard face and the adaptation clears it by the engineering margin",
+        "outcome": "rejected",
+        "status": "registered_counterfactual_prediction"
+      },
+      "hydra_overrides": [
+        "++seed=34007"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_ladder/ladder_138/nominal.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:931ac8e4a4d10654a0bf93a0ae7dfdf9b48b47c1e3972a80da4a593540258db2",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_ladder/ladder_138/nominal.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:837fe750431730bc0082ac4f72bbefd8bf7db031799e24d1f4b4cd0c4af2bafe"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/ladder_family/ladder_138/hard_nominal",
+      "pair_id": "ladder_138",
+      "pair_role": "nominal",
+      "runtime_seed": 34007,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e17/cs_ladder_138_ladder__shelf_plank__s00037138__hard.usda",
+        "scene_id": "cs_ladder_138_ladder__shelf_plank__s00037138__hard",
+        "sha256": "sha256:3e5e70e4bf8d0f036b4beb31866d54c94e2c859e6241cb60c6bae9f09c608db2"
+      },
+      "scene_difficulty": "hard",
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verdict_policy": "reference_trackability"
+    },
+    {
+      "body_mode": "reach_walk",
+      "cell_id": "ladder_138__hard__adapted",
+      "depends_on_acceptance_of": "ladder_138__easy__nominal",
+      "expectation": {
+        "basis": "closed-form window from executed reaches; the nominal exceeds the hard face and the adaptation clears it by the engineering margin",
+        "outcome": "accepted",
+        "status": "registered_counterfactual_prediction"
+      },
+      "hydra_overrides": [
+        "++seed=34007"
+      ],
+      "motion": {
+        "conversion_provenance": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_ladder/ladder_138/d070.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:41d555975df6945fcb083c5a8cafc4dd4fe5a6c5ebdcc91b700f68dbce533334",
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_ladder/ladder_138/d070.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:6e072c0b95fe1646cdda5b7291485e402bc08b68ae05321d341dd3b6bd7c1204"
+      },
+      "output": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/ladder_family/ladder_138/hard_adapted",
+      "pair_id": "ladder_138",
+      "pair_role": "adapted",
+      "runtime_seed": 34007,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e17/cs_ladder_138_ladder__shelf_plank__s00037138__hard.usda",
+        "scene_id": "cs_ladder_138_ladder__shelf_plank__s00037138__hard",
+        "sha256": "sha256:3e5e70e4bf8d0f036b4beb31866d54c94e2c859e6241cb60c6bae9f09c608db2"
+      },
+      "scene_difficulty": "hard",
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "verdict_policy": "reference_trackability"
+    }
+  ],
+  "execution_policy": {
+    "camera_passes": [
+      "ego"
+    ],
+    "claim5_inputs_untouched": true,
+    "cost_ceiling": {
+      "gpu_hours_contended": 0.417,
+      "peak_gpu_memory_gib_per_serial_rollout": 4.8,
+      "rollouts": 4,
+      "seconds_per_rollout_contended": 375
+    },
+    "default_not_before": "2026-08-25T00:00:00-04:00",
+    "driver": "scripts/research/run_kimodo_sonic_rollout.sh",
+    "forbidden_camera_passes": [
+      "overhead"
+    ],
+    "not_authorized": true,
+    "postflight": [
+      "derive verdict labels only through the existing physics scorer",
+      "report capsule-proxy disagreement without changing the physics verdict",
+      "use a 0.00001 m attribution-resolution floor and refuse ambiguous contact as unattributed",
+      "refuse any contact attributed to non-binding authored geometry as secondary_contact"
+    ],
+    "prediction_register_untouched": true,
+    "preflight": [
+      "verify every scene, motion, and provenance hash",
+      "require motion scene_start_xyz to match the cell's expected start exactly",
+      "run only one rollout at a time after the 9000 MiB free-memory gate",
+      "classify missing marker, timeout, OOM, or missing artifact as infrastructure_failure",
+      "classify a completed physics rejection as a scientific outcome, never infrastructure"
+    ],
+    "requires_explicit_user_approval": true,
+    "runtime": {
+      "free_gpu_mib_required": 9000,
+      "hang_timeout_seconds": 1800,
+      "success_requires": [
+        "SONIC_EVAL_SUCCESS marker",
+        "success_manifest.json",
+        "at least one trajectory pickle",
+        "recorded fps=50"
+      ]
+    }
+  },
+  "experiment": "LFH-E17-ladder-family",
+  "geometry": {
+    "archetype": "shelf_plank",
+    "binding_keypoint": "head_torso",
+    "easy_coordinate_m": 1.3521430004661903,
+    "engineering_window_mm": 34.07990249994475,
+    "hard_coordinate_m": 1.267059049216218
+  },
+  "purpose": "Counterfactual 2x2 for ladder_138, the first scene authored from a source discovered by the amplitude ladder rather than by the CAL3 cohort.",
+  "registered_predictions": "docs/prediction_register.md, LFH-E17 entry, filed 2026-08-26 before spend",
+  "scene_report": {
+    "path": "docs/hallucination/e17_ladder_scenes.json",
+    "sha256": "sha256:7a10955440d196f65eea83f79ed0c14a9a5c0512ef3d2f99b1628b3eab6d1709"
+  },
+  "schema_version": "lfh_gpu_request_v1",
+  "seed_policy": {
+    "pinned_seed": 34007,
+    "reason": "the adapted rung straddles the tracking gate across seeds (LFH-E16); an unpinned seed would confound the scene result with a delivery coin flip"
+  },
+  "stop_conditions": [
+    "skip every remaining cell if the easy nominal is rejected",
+    "continue after completed scientific rejections and retain the full denominator",
+    "stop on infrastructure failure and preserve every completed capture",
+    "complete the family only on accepted/accepted/rejected/accepted with unique binding attribution before reference drift"
+  ]
+}

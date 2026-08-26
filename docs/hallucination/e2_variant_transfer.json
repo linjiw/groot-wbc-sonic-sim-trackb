@@ -1,0 +1,372 @@
+{
+  "actual_contended_gpu_hours": 0.11186124444939198,
+  "binding_face_offset_range_mm": [
+    2.220446049250313e-13,
+    2.220446049250313e-13
+  ],
+  "drift_within_floor_cells": 12,
+  "e1a_noise_floor_mm": 18.04366759277601,
+  "funnel": {
+    "cpu_preflight_passed_cells": 12,
+    "proposed_cells": 12,
+    "rolled_out_cells": 12,
+    "scored_cells": 12,
+    "verified_variants": 2
+  },
+  "manifest_sha256": "sha256:84d5d6847539343569652fd4db09da7d545d2129158bdb8323963bdaa87232d2",
+  "outcome_matches": 12,
+  "registered_prediction_confirmed": true,
+  "registered_threshold": 2,
+  "rollouts": 12,
+  "schema_version": "lfh_e2_variant_transfer_v1",
+  "secondary_contact_variants": 0,
+  "variant_results": [
+    {
+      "archetype_id": "door_lintel",
+      "binding_contact_unique": true,
+      "cells": [
+        {
+          "binding_body": "torso_link",
+          "binding_bottleneck_frame": 130,
+          "binding_clearance_mm": 88.8714632226218,
+          "cell_id": "cs_duck_003__door_lintel__s00000017__nominal_easy",
+          "cell_role": "nominal_easy",
+          "contact": {
+            "attributed_prim_path": null,
+            "attribution": "none",
+            "drift_onset_frame": null,
+            "external_bodies": [],
+            "first_frame": null,
+            "peak_lateral_force_n": 0.0,
+            "peak_overhead_force_n": 0.0,
+            "runner_up_separation_mm": null
+          },
+          "drift_within_e1a_floor": true,
+          "expected_outcome": "accepted",
+          "frames_inside_binding_footprint": 24,
+          "outcome": "accepted",
+          "outcome_matches": true,
+          "route_reaches_binding": true,
+          "source_clearance_drift_mm": 0.8030812703423322,
+          "source_clearance_mm": 89.67454449296413
+        },
+        {
+          "binding_body": "torso_link",
+          "binding_bottleneck_frame": 159,
+          "binding_clearance_mm": -0.05085874775140331,
+          "cell_id": "cs_duck_003__door_lintel__s00000017__nominal_hard",
+          "cell_role": "nominal_hard",
+          "contact": {
+            "attributed_prim_path": "/World/ConstraintFrame/BindingDoorLintel",
+            "attribution": "binding_constraint",
+            "drift_onset_frame": 124,
+            "external_bodies": [
+              "torso_link"
+            ],
+            "first_frame": 109,
+            "peak_lateral_force_n": 91.62395477305363,
+            "peak_overhead_force_n": 394.9694519042969,
+            "runner_up_separation_mm": 1230.9065127533056
+          },
+          "drift_within_e1a_floor": true,
+          "expected_outcome": "rejected",
+          "frames_inside_binding_footprint": 88,
+          "outcome": "rejected",
+          "outcome_matches": true,
+          "route_reaches_binding": true,
+          "source_clearance_drift_mm": 0.0015292358945817597,
+          "source_clearance_mm": -0.04932951185682155
+        },
+        {
+          "binding_body": "torso_link",
+          "binding_bottleneck_frame": 105,
+          "binding_clearance_mm": 195.3949189768686,
+          "cell_id": "cs_duck_003__door_lintel__s00000017__adapted_easy",
+          "cell_role": "adapted_easy",
+          "contact": {
+            "attributed_prim_path": null,
+            "attribution": "none",
+            "drift_onset_frame": 64,
+            "external_bodies": [],
+            "first_frame": null,
+            "peak_lateral_force_n": 0.0,
+            "peak_overhead_force_n": 0.0,
+            "runner_up_separation_mm": null
+          },
+          "drift_within_e1a_floor": true,
+          "expected_outcome": "accepted",
+          "frames_inside_binding_footprint": 31,
+          "outcome": "accepted",
+          "outcome_matches": true,
+          "route_reaches_binding": true,
+          "source_clearance_drift_mm": 1.9677005007843604,
+          "source_clearance_mm": 193.42721847608425
+        },
+        {
+          "binding_body": "torso_link",
+          "binding_bottleneck_frame": 101,
+          "binding_clearance_mm": 48.42995604773573,
+          "cell_id": "cs_duck_003__door_lintel__s00000017__adapted_hard",
+          "cell_role": "adapted_hard",
+          "contact": {
+            "attributed_prim_path": null,
+            "attribution": "none",
+            "drift_onset_frame": 64,
+            "external_bodies": [],
+            "first_frame": null,
+            "peak_lateral_force_n": 0.0,
+            "peak_overhead_force_n": 0.0,
+            "runner_up_separation_mm": null
+          },
+          "drift_within_e1a_floor": true,
+          "expected_outcome": "accepted",
+          "frames_inside_binding_footprint": 31,
+          "outcome": "accepted",
+          "outcome_matches": true,
+          "route_reaches_binding": true,
+          "source_clearance_drift_mm": 7.187519719638949,
+          "source_clearance_mm": 55.61747576737468
+        }
+      ],
+      "hard_contact_summary": "unique",
+      "maximum_binding_face_offset_mm": 2.220446049250313e-13,
+      "maximum_source_clearance_drift_mm": 7.187519719638949,
+      "outcome_pattern_matches": true,
+      "secondary_contact": false,
+      "unexpected_other_contact": false,
+      "verified": true
+    },
+    {
+      "archetype_id": "hvac_duct",
+      "binding_contact_unique": false,
+      "cells": [
+        {
+          "binding_body": "torso_link",
+          "binding_bottleneck_frame": 130,
+          "binding_clearance_mm": 93.25325774846999,
+          "cell_id": "cs_duck_003__hvac_duct__s00000017__nominal_easy",
+          "cell_role": "nominal_easy",
+          "contact": {
+            "attributed_prim_path": null,
+            "attribution": "none",
+            "drift_onset_frame": 30,
+            "external_bodies": [],
+            "first_frame": null,
+            "peak_lateral_force_n": 0.0,
+            "peak_overhead_force_n": 0.0,
+            "runner_up_separation_mm": null
+          },
+          "drift_within_e1a_floor": true,
+          "expected_outcome": "accepted",
+          "frames_inside_binding_footprint": 24,
+          "outcome": "accepted",
+          "outcome_matches": true,
+          "route_reaches_binding": true,
+          "source_clearance_drift_mm": 3.5787132555058605,
+          "source_clearance_mm": 89.67454449296413
+        },
+        {
+          "binding_body": "torso_link",
+          "binding_bottleneck_frame": 133,
+          "binding_clearance_mm": -0.10194912549960078,
+          "cell_id": "cs_duck_003__hvac_duct__s00000017__nominal_hard",
+          "cell_role": "nominal_hard",
+          "contact": {
+            "attributed_prim_path": "/World/ConstraintFrame/BindingHvacDuct",
+            "attribution": "binding_constraint",
+            "drift_onset_frame": 30,
+            "external_bodies": [
+              "torso_link"
+            ],
+            "first_frame": 110,
+            "peak_lateral_force_n": 749.9046630860054,
+            "peak_overhead_force_n": 774.91162109375,
+            "runner_up_separation_mm": 2026.9835178166074
+          },
+          "drift_within_e1a_floor": true,
+          "expected_outcome": "rejected",
+          "frames_inside_binding_footprint": 66,
+          "outcome": "rejected",
+          "outcome_matches": true,
+          "route_reaches_binding": true,
+          "source_clearance_drift_mm": 0.05261961364277923,
+          "source_clearance_mm": -0.04932951185682155
+        },
+        {
+          "binding_body": "torso_link",
+          "binding_bottleneck_frame": 106,
+          "binding_clearance_mm": 201.21344759693994,
+          "cell_id": "cs_duck_003__hvac_duct__s00000017__adapted_easy",
+          "cell_role": "adapted_easy",
+          "contact": {
+            "attributed_prim_path": null,
+            "attribution": "none",
+            "drift_onset_frame": 93,
+            "external_bodies": [],
+            "first_frame": null,
+            "peak_lateral_force_n": 0.0,
+            "peak_overhead_force_n": 0.0,
+            "runner_up_separation_mm": null
+          },
+          "drift_within_e1a_floor": true,
+          "expected_outcome": "accepted",
+          "frames_inside_binding_footprint": 32,
+          "outcome": "accepted",
+          "outcome_matches": true,
+          "route_reaches_binding": true,
+          "source_clearance_drift_mm": 7.786229120855694,
+          "source_clearance_mm": 193.42721847608425
+        },
+        {
+          "binding_body": "torso_link",
+          "binding_bottleneck_frame": 102,
+          "binding_clearance_mm": 58.40420596645149,
+          "cell_id": "cs_duck_003__hvac_duct__s00000017__adapted_hard",
+          "cell_role": "adapted_hard",
+          "contact": {
+            "attributed_prim_path": null,
+            "attribution": "none",
+            "drift_onset_frame": 93,
+            "external_bodies": [],
+            "first_frame": null,
+            "peak_lateral_force_n": 0.0,
+            "peak_overhead_force_n": 0.0,
+            "runner_up_separation_mm": null
+          },
+          "drift_within_e1a_floor": true,
+          "expected_outcome": "accepted",
+          "frames_inside_binding_footprint": 32,
+          "outcome": "accepted",
+          "outcome_matches": true,
+          "route_reaches_binding": true,
+          "source_clearance_drift_mm": 2.786730199076814,
+          "source_clearance_mm": 55.61747576737468
+        }
+      ],
+      "hard_contact_summary": "unique, after drift (f110 >= f30)",
+      "maximum_binding_face_offset_mm": 2.220446049250313e-13,
+      "maximum_source_clearance_drift_mm": 7.786229120855694,
+      "outcome_pattern_matches": true,
+      "secondary_contact": false,
+      "unexpected_other_contact": false,
+      "verified": false
+    },
+    {
+      "archetype_id": "ibeam",
+      "binding_contact_unique": true,
+      "cells": [
+        {
+          "binding_body": "torso_link",
+          "binding_bottleneck_frame": 130,
+          "binding_clearance_mm": 91.60303316740098,
+          "cell_id": "cs_duck_003__ibeam__s00000017__nominal_easy",
+          "cell_role": "nominal_easy",
+          "contact": {
+            "attributed_prim_path": null,
+            "attribution": "none",
+            "drift_onset_frame": null,
+            "external_bodies": [],
+            "first_frame": null,
+            "peak_lateral_force_n": 0.0,
+            "peak_overhead_force_n": 0.0,
+            "runner_up_separation_mm": null
+          },
+          "drift_within_e1a_floor": true,
+          "expected_outcome": "accepted",
+          "frames_inside_binding_footprint": 26,
+          "outcome": "accepted",
+          "outcome_matches": true,
+          "route_reaches_binding": true,
+          "source_clearance_drift_mm": 1.9284886744368492,
+          "source_clearance_mm": 89.67454449296413
+        },
+        {
+          "binding_body": "torso_link",
+          "binding_bottleneck_frame": 172,
+          "binding_clearance_mm": -0.08330110607829289,
+          "cell_id": "cs_duck_003__ibeam__s00000017__nominal_hard",
+          "cell_role": "nominal_hard",
+          "contact": {
+            "attributed_prim_path": "/World/ConstraintFrame/BindingIBeamFlange",
+            "attribution": "binding_constraint",
+            "drift_onset_frame": 123,
+            "external_bodies": [
+              "torso_link"
+            ],
+            "first_frame": 109,
+            "peak_lateral_force_n": 105.89957427992418,
+            "peak_overhead_force_n": 673.5806274414062,
+            "runner_up_separation_mm": 105.990879301357
+          },
+          "drift_within_e1a_floor": true,
+          "expected_outcome": "rejected",
+          "frames_inside_binding_footprint": 88,
+          "outcome": "rejected",
+          "outcome_matches": true,
+          "route_reaches_binding": true,
+          "source_clearance_drift_mm": 0.033971594221471335,
+          "source_clearance_mm": -0.04932951185682155
+        },
+        {
+          "binding_body": "torso_link",
+          "binding_bottleneck_frame": 106,
+          "binding_clearance_mm": 203.157823147747,
+          "cell_id": "cs_duck_003__ibeam__s00000017__adapted_easy",
+          "cell_role": "adapted_easy",
+          "contact": {
+            "attributed_prim_path": null,
+            "attribution": "none",
+            "drift_onset_frame": 116,
+            "external_bodies": [],
+            "first_frame": null,
+            "peak_lateral_force_n": 0.0,
+            "peak_overhead_force_n": 0.0,
+            "runner_up_separation_mm": null
+          },
+          "drift_within_e1a_floor": true,
+          "expected_outcome": "accepted",
+          "frames_inside_binding_footprint": 31,
+          "outcome": "accepted",
+          "outcome_matches": true,
+          "route_reaches_binding": true,
+          "source_clearance_drift_mm": 9.730604671662746,
+          "source_clearance_mm": 193.42721847608425
+        },
+        {
+          "binding_body": "torso_link",
+          "binding_bottleneck_frame": 102,
+          "binding_clearance_mm": 71.12422277134034,
+          "cell_id": "cs_duck_003__ibeam__s00000017__adapted_hard",
+          "cell_role": "adapted_hard",
+          "contact": {
+            "attributed_prim_path": null,
+            "attribution": "none",
+            "drift_onset_frame": 116,
+            "external_bodies": [],
+            "first_frame": null,
+            "peak_lateral_force_n": 0.0,
+            "peak_overhead_force_n": 0.0,
+            "runner_up_separation_mm": null
+          },
+          "drift_within_e1a_floor": true,
+          "expected_outcome": "accepted",
+          "frames_inside_binding_footprint": 31,
+          "outcome": "accepted",
+          "outcome_matches": true,
+          "route_reaches_binding": true,
+          "source_clearance_drift_mm": 15.506747003965664,
+          "source_clearance_mm": 55.61747576737468
+        }
+      ],
+      "hard_contact_summary": "unique",
+      "maximum_binding_face_offset_mm": 2.220446049250313e-13,
+      "maximum_source_clearance_drift_mm": 15.506747003965664,
+      "outcome_pattern_matches": true,
+      "secondary_contact": false,
+      "unexpected_other_contact": false,
+      "verified": true
+    }
+  ],
+  "variants": 3,
+  "verified_variants": 2
+}

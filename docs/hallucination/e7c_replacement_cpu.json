@@ -1,0 +1,67 @@
+{
+  "adaptive_followup_to": "E7 refused lfh_086_crouch__door_lintel",
+  "all_cpu_preflights_pass": true,
+  "archetypes": [
+    "hanging_panel"
+  ],
+  "changed_variable": "archetype_id",
+  "held_fixed": [
+    "source",
+    "motion_pair",
+    "operator",
+    "route_station",
+    "finite_exposure",
+    "easy_hard_coordinates",
+    "engineering_margin_rule"
+  ],
+  "physics_executed": false,
+  "schema_version": "lfh_e7c_replacement_cpu_v1",
+  "sources": 1,
+  "variants": 1,
+  "variants_detail": [
+    {
+      "archetype_id": "hanging_panel",
+      "binding_geometry_clearance_mm": {
+        "easy": {
+          "edit": 119.45841179101718,
+          "orig": 49.391293324976274
+        },
+        "hard": {
+          "edit": 34.72795955190301,
+          "orig": -34.74887511598007
+        }
+      },
+      "easy_coordinate_m": 1.3406163751159803,
+      "face_across_route_m": 3.0,
+      "face_along_route_m": 0.1,
+      "hard_coordinate_m": 1.2558675306814142,
+      "keepout": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_086_crouch_cal3_d0100__hanging_panel__s00032301.keepout.json",
+      "keepout_sha256": "sha256:cbe389063fd1d0594718e0d36e5ab2978319b6e4170dc16dfd40188c4363dba4",
+      "pair_manifest": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_086_crouch_cal3_d0100__hanging_panel__s00032301.manifest.json",
+      "pair_manifest_sha256": "sha256:98883e60911b21b3375b2a9ad64de26e5968422e636bbc84b8bd977136929dc6",
+      "reference_motions": {
+        "adapted": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_086_crouch/adapted.pkl",
+        "nominal": "/data/robotixx/groot-wbc-kimodo-m0/lfh_crouch_calibration/lfh_086_crouch/nominal.pkl"
+      },
+      "route_axis": "x",
+      "scene_sha256": {
+        "easy": "sha256:3d7bd11c84100aa3fd01e05da6c2c19a9aca7db34b718848086dc1c9b981644a",
+        "hard": "sha256:a4a6a537c8dffbacf6ae2e0e27654e5f52ce815ec3ad76da116bb48f5e7938e9"
+      },
+      "scenes": {
+        "easy": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_086_crouch_cal3_d0100__hanging_panel__s00032301__easy.usda",
+        "hard": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e7/cs_lfh_086_crouch_cal3_d0100__hanging_panel__s00032301__hard.usda"
+      },
+      "seed": 32301,
+      "source_pair_id": "lfh_086_crouch",
+      "source_variant_id": "cal3_d0100_alpha_1p0",
+      "spec": "specs/hallucination/cs_lfh_086_crouch_cal3_d0100.json",
+      "spec_sha256": "sha256:5f9ae4719dc91d74e4396a992e2f7f8a4ac69715ad3cd6ec5f4fcab7ee6b03a1",
+      "station_xy_m": [
+        1.981722354888916,
+        -0.03133034333586693
+      ],
+      "variant_id": "lfh_086_crouch__hanging_panel"
+    }
+  ]
+}

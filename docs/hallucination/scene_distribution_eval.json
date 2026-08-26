@@ -1,0 +1,59 @@
+{
+  "admission_rule": {
+    "delta_mm": 20.0,
+    "epsilon_mm": 15.0,
+    "realism_floor": 1.0,
+    "regret_budget_mm": 15.0
+  },
+  "atoms": 4,
+  "atoms_refused_by_margin": 0,
+  "atoms_with_positive_window": 4,
+  "note": "geometric necessary conditions only; physics adjudicates every promoted scene. Regret and necessity share one budget fixed by the executed window, so a sampler cannot improve both at once.",
+  "results": [
+    {
+      "adapted_would_strike_rate": 0.0,
+      "admitted_rate": 1.0,
+      "in_support_rate": 1.0,
+      "median_necessity_mm": 42.853336300486035,
+      "median_realism": 1.0,
+      "median_regret_mm": 7.684095881592329,
+      "nominal_would_clear_rate": 0.0,
+      "sampler": "q_LFH (shaped, regret-budgeted)",
+      "samples": 2000
+    },
+    {
+      "adapted_would_strike_rate": 0.0,
+      "admitted_rate": 0.459,
+      "in_support_rate": 1.0,
+      "median_necessity_mm": 33.592285820422006,
+      "median_realism": 1.0,
+      "median_regret_mm": 16.34343988459319,
+      "nominal_would_clear_rate": 0.0,
+      "sampler": "uniform in support",
+      "samples": 2000
+    },
+    {
+      "adapted_would_strike_rate": 0.3375,
+      "admitted_rate": 0.0375,
+      "in_support_rate": 0.081,
+      "median_necessity_mm": 34.46369581890857,
+      "median_realism": 1.0,
+      "median_regret_mm": 16.30111663386602,
+      "nominal_would_clear_rate": 0.481,
+      "sampler": "random placement (no pair knowledge)",
+      "samples": 2000
+    },
+    {
+      "adapted_would_strike_rate": 0.0,
+      "admitted_rate": 0.084,
+      "in_support_rate": 0.1945,
+      "median_necessity_mm": 33.458278466263195,
+      "median_realism": 1.0,
+      "median_regret_mm": 16.82415012478944,
+      "nominal_would_clear_rate": 0.673,
+      "sampler": "route-midpoint station",
+      "samples": 2000
+    }
+  ],
+  "schema_version": "lfh_scene_distribution_eval_v1"
+}

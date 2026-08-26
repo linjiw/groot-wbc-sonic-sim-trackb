@@ -1,0 +1,794 @@
+{
+  "funnel": {
+    "certified": 1,
+    "motions": 2,
+    "selected": 1,
+    "trials": 24
+  },
+  "motions": [
+    {
+      "certified": 1,
+      "motion_id": "lfh_084_arm_tuck_right",
+      "refusal_counts": {
+        "binding_anatomy_mismatch": 3,
+        "coverage_target_empty": 4,
+        "edit_binding_outside_edit_interval": 9,
+        "edited_binding_anatomy_mismatch": 6,
+        "orig_binding_outside_edit_interval": 8,
+        "window_below_min": 6
+      },
+      "summary_reason": "no temporally active, same-side, noise-certified full-gap window",
+      "trials": 12
+    },
+    {
+      "certified": 0,
+      "motion_id": "lfh_092_arm_tuck_right",
+      "refusal_counts": {
+        "binding_anatomy_mismatch": 4,
+        "edit_binding_outside_edit_interval": 1,
+        "edited_binding_anatomy_mismatch": 12,
+        "orig_binding_outside_edit_interval": 7,
+        "window_below_min": 12
+      },
+      "summary_reason": "no temporally active, same-side, noise-certified full-gap window",
+      "trials": 12
+    }
+  ],
+  "physics_executed": false,
+  "schema_version": "lfh_e3_lateral_cpu_v1",
+  "search_contract": {
+    "along_route_grid_m": [
+      0.1,
+      0.2,
+      0.3,
+      0.4
+    ],
+    "coordinate": "full symmetric world-fixed gap width",
+    "delta_clear_gap_mm": 36.088,
+    "easy_gap_margin_mm": 100.0,
+    "minimum_certified_window_mm": 20.0,
+    "noise_floor_mm": 18.044,
+    "required_binding_anatomy": [
+      "shoulder_right",
+      "wrist_right"
+    ],
+    "station_grid": "time-mapped executed active-window start/median/end",
+    "vertical_band_m": [
+      0.0,
+      2.0
+    ]
+  },
+  "selected": [
+    {
+      "binding_geometry_clearance_mm": {
+        "easy": {
+          "edit": 112.12513511253998,
+          "orig": 35.998211992114406
+        },
+        "hard": {
+          "edit": 26.418850150910195,
+          "orig": -32.80625678339495
+        }
+      },
+      "binding_keypoint": "wrist_right",
+      "certified_window_mm": 56.40546632042809,
+      "coverage_target": {
+        "binding_keypoint": "wrist_right",
+        "constraint_axis": "lateral_gap",
+        "constraint_coordinate_bucket": "0.8_0.9",
+        "edit_behaviour_class": "arms",
+        "margin_bucket": "clear_25_50",
+        "operator": "local_arm_tuck",
+        "rank": 48,
+        "reason": "tail behaviour; mid-margin first"
+      },
+      "face_along_route_m": 0.3,
+      "full_certified_window_mm": 129.71447847958362,
+      "hard_coordinate_m": 0.871797266839786,
+      "hard_edit_clearance_mm": 26.418850150910195,
+      "keepout": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e3/cs_lfh_084_arm_tuck_right_cal2__pinch_panels__s00031584.keepout.json",
+      "keepout_sha256": "sha256:a57357043c13c0941972bc92fefa245ff4856a160b3a2145fbf918d378ecd8de",
+      "motion_id": "lfh_084_arm_tuck_right",
+      "pair_manifest": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e3/cs_lfh_084_arm_tuck_right_cal2__pinch_panels__s00031584.manifest.json",
+      "pair_manifest_sha256": "sha256:8ffa850aa8583ff764396d7ebc099cdf5c2de6730d8ff22de367bb258f37d9ed",
+      "raw_window_mm": 165.8024784795836,
+      "scene_sha256": {
+        "easy": "sha256:28f5bad9cac5e3e7955ff18a3dbcbfe4cbdf6e61148da4e3e00d8b76f6c24924",
+        "hard": "sha256:544bf7b89c62eff483f426328c8ba9c6bf73e19dc87d7b79404146c63eb3d77b"
+      },
+      "scenes": {
+        "easy": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e3/cs_lfh_084_arm_tuck_right_cal2__pinch_panels__s00031584__easy.usda",
+        "hard": "gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e3/cs_lfh_084_arm_tuck_right_cal2__pinch_panels__s00031584__hard.usda"
+      },
+      "spec": "specs/hallucination/cs_lfh_084_arm_tuck_right_cal2.json",
+      "spec_sha256": "sha256:726b6ec9f161ac2ebe020b02bf2c5b6b22cf7ea0595696ef7cea1e064dbcbd66",
+      "station_progress": 0.39247109375430933
+    }
+  ],
+  "trials": [
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_right",
+      "critical_frame_edit": 97,
+      "critical_frame_orig": 117,
+      "face_along_route_m": 0.1,
+      "motion_id": "lfh_084_arm_tuck_right",
+      "raw_window_mm": 21.213790436504954,
+      "refusal_reasons": [
+        "edit_binding_outside_edit_interval",
+        "edited_binding_anatomy_mismatch",
+        "window_below_min"
+      ],
+      "route_axis": "x",
+      "station_progress": 0.39247109375430933,
+      "station_xy_m": [
+        1.2064393758773804,
+        -0.17617939412593842
+      ],
+      "temporal_interval_edit": [
+        108,
+        152
+      ],
+      "temporal_interval_orig": [
+        108,
+        152
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_right",
+      "critical_frame_edit": 95,
+      "critical_frame_orig": 119,
+      "face_along_route_m": 0.2,
+      "motion_id": "lfh_084_arm_tuck_right",
+      "raw_window_mm": 97.7201429137038,
+      "refusal_reasons": [
+        "edit_binding_outside_edit_interval",
+        "edited_binding_anatomy_mismatch"
+      ],
+      "route_axis": "x",
+      "station_progress": 0.39247109375430933,
+      "station_xy_m": [
+        1.2064393758773804,
+        -0.17617939412593842
+      ],
+      "temporal_interval_edit": [
+        108,
+        152
+      ],
+      "temporal_interval_orig": [
+        108,
+        152
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_right",
+      "binding_keypoint_orig": "wrist_right",
+      "certified_window_mm": 56.40546632042809,
+      "coverage_target": {
+        "binding_keypoint": "wrist_right",
+        "constraint_axis": "lateral_gap",
+        "constraint_coordinate_bucket": "0.8_0.9",
+        "edit_behaviour_class": "arms",
+        "margin_bucket": "clear_25_50",
+        "operator": "local_arm_tuck",
+        "rank": 48,
+        "reason": "tail behaviour; mid-margin first"
+      },
+      "critical_frame_edit": 122,
+      "critical_frame_orig": 121,
+      "face_along_route_m": 0.3,
+      "full_certified_window_mm": 129.71447847958362,
+      "hard_coordinate_m": 0.871797266839786,
+      "motion_id": "lfh_084_arm_tuck_right",
+      "raw_window_mm": 165.8024784795836,
+      "refusal_reasons": [],
+      "route_axis": "x",
+      "station_progress": 0.39247109375430933,
+      "station_xy_m": [
+        1.2064393758773804,
+        -0.17617939412593842
+      ],
+      "temporal_interval_edit": [
+        108,
+        152
+      ],
+      "temporal_interval_orig": [
+        108,
+        152
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_right",
+      "binding_keypoint_orig": "wrist_right",
+      "critical_frame_edit": 126,
+      "critical_frame_orig": 124,
+      "face_along_route_m": 0.4,
+      "motion_id": "lfh_084_arm_tuck_right",
+      "raw_window_mm": 189.86600991251834,
+      "refusal_reasons": [
+        "coverage_target_empty"
+      ],
+      "route_axis": "x",
+      "station_progress": 0.39247109375430933,
+      "station_xy_m": [
+        1.2064393758773804,
+        -0.17617939412593842
+      ],
+      "temporal_interval_edit": [
+        108,
+        152
+      ],
+      "temporal_interval_orig": [
+        108,
+        152
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_left",
+      "critical_frame_edit": 110,
+      "critical_frame_orig": 107,
+      "face_along_route_m": 0.1,
+      "motion_id": "lfh_084_arm_tuck_right",
+      "raw_window_mm": 17.98036255302893,
+      "refusal_reasons": [
+        "binding_anatomy_mismatch",
+        "edited_binding_anatomy_mismatch",
+        "orig_binding_outside_edit_interval",
+        "window_below_min"
+      ],
+      "route_axis": "x",
+      "station_progress": 0.5383542091359537,
+      "station_xy_m": [
+        1.5915852785110474,
+        -0.4680514335632324
+      ],
+      "temporal_interval_edit": [
+        108,
+        152
+      ],
+      "temporal_interval_orig": [
+        108,
+        152
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_left",
+      "critical_frame_edit": 107,
+      "critical_frame_orig": 105,
+      "face_along_route_m": 0.2,
+      "motion_id": "lfh_084_arm_tuck_right",
+      "raw_window_mm": 6.594450897522752,
+      "refusal_reasons": [
+        "binding_anatomy_mismatch",
+        "edit_binding_outside_edit_interval",
+        "edited_binding_anatomy_mismatch",
+        "orig_binding_outside_edit_interval",
+        "window_below_min"
+      ],
+      "route_axis": "x",
+      "station_progress": 0.5383542091359537,
+      "station_xy_m": [
+        1.5915852785110474,
+        -0.4680514335632324
+      ],
+      "temporal_interval_edit": [
+        108,
+        152
+      ],
+      "temporal_interval_orig": [
+        108,
+        152
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_left",
+      "critical_frame_edit": 105,
+      "critical_frame_orig": 103,
+      "face_along_route_m": 0.3,
+      "motion_id": "lfh_084_arm_tuck_right",
+      "raw_window_mm": 2.8549149141998686,
+      "refusal_reasons": [
+        "binding_anatomy_mismatch",
+        "edit_binding_outside_edit_interval",
+        "edited_binding_anatomy_mismatch",
+        "orig_binding_outside_edit_interval",
+        "window_below_min"
+      ],
+      "route_axis": "x",
+      "station_progress": 0.5383542091359537,
+      "station_xy_m": [
+        1.5915852785110474,
+        -0.4680514335632324
+      ],
+      "temporal_interval_edit": [
+        108,
+        152
+      ],
+      "temporal_interval_orig": [
+        108,
+        152
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_right",
+      "critical_frame_edit": 103,
+      "critical_frame_orig": 164,
+      "face_along_route_m": 0.4,
+      "motion_id": "lfh_084_arm_tuck_right",
+      "raw_window_mm": 17.430215463966945,
+      "refusal_reasons": [
+        "edit_binding_outside_edit_interval",
+        "edited_binding_anatomy_mismatch",
+        "orig_binding_outside_edit_interval",
+        "window_below_min"
+      ],
+      "route_axis": "x",
+      "station_progress": 0.5383542091359537,
+      "station_xy_m": [
+        1.5915852785110474,
+        -0.4680514335632324
+      ],
+      "temporal_interval_edit": [
+        108,
+        152
+      ],
+      "temporal_interval_orig": [
+        108,
+        152
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_right",
+      "binding_keypoint_orig": "wrist_right",
+      "critical_frame_edit": 188,
+      "critical_frame_orig": 186,
+      "face_along_route_m": 0.1,
+      "motion_id": "lfh_084_arm_tuck_right",
+      "raw_window_mm": 92.04992904081766,
+      "refusal_reasons": [
+        "coverage_target_empty",
+        "edit_binding_outside_edit_interval",
+        "orig_binding_outside_edit_interval"
+      ],
+      "route_axis": "x",
+      "station_progress": 0.6832230280179059,
+      "station_xy_m": [
+        1.9811172485351562,
+        -0.744368851184845
+      ],
+      "temporal_interval_edit": [
+        108,
+        152
+      ],
+      "temporal_interval_orig": [
+        108,
+        152
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_right",
+      "binding_keypoint_orig": "wrist_right",
+      "critical_frame_edit": 198,
+      "critical_frame_orig": 194,
+      "face_along_route_m": 0.2,
+      "motion_id": "lfh_084_arm_tuck_right",
+      "raw_window_mm": 7.010905627002906,
+      "refusal_reasons": [
+        "edit_binding_outside_edit_interval",
+        "orig_binding_outside_edit_interval",
+        "window_below_min"
+      ],
+      "route_axis": "x",
+      "station_progress": 0.6832230280179059,
+      "station_xy_m": [
+        1.9811172485351562,
+        -0.744368851184845
+      ],
+      "temporal_interval_edit": [
+        108,
+        152
+      ],
+      "temporal_interval_orig": [
+        108,
+        152
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_right",
+      "binding_keypoint_orig": "wrist_right",
+      "critical_frame_edit": 198,
+      "critical_frame_orig": 198,
+      "face_along_route_m": 0.3,
+      "motion_id": "lfh_084_arm_tuck_right",
+      "raw_window_mm": 173.19759576482684,
+      "refusal_reasons": [
+        "coverage_target_empty",
+        "edit_binding_outside_edit_interval",
+        "orig_binding_outside_edit_interval"
+      ],
+      "route_axis": "x",
+      "station_progress": 0.6832230280179059,
+      "station_xy_m": [
+        1.9811172485351562,
+        -0.744368851184845
+      ],
+      "temporal_interval_edit": [
+        108,
+        152
+      ],
+      "temporal_interval_orig": [
+        108,
+        152
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_right",
+      "binding_keypoint_orig": "wrist_right",
+      "critical_frame_edit": 198,
+      "critical_frame_orig": 198,
+      "face_along_route_m": 0.4,
+      "motion_id": "lfh_084_arm_tuck_right",
+      "raw_window_mm": 176.84599321989137,
+      "refusal_reasons": [
+        "coverage_target_empty",
+        "edit_binding_outside_edit_interval",
+        "orig_binding_outside_edit_interval"
+      ],
+      "route_axis": "x",
+      "station_progress": 0.6832230280179059,
+      "station_xy_m": [
+        1.9811172485351562,
+        -0.744368851184845
+      ],
+      "temporal_interval_edit": [
+        108,
+        152
+      ],
+      "temporal_interval_orig": [
+        108,
+        152
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_left",
+      "critical_frame_edit": 119,
+      "critical_frame_orig": 118,
+      "face_along_route_m": 0.1,
+      "motion_id": "lfh_092_arm_tuck_right",
+      "raw_window_mm": -102.93282801618852,
+      "refusal_reasons": [
+        "binding_anatomy_mismatch",
+        "edit_binding_outside_edit_interval",
+        "edited_binding_anatomy_mismatch",
+        "orig_binding_outside_edit_interval",
+        "window_below_min"
+      ],
+      "route_axis": "y",
+      "station_progress": 0.41489738842206986,
+      "station_xy_m": [
+        1.273040771484375,
+        -0.9278083443641663
+      ],
+      "temporal_interval_edit": [
+        121,
+        159
+      ],
+      "temporal_interval_orig": [
+        121,
+        159
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_left",
+      "critical_frame_edit": 121,
+      "critical_frame_orig": 119,
+      "face_along_route_m": 0.2,
+      "motion_id": "lfh_092_arm_tuck_right",
+      "raw_window_mm": -108.88573986239703,
+      "refusal_reasons": [
+        "binding_anatomy_mismatch",
+        "edited_binding_anatomy_mismatch",
+        "orig_binding_outside_edit_interval",
+        "window_below_min"
+      ],
+      "route_axis": "y",
+      "station_progress": 0.41489738842206986,
+      "station_xy_m": [
+        1.273040771484375,
+        -0.9278083443641663
+      ],
+      "temporal_interval_edit": [
+        121,
+        159
+      ],
+      "temporal_interval_orig": [
+        121,
+        159
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_left",
+      "critical_frame_edit": 122,
+      "critical_frame_orig": 120,
+      "face_along_route_m": 0.3,
+      "motion_id": "lfh_092_arm_tuck_right",
+      "raw_window_mm": -119.0520849157265,
+      "refusal_reasons": [
+        "binding_anatomy_mismatch",
+        "edited_binding_anatomy_mismatch",
+        "orig_binding_outside_edit_interval",
+        "window_below_min"
+      ],
+      "route_axis": "y",
+      "station_progress": 0.41489738842206986,
+      "station_xy_m": [
+        1.273040771484375,
+        -0.9278083443641663
+      ],
+      "temporal_interval_edit": [
+        121,
+        159
+      ],
+      "temporal_interval_orig": [
+        121,
+        159
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_right",
+      "critical_frame_edit": 124,
+      "critical_frame_orig": 96,
+      "face_along_route_m": 0.4,
+      "motion_id": "lfh_092_arm_tuck_right",
+      "raw_window_mm": 6.218999640102751,
+      "refusal_reasons": [
+        "edited_binding_anatomy_mismatch",
+        "orig_binding_outside_edit_interval",
+        "window_below_min"
+      ],
+      "route_axis": "y",
+      "station_progress": 0.41489738842206986,
+      "station_xy_m": [
+        1.273040771484375,
+        -0.9278083443641663
+      ],
+      "temporal_interval_edit": [
+        121,
+        159
+      ],
+      "temporal_interval_orig": [
+        121,
+        159
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_right",
+      "critical_frame_edit": 144,
+      "critical_frame_orig": 134,
+      "face_along_route_m": 0.1,
+      "motion_id": "lfh_092_arm_tuck_right",
+      "raw_window_mm": -219.11244116869977,
+      "refusal_reasons": [
+        "edited_binding_anatomy_mismatch",
+        "window_below_min"
+      ],
+      "route_axis": "y",
+      "station_progress": 0.5657646970065293,
+      "station_xy_m": [
+        1.416685938835144,
+        -1.525449514389038
+      ],
+      "temporal_interval_edit": [
+        121,
+        159
+      ],
+      "temporal_interval_orig": [
+        121,
+        159
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_right",
+      "critical_frame_edit": 145,
+      "critical_frame_orig": 133,
+      "face_along_route_m": 0.2,
+      "motion_id": "lfh_092_arm_tuck_right",
+      "raw_window_mm": -212.9404915602533,
+      "refusal_reasons": [
+        "edited_binding_anatomy_mismatch",
+        "window_below_min"
+      ],
+      "route_axis": "y",
+      "station_progress": 0.5657646970065293,
+      "station_xy_m": [
+        1.416685938835144,
+        -1.525449514389038
+      ],
+      "temporal_interval_edit": [
+        121,
+        159
+      ],
+      "temporal_interval_orig": [
+        121,
+        159
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_right",
+      "critical_frame_edit": 146,
+      "critical_frame_orig": 132,
+      "face_along_route_m": 0.3,
+      "motion_id": "lfh_092_arm_tuck_right",
+      "raw_window_mm": -205.86414557793066,
+      "refusal_reasons": [
+        "edited_binding_anatomy_mismatch",
+        "window_below_min"
+      ],
+      "route_axis": "y",
+      "station_progress": 0.5657646970065293,
+      "station_xy_m": [
+        1.416685938835144,
+        -1.525449514389038
+      ],
+      "temporal_interval_edit": [
+        121,
+        159
+      ],
+      "temporal_interval_orig": [
+        121,
+        159
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_right",
+      "critical_frame_edit": 147,
+      "critical_frame_orig": 131,
+      "face_along_route_m": 0.4,
+      "motion_id": "lfh_092_arm_tuck_right",
+      "raw_window_mm": -199.13866456703678,
+      "refusal_reasons": [
+        "edited_binding_anatomy_mismatch",
+        "window_below_min"
+      ],
+      "route_axis": "y",
+      "station_progress": 0.5657646970065293,
+      "station_xy_m": [
+        1.416685938835144,
+        -1.525449514389038
+      ],
+      "temporal_interval_edit": [
+        121,
+        159
+      ],
+      "temporal_interval_orig": [
+        121,
+        159
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_left",
+      "critical_frame_edit": 152,
+      "critical_frame_orig": 151,
+      "face_along_route_m": 0.1,
+      "motion_id": "lfh_092_arm_tuck_right",
+      "raw_window_mm": -170.58482224819448,
+      "refusal_reasons": [
+        "binding_anatomy_mismatch",
+        "edited_binding_anatomy_mismatch",
+        "window_below_min"
+      ],
+      "route_axis": "y",
+      "station_progress": 0.7103477049674081,
+      "station_xy_m": [
+        1.3387017250061035,
+        -2.094590663909912
+      ],
+      "temporal_interval_edit": [
+        121,
+        159
+      ],
+      "temporal_interval_orig": [
+        121,
+        159
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_right",
+      "critical_frame_edit": 152,
+      "critical_frame_orig": 166,
+      "face_along_route_m": 0.2,
+      "motion_id": "lfh_092_arm_tuck_right",
+      "raw_window_mm": -132.81627053539935,
+      "refusal_reasons": [
+        "edited_binding_anatomy_mismatch",
+        "orig_binding_outside_edit_interval",
+        "window_below_min"
+      ],
+      "route_axis": "y",
+      "station_progress": 0.7103477049674081,
+      "station_xy_m": [
+        1.3387017250061035,
+        -2.094590663909912
+      ],
+      "temporal_interval_edit": [
+        121,
+        159
+      ],
+      "temporal_interval_orig": [
+        121,
+        159
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_right",
+      "critical_frame_edit": 151,
+      "critical_frame_orig": 168,
+      "face_along_route_m": 0.3,
+      "motion_id": "lfh_092_arm_tuck_right",
+      "raw_window_mm": -82.24419151330453,
+      "refusal_reasons": [
+        "edited_binding_anatomy_mismatch",
+        "orig_binding_outside_edit_interval",
+        "window_below_min"
+      ],
+      "route_axis": "y",
+      "station_progress": 0.7103477049674081,
+      "station_xy_m": [
+        1.3387017250061035,
+        -2.094590663909912
+      ],
+      "temporal_interval_edit": [
+        121,
+        159
+      ],
+      "temporal_interval_orig": [
+        121,
+        159
+      ]
+    },
+    {
+      "binding_keypoint_edit": "wrist_left",
+      "binding_keypoint_orig": "wrist_right",
+      "critical_frame_edit": 150,
+      "critical_frame_orig": 170,
+      "face_along_route_m": 0.4,
+      "motion_id": "lfh_092_arm_tuck_right",
+      "raw_window_mm": -42.58613383286969,
+      "refusal_reasons": [
+        "edited_binding_anatomy_mismatch",
+        "orig_binding_outside_edit_interval",
+        "window_below_min"
+      ],
+      "route_axis": "y",
+      "station_progress": 0.7103477049674081,
+      "station_xy_m": [
+        1.3387017250061035,
+        -2.094590663909912
+      ],
+      "temporal_interval_edit": [
+        121,
+        159
+      ],
+      "temporal_interval_orig": [
+        121,
+        159
+      ]
+    }
+  ]
+}

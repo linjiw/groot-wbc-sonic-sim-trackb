@@ -1,0 +1,139 @@
+{
+  "binding": {
+    "axis_type": "overhead",
+    "critical_frames": {
+      "edit": 113,
+      "orig": 109
+    },
+    "expected_link_group": "head_torso",
+    "keypoint": "head_torso",
+    "per_keypoint_margins": {
+      "foot_left": {
+        "edit_m": 1.0444801407963438,
+        "orig_m": 1.0605384179613015
+      },
+      "foot_right": {
+        "edit_m": 1.0713046220481044,
+        "orig_m": 1.1523804025637685
+      },
+      "head_torso": {
+        "edit_m": 0.034811741979629884,
+        "orig_m": -0.03481174197962966
+      },
+      "knee_left": {
+        "edit_m": 0.6318395778454936,
+        "orig_m": 0.5669230338051755
+      },
+      "knee_right": {
+        "edit_m": 0.6291066307877071,
+        "orig_m": 0.5706273791665973
+      },
+      "pelvis": {
+        "edit_m": 0.5772252868449991,
+        "orig_m": 0.506445446992231
+      },
+      "shoulder_left": {
+        "edit_m": 0.2931340926169883,
+        "orig_m": 0.22219551763605194
+      },
+      "shoulder_right": {
+        "edit_m": 0.2876189851964298,
+        "orig_m": 0.22132852087773958
+      },
+      "wrist_left": {
+        "edit_m": 0.6178146579233587,
+        "orig_m": 0.5451280363733069
+      },
+      "wrist_right": {
+        "edit_m": 0.604225225786449,
+        "orig_m": 0.5530345565179109
+      }
+    },
+    "reach_edit_m": 1.2265280042653741,
+    "reach_orig_m": 1.2961514882246337,
+    "window_mm": 69.62348395925954
+  },
+  "binding_station_xy_m": [
+    1.8716926574707031,
+    0.13857388496398926
+  ],
+  "crossing": {
+    "frames": {
+      "edit": [
+        108,
+        112
+      ],
+      "orig": [
+        106,
+        110
+      ]
+    }
+  },
+  "face_extent": {
+    "across_route_m": 3.0,
+    "along_route_m": 0.1,
+    "binding_thickness_m": 0.1,
+    "vertical_m": null
+  },
+  "faces": {
+    "easy_m": 1.3461514882246337,
+    "hard_m": 1.261339746245004
+  },
+  "keepout": {
+    "delta_mm": 50.0,
+    "exempt_roles": [
+      "support_floor",
+      "room_shell"
+    ]
+  },
+  "material_provenance": "runtime_default",
+  "motions": {
+    "edit": {
+      "empty_room_rollout": {
+        "adjudication": {
+          "cell_id": "lfh_089_crouch__cal_adapted",
+          "path": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/run_records/CROUCH_CALIBRATION_2026-08-20.json",
+          "sha256": "sha256:7ac414725bbe81b40e0c801c546917c27b3a876ae1f57789dd0a24f86f80b247"
+        },
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/crouch_calibration/lfh_089_crouch/adapted/trajectories/000000.trajectory.pkl",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:3f1e0e09ab2587186658aa230e1c63aa0dc269679d644f803a37b1620426625f"
+      },
+      "motion_id": "lfh_089_crouch_adapted",
+      "operator": "local_crouch"
+    },
+    "orig": {
+      "empty_room_rollout": {
+        "adjudication": {
+          "cell_id": "lfh_089_crouch__cal_nominal",
+          "path": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/run_records/CROUCH_CALIBRATION_2026-08-20.json",
+          "sha256": "sha256:7ac414725bbe81b40e0c801c546917c27b3a876ae1f57789dd0a24f86f80b247"
+        },
+        "path": "/data/robotixx/groot-wbc-kimodo-m0/hallucination/crouch_calibration/lfh_089_crouch/nominal/trajectories/000000.trajectory.pkl",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:6e33bd2eafb76d9cd8874d0ac15389e7b9bafd5c08b592b4496e3e391fef5650"
+      },
+      "motion_id": "lfh_089_crouch_nominal",
+      "operator": "local_crouch"
+    }
+  },
+  "room": {
+    "size_xy_m": [
+      12.3,
+      8.747
+    ],
+    "wall_height_m": 2.8
+  },
+  "route_axis": "x",
+  "source": {
+    "family_id": "lfh_089_crouch",
+    "kind": "inverse_synthesis",
+    "variant_id": "cal3_alpha_1p0"
+  },
+  "source_scenes": {
+    "easy": "screen_empty",
+    "hard": "screen_empty"
+  },
+  "spec_id": "cs_lfh_089_crouch_cal3",
+  "spec_version": "0.1"
+}

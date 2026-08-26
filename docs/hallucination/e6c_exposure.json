@@ -1,0 +1,97 @@
+{
+  "actual_contended_gpu_hours": 0.056210198063248146,
+  "adaptive_followup_verified": true,
+  "e6_registered_result_unchanged": "2/3",
+  "evidence": {
+    "e6_easy_run_sha256": "sha256:3255ed4150707b5e7a00c95e4a191310bbf3a724eba8a3a5583cacc8742ec2a9",
+    "easy_manifest_sha256": "sha256:07872054d5b43acda65f07c421cad045a170160b33e0da8a5d2277ba82faba71",
+    "easy_run_sha256": "sha256:6bfd403c375a71eaf71fd8914ec899e2b9e593e1f763c23d314fb91b6b7ffe1f",
+    "hard_manifest_sha256": "sha256:ee1ef7a0cfb7f4187f75edb7468f4059afc3f92c73f7f902d639938e03fbb235",
+    "hard_run_sha256": "sha256:18b526d56b61a01aa83f46ebbfbfdcff6a208609e02a77539bd7adb808bd01dc"
+  },
+  "exposure_comparison": {
+    "held_fixed": [
+      "motion_pair",
+      "operator",
+      "route_progress",
+      "archetype",
+      "DCS target",
+      "engineering-margin rule"
+    ],
+    "long_face_adapted_easy_drift_rate_mps": 0.15097431921516719,
+    "long_face_adapted_easy_outcome": "rejected",
+    "long_face_m": 0.3,
+    "short_face_adapted_easy_drift_rate_mps": 0.12819641286966837,
+    "short_face_adapted_easy_outcome": "accepted",
+    "short_face_m": 0.1
+  },
+  "extractable_source_count_after_e6c": 4,
+  "schema_version": "lfh_e6c_exposure_ablation_v1",
+  "source": {
+    "contacts": {
+      "adapted_easy": {
+        "attributed_body": null,
+        "attributed_prim_path": null,
+        "attribution": "none",
+        "binding_clearance_mm": 115.16765478602434,
+        "drift_onset_frame": 116,
+        "external_bodies": [],
+        "first_frame": null,
+        "peak_external_force_n": 0.0,
+        "peak_lateral_force_n": 0.0,
+        "peak_overhead_force_n": 0.0,
+        "runner_up_separation_mm": null
+      },
+      "adapted_hard": {
+        "attributed_body": null,
+        "attributed_prim_path": null,
+        "attribution": "none",
+        "binding_clearance_mm": 31.016405524910752,
+        "drift_onset_frame": 116,
+        "external_bodies": [],
+        "first_frame": null,
+        "peak_external_force_n": 0.0,
+        "peak_lateral_force_n": 0.0,
+        "peak_overhead_force_n": 0.0,
+        "runner_up_separation_mm": null
+      },
+      "nominal_easy": {
+        "attributed_body": null,
+        "attributed_prim_path": null,
+        "attribution": "none",
+        "binding_clearance_mm": 52.823243411455266,
+        "drift_onset_frame": null,
+        "external_bodies": [],
+        "first_frame": null,
+        "peak_external_force_n": 0.0,
+        "peak_lateral_force_n": 0.0,
+        "peak_overhead_force_n": 0.0,
+        "runner_up_separation_mm": null
+      },
+      "nominal_hard": {
+        "attributed_body": "torso_link",
+        "attributed_prim_path": "/World/ConstraintFrame/BindingShelfPlank",
+        "attribution": "binding_constraint",
+        "binding_clearance_mm": 0.18598444075883236,
+        "drift_onset_frame": 133,
+        "external_bodies": [
+          "torso_link"
+        ],
+        "first_frame": 124,
+        "peak_external_force_n": 58.737453008822406,
+        "peak_lateral_force_n": 36.085762023926954,
+        "peak_overhead_force_n": 46.34550857543945,
+        "runner_up_separation_mm": 3902.05480398876
+      }
+    },
+    "outcomes": {
+      "adapted_easy": "accepted",
+      "adapted_hard": "accepted",
+      "nominal_easy": "accepted",
+      "nominal_hard": "rejected"
+    },
+    "refusal_reasons": [],
+    "source_pair_id": "lfh_086_crouch",
+    "verified": true
+  }
+}
