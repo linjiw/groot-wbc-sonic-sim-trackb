@@ -133,6 +133,12 @@ def best_evaluable_payload(payload: dict, *, min_frames: int = 40) -> tuple[dict
 
     Returns the input unchanged when the capture holds a single pass, so callers can use
     this unconditionally without paying a copy for the common case.
+
+    "Best" means **first**, not highest-scoring: when a capture spans a reset this returns the
+    first segment, because the first pass is the one the reference commanded and the only one a
+    stored spec's frame indices refer to. A later segment is a different pass of the same clip and
+    would silently answer a question the caller did not ask. The name is kept for compatibility;
+    the semantics are first-pass selection.
     """
     if not spans_a_reset(payload):
         return payload, False
