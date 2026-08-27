@@ -168,3 +168,60 @@ def test_the_kl_term_carries_the_log_sigma_that_opposes_collapse():
     large = _kl(mean, torch.full((1, 3, 6), -2.0))
     assert float(small) > float(large), "shrinking sigma must cost more, not less"
     assert float(small) > 5.0
+
+
+def test_the_seed_places_a_face_that_selects_the_shallowest_edit():
+    """The computed seed should already work, before any training, for a minimum edit."""
+    from gear_sonic.dataset_generation.hallucination.lflh import (
+        ObstacleGeometry,
+        closed_form_seed,
+    )
+
+    geometry = ObstacleGeometry(stations=STATIONS)
+    extents = _extents()
+    for observed in (1, 2, 3):
+        latent = closed_form_seed(extents, COSTS, observed, geometry, obstacles=4)
+        boxes = geometry.decode(torch.tensor(latent, dtype=torch.float32))
+        weights = ChoiceDecoder()(
+            torch.tensor(extents, dtype=torch.float32),
+            boxes,
+            torch.tensor(COSTS, dtype=torch.float32),
+        )
+        assert (
+            int(weights.argmax()) == observed
+        ), f"seed for {LABELS[observed]} selected {LABELS[int(weights.argmax())]}"
+
+
+def test_the_seeds_non_binding_obstacles_are_harmless():
+    """A 'neutral' latent decodes to a 1.7 m box on the route centreline and blocks everything."""
+    from gear_sonic.dataset_generation.hallucination.lflh import (
+        ObstacleGeometry,
+        closed_form_seed,
+    )
+
+    geometry = ObstacleGeometry(stations=STATIONS)
+    latent = closed_form_seed(_extents(), COSTS, 1, geometry, obstacles=5)
+    boxes = geometry.decode(torch.tensor(latent, dtype=torch.float32))
+    # Every obstacle after the binding one must sit clear of the body, not span the centreline.
+    for index in range(1, 5):
+        lateral = float(boxes["lateral_m"][index])
+        half = float(boxes["half_lateral_m"][index])
+        assert abs(lateral) - half > 0.40, "extra obstacles must not reach the body"
+
+
+def test_annealing_ends_at_the_configured_sharpness():
+    """The decision must be faithful at the end even if it was soft during the search."""
+    decoder = ChoiceDecoder(temperature_m=0.02)
+    extents = _extents()
+    train(
+        [extents],
+        [COSTS],
+        [1],
+        obstacles=2,
+        steps=12,
+        samples=1,
+        seed=0,
+        decoder=decoder,
+        anneal_from_m=0.20,
+    )
+    assert decoder.temperature_m == pytest.approx(0.02)

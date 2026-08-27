@@ -95,6 +95,25 @@ class MultiObstacleHallucinator(nn.Module):
             nn.Linear(hidden, 2 * obstacles * OBSTACLE_PARAMS),
         )
 
+    def seed(self, latent: np.ndarray, log_sigma: float = -1.0) -> None:
+        """Start the output head at a known-good placement instead of at random.
+
+        The final layer's weights are zeroed and its bias set to ``latent``, so the model's initial
+        output *is* the seed for every input and the encoder begins by learning deviations from it.
+        Without this the optimiser has to find a band tens of millimetres wide inside a range of
+        hundreds, from a random start, across a loss that is flat outside the band.
+        """
+        final = self.head[-1]
+        with torch.no_grad():
+            final.weight.zero_()
+            bias = torch.cat(
+                (
+                    torch.tensor(latent, dtype=torch.float32).reshape(-1),
+                    torch.full((self.obstacles * OBSTACLE_PARAMS,), float(log_sigma)),
+                )
+            )
+            final.bias.copy_(bias)
+
     def forward(self, profiles: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         features = self.encoder(profiles)
         pooled = torch.cat((features.mean(dim=-1), features.amax(dim=-1)), dim=-1)
@@ -137,6 +156,98 @@ class ObstacleGeometry:
             "half_lateral_m": extents[..., 1],
             "half_vertical_m": extents[..., 2],
         }
+
+
+def closed_form_seed(
+    extents: np.ndarray,
+    costs: np.ndarray,
+    observed_index: int,
+    geometry: "ObstacleGeometry",
+    *,
+    obstacles: int,
+    clearance_m: float = 0.015,
+) -> np.ndarray:
+    """Where an obstacle *should* go, computed rather than searched.
+
+    For the observed candidate, find the (direction, station) at which it has the largest margin
+    over the cheapest competitor that would otherwise be chosen, and place a face in the middle of
+    that margin. This is the same quantity the overhead window solver computes, generalised to
+    left and right, and it exists precisely because the inverse problem is solvable pointwise even
+    where it is hard to search.
+
+    Returns latents, not metres, so the result can seed the network's output head directly.
+
+    Seeding is legitimate only if it is reported: the model then *refines* a known-good placement
+    rather than discovering it, and any claim about what the model learned must be made against a
+    control that keeps the seed and drops the learning.
+    """
+    candidates, directions, stations = extents.shape
+    # Competitors are every candidate at most as expensive as the observed one: those are the
+    # motions the scene has to rule out, since a cheaper feasible option would win instead.
+    competitors = [
+        index
+        for index in range(candidates)
+        if index != observed_index and costs[index] <= costs[observed_index] + 1e-9
+    ]
+    if not competitors:
+        competitors = [index for index in range(candidates) if index != observed_index]
+
+    observed = extents[observed_index]
+    rival = extents[competitors].min(axis=0)
+    # Margin: how much *less* far the observed motion reaches than every cheaper rival.
+    margin = rival - observed
+
+    best = np.unravel_index(int(np.argmax(margin)), margin.shape)
+    direction, station = int(best[0]), int(best[1])
+    width = float(margin[direction, station])
+    if width <= 2 * clearance_m:
+        direction, station, width = 0, stations // 2, max(width, 4 * clearance_m)
+
+    # Place the face just above the observed motion rather than at the middle of the band. The
+    # midpoint splits the margin evenly, which leaves a cheaper rival penetrating by only half the
+    # band -- often too little for the decision to overcome its cost advantage. Hugging the
+    # observed motion makes every rival penetrate by nearly the whole band, which is the placement
+    # that maximises the decision margin. It is also the minimum-regret placement, since regret is
+    # exactly the observed motion's clearance under the face.
+    face = float(observed[direction, station]) + max(clearance_m, 0.15 * width)
+
+    def _logit(value: float, low: float = 1e-4) -> float:
+        value = float(np.clip(value, low, 1.0 - low))
+        return float(np.log(value / (1.0 - value)))
+
+    def _atanh(value: float) -> float:
+        return float(np.arctanh(np.clip(value, -0.999, 0.999)))
+
+    latent = np.zeros((obstacles, OBSTACLE_PARAMS), dtype=np.float64)
+    latent[:, 0] = _logit(station / max(stations - 1, 1))
+    half_extent = np.clip(0.30, geometry.min_half_extent_m, geometry.max_half_extent_m)
+    span = geometry.max_half_extent_m - geometry.min_half_extent_m
+    latent[:, 3] = _logit((0.12 - geometry.min_half_extent_m) / span)
+    latent[:, 5] = _logit((0.08 - geometry.min_half_extent_m) / span)
+
+    if direction == 0:  # overhead: a face the observed motion passes under
+        latent[:, 1] = 0.0
+        latent[:, 2] = _atanh((face + 0.08 - geometry.height_centre_m) / geometry.height_scale_m)
+        latent[:, 4] = _logit((half_extent * 2.5 - geometry.min_half_extent_m) / span)
+    else:  # lateral: a face the observed motion passes beside, on the side it narrowed
+        sign = 1.0 if direction == 1 else -1.0
+        half_lateral = 0.10
+        latent[:, 1] = _atanh(sign * (face + half_lateral) / geometry.lateral_scale_m)
+        latent[:, 2] = _atanh((0.95 - geometry.height_centre_m) / geometry.height_scale_m)
+        latent[:, 4] = _logit((half_lateral - geometry.min_half_extent_m) / span)
+        latent[:, 5] = _logit((0.45 - geometry.min_half_extent_m) / span)
+    # Only the first obstacle is seeded onto the binding face. The rest must start *harmless*, and
+    # "neutral" latents are not: zeros decode to 1.7 m boxes centred on the route, which block
+    # every candidate and make the deepest edit win regardless of the target. They are instead
+    # placed at the lateral limit with minimum extent, where they cover neither the centreline nor
+    # the body, and the model is free to bring them in.
+    if obstacles > 1:
+        extras = obstacles - 1
+        latent[1:, 0] = np.linspace(-1.5, 1.5, extras)
+        latent[1:, 1] = np.where(np.arange(extras) % 2 == 0, 3.0, -3.0)
+        latent[1:, 2] = 0.0
+        latent[1:, 3:6] = _logit(1e-3)
+    return latent
 
 
 @dataclass
@@ -257,8 +368,19 @@ def train(
     seed: int = 0,
     geometry: ObstacleGeometry | None = None,
     decoder: ChoiceDecoder | None = None,
+    anneal_from_m: float | None = 0.15,
+    seed_latents: list[np.ndarray] | None = None,
 ) -> tuple[MultiObstacleHallucinator, TrainingReport]:
-    """LfLH's objective: reconstruct the observed choice, with size KL, clearance and repulsion."""
+    """LfLH's objective: reconstruct the observed choice, with size KL, clearance and repulsion.
+
+    ``anneal_from_m`` starts the decoder soft and sharpens it to its configured temperature over
+    training. A sharp decoder is the faithful one, but its gradient is flat wherever a candidate is
+    comfortably blocked or comfortably clear, which is everywhere outside a band a few centimetres
+    wide. Annealing gives the optimiser a signal to follow in before the decision is made crisp.
+    LfLH anneals its own loss weights over 1000 epochs for the same reason.
+
+    ``seed_latents`` starts the output head at a computed placement; see `closed_form_seed`.
+    """
     torch.manual_seed(seed)
     stations = batch_extents[0].shape[-1]
     geometry = geometry or ObstacleGeometry(stations=stations)
@@ -269,10 +391,19 @@ def train(
     profiles = torch.stack([extents[row][observed[row]] for row in range(len(extents))], dim=0)
 
     model = MultiObstacleHallucinator(stations, obstacles=obstacles)
+    if seed_latents:
+        model.seed(np.mean(np.stack(seed_latents), axis=0))
     optimiser = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    sharp_temperature = decoder.temperature_m
     history: list[dict] = []
     loss_value = reconstruction_value = float("nan")
     for step in range(steps):
+        if anneal_from_m is not None and steps > 1:
+            # Geometric schedule from soft to the configured sharpness.
+            progress = step / (steps - 1)
+            decoder.temperature_m = float(
+                anneal_from_m * (sharp_temperature / anneal_from_m) ** progress
+            )
         mean, log_sigma = model(profiles)
         sigma = log_sigma.exp()
         reconstruction = torch.zeros((), dtype=torch.float32)
@@ -317,6 +448,7 @@ def train(
                 }
             )
 
+    decoder.temperature_m = sharp_temperature
     with torch.no_grad():
         mean, log_sigma = model(profiles)
     return model, TrainingReport(
