@@ -1,0 +1,326 @@
+{
+  "arms": {
+    "learned": {
+      "height_sd_m": 0.4307854697108269,
+      "lateral_sd_m": 0.46471606691678363,
+      "reconstruction_rate": 0.026692708333333332,
+      "side_entropy": 0.6655684628752164,
+      "station_sd": 6.516509672005971
+    },
+    "learned_input_ablated": {
+      "height_sd_m": 0.4308639243245125,
+      "lateral_sd_m": 0.46607598289847374,
+      "reconstruction_rate": 0.22330729166666666,
+      "side_entropy": 0.671037086885478,
+      "station_sd": 6.519095480442047
+    },
+    "learned_without_kl": {
+      "height_sd_m": 0.36000001430511475,
+      "lateral_sd_m": 0.5878775715827942,
+      "mean_sigma": 3.340686798095703,
+      "reconstruction_rate": 0.0,
+      "side_entropy": 0.6730116877325224,
+      "station_sd": 7.348462422688802
+    },
+    "random_from_prior": {
+      "height_sd_m": 0.2879745314518611,
+      "lateral_sd_m": 0.4601220674812794,
+      "reconstruction_rate": 0.11588541666666667,
+      "side_entropy": 0.7607489219767772,
+      "station_sd": 3.237370769182841
+    }
+  },
+  "clips": 24,
+  "contract": "reconstruction is measured against a decoder that re-decides which candidate motion the scene prefers; it is not a physics verdict",
+  "kl_weight": 0.001,
+  "observed_labels": [
+    "crouch_040",
+    "crouch_055",
+    "crouch_070",
+    "tuck_left_040",
+    "tuck_left_070",
+    "tuck_right_040",
+    "tuck_right_070"
+  ],
+  "obstacles": 5,
+  "per_clip": [
+    {
+      "body_mode": "walk",
+      "motion_index": 0,
+      "observed_label": "crouch_040",
+      "reconstruction_rate": 0.0
+    },
+    {
+      "body_mode": "walk",
+      "motion_index": 1,
+      "observed_label": "crouch_055",
+      "reconstruction_rate": 0.0
+    },
+    {
+      "body_mode": "walk",
+      "motion_index": 2,
+      "observed_label": "crouch_070",
+      "reconstruction_rate": 0.0625
+    },
+    {
+      "body_mode": "walk",
+      "motion_index": 3,
+      "observed_label": "tuck_left_040",
+      "reconstruction_rate": 0.015625
+    },
+    {
+      "body_mode": "walk",
+      "motion_index": 4,
+      "observed_label": "tuck_left_070",
+      "reconstruction_rate": 0.0
+    },
+    {
+      "body_mode": "walk",
+      "motion_index": 5,
+      "observed_label": "tuck_right_040",
+      "reconstruction_rate": 0.0
+    },
+    {
+      "body_mode": "walk",
+      "motion_index": 6,
+      "observed_label": "tuck_right_070",
+      "reconstruction_rate": 0.0
+    },
+    {
+      "body_mode": "walk",
+      "motion_index": 7,
+      "observed_label": "crouch_040",
+      "reconstruction_rate": 0.0
+    },
+    {
+      "body_mode": "walk",
+      "motion_index": 8,
+      "observed_label": "crouch_055",
+      "reconstruction_rate": 0.015625
+    },
+    {
+      "body_mode": "walk",
+      "motion_index": 9,
+      "observed_label": "crouch_070",
+      "reconstruction_rate": 0.015625
+    },
+    {
+      "body_mode": "walk",
+      "motion_index": 10,
+      "observed_label": "tuck_left_040",
+      "reconstruction_rate": 0.0
+    },
+    {
+      "body_mode": "walk",
+      "motion_index": 11,
+      "observed_label": "tuck_left_070",
+      "reconstruction_rate": 0.0
+    },
+    {
+      "body_mode": "walk",
+      "motion_index": 12,
+      "observed_label": "tuck_right_040",
+      "reconstruction_rate": 0.0
+    },
+    {
+      "body_mode": "walk",
+      "motion_index": 13,
+      "observed_label": "tuck_right_070",
+      "reconstruction_rate": 0.0
+    },
+    {
+      "body_mode": "walk",
+      "motion_index": 14,
+      "observed_label": "crouch_040",
+      "reconstruction_rate": 0.0
+    },
+    {
+      "body_mode": "walk_look",
+      "motion_index": 30,
+      "observed_label": "crouch_055",
+      "reconstruction_rate": 0.0
+    },
+    {
+      "body_mode": "walk_look",
+      "motion_index": 31,
+      "observed_label": "crouch_070",
+      "reconstruction_rate": 0.0625
+    },
+    {
+      "body_mode": "walk_look",
+      "motion_index": 32,
+      "observed_label": "tuck_left_040",
+      "reconstruction_rate": 0.078125
+    },
+    {
+      "body_mode": "walk_look",
+      "motion_index": 33,
+      "observed_label": "tuck_left_070",
+      "reconstruction_rate": 0.0
+    },
+    {
+      "body_mode": "walk_look",
+      "motion_index": 34,
+      "observed_label": "tuck_right_040",
+      "reconstruction_rate": 0.0
+    },
+    {
+      "body_mode": "walk_look",
+      "motion_index": 35,
+      "observed_label": "tuck_left_040",
+      "reconstruction_rate": 0.0
+    },
+    {
+      "body_mode": "walk_look",
+      "motion_index": 36,
+      "observed_label": "crouch_040",
+      "reconstruction_rate": 0.328125
+    },
+    {
+      "body_mode": "walk_look",
+      "motion_index": 37,
+      "observed_label": "crouch_055",
+      "reconstruction_rate": 0.0
+    },
+    {
+      "body_mode": "walk_look",
+      "motion_index": 38,
+      "observed_label": "crouch_070",
+      "reconstruction_rate": 0.0625
+    }
+  ],
+  "schema_version": "lflh_training_v2",
+  "steps": 2500,
+  "training": {
+    "history": [
+      {
+        "loss": 10.0162353515625,
+        "mean_sigma": 1.001052975654602,
+        "reconstruction": 9.727999687194824,
+        "step": 0
+      },
+      {
+        "loss": 5.0935516357421875,
+        "mean_sigma": 3.3497910499572754,
+        "reconstruction": 5.048537731170654,
+        "step": 125
+      },
+      {
+        "loss": 4.6172332763671875,
+        "mean_sigma": 2.875248432159424,
+        "reconstruction": 4.541201591491699,
+        "step": 250
+      },
+      {
+        "loss": 3.7683820724487305,
+        "mean_sigma": 2.6638104915618896,
+        "reconstruction": 3.6773431301116943,
+        "step": 375
+      },
+      {
+        "loss": 3.613149642944336,
+        "mean_sigma": 2.3966550827026367,
+        "reconstruction": 3.512444019317627,
+        "step": 500
+      },
+      {
+        "loss": 3.4830758571624756,
+        "mean_sigma": 2.3234853744506836,
+        "reconstruction": 3.3860795497894287,
+        "step": 625
+      },
+      {
+        "loss": 3.307095766067505,
+        "mean_sigma": 2.304598569869995,
+        "reconstruction": 3.2141916751861572,
+        "step": 750
+      },
+      {
+        "loss": 3.071776866912842,
+        "mean_sigma": 2.2890310287475586,
+        "reconstruction": 2.9803247451782227,
+        "step": 875
+      },
+      {
+        "loss": 2.986602783203125,
+        "mean_sigma": 2.1950106620788574,
+        "reconstruction": 2.902261972427368,
+        "step": 1000
+      },
+      {
+        "loss": 4.789758205413818,
+        "mean_sigma": 2.085750102996826,
+        "reconstruction": 4.49961519241333,
+        "step": 1125
+      },
+      {
+        "loss": 4.75238561630249,
+        "mean_sigma": 3.238511085510254,
+        "reconstruction": 4.644685745239258,
+        "step": 1250
+      },
+      {
+        "loss": 5.223367691040039,
+        "mean_sigma": 5.237189292907715,
+        "reconstruction": 5.02501106262207,
+        "step": 1375
+      },
+      {
+        "loss": 5.227778911590576,
+        "mean_sigma": 4.382209777832031,
+        "reconstruction": 5.1089067459106445,
+        "step": 1500
+      },
+      {
+        "loss": 4.657805442810059,
+        "mean_sigma": 4.336548328399658,
+        "reconstruction": 4.568854808807373,
+        "step": 1625
+      },
+      {
+        "loss": 4.906506538391113,
+        "mean_sigma": 3.2801849842071533,
+        "reconstruction": 4.818662643432617,
+        "step": 1750
+      },
+      {
+        "loss": 4.730304718017578,
+        "mean_sigma": 3.7399964332580566,
+        "reconstruction": 4.633717060089111,
+        "step": 1875
+      },
+      {
+        "loss": 4.703253746032715,
+        "mean_sigma": 3.8738811016082764,
+        "reconstruction": 4.609992980957031,
+        "step": 2000
+      },
+      {
+        "loss": 4.704723834991455,
+        "mean_sigma": 3.146000862121582,
+        "reconstruction": 4.568819999694824,
+        "step": 2125
+      },
+      {
+        "loss": 4.553244590759277,
+        "mean_sigma": 3.6213934421539307,
+        "reconstruction": 4.470517635345459,
+        "step": 2250
+      },
+      {
+        "loss": 4.90836238861084,
+        "mean_sigma": 3.803273916244507,
+        "reconstruction": 4.693586349487305,
+        "step": 2375
+      },
+      {
+        "loss": 4.8317437171936035,
+        "mean_sigma": 3.821542263031006,
+        "reconstruction": 4.742986679077148,
+        "step": 2499
+      }
+    ],
+    "mean_sigma": 3.82120418548584,
+    "reconstruction": 4.742986679077148
+  }
+}
