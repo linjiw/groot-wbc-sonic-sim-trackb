@@ -129,3 +129,89 @@ env -u PYTHONPATH ~/miniconda3/envs/env_isaaclab/bin/python \
 env -u PYTHONPATH ~/miniconda3/envs/env_isaaclab/bin/python \
   scripts/research/hallucination/train_lflh.py --steps 700 --draws 48
 ```
+
+
+---
+
+# Addendum, 2026-08-27: seeding and annealing, and what the band width predicts
+
+The previous section diagnosed the per-clip failures as optimisation rather than representation and
+proposed two fixes. Both were implemented and ablated. **One works, one does not, and which is
+which is predictable in advance.**
+
+## The ablation
+
+Six clips, 400 steps, one observed edit each, evaluated at the sharp decoder. "Minimum edits" are
+the shallowest of each kind (`crouch_040`, `tuck_left_040`, `tuck_right_040`); "deep edits" are the
+deepest (`crouch_070`, `tuck_left_070`).
+
+| | baseline | anneal only | seed only | seed + anneal |
+|---|---:|---:|---:|---:|
+| **minimum edits** | **0.505** | 0.047 | 0.307 | 0.198 |
+| **deep edits** | 0.831 | **1.000** | 0.503 | 0.508 |
+
+## What separates the two rows is the band, and it is computable beforehand
+
+The width of the band an edit opens against its *cheapest rival* — the same quantity the closed-form
+solver calls `|W|`, generalised to left and right:
+
+| target | band vs cheapest rival | rivals |
+|---|---:|---:|
+| `crouch_040` | **81.1 mm** | 1 |
+| `tuck_left_040` | 47.9 mm | 3 |
+| `tuck_left_070` | 40.5 mm | 7 |
+| `crouch_055` | 23.3 mm | 4 |
+| `crouch_070` | **22.4 mm** | 5 |
+
+A minimum edit only has to beat the nominal, so its band is wide. A deep edit has to beat every
+shallower edit of the same kind as well, so its band is narrow — which is the lexicographic
+minimum-edit rule expressed as geometry, and exactly what `regret = xi * |W|` says.
+
+**Annealing helps narrow bands and destroys wide ones.** Deep edits go 0.831 → **1.000**; minimum
+edits collapse 0.505 → **0.047**. The mechanism is consistent: the soft phase supplies gradient
+where the sharp loss is flat, which is what a narrow band needs. Where the band is already wide the
+search was never the problem, and the soft phase instead lets the model settle on placements that
+fail once the decision is made faithful again.
+
+**This is a usable rule, not a curiosity.** The band width is known *before* training, from the
+envelopes alone. So the closed-form analysis does not merely compete with the learned machinery —
+it configures it: anneal when the band is narrow, do not when it is wide.
+
+## Seeding fails, and the likely reason is the one that sank the retracted version
+
+Closed-form seeding hurt both regimes (0.505 → 0.307, 0.831 → 0.503) despite the seed being good on
+its own — seed-only accuracy with no training at all is 8/8 on `crouch_040` and 7/8 on
+`tuck_left_040`.
+
+The probable mechanism is in how the seed is installed: the output layer's weights are zeroed so
+that the initial output *is* the seed. That also zeroes the gradient path to the encoder, so the
+model begins as a constant function of its input and has no pressure to stop being one. That is the
+same failure the retracted experiment shipped, arrived at from the opposite direction. It is a
+hypothesis, not a measurement — the test would be to seed only the bias while leaving the weights
+at their usual initialisation, and to report the input-ablation control alongside.
+
+## Where this leaves LfLH for the paper
+
+**Working, verified:** a multi-obstacle hallucinator with a decoder that genuinely re-decides can
+place obstacles that make a specific named edit preferred, choosing the correct side for a left
+versus right arm tuck. Per clip, with annealing on narrow bands, deep edits reach a **1.000**
+selection rate.
+
+**Not working:** amortising across clips. The learned arm still loses to random and to its own
+input-ablation, and seeding — the intervention meant to help — makes the input-dependence worse.
+
+**The honest headline** is not "LfLH works" or "LfLH fails". It is that **the inverse problem is
+well-posed exactly where the band is wide, and the band is computable in closed form.** A learned
+hallucinator is worth its cost in the narrow-band regime, where search is genuinely hard; in the
+wide-band regime the closed form already answers the question and the learner adds variance. That
+is a sharper claim than either paper it comes from makes, and it is supported by an ablation with
+the controls stated.
+
+## Next
+
+1. **Seed the bias only**, leaving the encoder's gradient path intact, and re-run with the
+   input-ablation control. This is the direct test of the hypothesis above.
+2. **Gate annealing on the computed band width** rather than applying it uniformly, and re-run the
+   24-clip amortisation with that rule.
+3. **Only then** report a distribution, with reconstruction rate and diversity, against
+   random-from-prior and input-ablated, at more than one training budget.
