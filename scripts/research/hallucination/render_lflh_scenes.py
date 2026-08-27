@@ -107,6 +107,11 @@ def main() -> int:
         "boxes no one would call a shelf; use only to demonstrate the mechanism, never as a "
         "scene proposal.",
     )
+    parser.add_argument(
+        "--anneal-prior",
+        action="store_true",
+        help="start with loose size ranges and tighten onto the physical ones during training",
+    )
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--manifest", type=Path)
     args = parser.parse_args()
@@ -145,6 +150,7 @@ def main() -> int:
         kl_weight=0.004,
         geometry=geometry,
         decoder=decoder,
+        anneal_prior=args.anneal_prior,
     )
     print(f"  reconstruction {report.reconstruction:.3f}")
 

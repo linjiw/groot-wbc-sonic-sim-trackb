@@ -308,3 +308,68 @@ amortisation; mixed-operator training.
 finds the band, tighten to physical ranges as it converges; this is the direct fix for §4.
 (2) Diagnose `tuck_right` against `tuck_left`, since they are mirror images and the asymmetry
 points at a sign convention in the lateral gate. (3) Only then attempt mixed-operator training.
+
+
+---
+
+# Addendum 3, 2026-08-27: annealing the size prior resolves the trade-off
+
+Addendum 2 ended on a trade-off: loose size ranges gave a 1.00 match rate and implausible 1.6 m
+cubes, while physical ranges gave plank-like boxes and no convergence. Both halves are now
+obtainable at once.
+
+## What did not work: annealing the ranges
+
+The obvious reading of "anneal the prior" is to start with wide extent ranges and narrow them.
+That fails, and the reason is worth recording: the latent-to-metres map is a sigmoid **onto the
+range**, so moving the range remaps every learned latent mid-training and the solution is lost.
+Measured, the binding face collapsed to 0.06 x 0.08 x 0.04 m and reconstruction rose 3.233 → 3.654.
+
+## What works: annealing a size *penalty*
+
+Keep the parameterisation stationary on a permissive superset, and add a penalty that pulls the
+extents toward a plausible shape — thin along route and vertically, wide across it — ramped in
+after the first third of training, once the mechanism already has a working solution to deform.
+
+| configuration | reconstruction | **match rate** | **plausible shape** | binding face |
+|---|---:|---:|---:|---|
+| permissive space, no shape penalty, 900 steps | 3.730 | 0.021 | 0.36 | 0.21 x 0.50 x 0.93 m |
+| **annealed size penalty, 900 steps** | 0.800 | **0.667** | **0.60** | 0.07 x 2.39 x 0.27 m |
+| **annealed size penalty, 1800 steps** | **0.312** | **0.990** | **1.00** | **0.16 x 2.38 x 0.23 m** |
+
+**Both objectives are satisfied together: a 0.990 selection rate with 100% of sampled binding faces
+inside the plausible-shape ranges**, and the face is a plank — 0.16 m along route, 2.38 m across,
+0.23 m thick. The penalty is not merely compatible with the mechanism, it *helps* it: at equal
+steps the annealed run beats the unpenalised one on match rate by 30x, because shaping the search
+is easier than searching a permissive space unaided.
+
+This is the guidance's "priors should prevent absurd scenes, not define the answer", made
+operational: as a soft term that arrives late, not as a boundary imposed from the start.
+
+## Rendered scenes
+
+`docs/source/_static/lflh_scenes/` — 24 videos, 12 clips x 2 draws, every obstacle sampled from
+the trained hallucinator, placed into the world through each station's executed heading. Match rate
+**1.00**: in every scene the differentiable decoder selects `crouch_040`, the motion the scene was
+generated to explain. `docs/source/_static/lflh_scenes_relaxed/` keeps the unpenalised version for
+comparison.
+
+## Known remaining issue
+
+Every sampled obstacle sits at height 1.75 m, which is exactly the ceiling of the height
+parameterisation (`1.30 + tanh(z) * 0.45`). The height latent is saturating, so the model is
+pressed against a boundary rather than choosing freely inside it. That should be widened, or the
+height re-parameterised relative to the body's own reach at that station, before any claim is made
+about *where* the model puts obstacles as opposed to *whether* they work.
+
+## Status
+
+| | |
+|---|---|
+| mechanism (decoder decides, sidedness) | verified by test |
+| per-clip capability, all three edit directions | verified by test |
+| operator-conditioned amortisation, 12 clips | crouch **0.986** vs 0.877 ablated; tuck_left 0.700 vs 0.653 |
+| generated scenes, match + plausibility | **0.990 / 1.00** |
+| mixed-operator amortisation | fails |
+| `tuck_right` amortisation | fails (works per clip) |
+| height parameterisation | saturating at its ceiling |

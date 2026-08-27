@@ -143,6 +143,20 @@ class MultiObstacleHallucinator(nn.Module):
 
 
 @dataclass(frozen=True)
+class PlausibleShape:
+    """What a binding face should look like: thin along route and vertically, wide across it.
+
+    These are the dimensions of the objects the corpus actually authors -- planks, lintels, beams,
+    ducts -- not a constraint the inverse problem needs. They are applied as an annealed penalty so
+    that plausibility is bought after the mechanism works, not imposed before it does.
+    """
+
+    half_along_range_m: tuple[float, float] = (0.03, 0.35)
+    half_lateral_range_m: tuple[float, float] = (0.15, 1.20)
+    half_vertical_range_m: tuple[float, float] = (0.02, 0.30)
+
+
+@dataclass(frozen=True)
 class ObstacleGeometry:
     """Latent -> metres. Kept separate so the parameterisation can be audited on its own.
 
@@ -161,9 +175,32 @@ class ObstacleGeometry:
     # route and vertically, and may be *wide* across it.
     min_half_extent_m: float = 0.02
     max_half_extent_m: float = 1.20
-    half_along_range_m: tuple[float, float] = (0.03, 0.35)
+    # Permissive superset: the search space in which the inverse problem is tractable. Plausible
+    # shape is imposed by `PlausibleShape` through an annealed penalty, not by narrowing this.
+    half_along_range_m: tuple[float, float] = (0.03, 0.80)
     half_lateral_range_m: tuple[float, float] = (0.04, 1.20)
-    half_vertical_range_m: tuple[float, float] = (0.02, 0.30)
+    half_vertical_range_m: tuple[float, float] = (0.02, 0.80)
+
+    def size_penalty(
+        self, boxes: dict[str, torch.Tensor], target: "PlausibleShape"
+    ) -> torch.Tensor:
+        """How far outside a plausible shape these boxes are, in squared metres.
+
+        Kept as a *penalty* rather than a narrowing of the parameterisation. Annealing the ranges
+        themselves was tried and fails: the latent-to-metres map is a sigmoid onto the range, so
+        moving the range remaps every learned latent mid-training and the solution is lost --
+        measured, the binding face collapsed to 0.06 x 0.08 x 0.04 m. A penalty leaves the map
+        stationary and lets the prior tighten around a solution the model already has.
+        """
+        cost = torch.zeros((), dtype=torch.float32)
+        for key, (low, high) in (
+            ("half_along_m", target.half_along_range_m),
+            ("half_lateral_m", target.half_lateral_range_m),
+            ("half_vertical_m", target.half_vertical_range_m),
+        ):
+            value = boxes[key]
+            cost = cost + (torch.relu(value - high) ** 2 + torch.relu(low - value) ** 2).mean()
+        return cost
 
     def decode(self, latent: torch.Tensor) -> dict[str, torch.Tensor]:
         station = torch.sigmoid(latent[..., 0]) * (self.stations - 1)
@@ -416,6 +453,9 @@ def train(
     geometry: ObstacleGeometry | None = None,
     decoder: ChoiceDecoder | None = None,
     anneal_from_m: float | None = 0.15,
+    anneal_prior: bool = False,
+    shape_weight: float = 6.0,
+    shape: "PlausibleShape | None" = None,
     seed_latents: list[np.ndarray] | None = None,
 ) -> tuple[MultiObstacleHallucinator, TrainingReport]:
     """LfLH's objective: reconstruct the observed choice, with size KL, clearance and repulsion.
@@ -459,6 +499,12 @@ def train(
             decoder.temperature_m = float(
                 anneal_from_m * (sharp_temperature / anneal_from_m) ** progress
             )
+        # Plausibility is bought after the mechanism works: zero for the first third, then
+        # ramped in, so the prior tightens around a solution rather than preventing one.
+        shape_ramp = 0.0
+        if anneal_prior and steps > 1:
+            share = step / (steps - 1)
+            shape_ramp = float(np.clip((share - 0.33) / 0.5, 0.0, 1.0))
         mean, log_sigma = model(profiles)
         sigma = log_sigma.exp()
         reconstruction = torch.zeros((), dtype=torch.float32)
@@ -466,10 +512,15 @@ def train(
         repulsion = torch.zeros((), dtype=torch.float32)
         easy_term = torch.zeros((), dtype=torch.float32)
         minimality = torch.zeros((), dtype=torch.float32)
+        shape_term = torch.zeros((), dtype=torch.float32)
         for _ in range(samples):
             latent = mean + sigma * torch.randn_like(mean)
             for row in range(len(extents)):
                 boxes = geometry.decode(latent[row])
+                if shape_ramp:
+                    shape_term = shape_term + shape_ramp * geometry.size_penalty(
+                        boxes, shape or PlausibleShape()
+                    )
                 weights = decoder(extents[row], boxes, costs[row])
                 reconstruction = reconstruction - torch.log(weights[observed[row]] + 1e-8)
                 # Easy scene: with the obstacles moved clear, the cheapest candidate -- the
@@ -497,6 +548,7 @@ def train(
             reconstruction
             + easy_weight * easy_term / scale
             + minimality_weight * minimality / scale
+            + shape_weight * shape_term / scale
             + kl_weight * _kl(mean, log_sigma)
             + clearance_weight * clearance / scale
             + repulsion_weight * repulsion / scale
