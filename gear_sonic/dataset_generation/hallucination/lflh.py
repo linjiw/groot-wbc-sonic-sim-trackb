@@ -81,6 +81,12 @@ class MultiObstacleHallucinator(nn.Module):
         # Deliberately permissive: a floor near zero must never be what a reported variance means.
         # The retracted result's headline was exactly its clamp.
         self.min_log_sigma = min_log_sigma
+        # One shared encoder applied to the nominal and to the adapted motion, then fused on
+        # their difference. Conditioning on the *pair* rather than on the observed motion alone
+        # is the difference between asking "what scene explains this body" -- which requires the
+        # model to first infer which edit it is looking at -- and "what scene explains this
+        # change", where the edit is handed over explicitly. Measured: the single-motion encoder
+        # was beaten by its own input-ablation, i.e. it never extracted the edit.
         self.encoder = nn.Sequential(
             nn.Conv1d(3, hidden, kernel_size=5, padding=2),
             nn.ReLU(),
@@ -89,11 +95,18 @@ class MultiObstacleHallucinator(nn.Module):
             nn.Conv1d(hidden, hidden, kernel_size=3, padding=1),
             nn.ReLU(),
         )
+        # [Z0, Z1, Z1-Z0, |Z1-Z0|] over both mean- and max-pooled features.
         self.head = nn.Sequential(
-            nn.Linear(2 * hidden, hidden),
+            nn.Linear(8 * hidden, hidden),
+            nn.ReLU(),
+            nn.Linear(hidden, hidden),
             nn.ReLU(),
             nn.Linear(hidden, 2 * obstacles * OBSTACLE_PARAMS),
         )
+
+    def _embed(self, profile: torch.Tensor) -> torch.Tensor:
+        features = self.encoder(profile)
+        return torch.cat((features.mean(dim=-1), features.amax(dim=-1)), dim=-1)
 
     def seed(self, latent: np.ndarray, log_sigma: float = -1.0) -> None:
         """Start the output head at a known-good placement instead of at random.
@@ -115,8 +128,12 @@ class MultiObstacleHallucinator(nn.Module):
             final.bias.copy_(bias)
 
     def forward(self, profiles: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        features = self.encoder(profiles)
-        pooled = torch.cat((features.mean(dim=-1), features.amax(dim=-1)), dim=-1)
+        """``profiles`` is (batch, 2, 3, stations): the nominal and the observed motion."""
+        if profiles.dim() != 4 or profiles.shape[1] != 2:
+            raise ValueError("pair-conditioned input must be (batch, 2, 3, stations)")
+        nominal = self._embed(profiles[:, 0])
+        adapted = self._embed(profiles[:, 1])
+        pooled = torch.cat((nominal, adapted, adapted - nominal, (adapted - nominal).abs()), dim=-1)
         raw = self.head(pooled)
         batch = raw.shape[0]
         raw = raw.view(batch, self.obstacles, 2 * OBSTACLE_PARAMS)
@@ -138,23 +155,34 @@ class ObstacleGeometry:
     height_centre_m: float = 1.30
     height_scale_m: float = 0.45
     lateral_scale_m: float = 0.60
-    min_half_extent_m: float = 0.04
-    max_half_extent_m: float = 0.80
+    # Per-axis extent ranges, because the three axes of a binding face are not interchangeable.
+    # A shared 0.04-0.80 m range let the model emit 1.6 m cubes that satisfied the decoder and
+    # looked nothing like anything a person would duck under: the face must be *thin* along the
+    # route and vertically, and may be *wide* across it.
+    min_half_extent_m: float = 0.02
+    max_half_extent_m: float = 1.20
+    half_along_range_m: tuple[float, float] = (0.03, 0.35)
+    half_lateral_range_m: tuple[float, float] = (0.04, 1.20)
+    half_vertical_range_m: tuple[float, float] = (0.02, 0.30)
 
     def decode(self, latent: torch.Tensor) -> dict[str, torch.Tensor]:
         station = torch.sigmoid(latent[..., 0]) * (self.stations - 1)
         lateral = torch.tanh(latent[..., 1]) * self.lateral_scale_m
         height = self.height_centre_m + torch.tanh(latent[..., 2]) * self.height_scale_m
-        extents = self.min_half_extent_m + (
-            self.max_half_extent_m - self.min_half_extent_m
-        ) * torch.sigmoid(latent[..., 3:6])
+        gates = torch.sigmoid(latent[..., 3:6])
+        ranges = (
+            self.half_along_range_m,
+            self.half_lateral_range_m,
+            self.half_vertical_range_m,
+        )
+        extents = [low + (high - low) * gates[..., axis] for axis, (low, high) in enumerate(ranges)]
         return {
             "station": station,
             "lateral_m": lateral,
             "height_m": height,
-            "half_along_m": extents[..., 0],
-            "half_lateral_m": extents[..., 1],
-            "half_vertical_m": extents[..., 2],
+            "half_along_m": extents[0],
+            "half_lateral_m": extents[1],
+            "half_vertical_m": extents[2],
         }
 
 
@@ -220,22 +248,25 @@ def closed_form_seed(
 
     latent = np.zeros((obstacles, OBSTACLE_PARAMS), dtype=np.float64)
     latent[:, 0] = _logit(station / max(stations - 1, 1))
-    half_extent = np.clip(0.30, geometry.min_half_extent_m, geometry.max_half_extent_m)
-    span = geometry.max_half_extent_m - geometry.min_half_extent_m
-    latent[:, 3] = _logit((0.12 - geometry.min_half_extent_m) / span)
-    latent[:, 5] = _logit((0.08 - geometry.min_half_extent_m) / span)
+
+    def _gate(value: float, bounds: tuple[float, float]) -> float:
+        low, high = bounds
+        return _logit((float(np.clip(value, low, high)) - low) / max(high - low, 1e-9))
+
+    latent[:, 3] = _gate(0.12, geometry.half_along_range_m)
+    latent[:, 5] = _gate(0.08, geometry.half_vertical_range_m)
 
     if direction == 0:  # overhead: a face the observed motion passes under
         latent[:, 1] = 0.0
         latent[:, 2] = _atanh((face + 0.08 - geometry.height_centre_m) / geometry.height_scale_m)
-        latent[:, 4] = _logit((half_extent * 2.5 - geometry.min_half_extent_m) / span)
+        latent[:, 4] = _gate(0.90, geometry.half_lateral_range_m)
     else:  # lateral: a face the observed motion passes beside, on the side it narrowed
         sign = 1.0 if direction == 1 else -1.0
         half_lateral = 0.10
         latent[:, 1] = _atanh(sign * (face + half_lateral) / geometry.lateral_scale_m)
         latent[:, 2] = _atanh((0.95 - geometry.height_centre_m) / geometry.height_scale_m)
-        latent[:, 4] = _logit((half_lateral - geometry.min_half_extent_m) / span)
-        latent[:, 5] = _logit((0.45 - geometry.min_half_extent_m) / span)
+        latent[:, 4] = _gate(half_lateral, geometry.half_lateral_range_m)
+        latent[:, 5] = _gate(0.30, geometry.half_vertical_range_m)
     # Only the first obstacle is seeded onto the binding face. The rest must start *harmless*, and
     # "neutral" latents are not: zeros decode to 1.7 m boxes centred on the route, which block
     # every candidate and make the deepest edit win regardless of the target. They are instead
@@ -246,8 +277,22 @@ def closed_form_seed(
         latent[1:, 0] = np.linspace(-1.5, 1.5, extras)
         latent[1:, 1] = np.where(np.arange(extras) % 2 == 0, 3.0, -3.0)
         latent[1:, 2] = 0.0
-        latent[1:, 3:6] = _logit(1e-3)
+        latent[1:, 3:6] = _logit(1e-3)  # minimum extent on every axis
     return latent
+
+
+def relax(boxes: dict[str, torch.Tensor], *, margin_m: float = 0.10) -> dict[str, torch.Tensor]:
+    """The easy scene: the same obstacles, moved clear of every candidate.
+
+    A counterfactual is a *pair* of scenes. Training only the hard one rewards putting something
+    large near the body; training the easy one alongside it requires the constraint to be
+    releasable, which is what makes the hard scene's obstacle the thing that mattered rather than
+    merely something that was present.
+    """
+    eased = dict(boxes)
+    eased["height_m"] = boxes["height_m"] + margin_m
+    eased["lateral_m"] = boxes["lateral_m"] + torch.sign(boxes["lateral_m"]) * margin_m
+    return eased
 
 
 @dataclass
@@ -362,6 +407,8 @@ def train(
     samples: int = 6,
     learning_rate: float = 2e-3,
     kl_weight: float = 0.02,
+    easy_weight: float = 0.3,
+    minimality_weight: float = 0.02,
     clearance_weight: float = 1.0,
     repulsion_weight: float = 0.2,
     clearance_m: float = 0.05,
@@ -388,7 +435,15 @@ def train(
     extents = [torch.tensor(item, dtype=torch.float32) for item in batch_extents]
     costs = [torch.tensor(item, dtype=torch.float32) for item in batch_costs]
     # The hallucinator sees only the observed motion, as LfLH sees only the executed plan.
-    profiles = torch.stack([extents[row][observed[row]] for row in range(len(extents))], dim=0)
+    # Pair conditioning: the nominal and the observed motion, so the edit is explicit rather
+    # than something the encoder has to infer from absolute extents.
+    profiles = torch.stack(
+        [
+            torch.stack((extents[row][0], extents[row][observed[row]]), dim=0)
+            for row in range(len(extents))
+        ],
+        dim=0,
+    )
 
     model = MultiObstacleHallucinator(stations, obstacles=obstacles)
     if seed_latents:
@@ -409,12 +464,23 @@ def train(
         reconstruction = torch.zeros((), dtype=torch.float32)
         clearance = torch.zeros((), dtype=torch.float32)
         repulsion = torch.zeros((), dtype=torch.float32)
+        easy_term = torch.zeros((), dtype=torch.float32)
+        minimality = torch.zeros((), dtype=torch.float32)
         for _ in range(samples):
             latent = mean + sigma * torch.randn_like(mean)
             for row in range(len(extents)):
                 boxes = geometry.decode(latent[row])
                 weights = decoder(extents[row], boxes, costs[row])
                 reconstruction = reconstruction - torch.log(weights[observed[row]] + 1e-8)
+                # Easy scene: with the obstacles moved clear, the cheapest candidate -- the
+                # nominal -- must be preferred again. This is the other half of the 2x2.
+                easy_weights = decoder(extents[row], relax(boxes), costs[row])
+                easy_term = easy_term - torch.log(easy_weights[0] + 1e-8)
+                # Minimality: the scene should sit just tight enough to force the edit, not
+                # bury the nominal. A face driven far past the nominal is a scene the observed
+                # motion did not need, which is regret expressed as a loss.
+                blocked = decoder.penetration(extents[row], boxes)
+                minimality = minimality + blocked[0].clamp(min=0.0).pow(2)
                 # The observed motion must remain executable: no obstacle may sit on it.
                 observed_extents = extents[row][observed[row] : observed[row] + 1]
                 intrusion = decoder.penetration(observed_extents, boxes)
@@ -429,6 +495,8 @@ def train(
         reconstruction = reconstruction / scale
         loss = (
             reconstruction
+            + easy_weight * easy_term / scale
+            + minimality_weight * minimality / scale
             + kl_weight * _kl(mean, log_sigma)
             + clearance_weight * clearance / scale
             + repulsion_weight * repulsion / scale
@@ -479,7 +547,7 @@ def sample_scenes(
     decoder = decoder or ChoiceDecoder()
     extent_tensor = torch.tensor(extents, dtype=torch.float32)
     cost_tensor = torch.tensor(costs, dtype=torch.float32)
-    profile = extent_tensor[observed_index][None, ...]
+    profile = torch.stack((extent_tensor[0], extent_tensor[observed_index]), dim=0)[None, ...]
     with torch.no_grad():
         mean, log_sigma = model(profile)
         sigma = log_sigma.exp()

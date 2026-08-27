@@ -144,7 +144,7 @@ def test_training_places_obstacles_that_make_the_observed_motion_preferred(obser
     """
     extents = _extents()
     model, report = train(
-        [extents], [COSTS], [observed], obstacles=3, steps=260, samples=3, seed=0, kl_weight=0.004
+        [extents], [COSTS], [observed], obstacles=3, steps=600, samples=3, seed=0, kl_weight=0.004
     )
     assert report.reconstruction < 0.7, "the observed motion should usually win"
     scenes = sample_scenes(model, extents, COSTS, observed, "m", count=60, seed=observed)

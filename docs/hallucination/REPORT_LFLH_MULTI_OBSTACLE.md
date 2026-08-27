@@ -215,3 +215,96 @@ the controls stated.
    24-clip amortisation with that rule.
 3. **Only then** report a distribution, with reconstruction rate and diversity, against
    random-from-prior and input-ablated, at more than one training budget.
+
+---
+
+# Addendum 2, 2026-08-27: pair conditioning, the dual objective, and operator conditioning
+
+Acting on external guidance recommending Formulation C (pair-conditioned counterfactual
+hallucination), a dual hard/easy objective, a minimality term, and **separate operator-conditioned
+models**. Three of the four changed the result; one did not.
+
+## 1. Pair conditioning alone does not fix amortisation
+
+The encoder previously saw only the observed motion, so it had to infer *which edit this was* from
+absolute extents. It now encodes the nominal and the observed motion with a shared encoder and
+fuses them as `[Z0, Z1, Z1-Z0, |Z1-Z0|]`, making the edit explicit.
+
+| arm | selects observed motion |
+|---|---:|
+| learned, pair-conditioned | 1.5% |
+| learned, input-ablated | 21.9% |
+| random from prior | 11.6% |
+
+Still beaten by its own ablation over 24 clips with rotating targets. **Handing the model the edit
+explicitly was not sufficient.**
+
+## 2. The dual objective needed retuning, and then works per clip
+
+Adding the easy-scene term (with obstacles relaxed, the *nominal* must be preferred again) and a
+minimality term initially broke per-clip training, because the weights were too aggressive:
+
+| easy weight | minimality | steps | crouch / tuck_left / tuck_right | mean |
+|---|---|---|---|---:|
+| 1.0 | 0.05 | 260 | 0.57 / 1.00 / 0.08 | 0.55 |
+| 1.0 | 0.05 | 600 | 0.00 / 0.00 / 1.00 | 0.33 |
+| **0.3** | **0.02** | **600** | **0.95 / 0.98 / 1.00** | **0.98** |
+
+At the tuned weights the full counterfactual objective — hard scene prefers the edit, easy scene
+prefers the nominal, minimality keeps the face tight — is satisfied on all three edit directions.
+
+## 3. Operator conditioning is what makes amortisation work
+
+Training one model per operator, 12 clips each, rather than one model that must also discover which
+*kind* of obstacle to emit:
+
+| operator | learned | input-ablated | reconstruction |
+|---|---:|---:|---:|
+| **crouch** | **0.986** | 0.877 | 0.290 |
+| **tuck_left** | **0.700** | 0.653 | 0.639 |
+| tuck_right | 0.014 | 0.007 | 3.587 |
+
+**For the first time the learned arm beats its own input-ablation** — on two of three operators.
+The mixed-operator model never did. `tuck_right` fails to amortise even though it succeeds per clip
+(1.00 in §2), so that is an optimisation failure specific to one operator rather than a
+representational limit.
+
+## 4. Generated scenes: the mechanism works, plausibility is a separate problem
+
+`render_lflh_scenes.py` samples obstacles from the trained hallucinator and replays the motion pair
+through them. Every box is the model's own output.
+
+**With loose size ranges the model succeeds completely and produces implausible scenes.**
+Reconstruction 0.290, **match rate 24/24 = 1.00** — every sampled scene makes the crouch the
+preferred motion. But the obstacles are 1.6 m cubes: they satisfy the decoder and look nothing like
+anything a person would duck under. `docs/source/_static/lflh_scenes_relaxed/`.
+
+**With physical per-axis ranges the scenes look right and the model stops converging.** Constraining
+the face to be thin along route (0.03–0.35 m) and vertically (0.02–0.30 m) while allowing width
+across route (0.04–1.20 m) produces plank-like boxes — 0.06 x 2.40 x 0.60 m — but:
+
+| steps | reconstruction | match rate |
+|---|---:|---:|
+| 900 | 3.233 | 0.00 |
+| 2600 | 1.412 | 0.08 |
+
+It is converging, and slowly. `docs/source/_static/lflh_scenes/`.
+
+**This trade-off is the honest headline of the addendum.** The prior that makes a scene plausible is
+the same prior that makes the inverse problem hard, and at the budgets tried the model can have one
+or the other. That is a sharper statement of the guidance's warning that priors must prevent absurd
+scenes without defining the answer — here they are currently doing neither cleanly.
+
+## 5. Status
+
+**Works:** pair-conditioned, dual-objective, operator-conditioned LfLH amortises across 12 clips
+and beats its input-ablation for crouch (0.986 vs 0.877) and left tuck (0.700 vs 0.653). Generated
+scenes reach a 1.00 match rate under loose geometry.
+
+**Does not work yet:** physically plausible geometry at the same match rate; `tuck_right`
+amortisation; mixed-operator training.
+
+**Next, in order.** (1) Anneal the *size prior* rather than the decoder — start loose so the model
+finds the band, tighten to physical ranges as it converges; this is the direct fix for §4.
+(2) Diagnose `tuck_right` against `tuck_left`, since they are mirror images and the asymmetry
+points at a sign convention in the lateral gate. (3) Only then attempt mixed-operator training.
