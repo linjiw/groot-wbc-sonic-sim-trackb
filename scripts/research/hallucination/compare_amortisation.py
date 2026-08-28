@@ -75,6 +75,12 @@ def main() -> int:
     parser.add_argument("--draws", type=int, default=16, help="model draws per clip")
     parser.add_argument("--search-budget", type=int, default=4096, help="random draws per clip")
     parser.add_argument("--epsilon", type=float, default=0.25, help="regret tolerance")
+    parser.add_argument(
+        "--station-matched",
+        action="store_true",
+        help="give the random control the model's station, so the comparison is over the "
+        "parameters the model actually learns",
+    )
     parser.add_argument("--seed", type=int, default=3)
     parser.add_argument(
         "--out", type=Path, default=REPO_ROOT / "docs/hallucination/amortisation.json"
@@ -122,6 +128,13 @@ def main() -> int:
             equal_budget = None
             for draw in range(args.search_budget):
                 latent = torch.randn(mean[row].shape, generator=generator)
+                if args.station_matched:
+                    # The control that matters. `to_world` rounds the station to an integer index
+                    # before using it, so the station channel receives *exactly zero* gradient and
+                    # is pulled to the prior mean, which decodes to route fraction 0.55 -- the
+                    # station every edit operator is centred on. A control that randomises the
+                    # station is therefore searching a dimension the model never had to solve.
+                    latent[..., 0] = 0.0
                 value = margin_of(clip, to_world(geometry.decode(latent), clip), decoder)
                 best = max(best, value)
                 if draws_to_match is None and best >= reference:
@@ -218,9 +231,12 @@ def main() -> int:
                     sum(r["model_wins_at_equal_budget"] for r in rows)
                 ),
                 "search_draw_ms": 1000 * search_s,
+                "station_matched_control": bool(args.station_matched),
                 "contract": (
                     "the control shares the model's parameterisation and decoder and differs only "
-                    "in not conditioning on the motion; margins are hard minima"
+                    "in not conditioning on the motion; margins are hard minima. With "
+                    "--station-matched the control is additionally given the station, which the "
+                    "model does not learn (zero gradient through the rounded index)"
                 ),
             },
             indent=2,

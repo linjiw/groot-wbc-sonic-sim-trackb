@@ -1,0 +1,68 @@
+{
+  "schema_version": "amortisation_v1",
+  "target": "crouch_070",
+  "clips": [
+    {
+      "motion_index": 11,
+      "model_median_margin_m": -0.011245708912611008,
+      "model_best_margin_m": 0.01305900514125824,
+      "search_best_margin_m": -0.0012020915746688843,
+      "search_equal_budget_margin_m": -0.1338474601507187,
+      "model_wins_at_equal_budget": true,
+      "draws_to_match": 46,
+      "search_budget": 512
+    },
+    {
+      "motion_index": 12,
+      "model_median_margin_m": -0.0030717477202415466,
+      "model_best_margin_m": 0.016280967742204666,
+      "search_best_margin_m": 0.01036117598414421,
+      "search_equal_budget_margin_m": 0.01036117598414421,
+      "model_wins_at_equal_budget": true,
+      "draws_to_match": 22,
+      "search_budget": 512
+    },
+    {
+      "motion_index": 13,
+      "model_median_margin_m": -0.007605299353599548,
+      "model_best_margin_m": 0.015804871916770935,
+      "search_best_margin_m": 0.010570473968982697,
+      "search_equal_budget_margin_m": -0.02237240970134735,
+      "model_wins_at_equal_budget": true,
+      "draws_to_match": 211,
+      "search_budget": 512
+    },
+    {
+      "motion_index": 14,
+      "model_median_margin_m": -0.007874935865402222,
+      "model_best_margin_m": 0.01737324893474579,
+      "search_best_margin_m": 0.013242051005363464,
+      "search_equal_budget_margin_m": 0.0051827579736709595,
+      "model_wins_at_equal_budget": true,
+      "draws_to_match": 12,
+      "search_budget": 512
+    },
+    {
+      "motion_index": 30,
+      "model_median_margin_m": -0.006748884916305542,
+      "model_best_margin_m": 0.012948468327522278,
+      "search_best_margin_m": -0.010701581835746765,
+      "search_equal_budget_margin_m": -0.11535714566707611,
+      "model_wins_at_equal_budget": true,
+      "draws_to_match": null,
+      "search_budget": 512
+    }
+  ],
+  "median_draws_to_match": 34,
+  "clips_search_never_matched": 1,
+  "model_forward_ms_per_clip": 0.4366489127278328,
+  "latent_spread_across_clips": 0.03077729046344757,
+  "latent_shift_when_motion_blinded": 0.025815926492214203,
+  "median_margin_m_conditioned": -0.0034052878618240356,
+  "median_margin_m_motion_blind": -0.006732270121574402,
+  "clips_conditioned_beats_blind": 2,
+  "clips_model_beats_search_at_equal_budget": 5,
+  "search_draw_ms": 0.5591212611761875,
+  "station_matched_control": true,
+  "contract": "the control shares the model's parameterisation and decoder and differs only in not conditioning on the motion; margins are hard minima. With --station-matched the control is additionally given the station, which the model does not learn (zero gradient through the rounded index)"
+}
