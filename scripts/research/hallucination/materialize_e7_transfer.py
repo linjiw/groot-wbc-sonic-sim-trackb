@@ -23,8 +23,7 @@ from gear_sonic.dataset_generation.hallucination.validate_keepout import (  # no
 
 ARCHETYPES = ("door_lintel", "ibeam")
 SPEC_PATHS = {
-    "lfh_086_crouch": REPO_ROOT
-    / "specs/hallucination/cs_lfh_086_crouch_cal3_d0100.json",
+    "lfh_086_crouch": REPO_ROOT / "specs/hallucination/cs_lfh_086_crouch_cal3_d0100.json",
     "lfh_089_crouch": REPO_ROOT / "specs/hallucination/cs_lfh_089_crouch_cal3.json",
     "lfh_090_crouch": REPO_ROOT / "specs/hallucination/cs_lfh_090_crouch_cal3.json",
 }
@@ -71,8 +70,7 @@ def main() -> int:
             write_report(keepout, keepout_path)
             if not keepout["ok"]:
                 raise SystemExit(
-                    f"{source_id}/{archetype}: Tier-2 refused "
-                    f"{keepout['refusal_reasons']}"
+                    f"{source_id}/{archetype}: Tier-2 refused " f"{keepout['refusal_reasons']}"
                 )
 
             pair_manifest = json.loads(result.manifest_path.read_text())
@@ -114,8 +112,7 @@ def main() -> int:
                     },
                     "binding_geometry_clearance_mm": {
                         cell: {
-                            motion: evidence["clearance_mm"]
-                            for motion, evidence in motions.items()
+                            motion: evidence["clearance_mm"] for motion, evidence in motions.items()
                         }
                         for cell, motions in keepout["binding_geometry_pattern"].items()
                     },

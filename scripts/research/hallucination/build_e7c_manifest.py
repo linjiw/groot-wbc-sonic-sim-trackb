@@ -58,9 +58,7 @@ def main() -> int:
             {
                 "cell_id": f"{prefix}__{role}",
                 "source_family_id": variant["source_pair_id"],
-                "source_variant_id": (
-                    f"{variant['source_variant_id']}__{variant['archetype_id']}"
-                ),
+                "source_variant_id": (f"{variant['source_variant_id']}__{variant['archetype_id']}"),
                 "archetype_id": variant["archetype_id"],
                 "cell_role": role,
                 "runtime_seed": variant["seed"],

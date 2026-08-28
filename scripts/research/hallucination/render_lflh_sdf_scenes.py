@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -46,6 +47,14 @@ from scripts.research.hallucination.train_lflh_sdf import (  # noqa: E402
     to_world,
     train_sdf,
 )
+
+
+#: These scripts do many small tensor operations, where torch's default of one thread per core
+#: costs more in contention than it buys in parallelism -- measured at load average 96 on a 20-core
+#: box with three of them running. Override with LFH_TORCH_THREADS if a run has the machine to
+#: itself.
+def _cap_threads() -> None:
+    torch.set_num_threads(int(os.environ.get("LFH_TORCH_THREADS", "2")))
 
 
 def score_scene(clip: dict, boxes: dict, decoder: SdfChoiceDecoder) -> dict:
@@ -129,6 +138,7 @@ def main() -> int:
     )
     parser.add_argument("--manifest", type=Path)
     args = parser.parse_args()
+    _cap_threads()
 
     payload = json.loads(args.candidates.read_text())
     built = []

@@ -86,9 +86,7 @@ def main() -> int:
         },
         "scene_sha256": {"easy": result.easy.sha256, "hard": result.hard.sha256},
         "binding_geometry_clearance_mm": {
-            cell: {
-                motion: evidence["clearance_mm"] for motion, evidence in motions.items()
-            }
+            cell: {motion: evidence["clearance_mm"] for motion, evidence in motions.items()}
             for cell, motions in keepout["binding_geometry_pattern"].items()
         },
         "reference_motions": references,

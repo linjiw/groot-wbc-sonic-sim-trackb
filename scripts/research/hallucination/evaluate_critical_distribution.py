@@ -54,9 +54,7 @@ def evaluate(q_path: Path, samples_per_source: int = 100) -> dict[str, object]:
             proposal = distribution.sample(index)
             geometry_samples += 1
             geometry_valid += int(
-                heldout.support.lower_m
-                <= proposal.hard_coordinate_m
-                <= heldout.support.upper_m
+                heldout.support.lower_m <= proposal.hard_coordinate_m <= heldout.support.upper_m
             )
         excluded = set(heldout.verified_archetypes)
         novelty = infer_critical_scene_distribution(
@@ -116,14 +114,22 @@ def main() -> int:
     report = evaluate(args.q, args.samples_per_source)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(json.dumps({key: report[key] for key in (
-        "decision",
-        "mean_heldout_log_loss",
-        "uniform_compatible_log_loss",
-        "log_loss_improvement_over_uniform",
-        "top3_recall",
-        "geometry_support_valid_rate",
-    )}, indent=2))
+    print(
+        json.dumps(
+            {
+                key: report[key]
+                for key in (
+                    "decision",
+                    "mean_heldout_log_loss",
+                    "uniform_compatible_log_loss",
+                    "log_loss_improvement_over_uniform",
+                    "top3_recall",
+                    "geometry_support_valid_rate",
+                )
+            },
+            indent=2,
+        )
+    )
     return 0 if report["decision"] == "keep" else 2
 
 

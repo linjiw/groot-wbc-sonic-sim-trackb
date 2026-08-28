@@ -123,9 +123,7 @@ def main() -> int:
                 contacts[role] = contact_evidence(
                     load(trajectory), REPO_ROOT / cell["scene"]["path"]
                 )
-                videos[role] = str(
-                    Path(cell["output"]) / "renders/000000.mp4"
-                )
+                videos[role] = str(Path(cell["output"]) / "renders/000000.mp4")
 
         reasons = [
             f"{role}_outcome_mismatch"

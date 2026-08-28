@@ -30,7 +30,8 @@ def main() -> int:
     parser.add_argument(
         "--out",
         type=Path,
-        default=REPO_ROOT / "docs/hallucination/manifests/E9A_MOTION_SCENE_CALIBRATION_PROPOSED.json",
+        default=REPO_ROOT
+        / "docs/hallucination/manifests/E9A_MOTION_SCENE_CALIBRATION_PROPOSED.json",
     )
     args = parser.parse_args()
 
@@ -45,7 +46,9 @@ def main() -> int:
                 "cell_id": cell_id,
                 "pair_id": "lfh_fresh_curve",
                 "pair_role": role,
-                "depends_on_acceptance_of": ("lfh_fresh_curve__empty__nominal" if role == "adapted" else None),
+                "depends_on_acceptance_of": (
+                    "lfh_fresh_curve__empty__nominal" if role == "adapted" else None
+                ),
                 "runtime_seed": 45001,
                 "hydra_overrides": ["++seed=45001"],
                 "scene": _scene("screen_empty"),

@@ -201,7 +201,9 @@ def main() -> int:
     output = args.out / "motion_pair.json"
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     output.chmod(0o664)
-    print(f"PASS: fresh Kimodo pair; drop={1000 * operator_report.silhouette_drop_m:.1f} mm -> {output}")
+    print(
+        f"PASS: fresh Kimodo pair; drop={1000 * operator_report.silhouette_drop_m:.1f} mm -> {output}"
+    )
     return 0
 
 

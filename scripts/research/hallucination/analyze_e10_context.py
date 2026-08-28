@@ -57,7 +57,11 @@ def main() -> int:
         )
         videos[role] = str(Path(cell["output"]) / "renders/000000.mp4")
 
-    reasons = [f"{role}_outcome_mismatch" for role, expected in EXPECTED.items() if outcomes.get(role) != expected]
+    reasons = [
+        f"{role}_outcome_mismatch"
+        for role, expected in EXPECTED.items()
+        if outcomes.get(role) != expected
+    ]
     hard = contacts["nominal_hard"]
     if hard["attribution"] != "binding_constraint":
         reasons.append("nominal_hard_not_uniquely_binding")
@@ -93,7 +97,9 @@ def main() -> int:
             "cpu_report_sha256": sha256_file(args.cpu_report),
         },
     }
-    rows = [f"| `{role}` | {outcomes[role]} | {contacts[role]['attribution']} |" for role in EXPECTED]
+    rows = [
+        f"| `{role}` | {outcomes[role]} | {contacts[role]['attribution']} |" for role in EXPECTED
+    ]
     markdown = (
         "\n".join(
             [

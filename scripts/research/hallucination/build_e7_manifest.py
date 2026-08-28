@@ -39,14 +39,10 @@ def main() -> int:
             raise SystemExit("E7 hard phase requires context recertification")
         recert = json.loads(RECERTIFICATION.read_text())
         eligible_ids = {
-            row["variant_id"]
-            for row in recert["variants"]
-            if row["hard_phase_eligible"]
+            row["variant_id"] for row in recert["variants"] if row["hard_phase_eligible"]
         }
         eligible_sources = {
-            row["source_pair_id"]
-            for row in recert["variants"]
-            if row["hard_phase_eligible"]
+            row["source_pair_id"] for row in recert["variants"] if row["hard_phase_eligible"]
         }
         if len(eligible_ids) < 4 or len(eligible_sources) < 3:
             raise SystemExit("E7 registered primary is no longer attainable")
@@ -131,9 +127,7 @@ def main() -> int:
             "generated_family_enters_claim5": False,
             "phase": args.phase,
             "physics_cells": len(cells),
-            "independent_motion_sources": len(
-                {row["source_pair_id"] for row in selected}
-            ),
+            "independent_motion_sources": len({row["source_pair_id"] for row in selected}),
             "source_archetype_variants": len(selected),
         },
     }

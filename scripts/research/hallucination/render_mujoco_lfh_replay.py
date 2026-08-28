@@ -52,8 +52,7 @@ def _sha256_bytes(payload: bytes) -> str:
 
 def _model_joint_names(model: mujoco.MjModel) -> tuple[str, ...]:
     return tuple(
-        mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, index)
-        for index in range(1, model.njnt)
+        mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, index) for index in range(1, model.njnt)
     )
 
 
@@ -116,8 +115,7 @@ def main() -> int:
                 for source, compiled in zip(mapping.center_m, compiled_center)
             )
             size_error = max(
-                abs(source - compiled)
-                for source, compiled in zip(mapping.size_m, compiled_size)
+                abs(source - compiled) for source, compiled in zip(mapping.size_m, compiled_size)
             )
             geometry_errors.append((center_error, size_error))
             compiled_mappings.append(

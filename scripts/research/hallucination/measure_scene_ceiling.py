@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -38,6 +39,14 @@ from scripts.research.hallucination.train_lflh_sdf import build_clip  # noqa: E4
 HALF_ALONG_M = 0.10
 HALF_LATERAL_M = 0.45
 HALF_VERTICAL_M = 0.15
+
+
+#: These scripts do many small tensor operations, where torch's default of one thread per core
+#: costs more in contention than it buys in parallelism -- measured at load average 96 on a 20-core
+#: box with three of them running. Override with LFH_TORCH_THREADS if a run has the machine to
+#: itself.
+def _cap_threads() -> None:
+    torch.set_num_threads(int(os.environ.get("LFH_TORCH_THREADS", "2")))
 
 
 def ceiling_for_clip(
@@ -164,6 +173,7 @@ def main() -> int:
         "--out", type=Path, default=REPO_ROOT / "docs/hallucination/scene_ceiling.json"
     )
     args = parser.parse_args()
+    _cap_threads()
 
     payload = json.loads(args.candidates.read_text())
     decoder = SdfChoiceDecoder()

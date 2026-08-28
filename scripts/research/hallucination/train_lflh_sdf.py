@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -101,6 +102,14 @@ def default_margins(target: str, epsilon: float = 0.25) -> tuple[float, float]:
         ceiling_mm = CEILING_SLOPE * int(suffix) + CEILING_INTERCEPT_MM
     share = max(MARGIN_FRACTION_OF_CEILING * ceiling_mm, 1.0) / 1000.0
     return share, share
+
+
+#: These scripts do many small tensor operations, where torch's default of one thread per core
+#: costs more in contention than it buys in parallelism -- measured at load average 96 on a 20-core
+#: box with three of them running. Override with LFH_TORCH_THREADS if a run has the machine to
+#: itself.
+def _cap_threads() -> None:
+    torch.set_num_threads(int(os.environ.get("LFH_TORCH_THREADS", "2")))
 
 
 def rebuild(qpos: np.ndarray, label: str) -> np.ndarray:
@@ -356,6 +365,7 @@ def main() -> int:
     parser.add_argument("--out", type=Path, default=REPO_ROOT / "docs/hallucination/lflh_sdf.json")
     parser.add_argument("--model-out", type=Path)
     args = parser.parse_args()
+    _cap_threads()
 
     fallback_clear, fallback_hit = default_margins(args.target, args.epsilon)
     m_clear = args.m_clear if args.m_clear is not None else fallback_clear

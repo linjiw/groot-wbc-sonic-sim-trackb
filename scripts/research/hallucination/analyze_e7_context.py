@@ -52,15 +52,12 @@ def main() -> int:
         raise SystemExit("completed E7a run does not match its immutable manifest")
     cpu = json.loads(args.cpu_report.read_text())
     expected_variants = len(cpu["variants_detail"])
-    expected_sources = len(
-        {row["source_pair_id"] for row in cpu["variants_detail"]}
-    )
+    expected_sources = len({row["source_pair_id"] for row in cpu["variants_detail"]})
     variants = []
     for variant in cpu["variants_detail"]:
         prefix = Path(variant["scenes"]["easy"]).stem.removesuffix("__easy")
         cells = {
-            role: run["cells"][f"{prefix}__{role}"]
-            for role in ("nominal_easy", "adapted_easy")
+            role: run["cells"][f"{prefix}__{role}"] for role in ("nominal_easy", "adapted_easy")
         }
         reasons = []
         tracks = {}
