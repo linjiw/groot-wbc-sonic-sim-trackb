@@ -120,33 +120,45 @@ def ceiling_for_clip(
                     )
                 # The reading that matches the project's own definition of the inverse set,
                 # S_{eps,delta}(tau) = {S : Feasible, Regret <= eps, Necessity >= delta}. The two
-                # rules above are its endpoints. Necessity is measured against the *cheapest*
-                # candidate -- the nominal, the motion that would have been executed had the scene
-                # been empty. Regret asks whether some cheaper candidate is also feasible, and by
-                # how much cost: an intermediate rung of the same operator is not a counterexample
-                # unless the robot could have saved more than eps by taking it.
+                # rules above are its endpoints.
+                #
+                # Regret enters as a *margin*, not as a gate. Gating on "no cheaper candidate is
+                # feasible" put the optimum exactly on a rival's zero crossing, where it is not
+                # robust to anything: at a frame stride of 4 the binding rival cleared by -0.7 mm
+                # and the scene passed; at a stride of 8 the same box gave +5.3 mm and it failed.
+                # Requiring every excluded candidate to be struck by the score instead makes the
+                # criterion identical to the one the trainer and the renderer evaluate, and puts
+                # the optimum a measurable distance inside the feasible set.
                 if epsilons:
                     clears = [
                         float(decoder.exact_clearance(*clip["clouds"][index], box).min())
                         for index in range(len(clip["clouds"]))
                     ]
-                    feasible_costs = [
-                        float(clip["costs"][index])
-                        for index, value in enumerate(clears)
-                        if value > 0.0
-                    ]
-                    regret = (
-                        float(clip["costs"][observed]) - min(feasible_costs)
-                        if feasible_costs
-                        else float("inf")
-                    )
-                    necessity = -clears[cheapest]
-                    score_eps = min(clear, necessity)
+                    observed_cost = float(clip["costs"][observed])
                     for epsilon in epsilons:
+                        excluded = {cheapest} | {
+                            index
+                            for index in range(len(clears))
+                            if index != observed
+                            and observed_cost - float(clip["costs"][index]) > epsilon
+                        }
+                        score_eps = min([clear] + [-clears[index] for index in excluded])
                         key = f"score_eps_{epsilon:g}_m"
-                        if regret <= epsilon and score_eps > best.get(key, -9.0):
+                        if score_eps > best.get(key, -9.0):
                             best[key] = score_eps
-                            best[f"regret_eps_{epsilon:g}"] = regret
+                            # The placement, not only the score: a figure that renders "the
+                            # optimum" has to render the box that achieved it under the *same*
+                            # rule, or it draws a scene failing the criterion it illustrates.
+                            best[f"station_eps_{epsilon:g}"] = station
+                            best[f"lateral_eps_{epsilon:g}_m"] = float(lateral)
+                            best[f"underside_height_eps_{epsilon:g}_m"] = float(height)
+                            best[f"clearance_eps_{epsilon:g}_m"] = clear
+                            best[f"strike_eps_{epsilon:g}_m"] = min(
+                                -clears[index] for index in excluded
+                            )
+                            best[f"excluded_eps_{epsilon:g}"] = sorted(
+                                clip["labels"][index] for index in excluded
+                            )
     best["motion_index"] = clip["motion_index"]
     best["body_mode"] = clip["body_mode"]
     best["rivals"] = [clip["labels"][r] for r in rivals]
@@ -160,7 +172,13 @@ def main() -> int:
     )
     parser.add_argument("--targets", nargs="+", default=["crouch_040", "crouch_055", "crouch_070"])
     parser.add_argument("--clips", type=int, default=8)
-    parser.add_argument("--stride", type=int, default=4)
+    parser.add_argument(
+        "--stride",
+        type=int,
+        default=8,
+        help="frame stride for the capsule cloud; must match the trainer's, or a box can be "
+        "searched at one resolution and scored at another",
+    )
     parser.add_argument("--height-step", type=float, default=0.01)
     parser.add_argument(
         "--epsilon",

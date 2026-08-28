@@ -55,11 +55,11 @@ The best it finds is the **ceiling**: no hallucinator, learned or otherwise, can
 
 | edit target | cheaper candidates | any-rival ceiling, median (range) |
 |---|---:|---:|
-| `crouch_040` | 1 | **33.2 mm** (25.6–49.1) |
-| `crouch_055` | 4 | **41.7 mm** (33.5–59.1) |
-| `crouch_070` | 5 | **50.5 mm** (39.3–73.6) |
+| `crouch_040` | 1 | **38.2 mm** (28.1–59.8) |
+| `crouch_070` | 5 | **58.6 mm** (46.7–87.0) |
 
-Twelve clips per target, exhaustive search, hard minima. `ceiling_mm ~= 0.578 * amplitude_mm + 10.0`.
+Sixteen clips per target, exhaustive search, hard minima, frame stride 8. Measured across three
+amplitudes at a coarser stride the relation is `ceiling_mm ~= 0.578 * amplitude_mm + 10.0`.
 
 The any-rival law is close to perfectly linear in the crouch amplitude, which is what the
 closed-form window predicts: a deeper crouch separates the two bodies further, and the extra
@@ -72,36 +72,45 @@ A box placed to clear `crouch_070` and strike the nominal must also deal with `c
 body sits only 15 mm above `crouch_070`'s. The admissible band collapses from the 70 mm amplitude to
 roughly the 15 mm rung spacing:
 
-| edit target | rivals | all-rival | eps = 0 | eps = 0.1 | eps = 0.25 | eps = 0.5 | any-rival |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| `crouch_040` | 1 | 33.2 | 33.2 | 33.2 | 33.2 | 33.2 | 33.2 |
-| `crouch_055` | 4 | 8.3 | 15.2 | 15.2 | 41.7 | 41.7 | 41.7 |
-| `crouch_070` | 5 | 8.3 | 15.5 | 15.5 | 31.3 | 50.5 | 50.5 |
+| edit target | rivals | all-rival | **eps = 0.25** | any-rival |
+|---|---:|---:|---:|---:|
+| `crouch_040` | 1 | 38.2 | **38.2** | 38.2 |
+| `crouch_070` | 5 | 9.8 | **20.8** | 58.6 |
 
-All medians in millimetres over the same twelve clips.
-
-Three things to read off it:
+Sixteen clips, frame stride 8, all medians in millimetres. Three things to read off it:
 
 * **`crouch_040` is invariant across every column.** Its only cheaper candidate is the nominal, so
   all three readings coincide by construction. That the numbers agree is a check on the instrument,
   not a finding.
-* **The amplitude law inverts once the ladder is taken seriously.** At `eps = 0` a 40 mm crouch
-  admits a **33.2 mm** margin and a 70 mm crouch only **15.5 mm** — the shallowest edit in the
-  ladder is the most explainable one, and going deeper *halves* the room available. The any-rival
-  law's tidy 0.578 slope describes a quantity no sound scene can claim.
-* **The jumps sit exactly at the rungs' cost gaps.** `crouch_055` costs 0.214 less than
-  `crouch_070` and `crouch_040` costs 0.429 less, so `crouch_070`'s ceiling steps up at
-  `eps = 0.25` (releasing `crouch_055`) and again at `eps = 0.5` (releasing `crouch_040` and the
-  tucks). `eps` is not a smoothing knob; it selects which rungs the scene must argue against.
+* **The amplitude law inverts once the ladder is taken seriously.** A 40 mm crouch admits a
+  **38.2 mm** margin and a 70 mm crouch only **20.8 mm** — the shallowest edit in the ladder is the
+  most explainable one, and going deeper cuts the room available by nearly half. The any-rival law's
+  tidy 0.578 slope describes a quantity no sound scene can claim.
+* **What `crouch_070` has to exclude** at `eps = 0.25` is `{nominal, crouch_040, tuck_left_040,
+  tuck_right_040}`; `crouch_055` costs only 0.214 less and is tolerated. `eps` is not a smoothing
+  knob — it selects which rungs the scene must argue against.
 
-**The ceiling is set by the spacing of the edit ladder, not by the amplitude of the edit.** A deeper
-crouch buys room against the nominal and spends it on the rungs it passes through. This is
-registered as LFH-E19 / P5 in the prediction register, before the runs were read.
+### 2.1 Regret has to be a margin, not a gate
 
-The `eps` column is the usable one, and it is a design knob rather than a fact about the world:
-`eps` is how much edit cost the robot is allowed to have wasted. At `eps = 0` the scene must make
-the executed motion the cheapest feasible one outright; as `eps` grows, intermediate rungs are
-tolerated and the ceiling rises toward the any-rival figure.
+An earlier version of this measurement gated on regret — "no cheaper candidate may be feasible" —
+and reported 32.6 mm for `crouch_070`. That number was not wrong so much as **not robust**, and the
+failure is worth recording because it is invisible unless tested.
+
+Gating puts the optimum exactly on a rival's zero crossing: the search buys margin right up to the
+point where the binding rival becomes feasible, and stops there. Measured on clip 030, the same box
+gives that rival **-0.7 mm at a frame stride of 4** — excluded, scene passes — and **+5.3 mm at a
+stride of 8** — feasible, scene fails. A 6 mm change in how finely the capsule cloud is sampled
+inverts the verdict, and the box had been *searched* at one resolution and *scored* at another.
+
+Requiring every excluded candidate to be struck by at least the score instead makes the criterion
+identical to the one the trainer, the renderer and the amortisation test all evaluate, and puts the
+optimum a measurable distance inside the feasible set. It costs about a third of the reported
+ceiling at `crouch_070` — 32.6 mm becomes 20.8 — and the third it costs was never there.
+
+`eps` is a design knob rather than a fact about the world: it is how much edit cost the robot is
+allowed to have wasted. At `eps = 0` the scene must make the executed motion the cheapest feasible
+one outright; as `eps` grows, intermediate rungs are tolerated and the ceiling rises toward the
+any-rival figure.
 
 ## 3. Why the previous training run could not have worked
 
@@ -164,8 +173,8 @@ figures below say whether it is worth its complexity.
 ### 5.0 The shallowest edit has the largest ceiling and is the hardest to learn
 
 The same trainer, same `eps`, same margin rule, run on `crouch_040` — whose ceiling is **larger**
-than `crouch_070`'s at every regret tolerance (33.2 mm against 31.3 at `eps = 0.25`, and 33.2
-against 15.5 at `eps = 0`), and whose objective is therefore comfortably feasible:
+than `crouch_070`'s at every regret tolerance (**38.2 mm against 20.8** at `eps = 0.25`), and whose
+objective is therefore comfortably feasible:
 
 | arm | selection | robot clear | counterfactual |
 |---|---:|---:|---:|

@@ -127,6 +127,19 @@ def world_boxes(boxes: dict) -> list[dict]:
     return out
 
 
+def approach_window(qpos: np.ndarray, box: dict, *, pad: int = 40) -> slice:
+    """Frames around the closest approach to the binding box.
+
+    A 70 mm difference in head height is invisible in a wide shot of a five-second walk. Trimming
+    to the moment the body passes under the obstacle is what makes the counterfactual legible --
+    the whole claim is about a few centimetres at one instant.
+    """
+    centre = np.asarray(box["center_m"][:2])
+    distance = np.linalg.norm(qpos[:, :2] - centre[None, :], axis=1)
+    nearest = int(distance.argmin())
+    return slice(max(nearest - pad, 0), min(nearest + pad, len(qpos)))
+
+
 def oracle_box(row: dict, clip: dict, *, epsilon: float) -> dict | None:
     """The best box the exhaustive search found for this clip, in world coordinates.
 
@@ -134,10 +147,10 @@ def oracle_box(row: dict, clip: dict, *, epsilon: float) -> dict | None:
     reader sees how much of the achievable margin the model actually captured, rather than a scene
     chosen because it looked good.
     """
-    key = f"underside_height_{'all_' if epsilon <= 0 else ''}m"
-    height = row.get(key, row.get("underside_height_m"))
-    station = row.get("station_all" if epsilon <= 0 else "station", row.get("station"))
-    lateral = row.get("lateral_all_m" if epsilon <= 0 else "lateral_m", row.get("lateral_m"))
+    suffix = f"eps_{epsilon:g}"
+    height = row.get(f"underside_height_{suffix}_m")
+    station = row.get(f"station_{suffix}")
+    lateral = row.get(f"lateral_{suffix}_m")
     if height is None or station is None or lateral is None:
         return None
     yaw = float(clip["yaw"][station])
@@ -255,9 +268,10 @@ def main() -> int:
         blob = json.loads(args.ceiling.read_text())
         for row in blob.get("targets", {}).get(args.target, {}).get("clips", []):
             oracle_rows[row["motion_index"]] = row
-            # Compare like with like: the achieved margin uses the all-rivals rule, so the
-            # ceiling must too.
-            ceilings[row["motion_index"]] = row.get("score_all_m", row["score_m"])
+            # Compare like with like: the achieved margin is scored under the regret rule at
+            # this epsilon, so the ceiling has to be the one measured under the same rule.
+            # Taking the all-rival ceiling instead produced efficiencies above 100%.
+            ceilings[row["motion_index"]] = row.get(f"score_eps_{args.epsilon:g}_m")
     for entry in scored:
         ceiling = ceilings.get(entry["motion_index"])
         entry["ceiling_m"] = ceiling
@@ -317,8 +331,9 @@ def main() -> int:
         ordered = [entry["boxes"][entry["binding_obstacle"]]] + [
             box for index, box in enumerate(entry["boxes"]) if index != entry["binding_obstacle"]
         ]
+        window = approach_window(qpos, ordered[0])
         render_pair(
-            {"a_nominal": qpos, "b_adapted": adapted},
+            {"a_nominal": qpos[window], "b_adapted": adapted[window]},
             ordered[0],
             out_path,
             width=args.width,
@@ -328,9 +343,9 @@ def main() -> int:
             # counterfactual is only legible in profile, and the default three-quarter view puts
             # the obstacle between the camera and the robot.
             azimuth_offset=90.0,
-            elevation=-4.0,
-            distance=3.6,
-            lookat_z=1.05,
+            elevation=-3.0,
+            distance=2.6,
+            lookat_z=ordered[0]["center_m"][2] - ordered[0]["full_size_m"][2] / 2 - 0.25,
             context=ordered[1:],
             captions={
                 "a_nominal": ["NOMINAL  (struck -> must adapt)"] + shared,
@@ -343,8 +358,9 @@ def main() -> int:
             if box is not None:
                 oracle_entry = score_scene(clip, world_to_tensors([box]), decoder)
                 oracle_path = out_path.with_name(out_path.name.replace("rank", "oracle_for_rank"))
+                oracle_window = approach_window(qpos, box)
                 render_pair(
-                    {"a_nominal": qpos, "b_adapted": adapted},
+                    {"a_nominal": qpos[oracle_window], "b_adapted": adapted[oracle_window]},
                     box,
                     oracle_path,
                     width=args.width,
@@ -354,9 +370,9 @@ def main() -> int:
                     # counterfactual is only legible in profile, and the default three-quarter view puts
                     # the obstacle between the camera and the robot.
                     azimuth_offset=90.0,
-                    elevation=-4.0,
-                    distance=3.6,
-                    lookat_z=1.05,
+                    elevation=-3.0,
+                    distance=2.6,
+                    lookat_z=box["center_m"][2] - box["full_size_m"][2] / 2 - 0.25,
                     captions={
                         "a_nominal": [
                             "NOMINAL  (struck -> must adapt)",
