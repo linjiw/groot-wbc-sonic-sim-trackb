@@ -87,15 +87,24 @@ $PY scripts/research/hallucination/train_lflh_sdf.py \
 
 # 2b. The bound the model is measured against: the best two-sided margin any single box can
 #     reach per clip, by exhaustive search. Report efficiency against this, never a raw margin.
-$PY scripts/research/hallucination/measure_scene_ceiling.py --clips 12
+#     --stride MUST match the trainer's, or a box is searched at one resolution and scored at
+#     another; that alone flipped a scene from passing to failing.
+$PY scripts/research/hallucination/measure_scene_ceiling.py \
+    --clips 16 --targets crouch_070 crouch_040 --epsilon 0.25 --stride 8
 
 # 2c. What one forward pass is worth in units of search, plus the motion-blind ablation.
 $PY scripts/research/hallucination/compare_amortisation.py --model-in /tmp/sdf.pt
 
-# 3. Render generated scenes against the motions that produced them.
-$PY scripts/research/hallucination/render_lflh_scenes.py \
-    --target crouch_040 --clips 12 --steps 1800 --anneal-prior \
-    --out-dir docs/source/_static/lflh_scenes
+# 3. Render generated scenes beside the exhaustive optimum for the same clip, ranked on
+#    measured clearance and discrimination. --with-oracle is what makes the figure honest.
+$PY scripts/research/hallucination/render_lflh_sdf_scenes.py \
+    --target crouch_070 --epsilon 0.25 --clips 16 --holdout 5 --stride 8 --draws 24 \
+    --render-top 3 --with-oracle --model-in /tmp/sdf.pt \
+    --ceiling docs/hallucination/scene_ceiling_16.json \
+    --out-dir docs/source/_static/lflh_ceiling
+
+# render_lflh_scenes.py is the OLDER envelope-decoder renderer, retained only so the
+# retraction stays reproducible.
 ```
 
 `train_lflh.py` is the **older** envelope-decoder trainer. It is retained because the retraction
@@ -178,11 +187,24 @@ $PY scripts/research/hallucination/run_case_study.py
   inert obstacle; the explained motion physically intersected an obstacle in 21/24 scenes; the
   ablation control was confounded; there was no train/test split.
 
-**Current honest LfLH numbers** — `docs/hallucination/lflh_sdf.json`, out of sample: selection
-28.7% vs 15.0% random, robot-clear 18.8% vs 0.0% random. **Read them with
-`REPORT_SCENE_CEILING.md`**: that run's objective was infeasible and its clearance metric was the
-training surrogate, so both numbers are lower bounds on nothing in particular. They are retained as
-the record of a diagnosed run, not as a result.
+**Current LfLH numbers** — `docs/hallucination/lflh_sdf_c070_eps.json`, held out, `crouch_070` at
+`eps = 0.25`:
+
+| | model | random from the prior |
+|---|---:|---:|
+| selection | 81.2% | 58.8% |
+| robot clear | 50.0% | 0.0% |
+| **counterfactual** (clears *and* is chosen) | **32.5%** | **0.0%** |
+| best-of-24 margin vs the exhaustive optimum | **72% median** | — |
+| beats a 24-draw random search | **5 / 5 clips** | — |
+| beats a **1024**-draw random search | **5 / 5 clips** | — |
+
+Report the counterfactual rate, never selection alone: the random control scores 58.8% on selection
+while burying the robot 320 mm deep, because the deepest crouch wins by being swallowed least.
+
+`docs/hallucination/lflh_sdf.json` is the earlier run and is **not** a result — its objective was
+infeasible and its clearance metric was the training surrogate. Retained as the record of a
+diagnosed failure.
 
 ## 7. Known open issues
 
@@ -210,7 +232,16 @@ the record of a diagnosed run, not as a result.
    authoring and keep-out are still axis-aligned, so no curved-route family can be built yet. The
    94-clip case study measures the cost: misalignment reaches 52.6°.
 6. **Scaling untested.** `lflh_candidates_large.json` has 64 sets ready for it.
-7. **The rival set is the open question.** "The scene excludes the alternative" has two readings —
+7. **`crouch_040` does not train**, though its ceiling is the *largest* (38.2 mm against
+   `crouch_070`'s 20.8 at the same `eps`). A shallow target leaves the deeper crouches as escape
+   routes for the decoder. Geometric feasibility and learnability point in opposite directions;
+   see `REPORT_SCENE_CEILING.md` section 5.0.
+8. **Conditioning is unproven.** The model is genuinely conditional -- blinding the motion moves its
+   output by 84% of its across-clip spread -- but conditioning beats the motion-blind control on
+   only 2 of 5 held-out clips. Needs `lflh_candidates_large.json` (64 sets) to settle.
+9. **The rival set is the open question.** "The scene excludes the alternative" has two readings —
    some cheaper candidate is struck, or every cheaper candidate is. They coincide only when the
    edit ladder has a single rung. `measure_scene_ceiling.py` now reports both; LFH-E19 in the
-   prediction register registers what the difference is expected to be, before the run.
+   prediction register registers what the difference is expected to be, before the run. Regret
+   must be applied as a *margin*, not a gate: gating puts the optimum on a rival's zero crossing,
+   where a change of frame stride from 4 to 8 flipped the verdict on clip 030.
