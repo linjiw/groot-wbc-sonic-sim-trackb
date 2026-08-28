@@ -1,0 +1,173 @@
+{
+  "archetype_id": "door_lintel",
+  "constraint_spec_fingerprint": "sha256:cf761303c1461e49c681e72de95a614fe741529561c3b067cee6ee28ced38d75",
+  "cpu_certificate": {
+    "binding_geometry_clearance_mm": {
+      "easy": {
+        "edit": 202.30186165016644,
+        "orig": 89.57745992155559
+      },
+      "hard": {
+        "edit": 66.663255918173,
+        "orig": -68.0
+      }
+    },
+    "binding_geometry_signs": {
+      "easy": {
+        "edit": "+",
+        "orig": "+"
+      },
+      "hard": {
+        "edit": "+",
+        "orig": "-"
+      }
+    },
+    "four_sign_pattern_matches": true,
+    "keepout_report": "/home/robotixx/GR00T-WholeBodyControl/gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__door_lintel__s00000017.keepout.json"
+  },
+  "manifest_path": "/home/robotixx/GR00T-WholeBodyControl/gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__door_lintel__s00000017.manifest.json",
+  "material_provenance": "runtime_default",
+  "scenes": {
+    "easy": {
+      "authored_primitives": [
+        {
+          "binding_face_id": "cs_duck_003:underside",
+          "binding_sense": "underside",
+          "center_local_m": [
+            0.0,
+            0.0,
+            1.4506249999999998
+          ],
+          "name": "BindingDoorLintel",
+          "optional": false,
+          "role": "binding_constraint",
+          "size_m": [
+            0.5,
+            3.0,
+            0.12
+          ]
+        },
+        {
+          "binding_face_id": null,
+          "binding_sense": null,
+          "center_local_m": [
+            0.0,
+            -1.56,
+            0.7553124999999998
+          ],
+          "name": "DoorJambLeft",
+          "optional": true,
+          "role": "constraint_context",
+          "size_m": [
+            0.12,
+            0.12,
+            1.5106249999999997
+          ]
+        },
+        {
+          "binding_face_id": null,
+          "binding_sense": null,
+          "center_local_m": [
+            0.0,
+            1.56,
+            0.7553124999999998
+          ],
+          "name": "DoorJambRight",
+          "optional": true,
+          "role": "constraint_context",
+          "size_m": [
+            0.12,
+            0.12,
+            1.5106249999999997
+          ]
+        }
+      ],
+      "binding_face_commanded_m": 1.3906249999999998,
+      "binding_face_offset_mm": 2.220446049250313e-13,
+      "binding_face_realized_m": 1.390625,
+      "binding_paths": [
+        "/World/ConstraintFrame/BindingDoorLintel"
+      ],
+      "binding_station_offset_mm": 1.1102230246251565e-13,
+      "binding_station_realized_xy_m": [
+        2.6739,
+        -0.2631999999999999
+      ],
+      "cell": "easy",
+      "path": "/home/robotixx/GR00T-WholeBodyControl/gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__door_lintel__s00000017__easy.usda",
+      "sha256": "sha256:23cdb5268c8e4849d71a72f6de725c351503b3ea0e163c15dddb71ed424feaf1"
+    },
+    "hard": {
+      "authored_primitives": [
+        {
+          "binding_face_id": "cs_duck_003:underside",
+          "binding_sense": "underside",
+          "center_local_m": [
+            0.0,
+            0.0,
+            1.2725
+          ],
+          "name": "BindingDoorLintel",
+          "optional": false,
+          "role": "binding_constraint",
+          "size_m": [
+            0.5,
+            3.0,
+            0.12
+          ]
+        },
+        {
+          "binding_face_id": null,
+          "binding_sense": null,
+          "center_local_m": [
+            0.0,
+            -1.56,
+            0.66625
+          ],
+          "name": "DoorJambLeft",
+          "optional": true,
+          "role": "constraint_context",
+          "size_m": [
+            0.12,
+            0.12,
+            1.3325
+          ]
+        },
+        {
+          "binding_face_id": null,
+          "binding_sense": null,
+          "center_local_m": [
+            0.0,
+            1.56,
+            0.66625
+          ],
+          "name": "DoorJambRight",
+          "optional": true,
+          "role": "constraint_context",
+          "size_m": [
+            0.12,
+            0.12,
+            1.3325
+          ]
+        }
+      ],
+      "binding_face_commanded_m": 1.2125,
+      "binding_face_offset_mm": 0.0,
+      "binding_face_realized_m": 1.2125,
+      "binding_paths": [
+        "/World/ConstraintFrame/BindingDoorLintel"
+      ],
+      "binding_station_offset_mm": 1.1102230246251565e-13,
+      "binding_station_realized_xy_m": [
+        2.6739,
+        -0.2631999999999999
+      ],
+      "cell": "hard",
+      "path": "/home/robotixx/GR00T-WholeBodyControl/gear_sonic/data/assets/scenes/hallucinated_variants_v1_e1/cs_duck_003__door_lintel__s00000017__hard.usda",
+      "sha256": "sha256:a211321f77c2797f1270ededefaccff91dffe66b3a2f303bf50a6bdd8f5246af"
+    }
+  },
+  "schema_version": "lfh_instantiation_v1",
+  "spec_id": "cs_duck_003",
+  "visual_seed": 17
+}
