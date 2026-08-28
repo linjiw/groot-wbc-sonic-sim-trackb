@@ -127,7 +127,7 @@ def world_boxes(boxes: dict) -> list[dict]:
     return out
 
 
-def approach_window(qpos: np.ndarray, box: dict, *, pad: int = 40) -> slice:
+def approach_window(qpos: np.ndarray, box: dict, *, pad: int = 26) -> slice:
     """Frames around the closest approach to the binding box.
 
     A 70 mm difference in head height is invisible in a wide shot of a five-second walk. Trimming
@@ -342,10 +342,13 @@ def main() -> int:
             # Look along the lintel from the side, level with its underside: an overhead-clearance
             # counterfactual is only legible in profile, and the default three-quarter view puts
             # the obstacle between the camera and the robot.
+            # Frame the head-lintel interface, not the robot: a 70 mm crouch is 5% of body
+            # height, invisible in any shot that fits the whole figure. The clearance being
+            # claimed is the only thing in frame.
             azimuth_offset=90.0,
-            elevation=-3.0,
-            distance=2.6,
-            lookat_z=ordered[0]["center_m"][2] - ordered[0]["full_size_m"][2] / 2 - 0.25,
+            elevation=0.0,
+            distance=1.5,
+            lookat_z=ordered[0]["center_m"][2] - ordered[0]["full_size_m"][2] / 2 - 0.06,
             context=ordered[1:],
             captions={
                 "a_nominal": ["NOMINAL  (struck -> must adapt)"] + shared,
@@ -370,9 +373,9 @@ def main() -> int:
                     # counterfactual is only legible in profile, and the default three-quarter view puts
                     # the obstacle between the camera and the robot.
                     azimuth_offset=90.0,
-                    elevation=-3.0,
-                    distance=2.6,
-                    lookat_z=box["center_m"][2] - box["full_size_m"][2] / 2 - 0.25,
+                    elevation=0.0,
+                    distance=1.5,
+                    lookat_z=box["center_m"][2] - box["full_size_m"][2] / 2 - 0.06,
                     captions={
                         "a_nominal": [
                             "NOMINAL  (struck -> must adapt)",

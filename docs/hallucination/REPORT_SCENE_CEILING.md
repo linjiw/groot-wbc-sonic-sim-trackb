@@ -203,6 +203,33 @@ which edits it can justify must report both, and the honest summary of this pipe
 it learns to justify the deepest edit in a ladder and cannot yet justify the shallowest — which is
 the more useful one, being cheaper for the robot to execute.
 
+### 5.0b The margin is a gradient scale, not only a feasibility bound
+
+Having measured the ceiling properly, the obvious next move is to set the margins strictly inside
+it: `0.6 x 20.8 = 12.5 mm` rather than the 18.8 mm the reported model was trained with, which
+exceeds the worst clip's 16.8 mm ceiling. Retrained that way, on the same clips and seed:
+
+| | trained at 18.8 mm | trained at 12.5 mm |
+|---|---:|---:|
+| held-out selection | 81.2% | 88.3% |
+| held-out robot clear | **50.0%** | 25.0% |
+| held-out counterfactual | **32.5%** | 20.0% |
+| fitted robot clear | 35.8% | 4.5% |
+
+**Relaxing the objective made the model worse**, and worse specifically at the thing the relaxed
+term governs. The barrier is `relu(m_clear - gap)^2`, so `m_clear` sets not only where the term
+stops firing but how large its gradient is everywhere below that: halving the demanded margin
+quarters the penalty at any given violation. Asking for slightly more clearance than the hardest
+clip can supply keeps pressure on all the others.
+
+So the rule from section 3 needs qualifying rather than repeating. A *wildly* infeasible target
+wastes the whole budget — 70 mm demanded against 33 available produced nothing. A target near or
+marginally above the ceiling trains better than one comfortably inside it. The ceiling is the right
+scale for the margin; it is not an upper bound the margin must respect.
+
+The 18.8 mm model is the one reported throughout this section and the one the rendered scenes come
+from. The 12.5 mm run is kept in `lflh_sdf_c070_v2.json` as the record of the comparison.
+
 ### 5.1 What one forward pass is worth, in units of search
 
 The control shares the model's parameterisation and its decoder and differs only in not

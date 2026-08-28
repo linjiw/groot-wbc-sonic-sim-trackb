@@ -1,0 +1,109 @@
+{
+  "arms": {
+    "fitted_clips": {
+      "counterfactual_rate": 0.03409090909090909,
+      "median_strike_of_every_rival_m": 0.05075092613697052,
+      "median_worst_clearance_m": -0.036536529660224915,
+      "robot_clear_rate": 0.045454545454545456,
+      "scenes": 264,
+      "selection_rate": 0.9583333333333334,
+      "worst_clearance_m": -0.12835441529750824
+    },
+    "held_out_clips": {
+      "counterfactual_rate": 0.2,
+      "median_strike_of_every_rival_m": 0.040790798142552376,
+      "median_worst_clearance_m": -0.03009466640651226,
+      "robot_clear_rate": 0.25,
+      "scenes": 120,
+      "selection_rate": 0.8833333333333333,
+      "worst_clearance_m": -0.11526627838611603
+    },
+    "random_from_prior_held_out": {
+      "counterfactual_rate": 0.008333333333333333,
+      "median_strike_of_every_rival_m": 0.33345434069633484,
+      "median_worst_clearance_m": -0.3321063816547394,
+      "robot_clear_rate": 0.008333333333333333,
+      "scenes": 120,
+      "selection_rate": 0.525,
+      "worst_clearance_m": -0.7548157572746277
+    }
+  },
+  "contract": "clearance is a true signed capsule-to-box distance in metres; selection is the differentiable choice rule, not a physics verdict",
+  "heldout_clips": 5,
+  "history": [
+    {
+      "barrier": 0.2875123918056488,
+      "margin": 0.0,
+      "reconstruction": 2.9677655696868896,
+      "step": 0
+    },
+    {
+      "barrier": 0.00733474176377058,
+      "margin": 0.0,
+      "reconstruction": 0.9496011137962341,
+      "step": 120
+    },
+    {
+      "barrier": 0.003981485962867737,
+      "margin": 0.000168633196153678,
+      "reconstruction": 0.6768988966941833,
+      "step": 240
+    },
+    {
+      "barrier": 0.0013569067232310772,
+      "margin": 0.00016407441580668092,
+      "reconstruction": 0.3235332667827606,
+      "step": 360
+    },
+    {
+      "barrier": 0.004317928571254015,
+      "margin": 0.0,
+      "reconstruction": 0.09269721060991287,
+      "step": 480
+    },
+    {
+      "barrier": 0.0034361586440354586,
+      "margin": 8.047220489970641e-07,
+      "reconstruction": 0.06255542486906052,
+      "step": 600
+    },
+    {
+      "barrier": 0.0019109360873699188,
+      "margin": 0.00016238844546023756,
+      "reconstruction": 0.33209121227264404,
+      "step": 720
+    },
+    {
+      "barrier": 0.0035468123387545347,
+      "margin": 0.0,
+      "reconstruction": 0.06753644347190857,
+      "step": 840
+    },
+    {
+      "barrier": 0.00352927902713418,
+      "margin": 4.112258011446102e-06,
+      "reconstruction": 0.0783749595284462,
+      "step": 960
+    },
+    {
+      "barrier": 0.0025984616950154305,
+      "margin": 0.0,
+      "reconstruction": 0.07146653532981873,
+      "step": 1080
+    },
+    {
+      "barrier": 0.0028464733622968197,
+      "margin": 0.0,
+      "reconstruction": 0.15659546852111816,
+      "step": 1199
+    }
+  ],
+  "m_clear_m": 0.012496588379144668,
+  "m_hit_m": 0.012496588379144668,
+  "obstacles": 4,
+  "regret_epsilon": 0.25,
+  "schema_version": "lflh_sdf_v1",
+  "steps": 1200,
+  "target": "crouch_070",
+  "train_clips": 11
+}
