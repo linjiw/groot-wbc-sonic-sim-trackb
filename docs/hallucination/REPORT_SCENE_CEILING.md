@@ -230,6 +230,30 @@ scale for the margin; it is not an upper bound the margin must respect.
 The 18.8 mm model is the one reported throughout this section and the one the rendered scenes come
 from. The 12.5 mm run is kept in `lflh_sdf_c070_v2.json` as the record of the comparison.
 
+### 5.0c The scenes, against the optimum for the same clip
+
+`docs/source/_static/lflh_ceiling/` holds three held-out scenes and, beside each, the exhaustive
+optimum for that clip. Pairing them is the point: a scene shown alone can only be admired, and this
+project has admired an inert obstacle before.
+
+| held-out clip | model clear | model strike | optimum clear / strike | efficiency |
+|---|---:|---:|---:|---:|
+| 30 `walk_look` | 17 mm | 16 mm | 21 / 21 mm | **79%** |
+| 14 `walk` | 16 mm | 28 mm | 21 / 23 mm | **76%** |
+| 12 `walk` | 18 mm | 15 mm | 26 / 21 mm | **72%** |
+
+These are the **best three of 36 admissible scenes out of 120 held-out draws**, selected on measured
+clearance and discrimination, not by eye. The distribution they come from is in the same manifest:
+the median draw is negative, and two draws in three express no counterfactual at all. What the best
+draw shows is that the model can place a lintel within a few millimetres of where an exhaustive
+search would put it, from one forward pass conditioned only on the motion.
+
+Each video is framed on the head-lintel interface at the moment of closest approach, because the
+whole claim is a 70 mm difference in head height and it is invisible in any shot that fits the
+robot. The nominal panel shows the head against the obstacle; the adapted panel shows it passing
+beneath. Obstacles are visual props -- the distances quoted are analytic capsule-to-box, not
+simulated contacts.
+
 ### 5.1 What one forward pass is worth, in units of search
 
 The control shares the model's parameterisation and its decoder and differs only in not
