@@ -53,7 +53,13 @@ The best it finds is the **ceiling**: no hallucinator, learned or otherwise, can
 
 ## 2. Under the weak reading the ceiling is half the edit amplitude — and that is a mirage
 
-<!--CEILING_TABLE-->
+| edit target | cheaper candidates | any-rival ceiling, median (range) |
+|---|---:|---:|
+| `crouch_040` | 1 | **33.2 mm** (25.6–49.1) |
+| `crouch_055` | 4 | **41.7 mm** (33.5–59.1) |
+| `crouch_070` | 5 | **50.5 mm** (39.3–73.6) |
+
+Twelve clips per target, exhaustive search, hard minima. `ceiling_mm ~= 0.578 * amplitude_mm + 10.0`.
 
 The any-rival law is close to perfectly linear in the crouch amplitude, which is what the
 closed-form window predicts: a deeper crouch separates the two bodies further, and the extra
@@ -66,7 +72,27 @@ A box placed to clear `crouch_070` and strike the nominal must also deal with `c
 body sits only 15 mm above `crouch_070`'s. The admissible band collapses from the 70 mm amplitude to
 roughly the 15 mm rung spacing:
 
-<!--EPSILON_TABLE-->
+| edit target | rivals | all-rival | eps = 0 | eps = 0.1 | eps = 0.25 | eps = 0.5 | any-rival |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `crouch_040` | 1 | 33.2 | 33.2 | 33.2 | 33.2 | 33.2 | 33.2 |
+| `crouch_055` | 4 | 8.3 | 15.2 | 15.2 | 41.7 | 41.7 | 41.7 |
+| `crouch_070` | 5 | 8.3 | 15.5 | 15.5 | 31.3 | 50.5 | 50.5 |
+
+All medians in millimetres over the same twelve clips.
+
+Three things to read off it:
+
+* **`crouch_040` is invariant across every column.** Its only cheaper candidate is the nominal, so
+  all three readings coincide by construction. That the numbers agree is a check on the instrument,
+  not a finding.
+* **The amplitude law inverts once the ladder is taken seriously.** At `eps = 0` a 40 mm crouch
+  admits a **33.2 mm** margin and a 70 mm crouch only **15.5 mm** — the shallowest edit in the
+  ladder is the most explainable one, and going deeper *halves* the room available. The any-rival
+  law's tidy 0.578 slope describes a quantity no sound scene can claim.
+* **The jumps sit exactly at the rungs' cost gaps.** `crouch_055` costs 0.214 less than
+  `crouch_070` and `crouch_040` costs 0.429 less, so `crouch_070`'s ceiling steps up at
+  `eps = 0.25` (releasing `crouch_055`) and again at `eps = 0.5` (releasing `crouch_040` and the
+  tucks). `eps` is not a smoothing knob; it selects which rungs the scene must argue against.
 
 **The ceiling is set by the spacing of the edit ladder, not by the amplitude of the edit.** A deeper
 crouch buys room against the nominal and spends it on the rungs it passes through. This is

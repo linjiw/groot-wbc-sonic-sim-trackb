@@ -19,10 +19,21 @@ defend, not harder. Detail: `docs/hallucination/REPORT_SCENE_CEILING.md`.
 **1. Whether a usable scene exists is a property of the edit, not of the model.** An exhaustive
 single-box search over station x lateral x height finds, per clip, the largest two-sided margin any
 scene can hold — the observed motion clearing every obstacle *and* the cheapest rival being struck.
-That ceiling is close to linear in the crouch amplitude. So `S_{eps,delta}(tau)` is non-empty
-essentially whenever `amplitude >= delta_clear + delta_strike`, and a brute-force search saturates
-it. **No learned hallucinator can be justified by existence.** Any paper claim of the form "our
-model finds scenes that explain the motion" is answered by a grid search, and a reviewer will say so.
+A brute-force search saturates that ceiling on every clip, in seconds, untrained. **No learned
+hallucinator can be justified by existence.** Any paper claim of the form "our model finds scenes
+that explain the motion" is answered by a grid search, and a reviewer will say so.
+
+And the ceiling behaves in a way that is worth a figure of its own. Read naively — "the scene must
+strike *some* cheaper candidate" — it is beautifully linear in the crouch amplitude,
+`ceiling_mm ~= 0.578 * amplitude_mm + 10.0`. Read correctly, it **inverts**. A deep edit acquires
+its own shallower versions as rivals: `crouch_070` has five cheaper candidates, one of them a 55 mm
+crouch whose body sits 15 mm away. At a regret tolerance of zero the achievable margin is **33.2 mm
+at a 40 mm crouch and only 15.5 mm at a 70 mm one**. The shallowest rung of the ladder is the most
+explainable edit in it, and going deeper halves the room a scene has to work with.
+
+So the ladder is part of the problem specification, not a sampling convenience: each rung added
+between the nominal and the target is another candidate every scene must argue against. Denser
+ladders buy resolution in edit space and pay for it in scene expressiveness.
 
 **2. The previous training run was chasing an infeasible target, and its headline number was
 measuring that.** It demanded 40 mm of clearance plus 30 mm of strike at a **40 mm** crouch, against
