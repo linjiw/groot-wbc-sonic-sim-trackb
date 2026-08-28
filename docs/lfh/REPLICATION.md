@@ -82,7 +82,15 @@ $PY scripts/research/hallucination/build_candidate_sets.py --clips 24
 # 2. Train against TRUE signed clearance, with a held-out split. This is the
 #    current pipeline; it supersedes train_lflh.py.
 $PY scripts/research/hallucination/train_lflh_sdf.py \
-    --clips 16 --holdout 5 --steps 1200 --samples 2 --stride 8
+    --clips 16 --holdout 5 --steps 1200 --samples 2 --stride 8 \
+    --target crouch_070 --model-out /tmp/sdf.pt
+
+# 2b. The bound the model is measured against: the best two-sided margin any single box can
+#     reach per clip, by exhaustive search. Report efficiency against this, never a raw margin.
+$PY scripts/research/hallucination/measure_scene_ceiling.py --clips 12
+
+# 2c. What one forward pass is worth in units of search, plus the motion-blind ablation.
+$PY scripts/research/hallucination/compare_amortisation.py --model-in /tmp/sdf.pt
 
 # 3. Render generated scenes against the motions that produced them.
 $PY scripts/research/hallucination/render_lflh_scenes.py \
@@ -170,22 +178,39 @@ $PY scripts/research/hallucination/run_case_study.py
   inert obstacle; the explained motion physically intersected an obstacle in 21/24 scenes; the
   ablation control was confounded; there was no train/test split.
 
-**Current honest LfLH numbers** — `docs/hallucination/lflh_sdf.json`, out of sample:
-selection 28.7% vs 15.0% random, robot-clear 18.8% vs 0.0% random.
+**Current honest LfLH numbers** — `docs/hallucination/lflh_sdf.json`, out of sample: selection
+28.7% vs 15.0% random, robot-clear 18.8% vs 0.0% random. **Read them with
+`REPORT_SCENE_CEILING.md`**: that run's objective was infeasible and its clearance metric was the
+training surrogate, so both numbers are lower bounds on nothing in particular. They are retained as
+the record of a diagnosed run, not as a result.
 
 ## 7. Known open issues
 
-1. **Robot-clear rate is under 20%.** The signed-clearance barrier is correct but the model is
-   under-trained against it. Longer runs, and a `m_hit`/`m_clear` two-sided margin loss.
+1. ~~**Robot-clear rate is under 20%.**~~ **Explained, 2026-08-28.** The barrier was correct and
+   the model was not under-trained: the *target* was outside the feasible set. Demanding 40 mm of
+   clearance plus 30 mm of strike at a 40 mm crouch exceeds what the geometry can hold — an
+   exhaustive box search puts the ceiling at a median of 33.2 mm. The run's final barrier of 0.011
+   per clip-sample decodes to a 55 mm residual, matching its own reported median clearance to
+   1 mm. See `docs/hallucination/REPORT_SCENE_CEILING.md`. Margins are now derived from the
+   amplitude, and `measure_scene_ceiling.py` reports the bound any hallucinator is measured against.
+   A second defect fell out of the same reading: every "robot clear" figure before that date used
+   the *soft* minimum the loss is trained through, which is never below the true distance, so a
+   scene could be reported clear with the robot inside a box. `exact_clearance` is now the reported
+   quantity.
 2. **Missing from the design spec**: trackability and progress terms in the candidate cost, a
    secondary-contact penalty over links outside the binding group, and a structured constraint
    `kappa` with an explicit regime and surface normal (obstacles are currently axis-aligned boxes
    with direction only implicit).
-3. **No checkpoints are saved** by the trainers, so no reported model can be re-evaluated. Add
-   `--model-out` usage (the flag exists in `train_lflh_sdf.py`).
+3. ~~**No checkpoints are saved**~~ — `train_lflh_sdf.py --model-out` is now used by every run, and
+   `render_lflh_sdf_scenes.py --model-in` / `compare_amortisation.py --model-in` re-evaluate a
+   saved model without retraining.
 4. **`tuck_right` does not amortise** although it works per clip — likely a sign convention in the
    lateral gate, since `tuck_left` does.
 5. **Oriented faces are half-done**: `overhead_face_reach` accepts `route_yaw_rad`, but scene
    authoring and keep-out are still axis-aligned, so no curved-route family can be built yet. The
    94-clip case study measures the cost: misalignment reaches 52.6°.
 6. **Scaling untested.** `lflh_candidates_large.json` has 64 sets ready for it.
+7. **The rival set is the open question.** "The scene excludes the alternative" has two readings —
+   some cheaper candidate is struck, or every cheaper candidate is. They coincide only when the
+   edit ladder has a single rung. `measure_scene_ceiling.py` now reports both; LFH-E19 in the
+   prediction register registers what the difference is expected to be, before the run.

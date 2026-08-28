@@ -6,7 +6,7 @@ quietly becomes a "finding we always suspected".
 
 ## Open
 
-### P9: retiming the adapted clip pays back the transport cost, and pays back the right amount
+### P9 — REFUTED. Retiming does not pay back the transport cost, because the cost is a ratio and not a debt
 
 **Registered 2026-08-19, before the retimed clip has been rolled out.**
 
@@ -66,6 +66,53 @@ that produced a well-formed table. Only the frame number of the strike was wrong
 an expectation of where the crouch was.
 
 The attempt is void, not negative. P9 stands unanswered and its predictions are unchanged.
+
+**Result, 2026-08-19, on the correctly-placed clip.** Predictions 1 and 2 are refuted; 3 partly
+holds. Both adapted cells ran clean and the preflight confirmed the route meets the obstacle.
+
+| clip | frames | commanded | delivered | ratio | endpoint |
+|---|---:|---:|---:|---:|---:|
+| nominal | 199 | 5.288 m | 5.100 m | 96.4% | 0.2171 m |
+| crouch, causal | 199 | 5.288 m | 4.859 m | 91.9% | 0.5242 m |
+| crouch, retimed | 217 | 5.280 m | 4.807 m | **91.0%** | **0.5647 m** |
+
+*Prediction 1, refuted.* `adapted_easy` and `adapted_hard` both record 0.5647 m against a 0.35 m
+gate — **worse** than the 0.5242 m the un-retimed clip achieved.
+
+*Prediction 2, refuted, and more informatively than 1.* The correction was supposed to bring the
+endpoint to within 0.06 m of the nominal's 0.217 m. It moved it 40 mm in the wrong direction.
+
+*Prediction 3, partly held.* The 2×2's contact structure survives and improves: `nominal_hard` still
+strikes at 1543.6 N, while both adapted cells now peak at **15.2 N**, down from the causal clip's
+49.1 N, and `disallowed_robot_contact` no longer appears on either. Retiming did buy clearance. It
+is still rejected, now for `unstable_reference_drift` rather than for tracking error — a different
+gate, not a softer one.
+
+**Why it failed, which is the part worth keeping.** The clip was given 18 extra frames and delivered
+*less* distance: 4.807 m against 4.859 m, at a delivery ratio of 91.0% against 91.9%. More time did
+not let the robot catch up, because it was never running out of time.
+
+The correction assumed the shortfall is a **debt**: a fixed number of metres the robot failed to
+cover, recoverable by commanding the same distance more slowly. The measurement says it is a
+**ratio**: a crouched G1 delivers roughly 91% of whatever arclength it is commanded, and stretching
+the clock stretches the loss along with it. `d` is not a constant to divide by a window; it is
+proportional to the window.
+
+That makes P9 the same species of error as P1–P4, and it is worth naming as such rather than filed
+as an unlucky guess. Each of those inferred trackability from a clip instead of measuring it. This
+one inferred a *transport model* from a single endpoint number when the delivery ratio was sitting
+in the same trajectory pickle and could have been measured first. The lesson is not "retiming does
+not work" — it is that the quantity to measure before correcting anything is the ratio, not the
+residual.
+
+**What follows.** A correction that respects a proportional loss has to command **less distance**,
+not less speed — which moves the goal, which is exactly what the matched pair holds fixed. So the
+deployable skill and the causal reference diverge more than
+[the two-artifact split](deployable_skill_bank.md) assumed: they cannot share a goal. That is a
+design consequence, not a tuning parameter, and it is not taken here.
+
+The 15.2 N result also stands on its own and should not be lost in the refutation: whatever retiming
+does to the endpoint, it made the crouch's *clearance* strictly better.
 
 **What refutation would mean.** If 1 fails, transport is not what rejected the clip and the
 diagnosis below is wrong. If 1 holds and 2 fails, retiming is a usable engineering fix whose
@@ -2041,3 +2088,36 @@ the deepest rung accepted at 3/3 seeds, and a window is measured only there. Und
 single-seed definition E12 reported five delivered pairs; under the new one, of the three re-tested,
 two survive. `docs/hallucination/e12_crouch_ladder.json` is not rewritten — its cells stand — but
 its yield figure should be read as an upper bound.
+
+---
+
+## LFH-E19 — the ladder is its own rival set (registered 2026-08-28, before reading the run)
+
+Two `train_lflh_sdf.py` runs are in flight (`crouch_070`, `crouch_040`, 11 train / 5 held-out clips)
+and a second ceiling sweep is measuring two readings of "the scene excludes the alternative":
+
+* **any-rival** — some cheaper candidate is struck. Measured first, and it gives a clean linear law,
+  `ceiling_mm ~= 0.578 * amplitude_mm + 10.0`: 33.2 / 41.7 / 50.5 mm median at 40 / 55 / 70 mm.
+* **all-rival** — *every* cheaper candidate is struck. This is what the training loss actually asks
+  for, and what makes the observed motion the only survivor rather than merely a survivor.
+
+The two coincide at `crouch_040`, whose only cheaper candidate is the nominal. They cannot coincide
+at `crouch_070`, which has **five**: nominal, `crouch_040`, `crouch_055`, and both 40 mm tucks.
+
+**P5.** Under the all-rival rule the ceiling will *not* follow the amplitude. A box that clears
+`crouch_070` and strikes the nominal must also strike `crouch_055`, whose body sits only 15 mm above
+`crouch_070`'s — so the admissible band collapses from the 70 mm amplitude to roughly the 15 mm rung
+spacing. I predict the all-rival median ceiling at `crouch_070` comes out **below** the any-rival
+median at `crouch_040` (33.2 mm), and below its own any-rival figure (50.5 mm) by more than half.
+
+**P6.** Consequently the `crouch_070` training run, whose margins were set from the *any-rival*
+ceiling at 27.6 mm per side, is infeasible under the rule its own loss enforces, and will report a
+**lower** counterfactual rate than the `crouch_040` run at 18.7 mm per side — the opposite of what
+the amplitude law predicts. If P6 holds, margins must be derived from the all-rival ceiling and both
+runs re-done; the amplitude law in `REPORT_SCENE_CEILING.md` §2 then describes an upper bound that
+only a single-rung ladder attains.
+
+**P7.** The falsifier: if the all-rival ceiling at `crouch_070` lands within a few mm of the
+any-rival one, then the intermediate rungs are being struck for free by the same box, the rival set
+is not binding, and P5–P6 are wrong. Either way the ceiling instrument now reports both, so the
+question cannot be quietly dropped.

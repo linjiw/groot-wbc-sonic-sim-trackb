@@ -11,6 +11,58 @@ the ordering below and stretch the scale, not the scope.
 
 ---
 
+## Update — 2026-08-28: the paper's claim about the learned model has to change
+
+Two measurements this week move the thesis, and they move it in a direction that makes it easier to
+defend, not harder. Detail: `docs/hallucination/REPORT_SCENE_CEILING.md`.
+
+**1. Whether a usable scene exists is a property of the edit, not of the model.** An exhaustive
+single-box search over station x lateral x height finds, per clip, the largest two-sided margin any
+scene can hold — the observed motion clearing every obstacle *and* the cheapest rival being struck.
+That ceiling is close to linear in the crouch amplitude. So `S_{eps,delta}(tau)` is non-empty
+essentially whenever `amplitude >= delta_clear + delta_strike`, and a brute-force search saturates
+it. **No learned hallucinator can be justified by existence.** Any paper claim of the form "our
+model finds scenes that explain the motion" is answered by a grid search, and a reviewer will say so.
+
+**2. The previous training run was chasing an infeasible target, and its headline number was
+measuring that.** It demanded 40 mm of clearance plus 30 mm of strike at a **40 mm** crouch, against
+a measured ceiling of 31.6 mm. The final barrier of 0.011 per clip-sample decodes to a 55 mm
+residual violation, which is exactly the -0.054 m median clearance the same run reported. The 18.8%
+robot-clear rate was the infeasibility, not the model. Margins are now derived from the amplitude.
+
+### What this means for the claim ladder
+
+The defensible claim is **amortisation and conditioning**, not existence:
+
+> **C-LfLH.** For an unseen motion, a single forward pass of `q_psi(S | tau)` returns a scene whose
+> two-sided counterfactual margin is a large fraction of the per-clip ceiling — a ceiling that
+> otherwise costs an exhaustive search to reach — and it does so *because* it conditions on the
+> motion, not despite it.
+
+That claim has three falsifiable parts, and all three now have an instrument:
+
+1. **Efficiency**, `achieved margin / ceiling` per clip — `measure_scene_ceiling.py` plus
+   `render_lflh_sdf_scenes.py`. Report it; never report a raw margin alone, because a small margin
+   may be the task.
+2. **Search equivalence**, how many random draws a search needs to match one forward pass —
+   `compare_amortisation.py`. If the answer is one or two draws, the model is worth nothing and the
+   paper should say the closed form is the method.
+3. **Conditioning**, the motion-blind ablation from the first retraction, run as a standing
+   diagnostic rather than a one-off.
+
+Write the negative if it comes out negative. The closed-form window is a perfectly good method, and
+this project has now retracted three results by claiming more than the measurement supported.
+
+### A defect worth remembering
+
+Every "robot clear" number reported before today used `SdfChoiceDecoder.clearance`, which is a
+**soft** minimum — a weighted average, therefore never below the true minimum. A scene could score
+clear while a point of the robot was inside a box. `exact_clearance` is now the reported quantity,
+the smooth form is used only for gradients, and both share one signed-distance implementation.
+The lesson generalises: *never report the quantity you optimised through a smoothing.*
+
+---
+
 ## Update — 2026-08-26, after the code audit and first model fits
 
 Everything below this section was written before auditing the code. Five things changed, and two
