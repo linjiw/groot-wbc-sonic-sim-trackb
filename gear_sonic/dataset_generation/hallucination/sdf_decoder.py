@@ -79,7 +79,29 @@ class SdfChoiceDecoder:
 
         ``points`` is (N, 3) in world metres; the box tensors are (K,). Returns (K,).
         """
-        centre = torch.stack((box["centre_x"], box["centre_y"], box["centre_z"]), dim=-1)  # (K, 3)
+        signed = self._signed(points, radii, box)
+        # Smooth minimum, so the gradient reaches the nearest few points rather than only one.
+        weights = torch.softmax(-signed / self.softmin_temperature_m, dim=-1)
+        return (weights * signed).sum(dim=-1)
+
+    def exact_clearance(
+        self, points: torch.Tensor, radii: torch.Tensor, box: dict[str, torch.Tensor]
+    ) -> torch.Tensor:
+        """Hard minimum signed distance -- the honest metric, not the training surrogate.
+
+        ``clearance`` returns a soft minimum so gradients reach the nearest few points. A soft
+        minimum is a weighted average and is therefore never below the true minimum, so reporting
+        "the robot is clear" from it is optimistic: a scene can score positive while a point of the
+        body is actually inside a box. Training uses the smooth form; every reported number uses
+        this one.
+        """
+        signed = self._signed(points, radii, box)
+        return signed.amin(dim=-1)
+
+    def _signed(
+        self, points: torch.Tensor, radii: torch.Tensor, box: dict[str, torch.Tensor]
+    ) -> torch.Tensor:
+        centre = torch.stack((box["centre_x"], box["centre_y"], box["centre_z"]), dim=-1)
         half = torch.stack(
             (box["half_along_m"], box["half_lateral_m"], box["half_vertical_m"]), dim=-1
         )
@@ -89,14 +111,10 @@ class SdfChoiceDecoder:
         local_x = cos[:, None] * delta[..., 0] - sin[:, None] * delta[..., 1]
         local_y = sin[:, None] * delta[..., 0] + cos[:, None] * delta[..., 1]
         local = torch.stack((local_x, local_y, delta[..., 2]), dim=-1)
-        # Exact signed distance to an axis-aligned box in its own frame.
         q = local.abs() - half[:, None, :]
         outside = torch.linalg.vector_norm(torch.clamp(q, min=0.0), dim=-1)
         inside = torch.clamp(q.amax(dim=-1), max=0.0)
-        signed = outside + inside - radii[None, :]
-        # Smooth minimum, so the gradient reaches the nearest few points rather than only one.
-        weights = torch.softmax(-signed / self.softmin_temperature_m, dim=-1)
-        return (weights * signed).sum(dim=-1)
+        return outside + inside - radii[None, :]
 
     def candidate_clearance(
         self, clouds: list[tuple[torch.Tensor, torch.Tensor]], box: dict[str, torch.Tensor]
