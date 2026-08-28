@@ -61,6 +61,7 @@ def _diversity(parameters: np.ndarray) -> dict[str, float]:
 
 
 def _score(model, sets, geometry, decoder, *, count: int, seed: int, profile_override=None):
+    """Score scenes; ``profile_override`` replaces only the encoder input, never the candidates."""
     rates, diversity, chosen = [], [], []
     for row, item in enumerate(sets):
         extents = np.asarray(item["extents"], dtype=np.float64)
@@ -75,6 +76,7 @@ def _score(model, sets, geometry, decoder, *, count: int, seed: int, profile_ove
             geometry=geometry,
             decoder=decoder,
             seed=seed + row,
+            profile_override=profile_override,
         )
         rates.append(batch.reconstruction_rate)
         diversity.append(_diversity(batch.parameters))
@@ -146,16 +148,24 @@ def main() -> int:
 
     learned, scenes = _score(model, sets, geometry, decoder, count=args.draws, seed=args.seed)
 
-    # Control 1: the trained model fed the corpus-mean profile instead of each clip's own.
-    mean_profile = np.mean(
+    # Control 1: the trained model fed the corpus-mean profile instead of each clip's own -- and
+    # nothing else changed. Overwriting `extents` corrupts the scored candidates as well as the
+    # encoder input, which conflates the encoder's input-dependence with a scoring artifact; the
+    # artifact alone was measured larger than the effect. Only the profile is replaced here.
+    mean_nominal = np.mean(np.stack([extents[row][0] for row in range(len(sets))]), axis=0)
+    mean_observed = np.mean(
         np.stack([extents[row][observed[row]] for row in range(len(sets))]), axis=0
     )
-    ablated_sets = [dict(item) for item in sets]
-    for item in ablated_sets:
-        block = np.asarray(item["extents"], dtype=np.float64).copy()
-        block[item["observed_index"]] = mean_profile
-        item["extents"] = block.tolist()
-    ablated, _ = _score(model, ablated_sets, geometry, decoder, count=args.draws, seed=args.seed)
+    mean_profile = np.stack((mean_nominal, mean_observed), axis=0)
+    ablated, _ = _score(
+        model,
+        sets,
+        geometry,
+        decoder,
+        count=args.draws,
+        seed=args.seed,
+        profile_override=mean_profile,
+    )
 
     # Control 2: obstacles drawn from the prior, no learning at all.
     class _Prior:

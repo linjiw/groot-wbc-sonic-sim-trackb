@@ -588,6 +588,7 @@ def sample_scenes(
     motion_id: str,
     *,
     count: int,
+    profile_override: np.ndarray | None = None,
     geometry: ObstacleGeometry | None = None,
     decoder: ChoiceDecoder | None = None,
     seed: int = 0,
@@ -599,7 +600,17 @@ def sample_scenes(
     decoder = decoder or ChoiceDecoder()
     extent_tensor = torch.tensor(extents, dtype=torch.float32)
     cost_tensor = torch.tensor(costs, dtype=torch.float32)
-    profile = torch.stack((extent_tensor[0], extent_tensor[observed_index]), dim=0)[None, ...]
+    # The encoder input and the scored candidates must be separable. An input ablation that
+    # overwrites `extents` changes *both*, so it measures the encoder's input-dependence and a
+    # scoring artifact at once -- and the artifact was measured larger than the effect it was
+    # supposed to isolate (re-scoring unchanged scenes against the corpus mean moved the match
+    # rate 1.00 -> 0.75 on its own).
+    if profile_override is not None:
+        profile = torch.tensor(profile_override, dtype=torch.float32)
+        if profile.dim() == 3:
+            profile = profile[None, ...]
+    else:
+        profile = torch.stack((extent_tensor[0], extent_tensor[observed_index]), dim=0)[None, ...]
     with torch.no_grad():
         mean, log_sigma = model(profile)
         sigma = log_sigma.exp()

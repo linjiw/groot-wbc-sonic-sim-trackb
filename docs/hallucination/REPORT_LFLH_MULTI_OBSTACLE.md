@@ -1,5 +1,49 @@
 # Multi-obstacle LfLH for humanoid counterfactuals: what works, and what does not
 
+> ## RETRACTION, 2026-08-27
+>
+> **Addenda 2 and 3 of this report are withdrawn.** Two independent audits, prompted by a reviewer
+> noticing that the robot appears to overlap obstacles in the rendered videos, found that it does.
+> The reviewer was right and the reports were wrong. Specifically:
+>
+> * **The explained motion physically intersects an obstacle in 21 of 24 shipped scenes** (median
+>   34 mm, max 773 mm), measured by true capsule-to-box distance. The crouch "wins" only because
+>   the nominal is blocked *more*, not because the scene admits the crouch.
+> * **The box the renderer labels "binding" is inert.** Acting alone it selects the *nominal* in
+>   24/24. It sits at 1.75 m -- exactly the ceiling of the height parameterisation -- 33 cm above a
+>   standing head. The box doing the work is an unlabelled 0.81 x 2.40 x 1.02 m slab.
+> * **The "plausibility 1.00" claim was measured on that inert box.** Across all 120 sampled
+>   obstacles only 40% satisfy `PlausibleShape`, and the slab that actually discriminates satisfies
+>   it in 0/24.
+> * **The clearance term was dead code.** `relu(blockedness + 0.05)` where blockedness is a
+>   softplus and therefore strictly positive: the `relu` never fired, the loss had no reachable
+>   minimum, and its only escape direction was height -- which is what drove every obstacle to the
+>   ceiling.
+> * **The decoder had a blind spot.** Gates multiplied the depth *before* the softplus, so a 1.6 m
+>   wall standing across the walking path scored 0.008976 against 0.008394 for the same wall ten
+>   metres in the sky. Geometrically intersecting and comfortably clear were indistinguishable.
+> * **The input-ablation control was confounded.** It overwrote `extents`, which is both the
+>   encoder input and the scored candidate. Re-scoring the *unchanged* scenes against the corpus
+>   mean moves the match rate 1.00 -> 0.75 on its own -- a larger artifact than the effect claimed.
+>   Corrected, the operator-conditioned result is **0.986 vs 0.979** (3/12 clips differ, p = 0.25),
+>   not 0.986 vs 0.877. **The amortisation win does not survive.**
+> * **There was no train/test split.** Every number in Addenda 1-3 is in-sample on 12-24 clips.
+> * Several headline figures came from throwaway scripts, were never committed, and no checkpoint
+>   was saved, so they cannot be re-evaluated.
+>
+> What survives: the decoder *does* decide (an empty scene selects the nominal, a wide overhead bar
+> the crouch, a left obstacle the left tuck), and the dual objective works -- relaxing the scene by
+> 10 cm restores the nominal in 23/24. The mechanism is real. The measurements built on the
+> envelope decoder are not.
+>
+> Both audits independently named the same highest-value fix: **a signed clearance in metres,
+> computed against real capsule geometry.** That is now implemented
+> (`hallucination/sdf_decoder.py`, `scripts/research/hallucination/train_lflh_sdf.py`) with a
+> held-out split, and it is verified to separate the cases the old decoder confused: a wall across
+> the path scores -0.200 m, the same wall in the sky +8.670 m. Numbers from it supersede everything
+> below.
+
+
 **Date:** 2026-08-27
 **Code:** `gear_sonic/dataset_generation/hallucination/{lflh,motion_envelope}.py`,
 `scripts/research/hallucination/{build_candidate_sets,train_lflh}.py` · **Tests:** 12
