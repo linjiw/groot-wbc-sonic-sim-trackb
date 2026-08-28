@@ -112,7 +112,37 @@ reported clear by the soft minimum and penetrating by the hard one.
 
 ## 6. What this changes
 
-<!--IMPLICATIONS-->
+**1. The paper cannot claim that a learned hallucinator finds scenes explaining a motion.** An
+exhaustive box search saturates the bound on every clip, in seconds, with no training. Existence is
+not the contribution and a reviewer will say so. What remains is **amortisation and conditioning**:
+a near-ceiling scene for an unseen motion in one forward pass, *because* the model conditions on the
+motion. `compare_amortisation.py` measures that as search-equivalence — how many random draws match
+one forward pass — with the motion-blind ablation from the first retraction as a standing
+diagnostic. If the answer is one or two draws, the closed form is the method and the paper should
+say so.
+
+**2. Never report a margin without its ceiling.** A raw margin is uninterpretable: a small one may
+be the task rather than the model, which is exactly the error that produced the retracted 18.8%.
+Efficiency — achieved margin over the per-clip ceiling — is the reportable quantity, and
+`render_lflh_sdf_scenes.py --with-oracle` renders the model's scene beside the provable optimum for
+the same clip so a figure cannot overstate it either.
+
+**3. `eps` is a design parameter and has to be declared.** It is how much edit cost the robot is
+allowed to have wasted, and the achievable margin depends on it by more than an order of magnitude.
+A paper that reports a margin without stating its regret tolerance has not reported anything. The
+default here is 0.25, which tolerates the neighbouring rung of the same operator and excludes
+everything coarser.
+
+**4. The edit ladder is part of the problem specification, not a sampling convenience.** Adding
+rungs between the nominal and the target shrinks every scene's achievable margin, because each rung
+is a candidate the scene must rule out. A denser ladder is not a free improvement in coverage; it
+buys resolution in the edit space and pays for it in scene expressiveness. That trade is worth a
+figure.
+
+**5. Two habits, both learned the hard way here.** Never report the quantity you optimised through a
+smoothing — report the exact one. And check feasibility before attributing a failure to the model:
+the residual of an unconverged barrier is a number, and decoding it took one line of arithmetic that
+would have saved the previous run entirely.
 
 ## Reproduce
 

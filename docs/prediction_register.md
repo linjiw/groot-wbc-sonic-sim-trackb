@@ -2121,3 +2121,37 @@ only a single-rung ladder attains.
 any-rival one, then the intermediate rungs are being struck for free by the same box, the rival set
 is not binding, and P5–P6 are wrong. Either way the ceiling instrument now reports both, so the
 question cannot be quietly dropped.
+
+### LFH-E19 outcome, part 1 (2026-08-28)
+
+**P5 confirmed, and by a wider margin than predicted.** On `crouch_070`, clip 000: the any-rival
+ceiling is **49.7 mm** and the all-rival ceiling is **2.7 mm** — a factor of eighteen, against a
+prediction of "below 33.2 mm and less than half of 50.5". The intermediate rung is not merely
+binding, it is almost the whole story. P7's falsifier (the two rules landing within a few mm of each
+other) is decisively not what happened.
+
+The `eps`-parameterised reading interpolates between them exactly as the definition says it should:
+
+| regret tolerance `eps` | ceiling, clip 000 |
+|---|---:|
+| 0 | 16.1 mm |
+| 0.1 | 16.1 mm |
+| 0.25 | 37.8 mm |
+| 0.5 | 49.7 mm |
+
+`crouch_055` costs 0.214 less than `crouch_070`, which is why the ceiling jumps between `eps = 0.1`
+and `eps = 0.25`: that is the tolerance at which the neighbouring rung stops having to be excluded.
+
+**P6 is settled by geometry, and its run was stopped rather than completed.** The prediction was
+that the `crouch_070` training run would report a lower counterfactual rate than `crouch_040`,
+because its 27.6 mm margins were taken from the any-rival ceiling while its loss enforced the
+all-rival rule. The ceiling measurement establishes the infeasibility directly and far more cheaply:
+27.6 mm demanded against 2.7 mm achievable. The run was killed at 67 minutes on a box already at
+load average 90, and its loss formulation has since been replaced. **P6 should therefore be read as
+confirmed by the instrument, not by the experiment it was registered against** — the weaker of the
+two, and recorded as such.
+
+What replaces it: the rival term now implements `S_{eps,delta}` directly — necessity charged to the
+cheapest candidate, regret to anything cheaper by more than `eps` — and margins are read from
+`scene_ceiling.json` for the target and tolerance in use, so a training objective outside the
+feasible set can no longer be written by hand.
