@@ -40,7 +40,9 @@ def ramp(count: int, start: float = 0.0) -> list[float]:
 
 def fake_report(*, accepted=True, reasons=(), errors=()):
     return SimpleNamespace(
-        accepted=accepted, rejection_reasons=tuple(reasons), errors=tuple(errors),
+        accepted=accepted,
+        rejection_reasons=tuple(reasons),
+        errors=tuple(errors),
         diagnostics={},
     )
 

@@ -49,7 +49,6 @@ def _open_map(**overrides) -> SceneObstacleMap:
     return SceneObstacleMap(**defaults)
 
 
-
 def _plan(path, obstacle_map, **kwargs):
     """Coarse search defaults: these tests assert behaviour, not search resolution."""
     kwargs.setdefault("translation_step_m", 1.0)

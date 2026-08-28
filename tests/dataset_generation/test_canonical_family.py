@@ -105,6 +105,7 @@ def test_the_claim_is_worded_no_more_broadly_than_what_was_varied(robustness):
 def test_the_perturbations_are_small_enough_to_leave_the_task_unchanged(robustness):
     """Large enough to break bit-identical replay, small enough that it is the same task."""
     import math
+
     for perturbation in robustness["perturbations"]:
         offset = math.hypot(perturbation["dx_m"], perturbation["dy_m"])
         assert 0.005 < offset < 0.05, offset

@@ -15,9 +15,7 @@ from gear_sonic.dataset_generation.reference_gate import (
 )
 from gear_sonic.dataset_generation.self_intersection import DEFAULT_G1_MJCF
 
-pytestmark = pytest.mark.skipif(
-    not Path(DEFAULT_G1_MJCF).exists(), reason="G1 MJCF not present"
-)
+pytestmark = pytest.mark.skipif(not Path(DEFAULT_G1_MJCF).exists(), reason="G1 MJCF not present")
 
 
 def standing(frames: int = 40) -> np.ndarray:
@@ -29,10 +27,19 @@ def standing(frames: int = 40) -> np.ndarray:
 
 def signature(**kw) -> EnvelopeSignature:
     base = dict(
-        episode_id="nominal", behaviour="walk", frames=40, duration_s=1.3,
-        start_xy=(0.0, 0.0), goal_xy=(2.0, 0.0), path_length_m=2.0,
-        net_displacement_m=2.0, heading_change_rad=0.0, mean_speed_mps=1.5,
-        min_silhouette_peak_m=1.30, min_half_width_m=0.30, min_foot_apex_m=0.13,
+        episode_id="nominal",
+        behaviour="walk",
+        frames=40,
+        duration_s=1.3,
+        start_xy=(0.0, 0.0),
+        goal_xy=(2.0, 0.0),
+        path_length_m=2.0,
+        net_displacement_m=2.0,
+        heading_change_rad=0.0,
+        mean_speed_mps=1.5,
+        min_silhouette_peak_m=1.30,
+        min_half_width_m=0.30,
+        min_foot_apex_m=0.13,
     )
     base.update(kw)
     return EnvelopeSignature(**base)
@@ -40,8 +47,12 @@ def signature(**kw) -> EnvelopeSignature:
 
 def verdict(**kw) -> ReferenceVerdict:
     base = dict(
-        motion_id="m", body_mode="walk", reference_semantic_valid=True,
-        embodiment_feasible=True, self_collision_free=True, functionally_separated=True,
+        motion_id="m",
+        body_mode="walk",
+        reference_semantic_valid=True,
+        embodiment_feasible=True,
+        self_collision_free=True,
+        functionally_separated=True,
     )
     base.update(kw)
     return ReferenceVerdict(**base)
@@ -49,11 +60,13 @@ def verdict(**kw) -> ReferenceVerdict:
 
 # ---- the four facts are independent -------------------------------------------------------
 
+
 def test_an_unreachable_clip_is_told_to_retarget_not_rephrase():
     """crouch_walk's failure: semantically correct, physically impossible. Rewording the
     prompt cannot fix a joint that has no range."""
-    v = verdict(embodiment_feasible=False, worst_joint="waist_pitch_joint",
-                worst_joint_fraction=1.0)
+    v = verdict(
+        embodiment_feasible=False, worst_joint="waist_pitch_joint", worst_joint_fraction=1.0
+    )
     assert not v.worth_a_rollout
     assert "retarget" in v.diagnosis
     assert "waist_pitch_joint" in v.diagnosis
@@ -73,7 +86,7 @@ def test_self_collision_blocks_a_rollout():
 
 
 def test_an_unchecked_behaviour_is_not_a_failure():
-    """"Nobody wrote the predicate" must not read the same as "the behaviour is absent"."""
+    """ "Nobody wrote the predicate" must not read the same as "the behaviour is absent"."""
     v = verdict(reference_semantic_valid=None)
     assert v.worth_a_rollout
     assert "no predicate exists" in v.diagnosis
@@ -93,6 +106,7 @@ def test_a_clean_clip_says_so():
 
 
 # ---- running the real checks ---------------------------------------------------------------
+
 
 def test_a_standing_reference_is_reachable_and_collision_free():
     v = screen_reference(standing(), "still", "walk")

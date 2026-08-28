@@ -18,9 +18,7 @@ STRAIGHT = np.stack([np.linspace(-2.0, 2.0, 40), np.zeros(40)], axis=1)
 
 
 def test_clearance_is_the_measured_body_plus_a_drift_allowance():
-    assert EVAL_CLEARANCE_M == pytest.approx(
-        MEASURED_BODY_HALF_WIDTH_M + POLICY_DRIFT_ALLOWANCE_M
-    )
+    assert EVAL_CLEARANCE_M == pytest.approx(MEASURED_BODY_HALF_WIDTH_M + POLICY_DRIFT_ALLOWANCE_M)
     # The training generator's 0.45 m body radius was exceeded on 98% of measured episodes.
     assert MEASURED_BODY_HALF_WIDTH_M > 0.45
 

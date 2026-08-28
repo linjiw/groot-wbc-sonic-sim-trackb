@@ -134,9 +134,7 @@ def test_malformed_pose_arrays_are_rejected(pos_shape, quat_shape):
 
 def test_clearance_is_surface_to_surface_not_centre_to_centre():
     names = _all_names()
-    body_pos, body_quat = _pose(
-        1, names, {"pelvis": (0.0, 0.0, 1.08)}, parked=(50.0, 50.0, 50.0)
-    )
+    body_pos, body_quat = _pose(1, names, {"pelvis": (0.0, 0.0, 1.08)}, parked=(50.0, 50.0, 50.0))
     # Pelvis sphere centre ends up at z=1.0 with radius 0.07.
     box = ("floorbox", (-5.0, -5.0, 0.0, 5.0, 5.0, 0.5))
 
@@ -150,9 +148,7 @@ def test_clearance_is_surface_to_surface_not_centre_to_centre():
 
 def test_interpenetration_reports_negative_clearance():
     names = _all_names()
-    body_pos, body_quat = _pose(
-        1, names, {"pelvis": (0.0, 0.0, 0.10)}, parked=(50.0, 50.0, 50.0)
-    )
+    body_pos, body_quat = _pose(1, names, {"pelvis": (0.0, 0.0, 0.10)}, parked=(50.0, 50.0, 50.0))
     box = ("block", (-1.0, -1.0, 0.0, 1.0, 1.0, 1.0))
 
     report = swept_volume_clearance(body_pos, body_quat, names, [box])

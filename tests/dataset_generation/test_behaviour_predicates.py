@@ -57,6 +57,7 @@ def walk(frames: int, speed: float = 0.8) -> np.ndarray:
 
 # ---- pause -------------------------------------------------------------------------------
 
+
 def test_a_walk_with_a_real_stop_satisfies_pause():
     xy = np.concatenate([walk(60), np.tile(walk(1)[-1] + walk(60)[-1], (40, 1)), walk(60) + 1.0])
     assert check_pause(episode(xy)).satisfied
@@ -77,6 +78,7 @@ def test_stopping_and_never_resuming_is_not_a_pause():
 
 
 # ---- turn in place -----------------------------------------------------------------------
+
 
 def test_turning_without_translating_satisfies_turn_in_place():
     frames = 120
@@ -103,10 +105,11 @@ def test_barely_turning_is_not_a_turn():
 
 # ---- side step ---------------------------------------------------------------------------
 
+
 def test_moving_sideways_while_facing_forward_satisfies_side_step():
     frames = 120
     xy = np.zeros((frames, 2))
-    xy[:, 1] = np.arange(frames) * 0.6 / FPS      # travel along +y
+    xy[:, 1] = np.arange(frames) * 0.6 / FPS  # travel along +y
     assert check_side_step(episode(xy)).satisfied  # heading stays at 0, i.e. facing +x
 
 
@@ -119,7 +122,7 @@ def test_turning_and_walking_does_not_pass_as_a_side_step():
     frames = 160
     heading = np.concatenate([np.linspace(0.0, math.pi / 2, 40), np.full(120, math.pi / 2)])
     xy = np.zeros((frames, 2))
-    xy[40:, 1] = np.arange(120) * 0.6 / FPS        # walks along +y after turning to face it
+    xy[40:, 1] = np.arange(120) * 0.6 / FPS  # walks along +y after turning to face it
     result = check_side_step(episode(xy, heading))
     assert not result.satisfied
     assert "turn, not a side-step" in result.reason
@@ -148,6 +151,7 @@ def test_a_stationary_episode_cannot_be_assessed_as_a_side_step():
 
 
 # ---- duck under --------------------------------------------------------------------------
+
 
 def test_a_torso_that_dips_and_recovers_satisfies_duck_under():
     frames = 200
@@ -184,6 +188,7 @@ def test_a_known_shelf_height_turns_the_duck_into_a_clearance_check():
 
 
 # ---- start and stop ----------------------------------------------------------------------
+
 
 def test_walking_then_holding_satisfies_walk_to_stop():
     xy = np.concatenate([walk(120), np.tile(walk(120)[-1], (80, 1))])
@@ -230,8 +235,9 @@ def test_walk_look_has_no_predicate_yet_rather_than_the_wrong_one():
 
 # ---- dispatch ----------------------------------------------------------------------------
 
+
 def test_a_behaviour_without_a_predicate_returns_none_not_a_pass():
-    """"Nobody wrote the check" and "checked and correct" are different facts."""
+    """ "Nobody wrote the check" and "checked and correct" are different facts."""
     assert check_behaviour("carry_walk", episode(walk(120))) is None
 
 
@@ -251,6 +257,7 @@ def test_every_registered_predicate_is_callable():
 
 
 # ---- step over ---------------------------------------------------------------------------
+
 
 def stepping(frames: int, left_apex: float, right_apex: float) -> dict:
     """Two feet, each swinging once to its own apex, while the body walks forward."""
@@ -301,6 +308,7 @@ def test_a_recording_without_two_feet_cannot_be_assessed():
 
 # ---- narrow pass -------------------------------------------------------------------------
 
+
 def widening(frames: int, widths: np.ndarray) -> dict:
     """A body walking forward with two side links at a controllable half-width."""
     payload = episode(walk(frames))
@@ -348,7 +356,7 @@ def test_a_side_step_is_not_a_narrowing_which_is_the_whole_point():
     """
     frames = 120
     payload = widening(frames, np.full(frames, 0.55))
-    payload["root_pos_w"][:, 1] = np.arange(frames) * 0.6 / FPS     # travel along +y
+    payload["root_pos_w"][:, 1] = np.arange(frames) * 0.6 / FPS  # travel along +y
     payload["body_pos_w"][:, :, 1] += payload["root_pos_w"][:, None, 1]
     assert not check_narrow_pass(payload).satisfied
 
@@ -393,6 +401,7 @@ def test_both_new_lateral_modes_dispatch_to_the_width_predicate():
 
 # ---- domain transfer ---------------------------------------------------------------------
 
+
 def test_the_apex_threshold_differs_between_a_reference_and_a_rollout():
     """Tracking lowers the foot, so one absolute number cannot serve both domains.
 
@@ -404,7 +413,7 @@ def test_the_apex_threshold_differs_between_a_reference_and_a_rollout():
     on references, step_over apex is 0.193-0.226 m against a walk's 0.206-0.222 m,
     Mann-Whitney p = 0.693.
     """
-    payload = stepping(120, 0.21, 0.21)          # a reference-scale swing, not a step-over
+    payload = stepping(120, 0.21, 0.21)  # a reference-scale swing, not a step-over
     assert check_step_over(payload).satisfied, "0.21 m clears the executed threshold"
 
     payload["kind"] = "reference"

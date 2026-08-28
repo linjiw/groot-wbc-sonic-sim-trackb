@@ -52,13 +52,15 @@ def test_speed_phrase_appears_in_the_prompt():
 
 
 def test_direction_locked_modes_are_not_crossed_with_turns():
-    """"A person steps sideways, then turns sharply left" describes two different things."""
+    """ "A person steps sideways, then turns sharply left" describes two different things."""
     taxonomy = build_taxonomy(body_modes=["side_step"], speeds=["steady"], turns=list(TURN_STYLES))
     assert {spec.turn for spec in taxonomy.specs} == {"straight"}
 
 
 def test_terminal_action_modes_skip_sharp_turns_but_keep_gentle_curves():
-    taxonomy = build_taxonomy(body_modes=["walk_to_stop"], speeds=["steady"], turns=list(TURN_STYLES))
+    taxonomy = build_taxonomy(
+        body_modes=["walk_to_stop"], speeds=["steady"], turns=list(TURN_STYLES)
+    )
     turns = {spec.turn for spec in taxonomy.specs}
     assert not any(turn.startswith("sharp") for turn in turns)
     assert "gentle_left" in turns

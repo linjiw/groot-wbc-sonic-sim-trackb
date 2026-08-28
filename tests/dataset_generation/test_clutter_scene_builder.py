@@ -82,8 +82,9 @@ def test_the_room_actually_ends_up_cluttered():
 
 def test_a_larger_clearance_pushes_furniture_further_away():
     tight = build_clutter_scene(_straight(), scene_id="a", seed=2, clearance_m=0.75)
-    loose = build_clutter_scene(_straight(), scene_id="b", seed=2, clearance_m=1.5,
-                                max_distance_from_path_m=4.0)
+    loose = build_clutter_scene(
+        _straight(), scene_id="b", seed=2, clearance_m=1.5, max_distance_from_path_m=4.0
+    )
     assert loose.metrics["min_distance_to_path_m"] >= 1.5 - 1e-9
     assert tight.metrics["min_distance_to_path_m"] >= 0.75 - 1e-9
 

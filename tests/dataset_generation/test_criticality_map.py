@@ -7,8 +7,8 @@ confined to a height band binds whatever passes through that band.
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
+import sys
 
 import numpy as np
 import pytest
@@ -32,8 +32,8 @@ def synthetic_payload(frames: int = 40) -> dict:
     """
     names = ["torso_link", "left_wrist_yaw_link"]
     pos = np.zeros((frames, 2, 3))
-    pos[:, 0] = (0.0, 0.00, 0.78)   # torso, on the centre line, the higher of the two
-    pos[:, 1] = (0.0, 0.30, 0.65)   # wrist, out to the left, lower but wider
+    pos[:, 0] = (0.0, 0.00, 0.78)  # torso, on the centre line, the higher of the two
+    pos[:, 1] = (0.0, 0.30, 0.65)  # wrist, out to the left, lower but wider
     quat = np.tile(np.array([1.0, 0.0, 0.0, 0.0]), (frames, 2, 1))
     return {
         "body_names": names,
@@ -46,10 +46,6 @@ def synthetic_payload(frames: int = 40) -> dict:
 
 @pytest.fixture(scope="module")
 def mapped():
-    capsules = {
-        "torso_link": ((np.zeros(3), np.zeros(3), 0.10),),
-        "left_wrist_yaw_link": ((np.zeros(3), np.zeros(3), 0.05),),
-    }
 
     class Capsule:
         def __init__(self, radius):
@@ -97,23 +93,36 @@ def test_a_band_the_robot_never_occupies_binds_nothing(mapped):
 
 def test_margin_is_chosen_rather_than_searched():
     constraint = BindingConstraint(
-        "overhead", "left", "torso_link", 0.100, "torso_link", 1.300, 40,
-        "local_crouch", "local_crouch",
+        "overhead",
+        "left",
+        "torso_link",
+        0.100,
+        "torso_link",
+        1.300,
+        40,
+        "local_crouch",
+        "local_crouch",
     )
     assert obstacle_offset_for_margin(constraint, 0.020) == pytest.approx(0.120)
     assert obstacle_offset_for_margin(constraint, -0.010) == pytest.approx(0.090)
     # A ceiling's margin is a height, not a sideways offset, and mixing them would place an
     # obstacle a metre from where it was meant to go.
-    assert obstacle_offset_for_margin(
-        constraint, 0.020, obstacle="ceiling"
-    ) == pytest.approx(1.320)
+    assert obstacle_offset_for_margin(constraint, 0.020, obstacle="ceiling") == pytest.approx(1.320)
 
 
 def test_a_binding_part_with_no_operator_is_not_a_family():
     """An obstacle binding a part nothing can relieve produces a negative with no matching
     positive. That is a scene, not a counterfactual, and the difference must not be blurred."""
     unrelieved = BindingConstraint(
-        "floor", "left", "left_ankle_roll_link", 0.245, "right_knee_link", 0.423, 40, None, None,
+        "floor",
+        "left",
+        "left_ankle_roll_link",
+        0.245,
+        "right_knee_link",
+        0.423,
+        40,
+        None,
+        None,
     )
     assert unrelieved.frames_in_band > 0
     assert not unrelieved.constructible("wall")

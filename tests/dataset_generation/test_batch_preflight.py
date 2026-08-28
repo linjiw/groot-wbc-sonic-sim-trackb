@@ -69,7 +69,11 @@ def test_endpoint_budget_rejects_a_crouch_at_the_operator_cap() -> None:
 def test_endpoint_budget_binds_before_the_crouch_cap() -> None:
     """Somewhere below the 0.98 rad cap the budget is already spent; find it and pin the ordering."""
     binding = min(
-        (x for x in np.linspace(0.0, 0.98, 99) if interpolate(CROUCH_LAG_CURVE, x) > ENDPOINT_BUDGET_M),
+        (
+            x
+            for x in np.linspace(0.0, 0.98, 99)
+            if interpolate(CROUCH_LAG_CURVE, x) > ENDPOINT_BUDGET_M
+        ),
         default=None,
     )
     assert binding is not None
@@ -89,7 +93,12 @@ def test_endpoint_budget_never_rejects_a_tuck() -> None:
 def test_window_check_rejects_the_chest_family_that_struck_its_wall() -> None:
     """23.8 mm predicted at a 0.70 ratio is 17 mm delivered, and it struck the obstacle."""
     ok, why = check_window_survives_delivery(
-        {"operator": "local_arm_tuck", "band": "chest", "window_m": 0.0238, "delivery_ratio_used": 0.70}
+        {
+            "operator": "local_arm_tuck",
+            "band": "chest",
+            "window_m": 0.0238,
+            "delivery_ratio_used": 0.70,
+        }
     )
     assert not ok
     assert "17 mm" in why
@@ -98,7 +107,12 @@ def test_window_check_rejects_the_chest_family_that_struck_its_wall() -> None:
 def test_window_check_accepts_the_corrected_chest_window() -> None:
     """The delivery-corrected planner produces 75.2 mm on the same nominal, which survives."""
     ok, _ = check_window_survives_delivery(
-        {"operator": "local_arm_tuck", "band": "chest", "window_m": 0.0752, "delivery_ratio_used": 0.70}
+        {
+            "operator": "local_arm_tuck",
+            "band": "chest",
+            "window_m": 0.0752,
+            "delivery_ratio_used": 0.70,
+        }
     )
     assert ok
 

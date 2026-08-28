@@ -22,8 +22,13 @@ TEST_CAPSULES = {
 }
 
 
-def traverse(frames: int = 100, duck_from: int | None = None, duck_to: int | None = None,
-             torso_z: float = 1.0, duck_z: float = 0.7) -> dict:
+def traverse(
+    frames: int = 100,
+    duck_from: int | None = None,
+    duck_to: int | None = None,
+    torso_z: float = 1.0,
+    duck_z: float = 0.7,
+) -> dict:
     """A body walking from x=0 to x=4, optionally ducking over a stretch of its route."""
     pos = np.zeros((frames, 2, 3))
     x = np.linspace(0.0, 4.0, frames)
@@ -37,19 +42,30 @@ def traverse(frames: int = 100, duck_from: int | None = None, duck_to: int | Non
     quat = np.zeros((frames, 2, 4))
     quat[:, :, 0] = 1.0
     return {
-        "body_pos_w": pos, "body_quat_w": quat,
+        "body_pos_w": pos,
+        "body_quat_w": quat,
         "body_names": ["pelvis", "torso_link"],
-        "root_pos_w": pos[:, 0, :], "root_quat_w": quat[:, 0, :],
+        "root_pos_w": pos[:, 0, :],
+        "root_quat_w": quat[:, 0, :],
         "fps": 50.0,
     }
 
 
 def signature(**overrides) -> EnvelopeSignature:
     base = dict(
-        episode_id="e", behaviour="walk", frames=100, duration_s=2.0,
-        start_xy=(0.0, 0.0), goal_xy=(4.0, 0.0), path_length_m=4.0,
-        net_displacement_m=4.0, heading_change_rad=0.0, mean_speed_mps=2.0,
-        min_silhouette_peak_m=1.30, min_half_width_m=0.30, min_foot_apex_m=0.13,
+        episode_id="e",
+        behaviour="walk",
+        frames=100,
+        duration_s=2.0,
+        start_xy=(0.0, 0.0),
+        goal_xy=(4.0, 0.0),
+        path_length_m=4.0,
+        net_displacement_m=4.0,
+        heading_change_rad=0.0,
+        mean_speed_mps=2.0,
+        min_silhouette_peak_m=1.30,
+        min_half_width_m=0.30,
+        min_foot_apex_m=0.13,
     )
     base.update(overrides)
     return EnvelopeSignature(**base)
@@ -57,16 +73,15 @@ def signature(**overrides) -> EnvelopeSignature:
 
 # ---- stations ----------------------------------------------------------------------------
 
+
 def test_a_station_the_motion_never_reaches_is_nan_not_clear():
     """Scoring an unreachable station as clearance would invent windows out of absence."""
-    peaks = silhouette_at_stations(
-        traverse(), np.array([12.0]), capsules=TEST_CAPSULES
-    )
+    peaks = silhouette_at_stations(traverse(), np.array([12.0]), capsules=TEST_CAPSULES)
     assert np.isnan(peaks[0])
 
 
 def test_the_station_profile_finds_where_the_duck_happens():
-    payload = traverse(duck_from=50, duck_to=70)      # x roughly 2.0 to 2.8
+    payload = traverse(duck_from=50, duck_to=70)  # x roughly 2.0 to 2.8
     stations = np.array([0.5, 2.4, 3.8])
     peaks = silhouette_at_stations(payload, stations, span=0.2, capsules=TEST_CAPSULES)
     assert peaks[1] < peaks[0]
@@ -77,7 +92,7 @@ def test_the_best_station_is_where_the_motions_differ_not_the_midpoint():
     """The whole point of scanning. On the real family the midpoint gave a 0.053 m window
     where the duck's own station offered 0.18 m."""
     nominal = traverse()
-    adapted = traverse(duck_from=70, duck_to=90)      # ducks late, past the midpoint
+    adapted = traverse(duck_from=70, duck_to=90)  # ducks late, past the midpoint
     station, spread = best_overhead_station(
         nominal, adapted, span=0.2, resolution_m=0.05, capsules=TEST_CAPSULES
     )
@@ -86,9 +101,7 @@ def test_the_best_station_is_where_the_motions_differ_not_the_midpoint():
 
 
 def test_two_identical_motions_have_no_station_that_separates_them():
-    _, spread = best_overhead_station(
-        traverse(), traverse(), span=0.2, capsules=TEST_CAPSULES
-    )
+    _, spread = best_overhead_station(traverse(), traverse(), span=0.2, capsules=TEST_CAPSULES)
     assert spread == pytest.approx(0.0, abs=1e-9)
 
 
@@ -102,14 +115,18 @@ def test_motions_whose_routes_do_not_overlap_yield_no_station():
 
 # ---- pairing -----------------------------------------------------------------------------
 
+
 def test_a_pair_going_to_different_places_is_refused_however_wide_the_gap():
     """A duck walking 2 m and a walk turning through 5 m differ in head height, but a shelf
     separating them says the two motions went to different places, not that geometry chose
     the behaviour."""
     nominal = signature(episode_id="a")
     adapted = signature(
-        episode_id="b", min_silhouette_peak_m=0.9,
-        goal_xy=(1.0, 6.0), path_length_m=9.0, duration_s=5.0,
+        episode_id="b",
+        min_silhouette_peak_m=0.9,
+        goal_xy=(1.0, 6.0),
+        path_length_m=9.0,
+        duration_s=5.0,
     )
     candidate = score_pair(nominal, adapted, "overhead")
     assert not candidate.compatible
@@ -180,8 +197,9 @@ def test_mining_ranks_the_widest_compatible_window_first():
 
 
 def test_mining_never_pairs_a_motion_with_itself():
-    signatures = [signature(episode_id=f"e{i}", min_silhouette_peak_m=1.3 - 0.1 * i)
-                  for i in range(4)]
+    signatures = [
+        signature(episode_id=f"e{i}", min_silhouette_peak_m=1.3 - 0.1 * i) for i in range(4)
+    ]
     for candidate in mine_pairs(signatures, "overhead"):
         assert candidate.nominal != candidate.adapted
 
@@ -238,7 +256,7 @@ def test_a_one_sided_search_returns_which_side_to_put_the_obstacle_on():
     from gear_sonic.dataset_generation.motion_envelope import best_one_sided_station
 
     nominal = leaning(left=0.35, right=0.35)
-    adapted = leaning(left=0.35, right=0.15)      # narrowed on the right only
+    adapted = leaning(left=0.35, right=0.15)  # narrowed on the right only
     station, side, window = best_one_sided_station(
         nominal, adapted, span=0.2, capsules=LATERAL_CAPSULES
     )
@@ -257,9 +275,7 @@ def test_a_one_sided_reduction_is_invisible_to_the_symmetric_measure():
     nominal = leaning(left=0.35, right=0.35)
     adapted = leaning(left=0.35, right=0.15)
     _, symmetric = best_lateral_station(nominal, adapted, span=0.2, capsules=LATERAL_CAPSULES)
-    _, _, one_sided = best_one_sided_station(
-        nominal, adapted, span=0.2, capsules=LATERAL_CAPSULES
-    )
+    _, _, one_sided = best_one_sided_station(nominal, adapted, span=0.2, capsules=LATERAL_CAPSULES)
     assert symmetric == pytest.approx(0.0, abs=1e-6)
     assert one_sided > 0.15
 
@@ -286,18 +302,17 @@ def test_width_splits_into_what_an_arm_tuck_can_move_and_what_it_cannot():
     payload["body_names"] = ["pelvis", "left_wrist_yaw_link", "left_ankle_roll_link"]
     capsules = {
         "pelvis": (CollisionCapsule(start=(0, 0, 0), end=(0, 0, 0), radius=0.05),),
-        "left_wrist_yaw_link": (
-            CollisionCapsule(start=(0, 0, 0), end=(0, 0, 0), radius=0.04),
-        ),
-        "left_ankle_roll_link": (
-            CollisionCapsule(start=(0, 0, 0), end=(0, 0, 0), radius=0.04),
-        ),
+        "left_wrist_yaw_link": (CollisionCapsule(start=(0, 0, 0), end=(0, 0, 0), radius=0.04),),
+        "left_ankle_roll_link": (CollisionCapsule(start=(0, 0, 0), end=(0, 0, 0), radius=0.04),),
     }
     station = float(np.median(payload["root_pos_w"][:, 0]))
     result = width_decomposition(payload, station, "left", span=1.0, capsules=capsules)
     assert set(result) >= {
-        "arm_width_m", "nonarm_floor_m", "available_reduction_m",
-        "critical_capsule", "arms_are_widest",
+        "arm_width_m",
+        "nonarm_floor_m",
+        "available_reduction_m",
+        "critical_capsule",
+        "arms_are_widest",
     }
     assert result["available_reduction_m"] >= 0.0
 
@@ -310,15 +325,11 @@ def test_a_side_step_is_a_genuine_refusal_case():
 
     payload = leaning(left=0.20, right=0.05)
     payload["body_names"] = ["pelvis", "left_wrist_yaw_link", "left_ankle_roll_link"]
-    payload["body_pos_w"][:, 2, 1] = 0.45      # the ankle, far outside the arm
+    payload["body_pos_w"][:, 2, 1] = 0.45  # the ankle, far outside the arm
     capsules = {
         "pelvis": (CollisionCapsule(start=(0, 0, 0), end=(0, 0, 0), radius=0.05),),
-        "left_wrist_yaw_link": (
-            CollisionCapsule(start=(0, 0, 0), end=(0, 0, 0), radius=0.04),
-        ),
-        "left_ankle_roll_link": (
-            CollisionCapsule(start=(0, 0, 0), end=(0, 0, 0), radius=0.04),
-        ),
+        "left_wrist_yaw_link": (CollisionCapsule(start=(0, 0, 0), end=(0, 0, 0), radius=0.04),),
+        "left_ankle_roll_link": (CollisionCapsule(start=(0, 0, 0), end=(0, 0, 0), radius=0.04),),
     }
     station = float(np.median(payload["root_pos_w"][:, 0]))
     result = width_decomposition(payload, station, "left", span=1.0, capsules=capsules)

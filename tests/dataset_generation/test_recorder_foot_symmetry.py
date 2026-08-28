@@ -20,10 +20,7 @@ from pathlib import Path
 
 import pytest
 
-RECORDER = (
-    Path(__file__).resolve().parents[2]
-    / "gear_sonic/envs/manager_env/mdp/recorders.py"
-)
+RECORDER = Path(__file__).resolve().parents[2] / "gear_sonic/envs/manager_env/mdp/recorders.py"
 
 FIELDS = ("left_foot_contact_force_n", "right_foot_contact_force_n")
 
@@ -79,6 +76,6 @@ def test_neither_foot_depends_on_the_ground_contact_sensor():
     that is exactly the coupling that made every bare-plane episode unevaluable."""
     for field in FIELDS:
         for guard in guards_for(field):
-            assert "ground_contact_force_w" not in guard, (
-                f"{field} is gated on a ground-contact sensor: {guard}"
-            )
+            assert (
+                "ground_contact_force_w" not in guard
+            ), f"{field} is gated on a ground-contact sensor: {guard}"

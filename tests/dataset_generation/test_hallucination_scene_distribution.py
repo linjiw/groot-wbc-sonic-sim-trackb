@@ -179,9 +179,10 @@ def test_inventory_filter_keeps_only_items_that_can_realise_the_atom():
 
 def test_a_wider_body_rejects_an_item_a_narrow_body_accepts():
     """Admissibility is a property of the item *and* the body that must pass it."""
-    from gear_sonic.dataset_generation.hallucination.scene_distribution import item_admissibility
-
-    from gear_sonic.dataset_generation.hallucination.scene_distribution import ObstacleItem
+    from gear_sonic.dataset_generation.hallucination.scene_distribution import (
+        ObstacleItem,
+        item_admissibility,
+    )
 
     lintel = ObstacleItem(
         "lintel", "overhead", 0.20, 1.60, 0.20, protrusion_m=1.2, protrusion_half_gap_m=0.40

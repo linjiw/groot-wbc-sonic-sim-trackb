@@ -114,7 +114,10 @@ def test_scene_around_motion_demotes_reference_gates():
 
 def test_safety_gates_still_bind_under_every_policy():
     """Nothing here relaxes what the corpus promises about collisions."""
-    for policy, extra in ((SCENE_AROUND_MOTION, {}), (SCENE_FIRST, {"planned_goal_xy": np.array([3.2, 0.0])})):
+    for policy, extra in (
+        (SCENE_AROUND_MOTION, {}),
+        (SCENE_FIRST, {"planned_goal_xy": np.array([3.2, 0.0])}),
+    ):
         outcome = apply_policy(
             ["reference_path_tracking_error", "disallowed_robot_contact"],
             payload(),

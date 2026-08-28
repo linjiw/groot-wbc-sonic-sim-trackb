@@ -53,7 +53,10 @@ def test_inference_excludes_query_source_and_preserves_exact_support() -> None:
 
     assert "self" not in distribution.evidence_record_weights
     assert math.isclose(sum(distribution.archetype_probabilities.values()), 1.0)
-    assert distribution.archetype_probabilities["shelf_plank"] > distribution.archetype_probabilities["hvac_duct"]
+    assert (
+        distribution.archetype_probabilities["shelf_plank"]
+        > distribution.archetype_probabilities["hvac_duct"]
+    )
     for seed in range(50):
         proposal = distribution.sample(seed)
         assert query.lower_m <= proposal.hard_coordinate_m <= query.upper_m

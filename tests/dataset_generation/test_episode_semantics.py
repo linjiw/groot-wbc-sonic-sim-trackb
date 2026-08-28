@@ -17,7 +17,7 @@ STRAIGHT = np.array([[0.0, 0.0], [1.0, 0.0], [2.0, 0.0], [3.0, 0.0]])
 
 def test_goal_is_the_object_nearest_the_endpoint():
     objects = [
-        SceneObject("Sofa_00", (-0.4, -0.4, 0.4, 0.4)),      # near the start
+        SceneObject("Sofa_00", (-0.4, -0.4, 0.4, 0.4)),  # near the start
         SceneObject("Bookshelf_01", (3.2, -0.4, 3.8, 0.4)),  # near the end
     ]
     semantics = derive_semantics(STRAIGHT, objects)
@@ -28,8 +28,8 @@ def test_goal_is_the_object_nearest_the_endpoint():
 def test_nearest_to_path_is_not_used_as_the_goal():
     """A route brushes many objects; only one is where it stopped."""
     objects = [
-        SceneObject("Chair_00", (1.4, -0.15, 1.6, 0.15)),   # closest to the path overall
-        SceneObject("Cabinet_01", (3.4, -0.4, 4.0, 0.4)),   # closest to the endpoint
+        SceneObject("Chair_00", (1.4, -0.15, 1.6, 0.15)),  # closest to the path overall
+        SceneObject("Cabinet_01", (3.4, -0.4, 4.0, 0.4)),  # closest to the endpoint
     ]
     assert derive_semantics(STRAIGHT, objects).goal_object == "Cabinet_01"
 

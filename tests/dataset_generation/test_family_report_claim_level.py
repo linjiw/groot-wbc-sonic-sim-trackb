@@ -53,7 +53,7 @@ def test_only_a_passing_robustness_file_earns_the_strong_claim(tmp_path):
 
 
 def test_the_strong_claim_names_what_was_varied_and_what_survived(tmp_path):
-    """"Robust" alone overclaims twice over, so the wording is pinned.
+    """ "Robust" alone overclaims twice over, so the wording is pinned.
 
     Only the start pose was varied -- not dynamics, mass, friction or actuation noise -- and
     only the *outcome* survived it. Severity did not: peak contact force on the failing cell

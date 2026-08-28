@@ -110,11 +110,14 @@ def test_a_wider_body_needs_a_wider_gap():
     gap = [Obstacle(rect=(-3.0, -0.35, 3.0, 0.35))]
     narrow_room = (7.0, 3.0)
     # A 0.20 m half-width with no margin threads the gap beside the slab; 0.60 m does not.
-    assert sample_routes(
-        gap, narrow_room, count=1, seed=29, body_half_width_m=0.20, margin_m=0.0
-    )
+    assert sample_routes(gap, narrow_room, count=1, seed=29, body_half_width_m=0.20, margin_m=0.0)
     with pytest.raises(RouteSamplingError):
         sample_routes(
-            gap, narrow_room, count=1, seed=29, body_half_width_m=0.60, margin_m=0.0,
+            gap,
+            narrow_room,
+            count=1,
+            seed=29,
+            body_half_width_m=0.60,
+            margin_m=0.0,
             max_attempts=40,
         )

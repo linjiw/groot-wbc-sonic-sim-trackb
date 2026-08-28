@@ -401,6 +401,7 @@ def test_near_horizontal_torso_is_a_fall_even_if_commanded():
 
 # ---- overhead collisions -------------------------------------------------------------------
 
+
 def test_a_downward_push_on_a_nonfoot_body_is_a_collision():
     """The defect this channel was added for.
 
@@ -411,12 +412,10 @@ def test_a_downward_push_on_a_nonfoot_body_is_a_collision():
     """
     names = ("torso_link", "left_ankle_roll_link")
     forces = np.zeros((3, 2, 3))
-    forces[1, 0, 2] = -1017.4          # shelf pressing the torso down
-    forces[1, 1, 2] = 409.8            # floor holding the foot up
+    forces[1, 0, 2] = -1017.4  # shelf pressing the torso down
+    forces[1, 1, 2] = 409.8  # floor holding the foot up
 
-    result = decompose_contact_forces(
-        forces, names, foot_body_names=("left_ankle_roll_link",)
-    )
+    result = decompose_contact_forces(forces, names, foot_body_names=("left_ankle_roll_link",))
     assert result.max_overhead_contact == pytest.approx(1017.4)
     assert result.max_overhead_contact_frame == 1
     assert result.max_lateral_contact == pytest.approx(0.0)
@@ -431,7 +430,7 @@ def test_the_floor_holding_a_knee_up_is_still_not_a_collision():
     """
     names = ("right_hip_roll_link",)
     forces = np.zeros((2, 1, 3))
-    forces[0, 0, 2] = 237.4            # settling load, upward
+    forces[0, 0, 2] = 237.4  # settling load, upward
 
     result = decompose_contact_forces(forces, names, foot_body_names=())
     assert result.max_overhead_contact == pytest.approx(0.0)

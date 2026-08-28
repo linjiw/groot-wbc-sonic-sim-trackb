@@ -121,9 +121,7 @@ def test_unevaluable_episodes_are_excluded_from_distinct_counts():
 
 def test_missing_clips_are_named_not_merely_counted():
     """A reviewer should never have to guess which episode a count gap refers to."""
-    snapshot = build_snapshot(
-        "test", "gate-v1", [record("a"), record("b", video=None)]
-    )
+    snapshot = build_snapshot("test", "gate-v1", [record("a"), record("b", video=None)])
     assert [r.episode_id for r in snapshot.missing_clips] == ["b"]
     assert snapshot.to_dict()["missing_clips"] == [{"episode_id": "b", "outcome": "accepted"}]
 

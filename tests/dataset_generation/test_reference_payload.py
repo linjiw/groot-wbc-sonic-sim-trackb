@@ -15,15 +15,13 @@ from gear_sonic.dataset_generation.self_intersection import (
     SelfIntersectionError,
 )
 
-pytestmark = pytest.mark.skipif(
-    not Path(DEFAULT_G1_MJCF).exists(), reason="G1 MJCF not present"
-)
+pytestmark = pytest.mark.skipif(not Path(DEFAULT_G1_MJCF).exists(), reason="G1 MJCF not present")
 
 
 def standing(frames: int = 12) -> np.ndarray:
     qpos = np.zeros((frames, 36))
-    qpos[:, 2] = 0.78          # root height
-    qpos[:, 3] = 1.0           # identity quaternion, wxyz
+    qpos[:, 2] = 0.78  # root height
+    qpos[:, 3] = 1.0  # identity quaternion, wxyz
     return qpos
 
 

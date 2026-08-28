@@ -14,9 +14,7 @@ from gear_sonic.dataset_generation.perception_timing import (
 )
 from gear_sonic.dataset_generation.self_intersection import DEFAULT_G1_MJCF
 
-pytestmark = pytest.mark.skipif(
-    not Path(DEFAULT_G1_MJCF).exists(), reason="G1 MJCF not present"
-)
+pytestmark = pytest.mark.skipif(not Path(DEFAULT_G1_MJCF).exists(), reason="G1 MJCF not present")
 
 
 def walk(frames: int = 90) -> np.ndarray:
@@ -41,7 +39,7 @@ def test_the_field_of_view_comes_from_the_recorded_intrinsics():
 def test_a_late_adaptation_can_be_a_response_to_what_was_seen():
     nominal = walk()
     adapted = nominal.copy()
-    adapted[45:, 7] = 0.5                       # departs from frame 45
+    adapted[45:, 7] = 0.5  # departs from frame 45
     timing = perception_timing(nominal, adapted, AHEAD)
     assert timing.t_adaptation_onset == 45
     assert timing.ordering_holds
@@ -52,7 +50,7 @@ def test_adapting_from_frame_zero_cannot_be_a_response():
     yet, so such a pair can only support map-conditioned selection."""
     nominal = walk()
     adapted = nominal.copy()
-    adapted[:, 7] = 0.5                         # departs immediately
+    adapted[:, 7] = 0.5  # departs immediately
     timing = perception_timing(nominal, adapted, AHEAD)
     assert timing.t_adaptation_onset == 0
     assert not timing.ordering_holds

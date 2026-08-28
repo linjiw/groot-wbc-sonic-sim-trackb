@@ -137,8 +137,8 @@ def test_recorded_threshold_is_a_different_scale_and_not_interchangeable():
     assert RECORDED_SATURATION_LIMIT > PRESIM_SATURATION_LIMIT * 5
     assert DEFAULT_SATURATION_LIMIT == PRESIM_SATURATION_LIMIT
     raw_crouch = 0.0444
-    assert raw_crouch > PRESIM_SATURATION_LIMIT      # correctly screened
-    assert raw_crouch < RECORDED_SATURATION_LIMIT    # wrongly passed on the wrong scale
+    assert raw_crouch > PRESIM_SATURATION_LIMIT  # correctly screened
+    assert raw_crouch < RECORDED_SATURATION_LIMIT  # wrongly passed on the wrong scale
 
 
 def test_crouch_is_reported_but_not_screened_on_height_alone():

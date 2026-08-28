@@ -13,9 +13,7 @@ from gear_sonic.dataset_generation.self_clearance import (
 )
 from gear_sonic.dataset_generation.self_intersection import DEFAULT_G1_MJCF
 
-pytestmark = pytest.mark.skipif(
-    not Path(DEFAULT_G1_MJCF).exists(), reason="G1 MJCF not present"
-)
+pytestmark = pytest.mark.skipif(not Path(DEFAULT_G1_MJCF).exists(), reason="G1 MJCF not present")
 
 
 def standing(frames: int = 6) -> np.ndarray:
@@ -48,6 +46,7 @@ def test_a_malformed_clip_is_refused():
 
 # ---- the comparison, which is the number worth using ---------------------------------------
 
+
 def test_a_clip_compared_with_itself_has_changed_nothing():
     change = clearance_change(standing(), standing(), frame_stride=1)
     assert change.worst_change_m == pytest.approx(0.0, abs=1e-9)
@@ -58,8 +57,8 @@ def test_bringing_the_legs_up_registers_as_a_loss_of_clearance():
     """A crouch lifts the heel toward the pelvis, which is what the operator's depth costs."""
     nominal = standing()
     crouched = standing()
-    crouched[:, 7] = 0.8      # left hip pitch
-    crouched[:, 10] = 1.2     # left knee
+    crouched[:, 7] = 0.8  # left hip pitch
+    crouched[:, 10] = 1.2  # left knee
     change = clearance_change(crouched, nominal, frame_stride=1)
     assert change.is_tighter
     assert change.adapted_clearance_m < change.nominal_clearance_m

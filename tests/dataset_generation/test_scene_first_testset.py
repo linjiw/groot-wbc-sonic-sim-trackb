@@ -55,7 +55,8 @@ def test_the_ranges_include_scenes_where_nothing_fits_and_scenes_where_everythin
     """
     shelves = [
         s["parameters"]["shelf_underside_m"]
-        for s in manifest["scenes"] if s["regime"] == "overhead"
+        for s in manifest["scenes"]
+        if s["regime"] == "overhead"
     ]
     assert min(shelves) < 1.036, "no scene stops every behaviour"
     assert max(shelves) > 1.248, "no scene admits every behaviour"

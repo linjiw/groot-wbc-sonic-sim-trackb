@@ -18,9 +18,7 @@ from gear_sonic.dataset_generation.retarget_reference import (
 )
 from gear_sonic.dataset_generation.self_intersection import DEFAULT_G1_MJCF
 
-pytestmark = pytest.mark.skipif(
-    not Path(DEFAULT_G1_MJCF).exists(), reason="G1 MJCF not present"
-)
+pytestmark = pytest.mark.skipif(not Path(DEFAULT_G1_MJCF).exists(), reason="G1 MJCF not present")
 
 
 @pytest.fixture(scope="module")
@@ -157,7 +155,7 @@ def test_foot_movement_is_measured_on_the_sole_not_the_link_origin(limits):
 
 def test_an_already_interior_clip_is_left_essentially_alone(limits):
     names, bounds = limits
-    source = clip(40)          # every joint at zero, well inside every range
+    source = clip(40)  # every joint at zero, well inside every range
     retargeted, report = retarget_crouch(source, waist_fraction=0.0)
     assert np.allclose(retargeted[:, 7:], source[:, 7:])
     assert report.relieved_joints == ()

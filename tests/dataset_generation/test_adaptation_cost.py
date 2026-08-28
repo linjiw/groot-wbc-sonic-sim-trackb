@@ -19,8 +19,13 @@ from gear_sonic.dataset_generation.adaptation_cost import (
 FPS = 50.0
 
 
-def motion(frames: int = 200, pelvis: float = 0.75, amplitude: float = 0.10,
-           offset: float = 0.0, speed: float = 1.0) -> dict:
+def motion(
+    frames: int = 200,
+    pelvis: float = 0.75,
+    amplitude: float = 0.10,
+    offset: float = 0.0,
+    speed: float = 1.0,
+) -> dict:
     """A body walking forward with a swinging gait, optionally lowered and offset in pose."""
     root = np.zeros((frames, 3))
     root[:, 0] = np.arange(frames) * speed / FPS
@@ -97,11 +102,17 @@ def test_components_are_reported_so_the_weights_can_be_changed_without_rerunning
     """The weights are a convention, so a reader must be able to reweight them."""
     cost = adaptation_cost(motion(), "walk")
     assert set(cost.components()) == {
-        "pelvis_lowering_m", "pelvis_height_m", "joint_travel_rad_per_s",
-        "postural_deviation_rad", "duration_s",
+        "pelvis_lowering_m",
+        "pelvis_height_m",
+        "joint_travel_rad_per_s",
+        "postural_deviation_rad",
+        "duration_s",
     }
     assert set(DEFAULT_WEIGHTS) == {
-        "pelvis_lowering", "joint_travel", "postural_deviation", "duration",
+        "pelvis_lowering",
+        "joint_travel",
+        "postural_deviation",
+        "duration",
     }
 
 

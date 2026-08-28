@@ -89,9 +89,7 @@ def test_heading_change_accumulates_through_a_turn():
 
 def test_returning_to_the_start_does_not_divide_by_zero():
     payload = straight_payload(speed_mps=0.7)
-    payload["root_pos_w"][:, 0] = np.concatenate(
-        [np.linspace(0, 1, 50), np.linspace(1, 0, 50)]
-    )
+    payload["root_pos_w"][:, 0] = np.concatenate([np.linspace(0, 1, 50), np.linspace(1, 0, 50)])
     episode = summarise_episode("loop", payload)
     assert math.isinf(episode.tortuosity)
 
@@ -121,7 +119,9 @@ def test_identical_episodes_do_not_raise_the_pooled_rank():
 
 def test_speed_spread_cv_separates_a_degenerate_corpus_from_a_varied_one():
     same = [straight_payload(speed_mps=0.70, seed=i) for i in range(5)]
-    varied = [straight_payload(speed_mps=s, seed=i) for i, s in enumerate([0.3, 0.6, 0.9, 1.2, 1.5])]
+    varied = [
+        straight_payload(speed_mps=s, seed=i) for i, s in enumerate([0.3, 0.6, 0.9, 1.2, 1.5])
+    ]
     for payloads, expect_low in ((same, True), (varied, False)):
         episodes = [summarise_episode(f"e{i}", p) for i, p in enumerate(payloads)]
         report = build_diversity_report(episodes, [p["action_motion_token"] for p in payloads])

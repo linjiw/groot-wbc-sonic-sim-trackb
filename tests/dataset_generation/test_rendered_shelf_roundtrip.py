@@ -95,8 +95,11 @@ def test_the_rendered_box_agrees_with_the_obstacle_spec_the_search_used(tmp_path
     """The exact invariant the builder now checks before spending rollouts."""
     station, underside = (2.68, 1.212)
     obstacle = ObstacleSpec(
-        name="LowShelf", size=SHELF_SIZE,
-        base_center=(station, 0.0, 2.30), axis=(0.0, 0.0, -1.0), regime="overhead",
+        name="LowShelf",
+        size=SHELF_SIZE,
+        base_center=(station, 0.0, 2.30),
+        axis=(0.0, 0.0, -1.0),
+        regime="overhead",
     )
     # Parameter that puts the spec's underside at the same height as the rendered scene.
     parameter = 2.30 - SHELF_SIZE[2] / 2 - underside
