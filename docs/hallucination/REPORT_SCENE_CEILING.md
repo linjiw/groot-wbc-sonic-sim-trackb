@@ -134,7 +134,34 @@ reported clear by the soft minimum and penetrating by the hard one.
 
 ## 5. What the learned model achieves against the ceiling
 
-<!--MODEL_TABLE-->
+Retrained on `crouch_070` at `eps = 0.25`, with `m_clear = m_hit = 18.8 mm` read from the measured
+ceiling of 31.3 mm rather than chosen by hand. Eleven clips fitted, five held out, 16 draws each.
+
+| arm | selection | robot clear | **counterfactual** | worst gap |
+|---|---:|---:|---:|---:|
+| fitted clips | 95.5% | 35.8% | 31.8% | -0.091 m |
+| **held-out clips** | **81.2%** | **50.0%** | **32.5%** | -0.141 m |
+| random from the prior, held out | 58.8% | 0.0% | **0.0%** | -0.718 m |
+
+Against the retracted run's 28.7% selection and 18.8% robot-clear, and with the training
+reconstruction falling from 3.228 to 0.120, the model is now fitting something. But two of these
+columns need reading carefully, and one of them is a trap.
+
+**Selection alone is not a discriminating metric here.** The random control scores 58.8% on it
+while clearing the robot 0% of the time, at a median worst clearance of **-320 mm**. Boxes drawn
+from the prior simply engulf every candidate, and the deepest crouch wins by being swallowed least.
+A metric that a scene which buries the robot can score well on is not measuring explanation. This is
+the same lesson as the retracted `valid_rate`: report the conjunction, not the arm that flatters.
+
+**The counterfactual rate is the honest one** — the observed motion fits *and* the decoder prefers
+it. The control is at 0.0% there by construction, because a scene that swallows the robot cannot
+admit it. **32.5% out of sample against 0.0%** is the number this section stands behind.
+
+It is also not a good number in absolute terms: two held-out scenes in three still fail to express
+the counterfactual at all. The model is real but weak, and the efficiency and search-equivalence
+figures below say whether it is worth its complexity.
+
+<!--AMORTISATION-->
 
 ## 6. What this changes
 
