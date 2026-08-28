@@ -161,6 +161,39 @@ It is also not a good number in absolute terms: two held-out scenes in three sti
 the counterfactual at all. The model is real but weak, and the efficiency and search-equivalence
 figures below say whether it is worth its complexity.
 
+### 5.0 The shallowest edit has the largest ceiling and is the hardest to learn
+
+The same trainer, same `eps`, same margin rule, run on `crouch_040` — whose ceiling is **larger**
+than `crouch_070`'s at every regret tolerance (33.2 mm against 31.3 at `eps = 0.25`, and 33.2
+against 15.5 at `eps = 0`), and whose objective is therefore comfortably feasible:
+
+| arm | selection | robot clear | counterfactual |
+|---|---:|---:|---:|
+| fitted clips | 21.6% | 5.1% | 0.6% |
+| held-out clips | 11.2% | 10.0% | **0.0%** |
+| random from the prior | 15.0% | 0.0% | 0.0% |
+
+It fails completely — below the random control on selection — and its reconstruction never
+converges, oscillating between 3.46 and 6.83 across a thousand steps while `crouch_070`'s fell
+monotonically to 0.12.
+
+The reason is structural, not a matter of more steps. `crouch_040` is the *shallowest* rung, so the
+deeper crouches remain available to the decoder as escape routes. Any box placed low enough to
+strike the nominal is within 40 mm of striking `crouch_040` itself, and the moment it does, the
+decoder retreats to `crouch_055` or `crouch_070` — which cost more but clear easily, and which the
+regret rule does not require the scene to exclude because they are *more* expensive. The target sits
+in a narrow band with a cheaper alternative below it and costlier-but-safer alternatives above, and
+the gradient has somewhere to run in both directions.
+
+`crouch_070` has no such escape: it is the deepest rung, so blocking everything shallower is a broad
+and stable descent direction.
+
+**Geometric feasibility and learnability are different properties and here they point in opposite
+directions.** The ceiling instrument measures only the first. A scene-generation method that reports
+which edits it can justify must report both, and the honest summary of this pipeline today is that
+it learns to justify the deepest edit in a ladder and cannot yet justify the shallowest — which is
+the more useful one, being cheaper for the robot to execute.
+
 ### 5.1 What one forward pass is worth, in units of search
 
 The control shares the model's parameterisation and its decoder and differs only in not
