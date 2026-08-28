@@ -21,9 +21,13 @@ addenda 2–3 — they carry a retraction banner.
 | Tests (872) | `tests/dataset_generation/` | yes |
 | Reports, registers, JSON results | `docs/hallucination/`, `docs/lfh/` | yes |
 | Constraint specs | `specs/hallucination/` | yes |
-| Authored USD scenes | `gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e17/` | yes (LFS) |
+| Authored USD scenes | `gear_sonic/data/assets/scenes/g1_counterfactual_lfh_e{3,6,7,10,17}/`, `hallucinated_variants_v1_e1/` | yes (LFS) |
 | Rendered videos and figures | `docs/source/_static/{lfh_cases,lflh_scenes,lfh_e17}/` | yes |
 | **Motion clips, rollouts, trajectories** | **`/data/robotixx/groot-wbc-kimodo-m0/` (466 MB)** | **NO** |
+
+All 90 scene files carry the geometry the physics actually ran against: every one that a run
+record or approved manifest pins by SHA-256 (36 + 16) was hash-verified before being committed. A
+sweep over every committed JSON reports **no scene referenced but untracked**.
 
 **The artifact tree is not in git and is the one hard dependency.** Every script defaults to
 `DATA_ROOT = /data/robotixx/groot-wbc-kimodo-m0`. On a new machine either copy that tree to the
