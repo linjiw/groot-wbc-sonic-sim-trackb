@@ -365,6 +365,10 @@ def render_pair(
     fps,
     captions: dict | None = None,
     context: list[dict] | None = None,
+    azimuth_offset: float = 125.0,
+    elevation: float = -16.0,
+    distance: float = 5.6,
+    lookat_z: float | None = None,
 ) -> int:
     xml = build_scene(ROBOT_XML, obstacle, context)
     with tempfile.TemporaryDirectory(prefix="lfh_proposal_") as temp_dir:
@@ -376,10 +380,14 @@ def render_pair(
         camera = mujoco.MjvCamera()
         camera.type = mujoco.mjtCamera.mjCAMERA_FREE
         station = obstacle["center_m"]
-        camera.lookat[:] = (station[0], station[1], 0.85)
-        camera.azimuth = math.degrees(obstacle["yaw_rad"]) + 125.0
-        camera.elevation = -16.0
-        camera.distance = 5.6
+        camera.lookat[:] = (
+            station[0],
+            station[1],
+            0.85 if lookat_z is None else lookat_z,
+        )
+        camera.azimuth = math.degrees(obstacle["yaw_rad"]) + azimuth_offset
+        camera.elevation = elevation
+        camera.distance = distance
         frames = min(len(value) for value in qpos_by_role.values())
         out_path.parent.mkdir(parents=True, exist_ok=True)
         writer = imageio.get_writer(out_path, fps=fps, codec="libx264", macro_block_size=None)

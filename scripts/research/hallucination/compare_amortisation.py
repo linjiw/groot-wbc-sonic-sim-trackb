@@ -119,53 +119,66 @@ def main() -> int:
             # The control has the same parameterisation and the same decoder; it simply does not
             # condition on the motion. Anything the model gains over it is what conditioning buys.
             best, draws_to_match, search_started = -9.0, None, time.perf_counter()
+            equal_budget = None
             for draw in range(args.search_budget):
                 latent = torch.randn(mean[row].shape, generator=generator)
                 value = margin_of(clip, to_world(geometry.decode(latent), clip), decoder)
                 best = max(best, value)
                 if draws_to_match is None and best >= reference:
                     draws_to_match = draw + 1
+                if draw + 1 == args.draws:
+                    # The comparison that actually decides it: same number of draws each, best of
+                    # each. Comparing the model's *median* draw against a search's *best* of a
+                    # thousand flatters neither side honestly.
+                    equal_budget = best
             search_s = (time.perf_counter() - search_started) / args.search_budget
-
             rows.append(
                 {
                     "motion_index": clip["motion_index"],
                     "model_median_margin_m": reference,
                     "model_best_margin_m": float(np.max(model_margins)),
                     "search_best_margin_m": best,
+                    "search_equal_budget_margin_m": equal_budget,
+                    "model_wins_at_equal_budget": bool(
+                        equal_budget is not None and float(np.max(model_margins)) > equal_budget
+                    ),
                     "draws_to_match": draws_to_match,
                     "search_budget": args.search_budget,
                 }
             )
             print(
-                f"clip {clip['motion_index']:03d}  model median {1000 * reference:6.1f} mm  "
-                f"search best of {args.search_budget} {1000 * best:6.1f} mm  "
-                f"draws to match: "
+                f"clip {clip['motion_index']:03d}  best of {args.draws}: "
+                f"model {1000 * np.max(model_margins):6.1f} mm  vs  search "
+                f"{1000 * (equal_budget or float('nan')):6.1f} mm   |   "
+                f"search best of {args.search_budget} {1000 * best:6.1f} mm, "
+                f"draws to match the model's median: "
                 f"{draws_to_match if draws_to_match is not None else '>' + str(args.search_budget)}"
             )
 
     # Standing diagnostic from the first retraction: if replacing the trajectory with the corpus
     # mean does not change the output, the model is not conditional and nothing was learned.
+    # Both arms are evaluated at their *mean* latent -- comparing a sampled median against a
+    # deterministic mean would charge the conditioned arm for its own sampling noise.
     with torch.no_grad():
         blind = profiles.mean(dim=0, keepdim=True).expand_as(profiles)
         blind_mean, _ = model(blind)
         spread = float(mean.std(dim=0).mean())
         shift = float((mean - blind_mean).abs().mean())
-        blind_margins = []
+        conditioned, blind_margins = [], []
         for row, clip in enumerate(test_clips):
-            values = [
+            conditioned.append(margin_of(clip, to_world(geometry.decode(mean[row]), clip), decoder))
+            blind_margins.append(
                 margin_of(clip, to_world(geometry.decode(blind_mean[row]), clip), decoder)
-                for _ in range(1)
-            ]
-            blind_margins.append(float(np.median(values)))
-    conditioned = [r["model_median_margin_m"] for r in rows]
+            )
     print(
         f"\ninput ablation: latent spread across clips {spread:.4f}; "
         f"mean shift when the motion is replaced by the corpus mean {shift:.4f}"
     )
     print(
-        f"  margin conditioned {1000 * np.median(conditioned):.1f} mm vs "
-        f"motion-blind {1000 * np.median(blind_margins):.1f} mm"
+        f"  margin at the mean latent: conditioned {1000 * np.median(conditioned):.1f} mm vs "
+        f"motion-blind {1000 * np.median(blind_margins):.1f} mm "
+        f"(conditioned wins on {sum(c > b for c, b in zip(conditioned, blind_margins))}"
+        f"/{len(conditioned)} clips)"
     )
 
     matched = [r["draws_to_match"] for r in rows if r["draws_to_match"] is not None]
@@ -174,8 +187,13 @@ def main() -> int:
         f"\n{len(rows)} held-out clips | search matched the model on {len(matched)}, "
         f"never within budget on {never}"
     )
+    wins = sum(r["model_wins_at_equal_budget"] for r in rows)
+    print(
+        f"at an equal budget of {args.draws} draws, the model's best beats the search's best on "
+        f"{wins}/{len(rows)} clips"
+    )
     if matched:
-        print(f"median draws for search to match one forward pass: {int(np.median(matched))}")
+        print(f"median draws for search to match the model's median: {int(np.median(matched))}")
     print(
         f"model forward pass {1000 * forward_s:.2f} ms/clip; one search draw {1000 * search_s:.2f} ms"
     )
@@ -193,6 +211,12 @@ def main() -> int:
                 "latent_shift_when_motion_blinded": shift,
                 "median_margin_m_conditioned": float(np.median(conditioned)),
                 "median_margin_m_motion_blind": float(np.median(blind_margins)),
+                "clips_conditioned_beats_blind": int(
+                    sum(c > b for c, b in zip(conditioned, blind_margins))
+                ),
+                "clips_model_beats_search_at_equal_budget": int(
+                    sum(r["model_wins_at_equal_budget"] for r in rows)
+                ),
                 "search_draw_ms": 1000 * search_s,
                 "contract": (
                     "the control shares the model's parameterisation and decoder and differs only "

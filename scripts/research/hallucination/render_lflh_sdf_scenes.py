@@ -88,6 +88,23 @@ def score_scene(clip: dict, boxes: dict, decoder: SdfChoiceDecoder) -> dict:
     }
 
 
+def world_to_tensors(boxes: list[dict]) -> dict[str, torch.Tensor]:
+    """World-space box dicts back into the tensor form the decoder scores."""
+
+    def column(getter):
+        return torch.tensor([getter(box) for box in boxes], dtype=torch.float32)
+
+    return {
+        "centre_x": column(lambda b: b["center_m"][0]),
+        "centre_y": column(lambda b: b["center_m"][1]),
+        "centre_z": column(lambda b: b["center_m"][2]),
+        "half_along_m": column(lambda b: b["full_size_m"][0] / 2),
+        "half_lateral_m": column(lambda b: b["full_size_m"][1] / 2),
+        "half_vertical_m": column(lambda b: b["full_size_m"][2] / 2),
+        "yaw": column(lambda b: b["yaw_rad"]),
+    }
+
+
 def world_boxes(boxes: dict) -> list[dict]:
     out = []
     for index in range(boxes["centre_x"].shape[0]):
@@ -110,6 +127,33 @@ def world_boxes(boxes: dict) -> list[dict]:
     return out
 
 
+def oracle_box(row: dict, clip: dict, *, epsilon: float) -> dict | None:
+    """The best box the exhaustive search found for this clip, in world coordinates.
+
+    Rendering the model's scene next to this one is the only honest way to show a favourite: the
+    reader sees how much of the achievable margin the model actually captured, rather than a scene
+    chosen because it looked good.
+    """
+    key = f"underside_height_{'all_' if epsilon <= 0 else ''}m"
+    height = row.get(key, row.get("underside_height_m"))
+    station = row.get("station_all" if epsilon <= 0 else "station", row.get("station"))
+    lateral = row.get("lateral_all_m" if epsilon <= 0 else "lateral_m", row.get("lateral_m"))
+    if height is None or station is None or lateral is None:
+        return None
+    yaw = float(clip["yaw"][station])
+    base_x, base_y = clip["station_xy"][station]
+    return {
+        "name": "oracle",
+        "center_m": (
+            float(base_x - np.sin(yaw) * lateral),
+            float(base_y + np.cos(yaw) * lateral),
+            float(height) + 0.15,
+        ),
+        "full_size_m": (0.20, 0.90, 0.30),
+        "yaw_rad": yaw,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -125,6 +169,11 @@ def main() -> int:
     parser.add_argument("--stride", type=int, default=8)
     parser.add_argument("--render-top", type=int, default=4)
     parser.add_argument("--epsilon", type=float, default=0.25, help="regret tolerance")
+    parser.add_argument(
+        "--with-oracle",
+        action="store_true",
+        help="also render the exhaustive-search optimum for each rendered clip, for comparison",
+    )
     parser.add_argument("--model-in", type=Path)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--width", type=int, default=560)
@@ -201,10 +250,11 @@ def main() -> int:
     # Margin efficiency: the achieved two-sided margin as a fraction of the best any single box
     # could reach on that clip. A raw margin is uninterpretable without it -- a small margin may be
     # the task rather than the model, which is exactly what the first run of this trainer got wrong.
-    ceilings = {}
+    ceilings, oracle_rows = {}, {}
     if args.ceiling.exists():
         blob = json.loads(args.ceiling.read_text())
         for row in blob.get("targets", {}).get(args.target, {}).get("clips", []):
+            oracle_rows[row["motion_index"]] = row
             # Compare like with like: the achieved margin uses the all-rivals rule, so the
             # ceiling must too.
             ceilings[row["motion_index"]] = row.get("score_all_m", row["score_m"])
@@ -274,6 +324,13 @@ def main() -> int:
             width=args.width,
             height=args.height,
             fps=30,
+            # Look along the lintel from the side, level with its underside: an overhead-clearance
+            # counterfactual is only legible in profile, and the default three-quarter view puts
+            # the obstacle between the camera and the robot.
+            azimuth_offset=90.0,
+            elevation=-4.0,
+            distance=3.6,
+            lookat_z=1.05,
             context=ordered[1:],
             captions={
                 "a_nominal": ["NOMINAL  (struck -> must adapt)"] + shared,
@@ -281,6 +338,52 @@ def main() -> int:
             },
         )
         entry["video"] = str(out_path)
+        if args.with_oracle and entry["motion_index"] in oracle_rows:
+            box = oracle_box(oracle_rows[entry["motion_index"]], clip, epsilon=args.epsilon)
+            if box is not None:
+                oracle_entry = score_scene(clip, world_to_tensors([box]), decoder)
+                oracle_path = out_path.with_name(out_path.name.replace("rank", "oracle_for_rank"))
+                render_pair(
+                    {"a_nominal": qpos, "b_adapted": adapted},
+                    box,
+                    oracle_path,
+                    width=args.width,
+                    height=args.height,
+                    fps=30,
+                    # Look along the lintel from the side, level with its underside: an overhead-clearance
+                    # counterfactual is only legible in profile, and the default three-quarter view puts
+                    # the obstacle between the camera and the robot.
+                    azimuth_offset=90.0,
+                    elevation=-4.0,
+                    distance=3.6,
+                    lookat_z=1.05,
+                    captions={
+                        "a_nominal": [
+                            "NOMINAL  (struck -> must adapt)",
+                            "THE PROVABLE OPTIMUM for this clip, by exhaustive search",
+                            f"clip {entry['motion_index']:03d} {entry['body_mode']}",
+                            f"robot clears by {1000 * oracle_entry['clearance_m']:.0f} mm; "
+                            f"struck by {1000 * oracle_entry['strike_m']:.0f} mm",
+                        ],
+                        "b_adapted": [
+                            f"ADAPTED {args.target}  (clears)",
+                            "THE PROVABLE OPTIMUM for this clip, by exhaustive search",
+                            (
+                                f"the model reached {entry['efficiency']:.0%} of this"
+                                if entry.get("efficiency")
+                                else ""
+                            ),
+                            "distances are analytic capsule-to-box",
+                        ],
+                    },
+                )
+                entry["oracle_video"] = str(oracle_path)
+                entry["oracle_clearance_m"] = oracle_entry["clearance_m"]
+                entry["oracle_strike_m"] = oracle_entry["strike_m"]
+                print(
+                    f"           optimum: clear {1000 * oracle_entry['clearance_m']:+.0f} mm "
+                    f"strike {1000 * oracle_entry['strike_m']:+.0f} mm -> {oracle_path.name}"
+                )
         rendered.append(entry)
         print(
             f"  rank {rank}: clip {entry['motion_index']:03d} clear "

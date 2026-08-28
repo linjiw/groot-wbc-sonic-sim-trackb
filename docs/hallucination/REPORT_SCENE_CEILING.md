@@ -161,7 +161,54 @@ It is also not a good number in absolute terms: two held-out scenes in three sti
 the counterfactual at all. The model is real but weak, and the efficiency and search-equivalence
 figures below say whether it is worth its complexity.
 
-<!--AMORTISATION-->
+### 5.1 What one forward pass is worth, in units of search
+
+The control shares the model's parameterisation and its decoder and differs only in not
+conditioning on the motion. Margins are hard minima, on the five held-out clips.
+
+| clip | model, best of 24 draws | search, best of 24 | search, best of **1024** |
+|---|---:|---:|---:|
+| 011 | **+13.1 mm** | -107.9 | -1.2 |
+| 012 | **+17.5 mm** | -5.4 | 14.9 |
+| 013 | **+16.0 mm** | -108.9 | -3.8 |
+| 014 | **+10.7 mm** | -178.7 | 10.7 |
+| 030 | **+14.2 mm** | -243.8 | -6.6 |
+
+**At an equal budget of 24 draws the model wins on 5 clips out of 5**, and its best draw is
+positive — a scene that genuinely expresses the counterfactual — on every one. Handing the search
+**43x the compute** (1024 draws, 573 ms against 11.5 ms) still does not beat it on a single clip:
+the search ties on 014, loses on 012, and remains negative on the other three.
+
+This is the claim the paper can carry, and it is the only one here that survives the observation
+that a grid search saturates the ceiling. The exhaustive search of section 2 succeeds because it is
+*structured* — one box, swept over station, lateral offset and height. Unstructured sampling in the
+model's own six-parameter-per-obstacle latent space does not find these scenes at all.
+
+A weaker framing was tempting and is recorded so it is not reached for again: "182 random draws to
+match one forward pass" compares the model's *median* draw against a search's *running best*, and
+on clip 011 the search overtakes that median after 54 draws and goes on to beat it outright. Best of
+N against best of N at the same N is the comparison that means something.
+
+### 5.2 Is it conditioning, or is it a good constant?
+
+The standing diagnostic from the first retraction, where the "learned" model turned out to be a
+constant function of its input with 0.15 mm of clip-to-clip variation.
+
+| | |
+|---|---:|
+| latent spread across clips | 0.0308 |
+| shift when the motion is replaced by the corpus mean | 0.0258 |
+| margin at the mean latent, conditioned | -3.4 mm |
+| margin at the mean latent, motion-blind | -6.7 mm |
+| clips where conditioning wins | **2 / 5** |
+
+The model is genuinely conditional — blinding the input moves its output by 84% of its entire
+across-clip spread, against the retracted model's 0.15 mm of nothing. But **conditioning wins on
+only two held-out clips in five**, and with `n = 5` that is not evidence of anything. The
+amortisation result above is strong; the conditioning result is not yet a result. It needs the
+64-clip candidate set before it can be claimed either way, and until then the honest statement is
+that the model beats unstructured search while it remains unproven that it beats a well-chosen
+constant.
 
 ## 6. What this changes
 
