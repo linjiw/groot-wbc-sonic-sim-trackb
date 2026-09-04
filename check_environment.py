@@ -132,6 +132,7 @@ def check_training_deps():
     results = []
     for pkg, pip_name in [
         ("hydra", "hydra-core"),
+        ("tensordict", "tensordict"),
         ("trl", "trl"),
         ("transformers", "transformers"),
         ("accelerate", "accelerate"),
