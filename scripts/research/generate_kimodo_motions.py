@@ -41,6 +41,8 @@ if str(REPO_ROOT) not in sys.path:
 KIMODO_FPS = 30
 KIMODO_MAX_FRAMES = 300
 
+SEED_DESIGNS = ("independent_per_prompt", "shared_across_prompts")
+
 
 def read_prompts(path: Path) -> list[str]:
     prompts: list[str] = []
@@ -56,6 +58,25 @@ def read_prompts(path: Path) -> list[str]:
 def slugify(prompt: str, limit: int = 48) -> str:
     slug = re.sub(r"[^a-z0-9]+", "_", prompt.lower()).strip("_")
     return slug[:limit].rstrip("_") or "prompt"
+
+
+def generation_seed(
+    seed_base: int,
+    prompt_index: int,
+    seed_index: int,
+    seed_design: str,
+) -> int:
+    """Return the registered seed for one prompt cell.
+
+    The legacy design deliberately spaces prompts by 1,000. The shared design holds the
+    latent noise fixed across all prompts at one replicate, making body/route contrasts paired.
+    """
+
+    if seed_design == "independent_per_prompt":
+        return seed_base + prompt_index * 1000 + seed_index
+    if seed_design == "shared_across_prompts":
+        return seed_base + seed_index
+    raise ValueError(f"unknown seed design: {seed_design}")
 
 
 def register_cached_encoder(cache_path: Path, device: str) -> None:
@@ -96,6 +117,17 @@ def main() -> int:
     parser.add_argument("--duration", type=float, default=4.0, help="seconds, max 10")
     parser.add_argument("--seeds", type=int, default=1, help="samples per prompt")
     parser.add_argument("--seed-base", type=int, default=1000)
+    parser.add_argument(
+        "--seed-design",
+        choices=SEED_DESIGNS,
+        default="independent_per_prompt",
+        help="use identical replicate seeds across prompts for paired factorial analysis",
+    )
+    parser.add_argument(
+        "--prompt-design-version",
+        default="unversioned",
+        help="immutable prompt-design label written into every sidecar",
+    )
     parser.add_argument("--steps", type=int, default=100, help="DDIM denoising steps")
     parser.add_argument("--device", default="cuda")
     args = parser.parse_args()
@@ -128,7 +160,12 @@ def main() -> int:
 
     for prompt_index, prompt in enumerate(prompts):
         for seed_index in range(args.seeds):
-            seed = args.seed_base + prompt_index * 1000 + seed_index
+            seed = generation_seed(
+                args.seed_base,
+                prompt_index,
+                seed_index,
+                args.seed_design,
+            )
             stem = f"{prompt_index:03d}_{slugify(prompt)}_s{seed_index}"
             csv_path = args.out / f"{stem}.csv"
             if csv_path.exists():
@@ -157,6 +194,15 @@ def main() -> int:
             sidecar = {
                 "prompt": prompt,
                 "seed": seed,
+                "generation_seed": seed,
+                "matched_seed_group_id": (
+                    f"{args.prompt_design_version}:seed:{seed}"
+                    if args.seed_design == "shared_across_prompts"
+                    else None
+                ),
+                "prompt_cell_id": f"prompt-{prompt_index:03d}",
+                "prompt_design_version": args.prompt_design_version,
+                "seed_design": args.seed_design,
                 "model": resolved,
                 "num_frames": num_frames,
                 "fps": KIMODO_FPS,
@@ -177,14 +223,19 @@ def main() -> int:
         "failures": failures,
         "prompts": len(prompts),
         "seeds_per_prompt": args.seeds,
+        "seed_base": args.seed_base,
+        "seed_design": args.seed_design,
+        "prompt_design_version": args.prompt_design_version,
         "num_frames": num_frames,
         "total_seconds": round(time.monotonic() - started, 1),
     }
     (args.out / "generation_report.json").write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    print(f"\n{len(written)} motion(s) written, {len(failures)} failed, "
-          f"{report['total_seconds']:.0f} s total -> {args.out}")
+    print(
+        f"\n{len(written)} motion(s) written, {len(failures)} failed, "
+        f"{report['total_seconds']:.0f} s total -> {args.out}"
+    )
     return 1 if failures and not written else 0
 
 
