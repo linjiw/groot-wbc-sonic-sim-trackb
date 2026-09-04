@@ -130,6 +130,23 @@ def verify_manifest_artifacts(manifest: dict) -> None:
         )
 
 
+def resolve_python(manifest: dict, override: Path | None) -> Path:
+    """Resolve the rollout interpreter, preferring an explicit CLI override.
+
+    Physics manifests pin the environment used to execute their cells.  A stale developer-machine
+    default must not silently replace that recorded environment.
+    """
+    value = override
+    if value is None:
+        value = manifest.get("implementation", {}).get("python")
+    if value is None:
+        raise ValueError("manifest implementation.python is missing and --python was not supplied")
+    path = _resolve_artifact_path(str(value))
+    if not path.is_file():
+        raise ValueError(f"rollout Python does not exist: {path}")
+    return path
+
+
 def free_gpu_mib() -> int:
     result = subprocess.run(
         ["nvidia-smi", "--query-gpu=memory.free", "--format=csv,noheader,nounits"],
@@ -247,12 +264,14 @@ def main() -> int:
     parser.add_argument(
         "--python",
         type=Path,
-        default=Path.home() / "miniconda3/envs/env_isaaclab/bin/python",
+        default=None,
+        help="Override implementation.python from the manifest.",
     )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
     manifest = json.loads(args.manifest.read_text())
+    rollout_python = resolve_python(manifest, args.python)
     authorization = manifest.get("authorization", {})
     policy = manifest["execution_policy"]
     if policy.get("not_authorized") is not False:
@@ -352,7 +371,7 @@ def main() -> int:
                 "--out",
                 cell["output"],
                 "--python",
-                str(args.python),
+                str(rollout_python),
                 "--checkpoint",
                 str(_resolve_artifact_path(manifest["implementation"]["checkpoint"]["path"])),
             ]
