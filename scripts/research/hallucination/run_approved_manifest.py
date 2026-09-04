@@ -147,6 +147,13 @@ def resolve_python(manifest: dict, override: Path | None) -> Path:
     return path
 
 
+def capture_mode_arguments(policy: dict) -> list[str]:
+    """Translate the registered capture mode into rollout-driver arguments."""
+    if policy.get("runtime", {}).get("render_ego", True):
+        return []
+    return ["--trajectory-only"]
+
+
 def free_gpu_mib() -> int:
     result = subprocess.run(
         ["nvidia-smi", "--query-gpu=memory.free", "--format=csv,noheader,nounits"],
@@ -375,6 +382,7 @@ def main() -> int:
                 "--checkpoint",
                 str(_resolve_artifact_path(manifest["implementation"]["checkpoint"]["path"])),
             ]
+            command.extend(capture_mode_arguments(policy))
             task = cell.get("task_prompt")
             if task:
                 command.extend(["--task", task])

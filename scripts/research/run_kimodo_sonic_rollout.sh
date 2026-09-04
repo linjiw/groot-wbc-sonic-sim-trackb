@@ -20,6 +20,7 @@ Usage:
     [--python /abs/path/python] \
     [--scene-package /abs/path/scene_package] \
     [--max-steps auto|<int>] \
+    [--trajectory-only] \
     [--task "natural language instruction"]
 
 Writes <out>/trajectories, <out>/renders, <out>/rollout.log and requires the
@@ -40,6 +41,7 @@ MAX_STEPS=auto
 TASK="kimodo_locomotion"
 EXTRA_OVERRIDES=()
 SCENE_PACKAGE=""
+RENDER_EGO=True
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -50,6 +52,7 @@ while [[ $# -gt 0 ]]; do
     --python) PYTHON_BIN="$2"; shift 2 ;;
     --scene-package) SCENE_PACKAGE="$2"; shift 2 ;;
     --max-steps) MAX_STEPS="$2"; shift 2 ;;
+    --trajectory-only) RENDER_EGO=False; shift ;;
     --task) TASK="$2"; shift 2 ;;
     # Extra Hydra overrides, whitespace-separated, appended last so they win. Added for the
     # fixed observer camera: the ego view rides the head and the chase view follows the robot,
@@ -184,7 +187,7 @@ env PYTHONPATH="$REPO_ROOT" "$PYTHON_BIN" gear_sonic/eval_agent_trl.py \
   +headless=True \
   ++num_envs=1 \
   "${TERRAIN_OVERRIDES[@]}" \
-  ++manager_env.config.render_ego=True \
+  ++manager_env.config.render_ego="$RENDER_EGO" \
   ++manager_env.config.save_rendering_dir="$OUT/renders" \
   ++manager_env.config.save_trajectory_dir="$OUT/trajectories" \
   ++manager_env.commands.motion.motion_lib_cfg.motion_file="$MOTION" \

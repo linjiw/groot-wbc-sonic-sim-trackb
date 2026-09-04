@@ -50,3 +50,17 @@ def test_resolve_python_fails_closed_without_environment() -> None:
 
     with pytest.raises(ValueError, match="implementation.python is missing"):
         module.resolve_python({"implementation": {}}, None)
+
+
+def test_capture_mode_arguments_defaults_to_rendering() -> None:
+    module = _load_module()
+
+    assert module.capture_mode_arguments({"runtime": {}}) == []
+
+
+def test_capture_mode_arguments_disables_rendering_when_registered() -> None:
+    module = _load_module()
+
+    assert module.capture_mode_arguments({"runtime": {"render_ego": False}}) == [
+        "--trajectory-only"
+    ]
