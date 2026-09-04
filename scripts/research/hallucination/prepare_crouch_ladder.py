@@ -60,12 +60,20 @@ def _write_provenance(path: Path, key: str, source_csv: Path, operator: dict | N
     return manifest
 
 
-def select(screen: dict, *, cohort: int, exclude_sourced: bool) -> list[dict]:
+def select(
+    screen: dict,
+    *,
+    cohort: int,
+    exclude_sourced: bool,
+    motion_indices: set[int] | None = None,
+) -> list[dict]:
     """Prefer body-mode diversity, then depth of usable ladder."""
     eligible = [
         clip
         for clip in screen["clips"]
-        if clip["usable_rungs"] >= 2 and not (exclude_sourced and clip["already_sourced"])
+        if clip["usable_rungs"] >= 2
+        and not (exclude_sourced and clip["already_sourced"])
+        and (motion_indices is None or int(clip["motion_index"]) in motion_indices)
     ]
     eligible.sort(key=lambda clip: (-clip["usable_rungs"], -clip["deepest_usable_mm"]))
     chosen: list[dict] = []
@@ -97,10 +105,26 @@ def main() -> int:
     parser.add_argument("--cohort", type=int, default=12)
     parser.add_argument("--max-rungs", type=int, default=3)
     parser.add_argument("--include-sourced", action="store_true")
+    parser.add_argument(
+        "--motion-index",
+        type=int,
+        action="append",
+        help="restrict materialization to these explicitly selected motion indices",
+    )
     args = parser.parse_args()
 
     screen = json.loads(args.screen.read_text())
-    chosen = select(screen, cohort=args.cohort, exclude_sourced=not args.include_sourced)
+    requested = set(args.motion_index) if args.motion_index else None
+    if requested is not None:
+        available = {int(clip["motion_index"]) for clip in screen["clips"]}
+        if missing := requested - available:
+            raise SystemExit(f"motion indices absent from screen: {sorted(missing)}")
+    chosen = select(
+        screen,
+        cohort=args.cohort,
+        exclude_sourced=not args.include_sourced,
+        motion_indices=requested,
+    )
     if not chosen:
         raise SystemExit("the ladder screen yielded no eligible clip")
     args.out.mkdir(parents=True, exist_ok=True)
@@ -186,10 +210,16 @@ def main() -> int:
         "operator": "local_crouch",
         "station_fraction": STATION_FRACTION,
         "window_fraction": WINDOW_FRACTION,
-        "screen": str(args.screen.relative_to(REPO_ROOT)),
+        "screen": (
+            str(args.screen.resolve().relative_to(REPO_ROOT))
+            if args.screen.resolve().is_relative_to(REPO_ROOT)
+            else str(args.screen.resolve())
+        ),
         "screen_sha256": sha256_file(args.screen),
         "selection_basis": (
-            "body-mode diversity first, then usable ladder depth; motions already anchoring "
+            "explicit motion-index restriction, then body-mode diversity and usable ladder depth"
+            if requested is not None
+            else "body-mode diversity first, then usable ladder depth; motions already anchoring "
             "verified critical support are excluded unless --include-sourced"
         ),
         "pairs": pairs,
