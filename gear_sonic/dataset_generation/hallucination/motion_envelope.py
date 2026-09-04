@@ -79,38 +79,41 @@ def extract_envelope(
 ) -> MotionEnvelope:
     """Measure up/left/right extents at each requested route fraction.
 
-    A station's window is a slab of ``along_route_m`` measured **along the executed tangent**, so
-    the measurement follows a curving route instead of a world axis. Capsule radii are added, so
-    the extents describe the body surface rather than its axis.
+    A station's window spans ``along_route_m`` of executed-route arclength, so the measurement
+    remains local on curved routes instead of admitting distant frames with a similar tangent
+    projection. Capsule radii are added, so the extents describe the body surface rather than
+    its axis.
     """
     root = np.asarray(tracks.root_pos_w[:, :2], dtype=np.float64)
     progress = route_progress(root)
+    segment_length = np.linalg.norm(np.diff(root, axis=0), axis=1)
+    arclength = np.concatenate(([0.0], np.cumsum(segment_length)))
     up, left, right = [], [], []
     stations, yaws = [], []
     for fraction in np.asarray(fractions, dtype=np.float64):
         index = int(np.argmin(np.abs(progress - fraction)))
         station = root[index]
         yaw = _yaw_at(root, index)
-        forward = np.asarray((np.cos(yaw), np.sin(yaw)))
         lateral = np.asarray((-np.sin(yaw), np.cos(yaw)))
 
-        # Every capsule endpoint of every frame, projected into this station's route frame.
-        points = np.concatenate((tracks.starts.reshape(-1, 3), tracks.ends.reshape(-1, 3)), axis=0)
-        radii = np.tile(tracks.radii, tracks.frames * 2)
+        # Select frames by *route arclength*. Filtering all trajectory points only by their
+        # projection onto this tangent aliases distant parts of a curved/looping route into
+        # the same slab and can report metre-scale "body width" for an ordinary G1. The root
+        # arclength window keeps the measurement local to this traversal event.
+        frame_mask = np.abs(arclength - arclength[index]) <= along_route_m / 2.0
+        if not frame_mask.any():  # Defensive: the nearest station frame must normally match.
+            frame_mask[index] = True
+        selected_starts = tracks.starts[frame_mask]
+        selected_ends = tracks.ends[frame_mask]
+        points = np.concatenate(
+            (selected_starts.reshape(-1, 3), selected_ends.reshape(-1, 3)), axis=0
+        )
+        radii = np.tile(tracks.radii, int(frame_mask.sum()) * 2)
         offsets = points[:, :2] - station[None, :]
-        along = offsets @ forward
         across = offsets @ lateral
-        inside = np.abs(along) <= along_route_m / 2.0 + radii
-        if not inside.any():
-            # No body part occupies this slab: report a floor rather than a NaN, so the station
-            # simply offers no obstacle rather than poisoning the profile.
-            up.append(0.0)
-            left.append(0.0)
-            right.append(0.0)
-        else:
-            up.append(float((points[inside, 2] + radii[inside]).max()))
-            left.append(float((across[inside] + radii[inside]).max()))
-            right.append(float((-across[inside] + radii[inside]).max()))
+        up.append(float((points[:, 2] + radii).max()))
+        left.append(float((across + radii).max()))
+        right.append(float((-across + radii).max()))
         stations.append(station)
         yaws.append(yaw)
     return MotionEnvelope(
