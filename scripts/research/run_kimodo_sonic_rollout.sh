@@ -23,8 +23,8 @@ Usage:
     [--trajectory-only] \
     [--task "natural language instruction"]
 
-Writes <out>/trajectories, <out>/renders, <out>/rollout.log and requires the
-SONIC_EVAL_SUCCESS marker before reporting success.
+Writes <out>/trajectories, <out>/rollout.log, and—unless `--trajectory-only` is
+set—<out>/renders. Requires the SONIC_EVAL_SUCCESS marker before reporting success.
 EOF
 }
 
@@ -42,6 +42,7 @@ TASK="kimodo_locomotion"
 EXTRA_OVERRIDES=()
 SCENE_PACKAGE=""
 RENDER_EGO=True
+RECORDER_PROFILE=dataset
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -52,7 +53,7 @@ while [[ $# -gt 0 ]]; do
     --python) PYTHON_BIN="$2"; shift 2 ;;
     --scene-package) SCENE_PACKAGE="$2"; shift 2 ;;
     --max-steps) MAX_STEPS="$2"; shift 2 ;;
-    --trajectory-only) RENDER_EGO=False; shift ;;
+    --trajectory-only) RENDER_EGO=False; RECORDER_PROFILE=trajectory; shift ;;
     --task) TASK="$2"; shift 2 ;;
     # Extra Hydra overrides, whitespace-separated, appended last so they win. Added for the
     # fixed observer camera: the ego view rides the head and the chase view follows the robot,
@@ -199,7 +200,7 @@ env PYTHONPATH="$REPO_ROOT" "$PYTHON_BIN" gear_sonic/eval_agent_trl.py \
   "${EXTRA_OVERRIDES[@]}" \
   ++max_render_steps="$MAX_STEPS" \
   +success_manifest="$OUT/success_manifest.json" \
-  "~manager_env/recorders=empty" "+manager_env/recorders=dataset" \
+  "~manager_env/recorders=empty" "+manager_env/recorders=$RECORDER_PROFILE" \
   > "$LOG" 2>&1
 STATUS=$?
 

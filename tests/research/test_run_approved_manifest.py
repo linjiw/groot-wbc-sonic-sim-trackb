@@ -4,6 +4,7 @@ import importlib.util
 from pathlib import Path
 
 import pytest
+import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = REPO_ROOT / "scripts/research/hallucination/run_approved_manifest.py"
@@ -64,3 +65,12 @@ def test_capture_mode_arguments_disables_rendering_when_registered() -> None:
     assert module.capture_mode_arguments({"runtime": {"render_ego": False}}) == [
         "--trajectory-only"
     ]
+
+
+def test_trajectory_recorder_profile_has_no_camera_term() -> None:
+    profile = yaml.safe_load(
+        (REPO_ROOT / "gear_sonic/config/manager_env/recorders/trajectory.yaml").read_text()
+    )
+
+    assert "trajectory" in profile
+    assert "render_envs" not in profile
