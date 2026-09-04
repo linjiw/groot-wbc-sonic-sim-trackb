@@ -29,6 +29,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import shutil
 import sys
 
 import numpy as np
@@ -125,7 +126,9 @@ def main() -> int:
                     "support_floor_prim": "/World/Structure/Floor",
                     "support_z_m": 0.0,
                     "walkable_bounds_xy": {"min": [min_x, min_y], "max": [max_x, max_y]},
-                    "route_xy": [[float(x), float(y)] for x, y in placed[:: max(1, len(placed) // 8)]],
+                    "route_xy": [
+                        [float(x), float(y)] for x, y in placed[:: max(1, len(placed) // 8)]
+                    ],
                     "route_clearance_radius_m": BODY_RADIUS_M,
                     "robot_clearance_height_m": ROBOT_CLEARANCE_HEIGHT_M,
                     "minimum_collision_prims": 4 + len(spec.pieces),
@@ -163,7 +166,7 @@ def main() -> int:
         ),
         "license": {
             "spdx": "Apache-2.0",
-            "source": "../../../../../LICENSE",
+            "source": "LICENSE",
             "redistribution_allowed": True,
         },
         "provenance": {
@@ -177,8 +180,14 @@ def main() -> int:
         },
         "scenes": scenes,
     }
+    license_path = REPO_ROOT / "LICENSE"
+    if not license_path.is_file():
+        raise SystemExit(f"repository license not found: {license_path}")
+    shutil.copyfile(license_path, args.out / "LICENSE")
     manifest_path = args.out / "manifest.json"
-    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     print(f"\nwrote {len(scenes)} scenes + manifest to {args.out}")
     return 0
 

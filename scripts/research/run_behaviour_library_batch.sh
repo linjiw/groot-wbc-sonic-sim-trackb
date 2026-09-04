@@ -128,10 +128,29 @@ for row in "${SCENE_ROWS[@]}"; do
     fi
   fi
 
+  # Keep the language label bound to the motion that Kimodo actually generated. Falling
+  # back keeps historical sidecar-free libraries runnable, while fresh corpora preserve
+  # the exact prompt from generation through trajectory capture and export.
+  task="walk through the room, avoiding the furniture"
+  sidecar="$MOTIONS/$motion.json"
+  if [[ -f "$sidecar" ]]; then
+    task=$("$PYTHON_BIN" - "$sidecar" <<'PY'
+import json, sys
+from pathlib import Path
+
+prompt = json.loads(Path(sys.argv[1]).read_text()).get("prompt", "").strip()
+if not prompt:
+    raise SystemExit(f"missing prompt in {sys.argv[1]}")
+print(prompt)
+PY
+    ) || { echo "METAFAIL $sid"; failed=$((failed+1)); continue; }
+  fi
+
   # Task language carries commas; run_kimodo_sonic_rollout.sh quotes it for Hydra.
   "$REPO_ROOT/scripts/research/run_kimodo_sonic_rollout.sh" \
     --scene "$sid" --motion "$motion_pkl" --out "$out" --max-steps "$MAX_STEPS" \
-    --task "walk through the room, avoiding the furniture" \
+    --scene-package "$SCENES_DIR" \
+    --task "$task" \
     > "$WORK/logs/$sid.runner.log" 2>&1
   if grep -q "^PASS" "$WORK/logs/$sid.runner.log"; then
     echo "RUN-OK   $sid"; ok=$((ok+1))

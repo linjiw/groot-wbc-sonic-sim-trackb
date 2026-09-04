@@ -94,6 +94,42 @@ def verify_cell(cell: dict) -> None:
         raise ValueError(f"{cell['cell_id']}: protected output path {output}")
 
 
+def _resolve_artifact_path(value: str) -> Path:
+    path = Path(value)
+    return path if path.is_absolute() else REPO_ROOT / path
+
+
+def verify_manifest_artifacts(manifest: dict) -> None:
+    """Verify the code, controller, and prediction record pinned by a manifest."""
+    implementation = manifest.get("implementation", {})
+    for label in ("rollout_driver", "manifest_driver", "checkpoint"):
+        artifact = implementation.get(label)
+        if not isinstance(artifact, dict):
+            raise ValueError(f"manifest implementation.{label} is missing")
+        verify_hash(
+            _resolve_artifact_path(artifact["path"]),
+            artifact["sha256"],
+            f"implementation {label}",
+        )
+    prediction = manifest.get("registered_predictions")
+    if not isinstance(prediction, dict):
+        raise ValueError("manifest registered_predictions must be a hash-pinned artifact")
+    verify_hash(
+        _resolve_artifact_path(prediction["path"]),
+        prediction["sha256"],
+        "registered predictions",
+    )
+    reference_gate = manifest.get("eligibility", {}).get("reference_gate")
+    if reference_gate is not None:
+        if not isinstance(reference_gate, dict):
+            raise ValueError("manifest eligibility.reference_gate must be a hash-pinned artifact")
+        verify_hash(
+            _resolve_artifact_path(reference_gate["path"]),
+            reference_gate["sha256"],
+            "eligibility reference gate",
+        )
+
+
 def free_gpu_mib() -> int:
     result = subprocess.run(
         ["nvidia-smi", "--query-gpu=memory.free", "--format=csv,noheader,nounits"],
@@ -229,6 +265,7 @@ def main() -> int:
     projected = float(policy["cost_ceiling"]["gpu_hours_contended"])
     if projected > DAILY_GPU_HOURS:
         raise SystemExit(f"manifest projects {projected:.3f} GPU-h, beyond the daily budget")
+    verify_manifest_artifacts(manifest)
     for cell in manifest["cells"]:
         verify_cell(cell)
 
@@ -316,7 +353,18 @@ def main() -> int:
                 cell["output"],
                 "--python",
                 str(args.python),
+                "--checkpoint",
+                str(_resolve_artifact_path(manifest["implementation"]["checkpoint"]["path"])),
             ]
+            task = cell.get("task_prompt")
+            if task:
+                command.extend(["--task", task])
+            scene_path = cell["scene"].get("path")
+            if cell["scene"]["scene_id"] != "plane" and scene_path:
+                scene_package = Path(scene_path)
+                if not scene_package.is_absolute():
+                    scene_package = REPO_ROOT / scene_package
+                command.extend(["--scene-package", str(scene_package.parent)])
             for override in cell.get("hydra_overrides", []):
                 command.extend(["--extra", override])
             started = time.monotonic()

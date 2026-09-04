@@ -18,6 +18,7 @@ Usage:
     --out /abs/path/output_dir \
     [--checkpoint /abs/path/last.pt] \
     [--python /abs/path/python] \
+    [--scene-package /abs/path/scene_package] \
     [--max-steps auto|<int>] \
     [--task "natural language instruction"]
 
@@ -38,6 +39,7 @@ MAX_STEPS=auto
 # will train on has to be decided here.
 TASK="kimodo_locomotion"
 EXTRA_OVERRIDES=()
+SCENE_PACKAGE=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -46,6 +48,7 @@ while [[ $# -gt 0 ]]; do
     --out) OUT="$2"; shift 2 ;;
     --checkpoint) CHECKPOINT="$2"; shift 2 ;;
     --python) PYTHON_BIN="$2"; shift 2 ;;
+    --scene-package) SCENE_PACKAGE="$2"; shift 2 ;;
     --max-steps) MAX_STEPS="$2"; shift 2 ;;
     --task) TASK="$2"; shift 2 ;;
     # Extra Hydra overrides, whitespace-separated, appended last so they win. Added for the
@@ -77,7 +80,11 @@ else
   # g1_dataset package and any generated clutter package. Search them all rather
   # than hard-coding, so a new package does not silently fail to resolve.
   SCENE_USD=""
-  for pkg in "${REPO_ROOT}"/gear_sonic/data/assets/scenes/*/; do
+  SCENE_PACKAGES=("${REPO_ROOT}"/gear_sonic/data/assets/scenes/*/)
+  if [[ -n "$SCENE_PACKAGE" ]]; then
+    SCENE_PACKAGES=("${SCENE_PACKAGE%/}/" "${SCENE_PACKAGES[@]}")
+  fi
+  for pkg in "${SCENE_PACKAGES[@]}"; do
     if [[ -e "${pkg}${SCENE}.usda" ]]; then SCENE_USD="${pkg}${SCENE}.usda"; break; fi
   done
   if [[ -z "$SCENE_USD" ]]; then

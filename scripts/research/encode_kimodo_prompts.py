@@ -57,6 +57,12 @@ def main() -> int:
     parser.add_argument("--prompts", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--device", default="cpu", help="cpu (default) or cuda")
+    parser.add_argument(
+        "--dtype",
+        choices=("auto", "float32", "bfloat16"),
+        default="auto",
+        help="encoder dtype; auto uses float32 on CPU and bfloat16 on CUDA",
+    )
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument(
         "--append",
@@ -64,6 +70,12 @@ def main() -> int:
         help="keep prompts already in --out and only encode the new ones",
     )
     args = parser.parse_args()
+
+    if args.device == "cpu":
+        # This must happen before the first ``kimodo`` import below. Importing
+        # ``kimodo.sanitize`` initializes torch through kimodo.__init__, after which changing
+        # CUDA_VISIBLE_DEVICES is too late to prevent the encoder loader from seeing the GPU.
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
     # Kimodo sanitizes prompts (capitalisation, trailing period) before handing them to
     # the encoder, so the model looks the sanitized string up. Caching the raw string
@@ -83,20 +95,16 @@ def main() -> int:
         return 0
     print(f"encoding {len(todo)} of {len(prompts)} prompt(s) on {args.device}")
 
-    if args.device == "cpu":
-        # LLM2Vec.from_pretrained places weights while loading, so a later .to("cpu")
-        # is too late -- the allocation has already happened on the GPU and, on a shared
-        # card, already failed. Hiding the device is the only reliable way to keep this
-        # stage off the GPU that generation needs.
-        os.environ["CUDA_VISIBLE_DEVICES"] = ""
-
     from kimodo.model import LLM2VecEncoder
 
     started = time.monotonic()
+    dtype = args.dtype
+    if dtype == "auto":
+        dtype = "bfloat16" if args.device == "cuda" else "float32"
     encoder = LLM2VecEncoder(
         base_model_name_or_path="McGill-NLP/LLM2Vec-Meta-Llama-3-8B-Instruct-mntp",
         peft_model_name_or_path="McGill-NLP/LLM2Vec-Meta-Llama-3-8B-Instruct-mntp-supervised",
-        dtype="bfloat16" if args.device == "cuda" else "float32",
+        dtype=dtype,
         llm_dim=4096,
     )
     encoder.to(args.device)
