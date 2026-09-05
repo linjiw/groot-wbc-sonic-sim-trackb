@@ -274,6 +274,11 @@ def figures(out, corpus, shared, heldout):
     fig.savefig(out / "height-profiles.svg", bbox_inches="tight")
     plt.close(fig)
     shutil.copyfile(heldout / "q3/route_comparison.svg", out / "route-comparison.svg")
+    # Matplotlib emits trailing blanks in SVG path data. Normalize derived assets
+    # before hashing so the publication also passes the repository whitespace gate.
+    for name in ("qualification.svg", "height-profiles.svg", "route-comparison.svg"):
+        path = out / name
+        path.write_text("\n".join(line.rstrip() for line in path.read_text().splitlines()) + "\n")
 
 
 def main():
