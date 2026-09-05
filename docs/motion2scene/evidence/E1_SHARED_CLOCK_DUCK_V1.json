@@ -1,0 +1,43 @@
+{
+  "schema_version": "motion2scene_shared_clock_duck_design_v1",
+  "experiment": "M2S-E1-shared-clock-duck-v1",
+  "role": "reference_acquisition_and_timing_hypothesis_pilot",
+  "source_candidates": "cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/candidates.json",
+  "source_candidates_sha256": "sha256:7a0cd98d4f2a1711dc453f2ff414d96fae643b8b17e46bb5944f886632c45b1a",
+  "source_repository": "groot-wbc-sonic-sim-trackb",
+  "source_commit": "cfda4299e9ac8240975e921525014f2c3b23769e",
+  "base_selection": "all eight seed-41001-through-41008 carrier groups, including previous rejected adaptations",
+  "levels": [
+    "neutral",
+    "d055",
+    "d085"
+  ],
+  "common_time_map": {
+    "activity_source": "departure_profile(neutral, d085)",
+    "rate": "1 - 0.30 * activity",
+    "minimum_pace_ratio": 0.7,
+    "apply_identical_map_to_every_level": true,
+    "fps": 30.0,
+    "implementation": "gear_sonic.dataset_generation.deployable_retiming.time_map and resample_clip"
+  },
+  "semantic_policy": {
+    "minimum_effect_m": 0.05
+  },
+  "qualification": {
+    "q0_q1": "remeasure each resampled level",
+    "reference_route": "frozen route_semantics_v2_preregistered",
+    "ordered_envelope_region": [
+      0.45,
+      0.55
+    ],
+    "q3_q4": "not_measured until separately registered execution",
+    "dataset_admission": false
+  },
+  "output": "cg-wbc-v2-shared-seed-confirmatory/e1_shared_clock_duck_v1",
+  "predictions": [
+    "all eight groups retain identical root XY, root rotation and timing across three levels",
+    "at least six of eight groups retain Q0/Q1, reference semantics and ordered central height profiles",
+    "slower common timing may reduce crouch endpoint lag; this remains untested until Q3"
+  ],
+  "comparison_limit": "Changing timing and selecting a different upper intensity means the old Q3 batch is historical context, not an isolated causal estimate of slowing."
+}

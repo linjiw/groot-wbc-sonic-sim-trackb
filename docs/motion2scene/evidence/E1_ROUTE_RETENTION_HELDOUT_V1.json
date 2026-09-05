@@ -1,0 +1,84 @@
+{
+  "schema_version": "motion2scene_route_retention_heldout_design_v1",
+  "experiment": "M2S-E1-route-retention-heldout-v1",
+  "purpose": "Validate the frozen reference-relative route-retention gate on newly generated and newly executed neutral walk carriers.",
+  "analysis_role": "heldout_instrument_validation",
+  "independent_experimental_unit": "generation_seed",
+  "source_repository": {
+    "path": "groot-wbc-sonic-sim-trackb",
+    "commit": "cfda4299e9ac8240975e921525014f2c3b23769e"
+  },
+  "generation": {
+    "prompt_design_version": "kimodo_route_retention_neutral_v1",
+    "prompt_file": "configs/prompts/kimodo_route_retention_neutral_v1.txt",
+    "prompt_file_sha256": "sha256:e17d9b03c082128217e3deebc5a98245d30d8274c3b669fbf4a772e6b4134b85",
+    "prompt_cache": "cg-wbc-v2-shared-seed-confirmatory/taxonomy/prompt_cache.npz",
+    "prompt_cache_sha256": "sha256:eea36e67890f77aedcb3c49dcc598282004c60825330a23f5f6b91c0faf96153",
+    "generator": "scripts/research/generate_kimodo_motions.py",
+    "generator_sha256": "sha256:0a9d4f40bb40e0b3b9661013cb87a473ecaa478c557d3e94c1f449c77467ed54",
+    "python": ".venv_kimodo/bin/python",
+    "model": "kimodo-g1-rp",
+    "duration_seconds": 4.0,
+    "denoising_steps": 100,
+    "seeds": [
+      42001,
+      42002,
+      42003,
+      42004,
+      42005,
+      42006,
+      42007,
+      42008
+    ],
+    "registered_reference_count": 8,
+    "output_root": "cg-wbc-route-retention-heldout-v1"
+  },
+  "reference_admission": {
+    "q0": "passed",
+    "q1": "passed",
+    "route_predicate_version": "route_semantics_v2_preregistered",
+    "required_route_class": "valid_straight",
+    "failure_accounting": "retain every generated reference and report every failed gate"
+  },
+  "q3": {
+    "scene": "screen_empty",
+    "runtime_seed": 7700,
+    "trajectory_only": true,
+    "serial_execution": true,
+    "minimum_free_vram_mib": 7500,
+    "registered_maximum_rollouts": 8,
+    "rule": "execute every Q0/Q1 and valid-straight reference exactly once; do not replace failures"
+  },
+  "relative_retention_policy": {
+    "version": "relative_route_retention_v2_heldout",
+    "alignment": "initial_translation_only_no_rotation_scale_or_shape_warp",
+    "station_count": 101,
+    "minimum_path_length_ratio": 0.9,
+    "maximum_path_length_ratio": 1.1,
+    "minimum_net_displacement_ratio": 0.9,
+    "maximum_net_displacement_ratio": 1.1,
+    "maximum_endpoint_error_m": 0.35,
+    "maximum_absolute_signed_heading_error_rad": 0.3490658503988659,
+    "maximum_cross_track_rmse_m": 0.1,
+    "maximum_cross_track_absolute_error_m": 0.2,
+    "minimum_monotonic_progress_fraction": 0.9,
+    "require_no_self_intersection": true,
+    "require_no_reversal": true,
+    "cumulative_absolute_curvature_is_a_hard_gate": false,
+    "threshold_provenance": "frozen after calibration and therefore evaluated only on these new held-out executions"
+  },
+  "analysis_implementation": {
+    "path": "src/motion2scene/motion/route_retention.py",
+    "sha256": "sha256:115519ec758170012239053fb98a775ee792545e458993d8b066bf46510ed3cc"
+  },
+  "registered_predictions": {
+    "path": "experiments/registrations/E1_ROUTE_RETENTION_HELDOUT_V1_PREDICTIONS.md",
+    "sha256": "sha256:04232ed573025fe1e10260e28465af9c8f74f8b173b3dcd4da06e6594afc389b"
+  },
+  "promotion_limits": [
+    "do not alter the original v2 route or S4 labels",
+    "do not admit adapted motions or ladders to Q4 from this neutral-only validation",
+    "do not train a hallucinator",
+    "if the relative gate fails held-out validation, revise the instrument in a new version"
+  ]
+}

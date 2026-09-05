@@ -1,0 +1,208 @@
+{
+  "analysis_driver": {
+    "path": "experiments/e0_shared_seed_reference_eval.py",
+    "sha256": "sha256:8f6ff61cf7ac9afaa3c3aa94eb75afa40fd29bfdd3001f4b9c08ded58aa778fe"
+  },
+  "analysis_scope": "reference_only_q0_q1_route_and_paired_s0_s3",
+  "analysis_source_commit": "cfda4299e9ac8240975e921525014f2c3b23769e",
+  "analysis_source_files": {
+    "motion_envelope": {
+      "path": "gear_sonic/dataset_generation/hallucination/motion_envelope.py",
+      "sha256": "sha256:2536474e15c436ff7db5786ccd96159ef6edb27dfeff263f95f231afab8a5e67"
+    },
+    "reference_payload": {
+      "path": "gear_sonic/dataset_generation/reference_payload.py",
+      "sha256": "sha256:1f45326fef9cd896cf46d3e2c03a6996831aeb5713dc2d8e0e8c64301e25eb67"
+    },
+    "self_intersection": {
+      "path": "gear_sonic/dataset_generation/self_intersection.py",
+      "sha256": "sha256:f7878ca1a25c6160236b8f093e048b9314364d095b4aa04e200efdeffc6a8207"
+    },
+    "semantic_keypoints": {
+      "path": "gear_sonic/dataset_generation/hallucination/keypoints.py",
+      "sha256": "sha256:f16edb0c63835934ba8efb3c599993ac2523f5eaf2f3dde2a7a44b1269a2238f"
+    }
+  },
+  "analysis_source_repo": "groot-wbc-sonic-sim-trackb",
+  "corpus_id": "cg-wbc-v2-shared-seed-confirmatory",
+  "design_sha256": "sha256:a395bb765852d3a4e3ea93b57c11e1fbbc07d3ae384aca113266182862a974b8",
+  "generation_source_commit": "d9e7b1b50b11568a34392f04aefd95b860680364",
+  "independent_experimental_units": 8,
+  "mjcf_sha256": "sha256:5d76cf92f00dd49d6eb9fae38d7d38e46886848b602ac691051e886c3bcccfb1",
+  "observed": 144,
+  "q0_artifact_sha256": "sha256:6d280d300e0e0b8eedae8e869ffad633d1bd206b09e17e4889d5c6396c3c85e4",
+  "registered": 144,
+  "route_policy": {
+    "centerline_smoothing_s": 0.5,
+    "centerline_station_spacing_m": 0.5,
+    "gentle_max_heading_rad": 1.8325957145940461,
+    "gentle_max_total_curvature_rad": 2.181661564992912,
+    "gentle_min_heading_rad": 0.2617993877991494,
+    "min_monotonic_progress_fraction": 0.9,
+    "min_net_displacement_m": 1.0,
+    "min_net_to_path_ratio": 0.65,
+    "reversal_excursion_m": 0.15,
+    "straight_max_heading_rad": 0.3490658503988659,
+    "straight_max_total_curvature_rad": 0.9599310885968813
+  },
+  "schema_version": "motion2scene_e0_shared_seed_reference_eval_v2",
+  "station_progress": [
+    0.0,
+    0.01,
+    0.02,
+    0.03,
+    0.04,
+    0.05,
+    0.06,
+    0.07,
+    0.08,
+    0.09,
+    0.1,
+    0.11,
+    0.12,
+    0.13,
+    0.14,
+    0.15,
+    0.16,
+    0.17,
+    0.18,
+    0.19,
+    0.2,
+    0.21,
+    0.22,
+    0.23,
+    0.24,
+    0.25,
+    0.26,
+    0.27,
+    0.28,
+    0.29,
+    0.3,
+    0.31,
+    0.32,
+    0.33,
+    0.34,
+    0.35000000000000003,
+    0.36,
+    0.37,
+    0.38,
+    0.39,
+    0.4,
+    0.41000000000000003,
+    0.42,
+    0.43,
+    0.44,
+    0.45,
+    0.46,
+    0.47000000000000003,
+    0.48,
+    0.49,
+    0.5,
+    0.51,
+    0.52,
+    0.53,
+    0.54,
+    0.55,
+    0.56,
+    0.5700000000000001,
+    0.58,
+    0.59,
+    0.6,
+    0.61,
+    0.62,
+    0.63,
+    0.64,
+    0.65,
+    0.66,
+    0.67,
+    0.68,
+    0.6900000000000001,
+    0.7000000000000001,
+    0.71,
+    0.72,
+    0.73,
+    0.74,
+    0.75,
+    0.76,
+    0.77,
+    0.78,
+    0.79,
+    0.8,
+    0.81,
+    0.8200000000000001,
+    0.8300000000000001,
+    0.84,
+    0.85,
+    0.86,
+    0.87,
+    0.88,
+    0.89,
+    0.9,
+    0.91,
+    0.92,
+    0.93,
+    0.9400000000000001,
+    0.9500000000000001,
+    0.96,
+    0.97,
+    0.98,
+    0.99,
+    1.0
+  ],
+  "summary": {
+    "paired_peak_reduction_m": {
+      "arm_tuck": {
+        "maximum": 0.23206966965629783,
+        "median": 0.06044962497668743,
+        "minimum": -0.0005411546282005353,
+        "n": 24
+      },
+      "duck_under": {
+        "maximum": 0.3793020658632502,
+        "median": 0.24173272908851617,
+        "minimum": 0.04287167107593248,
+        "n": 24
+      }
+    },
+    "q0": {
+      "failed": 12,
+      "passed": 132
+    },
+    "q1": {
+      "passed": 144
+    },
+    "route": {
+      "insufficient_progress": 2,
+      "looping_reversal": 11,
+      "over_turn": 65,
+      "valid_gentle_left": 16,
+      "valid_gentle_right": 16,
+      "valid_straight": 34
+    },
+    "semantics_by_mode": {
+      "arm_tuck": {
+        "absent": 12,
+        "elicited": 8,
+        "localized": 4
+      },
+      "carry_walk": {
+        "not_measured": 24
+      },
+      "duck_under": {
+        "absent": 3,
+        "elicited": 16,
+        "localized": 4,
+        "route_aligned": 1
+      },
+      "shoulder_turn": {
+        "not_measured": 24
+      },
+      "step_over": {
+        "not_measured": 24
+      },
+      "walk": {
+        "not_measured": 24
+      }
+    }
+  }
+}

@@ -1,0 +1,262 @@
+{
+  "schema_version": "motion2scene_prompt_experiment_v2",
+  "status": "registered_not_started",
+  "corpus_id": "cg-wbc-v2-shared-seed-confirmatory",
+  "corpus_role": "confirmatory_motion_acquisition",
+  "prompt_design_version": "kimodo_shared_seed_factorial_v2",
+  "development_corpus": {
+    "corpus_id": "cg-wbc-v1-pilot",
+    "permanent_role": "pilot_characterization_v1",
+    "allowed_uses": [
+      "one prompt revision",
+      "predicate development",
+      "descriptive secondary analysis"
+    ],
+    "forbidden_uses": [
+      "final test set",
+      "confirmatory prompt effect estimate",
+      "paired S0-S4 label"
+    ]
+  },
+  "design": {
+    "independent_experimental_unit": "generation_seed",
+    "repeated_measures": [
+      "body_mode",
+      "route"
+    ],
+    "body_modes": [
+      "walk",
+      "duck_under",
+      "arm_tuck",
+      "shoulder_turn",
+      "step_over",
+      "carry_walk"
+    ],
+    "routes": [
+      "straight",
+      "gentle_left",
+      "gentle_right"
+    ],
+    "speed": "steady",
+    "generation_seeds": [
+      41001,
+      41002,
+      41003,
+      41004,
+      41005,
+      41006,
+      41007,
+      41008
+    ],
+    "prompts": 18,
+    "references_per_prompt": 8,
+    "registered_references": 144,
+    "missing_or_failed_generations_remain_in_denominator": true
+  },
+  "prompt_file": "configs/prompts/kimodo_shared_seed_factorial_v2.txt",
+  "prompt_file_sha256": "sha256:98377fbb3a042a48a5e00b6b7d49e7eee70140051d50fcacc3e4b8c7c76ec0f2",
+  "prompt_cells": [
+    {
+      "prompt_cell_id": "walk_straight",
+      "prompt_index": 0,
+      "body_mode": "walk",
+      "route": "straight"
+    },
+    {
+      "prompt_cell_id": "walk_gentle_left",
+      "prompt_index": 1,
+      "body_mode": "walk",
+      "route": "gentle_left"
+    },
+    {
+      "prompt_cell_id": "walk_gentle_right",
+      "prompt_index": 2,
+      "body_mode": "walk",
+      "route": "gentle_right"
+    },
+    {
+      "prompt_cell_id": "duck_under_straight",
+      "prompt_index": 3,
+      "body_mode": "duck_under",
+      "route": "straight"
+    },
+    {
+      "prompt_cell_id": "duck_under_gentle_left",
+      "prompt_index": 4,
+      "body_mode": "duck_under",
+      "route": "gentle_left"
+    },
+    {
+      "prompt_cell_id": "duck_under_gentle_right",
+      "prompt_index": 5,
+      "body_mode": "duck_under",
+      "route": "gentle_right"
+    },
+    {
+      "prompt_cell_id": "arm_tuck_straight",
+      "prompt_index": 6,
+      "body_mode": "arm_tuck",
+      "route": "straight"
+    },
+    {
+      "prompt_cell_id": "arm_tuck_gentle_left",
+      "prompt_index": 7,
+      "body_mode": "arm_tuck",
+      "route": "gentle_left"
+    },
+    {
+      "prompt_cell_id": "arm_tuck_gentle_right",
+      "prompt_index": 8,
+      "body_mode": "arm_tuck",
+      "route": "gentle_right"
+    },
+    {
+      "prompt_cell_id": "shoulder_turn_straight",
+      "prompt_index": 9,
+      "body_mode": "shoulder_turn",
+      "route": "straight"
+    },
+    {
+      "prompt_cell_id": "shoulder_turn_gentle_left",
+      "prompt_index": 10,
+      "body_mode": "shoulder_turn",
+      "route": "gentle_left"
+    },
+    {
+      "prompt_cell_id": "shoulder_turn_gentle_right",
+      "prompt_index": 11,
+      "body_mode": "shoulder_turn",
+      "route": "gentle_right"
+    },
+    {
+      "prompt_cell_id": "step_over_straight",
+      "prompt_index": 12,
+      "body_mode": "step_over",
+      "route": "straight"
+    },
+    {
+      "prompt_cell_id": "step_over_gentle_left",
+      "prompt_index": 13,
+      "body_mode": "step_over",
+      "route": "gentle_left"
+    },
+    {
+      "prompt_cell_id": "step_over_gentle_right",
+      "prompt_index": 14,
+      "body_mode": "step_over",
+      "route": "gentle_right"
+    },
+    {
+      "prompt_cell_id": "carry_walk_straight",
+      "prompt_index": 15,
+      "body_mode": "carry_walk",
+      "route": "straight"
+    },
+    {
+      "prompt_cell_id": "carry_walk_gentle_left",
+      "prompt_index": 16,
+      "body_mode": "carry_walk",
+      "route": "gentle_left"
+    },
+    {
+      "prompt_cell_id": "carry_walk_gentle_right",
+      "prompt_index": 17,
+      "body_mode": "carry_walk",
+      "route": "gentle_right"
+    }
+  ],
+  "generator": {
+    "repository": "groot-wbc-sonic-sim-trackb",
+    "branch": "research/cg-wbc-v0-golden-path",
+    "commit": "d9e7b1b50b11568a34392f04aefd95b860680364",
+    "script": "scripts/research/generate_kimodo_motions.py",
+    "script_sha256": "sha256:0a9d4f40bb40e0b3b9661013cb87a473ecaa478c557d3e94c1f449c77467ed54",
+    "model": "kimodo-g1-rp",
+    "source_checkpoint": {
+      "repository": "nvidia/Kimodo-G1-RP-v1",
+      "snapshot_revision": "3020ad8c419c244e0429d360163730c63c4ed011",
+      "config_sha256": "sha256:73b550ba606d69847725ee257d5d99fa5cd56bd8bac320dbe5c2a49f0873846c",
+      "weights_sha256": "sha256:e18c1de73e2ce17a107b06d85155fbbc5debe68eb35455aa5b033e6ddbe056a5"
+    },
+    "duration_s": 4.0,
+    "fps": 30,
+    "frames": 120,
+    "denoising_steps": 100,
+    "seed_design": "shared_across_prompts",
+    "seed_base": 41001,
+    "seeds_per_prompt": 8,
+    "command": "python scripts/research/generate_kimodo_motions.py --prompts <prompt_file> --cache <prompt_cache> --out <corpus>/motions --duration 4 --steps 100 --seed-base 41001 --seeds 8 --seed-design shared_across_prompts --prompt-design-version kimodo_shared_seed_factorial_v2"
+  },
+  "semantic_protocol": {
+    "implementation": "src/motion2scene/motion/paired_semantics.py",
+    "implementation_sha256": "sha256:f8933e87d66a8cb7e5165eba729594963857ed35d1e29f50bf84d1d87ce1ad31",
+    "version": "paired_functional_reduction_v2",
+    "null_motion": "same_generation_seed_same_route_walk",
+    "common": {
+      "activation_fraction": 0.5,
+      "boundary_guard_progress": 0.05,
+      "minimum_event_duration_progress": 0.05,
+      "maximum_event_duration_progress": 0.7,
+      "minimum_controller_retention_ratio": 0.6,
+      "minimum_event_iou": 0.3
+    },
+    "minimum_effects": {
+      "duck_whole_body_top_reduction_m": 0.05,
+      "arm_tuck_route_normal_width_reduction_m": 0.06,
+      "shoulder_turn_route_normal_width_reduction_m": 0.06,
+      "shoulder_axis_yaw_gain_rad": 0.3490658504,
+      "step_unilateral_foot_apex_gain_m": 0.04
+    },
+    "step_required_components": [
+      "unilateral_swing",
+      "supporting_foot_contact",
+      "landing",
+      "recovery",
+      "no_bilateral_flight"
+    ],
+    "carry_walk_status": "not_measured_no_frozen_functional_predicate"
+  },
+  "route_protocol": {
+    "implementation": "src/motion2scene/motion/route_semantics.py",
+    "implementation_sha256": "sha256:236f0b4dd5ea89dc198ec91ac8777a3704180e5257834be73c97cff53e5915aa",
+    "version": "route_semantics_v2_preregistered",
+    "centerline_smoothing_s": 0.5,
+    "centerline_station_spacing_m": 0.5,
+    "minimum_net_displacement_m": 1.0,
+    "minimum_net_to_path_ratio": 0.65,
+    "minimum_monotonic_progress_fraction": 0.9,
+    "reversal_excursion_m": 0.15,
+    "straight_max_heading_rad": 0.3490658504,
+    "straight_max_total_curvature_rad": 0.9599310886,
+    "gentle_min_heading_rad": 0.2617993878,
+    "gentle_max_heading_rad": 1.8325957146,
+    "gentle_max_total_curvature_rad": 2.181661565
+  },
+  "confirmatory_analysis": {
+    "primary_estimands": [
+      "same-seed same-route walk-minus-duck whole-body height",
+      "same-seed same-route walk-minus-arm-tuck path-normal width",
+      "same-seed same-route walk-minus-shoulder-turn path-normal width",
+      "same-seed same-route step-minus-walk unilateral foot apex"
+    ],
+    "pairing_key": [
+      "generation_seed",
+      "route"
+    ],
+    "report": [
+      "all 144 generation outcomes",
+      "S0-S3 yield by behavior and route",
+      "route-validity yield by behavior and route",
+      "paired effect distribution over eight independent seeds",
+      "Q0-Q2 funnel with all failures"
+    ],
+    "no_prompt_changes_after_first_output": true
+  },
+  "promotion_boundary": {
+    "hallucinator_training_allowed": false,
+    "duck_first": true,
+    "lateral_second": true,
+    "step_over_parked_until_q4_source_exists": true,
+    "next_gate": "Q3/Q4 retained matched ladder then analytic critical interval then physical preference reversal"
+  }
+}
