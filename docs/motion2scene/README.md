@@ -1,16 +1,31 @@
 # Motion2Scene visual research report
 
-**Current update (2026-09-06):** see the [project completion assessment](PROJECT_COMPLETION_STATUS.md)
-and the [public notebook](index.html#next-stage). The [native outer-envelope crossing
-audit](NATIVE_CROSSING_AUDIT_V1_RESULT.md) retains all fourteen prior outcomes and
-moves completion 20–40 ms later. The [42-cell variation panel](OVERHANG_VARIATION_V1.md)
-is registered and partially executed; its [runtime snapshot](evidence/overhang-variation-status.json)
-reports completed cells and resource yields without adjudicating an incomplete panel.
-A new MuJoCo mesh replay visualizes measured Isaac states and contact readouts.
-The central unfinished experiment is the matched downstream learning-data comparison.
+**Current update (2026-09-06, completed panel):** the [42-cell Isaac Lab stress
+study](OVERHANG_VARIATION_V1_RESULT.md) is complete: reactive and oracle each pass
+9/10 pose trials, so the registered pose-robustness prediction fails. The earlier
+beam in seed 8042 causes a 429.159 N contact for both. All ten blind trials contact;
+100 ms and realized 260 ms delays pass 2/2 each, while 500 ms refuses and fails 2/2.
+All six negative controls reject overhang detection; blocked passages still fail.
+Measurement and reference-bank audits pass all 42 cells.
+
+The [full-batch native/time audit](FRESH_NATIVE_TEMPORAL_V1_RESULT.md) retains
+384/384 sampled passes and independently verifies 384/384 conditional interval bounds
+at nominal placements, with a 21.623 mm worst lower bound. The original capped-bound
+attempt remains unresolved 0/384. These are authored outer enclosures and a declared
+reference interpolant, not cooked-mesh CCD or actual dynamic guarantees.
+
+The [policy-data readiness audit](POLICY_READINESS_V1_RESULT.md) packages 144 sensor
+features with object identity and outcome labels excluded. Only 10/16 scene–seed
+groups have both skill labels; one has neither tested skill passing. Six negative
+controls lack crouch comparators. No policy is trained on this development-only set.
+Next: close those six labels, diagnose the earlier-beam failure without altering this
+panel, then freeze source splits and the matched four-arm learning-data comparison.
+See the [completion assessment](PROJECT_COMPLETION_STATUS.md) and
+[latest demos](index.html#next-stage). The downstream learning benefit remains unproved.
 
 
-**Latest stage (2026-09-06):** the [overhang/guard follow-up](OVERHANG_INTERFACE_V2_RESULT.md)
+
+**Previous completed stage (retained):** the [overhang/guard follow-up](OVERHANG_INTERFACE_V2_RESULT.md)
 completes fourteen evaluation-bank Isaac trials. All ten normal reactive/oracle
 requests pass contact-free traversal; both critical-beam reactive trials pass, and
 all four absent/raised reactive controls reject wall observations without switching.
