@@ -1,5 +1,15 @@
 # Motion2Scene visual research report
 
+**Latest acquisition preparation (September 6):** [the four-arm d040-bound pipeline](COMPARATIVE_ACQUISITION_V1_RESULT.md)
+now records 64 outputs and 36 assigned generated slots, plus a shared background quota.
+The common checks admit 9/9 uniform, 8/9 analytic, 9/9 no-contrast and 9/9 Motion2Scene
+slots; the analytic test-neighborhood rejection is retained. A twenty-cell first-slice
+manifest is frozen, with direct 0.30 s pre-command state capture. **0/20 runs have
+started because GPU memory is below the registered 7500 MiB floor.** No new paired
+labels, robot-data selector fit or learning benefit is claimed. Exact d040 input binding
+is complete within its declared numerical tolerance. Final source reservation remains
+unresolved after the bounded inventory timed out.
+
 **Completed action study (September 6):** [all 12 new runs](ACTION_LABEL_COMPLETION_V1_RESULT.md)
 complete 16/16 matched 0.20 s action-label pairs. In the earlier-beam development case,
 seed 8042 passes at 0.30 s but fails at 0.20 and 0.40 s. The [v2 learning contract](LEARNING_CONTRACT_V2.md)
