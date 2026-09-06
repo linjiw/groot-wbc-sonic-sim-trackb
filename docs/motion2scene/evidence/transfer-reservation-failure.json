@@ -1,0 +1,17 @@
+{
+  "status": "not_reserved",
+  "candidate_ids": [
+    9460001,
+    9460002,
+    9460003,
+    9460004,
+    9460005,
+    9460006,
+    9460007,
+    9460008
+  ],
+  "reason": "Complete local JSON ancestry inventory exceeded its declared 180 s ceiling. No freshness claim, reservation or source generation follows.",
+  "log": "Traceback (most recent call last):\n  File \"/home/linjiw/groot-wbc-sonic-sim-trackb/scripts/research/motion2scene_reserve_transfer_sources_v2.py\", line 92, in <module>\n    main()\n  File \"/home/linjiw/groot-wbc-sonic-sim-trackb/scripts/research/motion2scene_reserve_transfer_sources_v2.py\", line 43, in main\n    raise TimeoutError(\"180 s inventory ceiling\")\nTimeoutError: 180 s inventory ceiling\n",
+  "script_sha256": "b64dca385335c16656a4bc6cd4f0a6c19c71a7158146de74192a9fbdcd8ba12a",
+  "prior_attempt": "v1 refused 46001..46008 after conservative integer collisions; these are not necessarily motion-source reuse."
+}

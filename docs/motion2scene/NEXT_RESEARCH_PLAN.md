@@ -1,6 +1,24 @@
 # Research plan: robust motion-conditioned inverse scene generation
 
-**Current update (2026-09-06, completed panel):** the [42-cell Isaac Lab stress
+**Completed action study (September 6):** [all 12 new runs](ACTION_LABEL_COMPLETION_V1_RESULT.md)
+complete 16/16 matched 0.20 s action-label pairs. In the earlier-beam development case,
+seed 8042 passes at 0.30 s but fails at 0.20 and 0.40 s. The [v2 learning contract](LEARNING_CONTRACT_V2.md)
+therefore selects one common 0.30 s decision for new data in every arm; the old labels
+remain at 0.20 s and cannot be reused as 0.30 s outcomes. The matched no-contrast generator
+baseline is fitted, the shared outcome learner is implemented, and robot-data selector
+fits remain zero. Next acquire the comparative corpus and evaluate learning utility.
+
+
+**Learning-utility priority (September 6):** [the revised comparison plan](LEARNING_UTILITY_PLAN_V1.md)
+freezes the current generator, makes Motion2Scene versus strong analytic data the
+primary question, and uses complete outcomes for explicit encounter commands.
+The [registered 12-cell label/timing study](ACTION_LABEL_COMPLETION_V1.md) is the
+only added diagnostic prerequisite. Continuous certificate expansion, new skills
+and new generator architectures are deferred. The plan also corrects the evaluation
+cost and current ICRA submission/video schedule.
+
+
+**Previous completed panel (retained):** the [42-cell Isaac Lab stress
 study](OVERHANG_VARIATION_V1_RESULT.md) is complete: reactive and oracle each pass
 9/10 pose trials, so the registered pose-robustness prediction fails. The earlier
 beam in seed 8042 causes a 429.159 N contact for both. All ten blind trials contact;
