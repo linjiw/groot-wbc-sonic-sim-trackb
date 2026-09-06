@@ -1,5 +1,62 @@
 # Motion2Scene visual research report
 
+**Current update (2026-09-06):** see the [project completion assessment](PROJECT_COMPLETION_STATUS.md)
+and the [public notebook](index.html#next-stage). The [native outer-envelope crossing
+audit](NATIVE_CROSSING_AUDIT_V1_RESULT.md) retains all fourteen prior outcomes and
+moves completion 20–40 ms later. The [42-cell variation panel](OVERHANG_VARIATION_V1.md)
+is registered and partially executed; its [runtime snapshot](evidence/overhang-variation-status.json)
+reports completed cells and resource yields without adjudicating an incomplete panel.
+A new MuJoCo mesh replay visualizes measured Isaac states and contact readouts.
+The central unfinished experiment is the matched downstream learning-data comparison.
+
+
+**Latest stage (2026-09-06):** the [overhang/guard follow-up](OVERHANG_INTERFACE_V2_RESULT.md)
+completes fourteen evaluation-bank Isaac trials. All ten normal reactive/oracle
+requests pass contact-free traversal; both critical-beam reactive trials pass, and
+all four absent/raised reactive controls reject wall observations without switching.
+Both deliberately late requests are denied and remain failed avoidance outcomes.
+The earlier fourteen-cell batch is retained: a training-augmented alternate reference
+froze in one seed and stopped the robot. The repair loads both references for evaluation
+and independently verifies the realized route and bank arrays in every run.
+Next: [height, position and observation-delay variation](OVERHANG_VARIATION_PANEL_DESIGN.md),
+then the matched downstream learning comparison. No learning-benefit claim is made.
+
+
+**Previous simulation stage (retained):** the [Isaac sensing/interface pilot](REACTIVE_INTERFACE_V3_RESULT.md)
+now completes all 12 corrected condition/seed cells. A sparse collision-ray observer
+selects d040 and returns to neutral without state/clock resets; both critical-beam
+reactive trials pass with zero recorded 200 Hz beam force. Blind walking contacts the beam in both seeds. However, all four absent/raised
+controls switch unnecessarily on the far wall at 2.58–2.64 s: specificity P1 fails. The initial disabled
+scene-query batch and interrupted typed-callback attempt remain in the failure ledger.
+This supports contact-free adaptation on one beam, but does not validate selector
+specificity or a trained perception policy. Next distinguish walls from overhead
+free space and enforce legal switch timing, then test height/position/delay variation
+before executing the [matched learning-data
+comparison](DOWNSTREAM_SENSOR_POLICY_PILOT_DESIGN.md).
+
+
+**Latest (2026-09-06):** the [generated-source execution pilot](SOURCE_EXECUTION_V1_RESULT.md)
+completes 52 physics cells: six of eight source pairs qualify and all their three
+frozen learned beams separate upright from d055, **18/24 requested slots** with
+source refusals retained. All 18 target runs record zero sampled beam force;
+upright contacts but still crosses. The [six new d040 runs](BEAM_D040_EXECUTION_V1_RESULT.md)
+also pass 3/3 with the selected 41002 beam, contradicting d055 necessity for that scene.
+
+The [native 200 Hz temporal audit](TEMPORAL_NATIVE_AUDIT_V1_RESULT.md) retains a
+10.075 mm worst interval lower bound for the declared d055 interpolant. The
+[384-output local pose audit](FRESH_LOCAL_POSE_CERTIFICATE_V1_RESULT.md) supplies
+conditional nonzero six-dimensional domains under the static proxy model, with a
+preserved and explained clearance-cap reproduction failure. These are separate
+contracts, not a combined native continuous-time guarantee. The
+[ICRA completion plan](ICRA_COMPLETION_PLAN.md) makes downstream exteroceptive
+traversal learning the next central evidence gate; that comparison remains untested.
+
+The following entries preserve the earlier experiment history.
+
+The [fixed-controller beam intervention](BEAM_EXECUTION_V3_RESULT.md) now completes **14 physics runs**. Both motions pass 3/3 without the beam; with it, crouch passes 3/3 and upright fails contact-free passage 3/3. Upright still crosses but contacts the beam at **73.6–762.1 N**; crouch records zero beam force. Contact controls pass. This is one selected source pair and one frozen analytic development beam, not learned-generator execution yield. The registered separation criterion passes at **0.13057 contended GPU-hours**.
+
+The [September 6 counterfactual stage](COUNTERFACTUAL_STAGE_V1_RESULT.md) also measures teacher support against 40 independent reference maps and adds a serious analytic baseline. Distinct analytic generation accepts **127/128** unique placements at **99.0% reference station coverage**, versus historical learned pattern search at **384/384** and **37.3%** coverage, with the same online query budget. Its exact-yield prediction fails on one preserved audit rejection. The [current plan](COUNTERFACTUAL_STAGE_V1.md) now advances to source-level execution and coverage-aware learning against that stronger competitor.
+
 The [training-source distillation pilot](DISTILLATION_V1_RESULT.md) now completes a teacher bank, twelve student/control fits and 3,456 independently checked outputs. Hybrid raw accepts **334/384**, original raw **292/384**, and the stronger query-budget control **310/384**. Hybrid five-evaluation search accepts **377/384**, versus **384/384** for original seventeen-evaluation search. These are results on observed development sources; the 430xx pool remains excluded.
 
 The recipe misses at least one registered source-wise raw-proposal or reduced-search criterion. Prioritize diagnosing teacher coverage, source-specific geometry and proposal concentration on development data before another fresh acquisition. Do not treat pooled gains or cheaper search alone as preserved performance. See the [research deep dive](RESEARCH_DEEP_DIVE.md) for the method, evidence and collision contract.

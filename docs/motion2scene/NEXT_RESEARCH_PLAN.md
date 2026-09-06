@@ -1,5 +1,52 @@
 # Research plan: robust motion-conditioned inverse scene generation
 
+**Current update (2026-09-06):** see the [project completion assessment](PROJECT_COMPLETION_STATUS.md)
+and the [public notebook](index.html#next-stage). The [native outer-envelope crossing
+audit](NATIVE_CROSSING_AUDIT_V1_RESULT.md) retains all fourteen prior outcomes and
+moves completion 20–40 ms later. The [42-cell variation panel](OVERHANG_VARIATION_V1.md)
+is registered and partially executed; its [runtime snapshot](evidence/overhang-variation-status.json)
+reports completed cells and resource yields without adjudicating an incomplete panel.
+A new MuJoCo mesh replay visualizes measured Isaac states and contact readouts.
+The central unfinished experiment is the matched downstream learning-data comparison.
+
+
+**Latest stage (2026-09-06):** the [overhang/guard follow-up](OVERHANG_INTERFACE_V2_RESULT.md)
+completes fourteen evaluation-bank Isaac trials. All ten normal reactive/oracle
+requests pass contact-free traversal; both critical-beam reactive trials pass, and
+all four absent/raised reactive controls reject wall observations without switching.
+Both deliberately late requests are denied and remain failed avoidance outcomes.
+The earlier fourteen-cell batch is retained: a training-augmented alternate reference
+froze in one seed and stopped the robot. The repair loads both references for evaluation
+and independently verifies the realized route and bank arrays in every run.
+Next: [height, position and observation-delay variation](OVERHANG_VARIATION_PANEL_DESIGN.md),
+then the matched downstream learning comparison. No learning-benefit claim is made.
+
+
+**Previous simulation stage (retained):** the [Isaac sensing/interface pilot](REACTIVE_INTERFACE_V3_RESULT.md)
+now completes all 12 corrected condition/seed cells. A sparse collision-ray observer
+selects d040 and returns to neutral without state/clock resets; both critical-beam
+reactive trials pass with zero recorded 200 Hz beam force. Blind walking contacts the beam in both seeds. However, all four absent/raised
+controls switch unnecessarily on the far wall at 2.58–2.64 s: specificity P1 fails. The initial disabled
+scene-query batch and interrupted typed-callback attempt remain in the failure ledger.
+This supports contact-free adaptation on one beam, but does not validate selector
+specificity or a trained perception policy. Next distinguish walls from overhead
+free space and enforce legal switch timing, then test height/position/delay variation
+before executing the [matched learning-data
+comparison](DOWNSTREAM_SENSOR_POLICY_PILOT_DESIGN.md).
+
+
+**Current direction (2026-09-06):** follow the [ICRA completion plan](ICRA_COMPLETION_PLAN.md).
+The [generated-source pilot](SOURCE_EXECUTION_V1_RESULT.md) completes 52 physics cells
+and separates 18/24 requested slots, with two source refusals retained. The
+[d040 intervention](BEAM_D040_EXECUTION_V1_RESULT.md) shows d040 also clears the selected
+41002 beam 3/3, so d055 necessity is contradicted. The [native temporal audit](TEMPORAL_NATIVE_AUDIT_V1_RESULT.md)
+and [384-output local full-pose certificates](FRESH_LOCAL_POSE_CERTIFICATE_V1_RESULT.md)
+advance separate geometric contracts without establishing a joint physical guarantee.
+Next validate beam-visible sensing and stable online motion commands, then compare
+downstream policy learning against random, analytic/grid and unconstrained generation.
+Keep complete source refusals, costs and the strong analytic comparator. The remaining
+text preserves the prior planning record.
+
 The [training-source distillation pilot](DISTILLATION_V1_RESULT.md) now completes a teacher bank, twelve student/control fits and 3,456 independently checked outputs. Hybrid raw accepts **334/384**, original raw **292/384**, and the stronger query-budget control **310/384**. Hybrid five-evaluation search accepts **377/384**, versus **384/384** for original seventeen-evaluation search. These are results on observed development sources; the 430xx pool remains excluded.
 
 The recipe misses at least one registered source-wise raw-proposal or reduced-search criterion. Prioritize diagnosing teacher coverage, source-specific geometry and proposal concentration on development data before another fresh acquisition. Do not treat pooled gains or cheaper search alone as preserved performance. See the [research deep dive](RESEARCH_DEEP_DIVE.md) for the method, evidence and collision contract.
