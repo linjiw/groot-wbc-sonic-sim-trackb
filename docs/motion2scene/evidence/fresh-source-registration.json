@@ -1,0 +1,858 @@
+{
+  "arms": [
+    "raw",
+    "rank",
+    "gradient",
+    "probe_refine",
+    "multistart",
+    "pattern",
+    "uniform_pattern"
+  ],
+  "cache": {
+    "path": "cg-wbc-v2-shared-seed-confirmatory/taxonomy/prompt_cache.npz",
+    "sha256": "sha256:eea36e67890f77aedcb3c49dcc598282004c60825330a23f5f6b91c0faf96153"
+  },
+  "cells": [
+    {
+      "path": "m2s-source-phase-v1/runs/all8_8421/1200/result.json",
+      "sha256": "sha256:2ba6cc1ea66635c1ae7f74f06f16ccc0871721dc03e33068054429ce072469ed"
+    },
+    {
+      "path": "m2s-source-phase-v1/runs/all8_8422/1200/result.json",
+      "sha256": "sha256:a02fcc4ea008a8a9b640f53a80abdf76dec645852d8a1eecfd7ea5550cc1358b"
+    },
+    {
+      "path": "m2s-source-phase-v1/runs/all8_8423/1200/result.json",
+      "sha256": "sha256:7e53610a23efaa003a30fdc33543cbad5bd1e6b679b228bf44a8f4ded9f9fcbe"
+    }
+  ],
+  "created_utc": "2026-09-06T03:04:32.779447+00:00",
+  "event_stations": [
+    0.35,
+    0.65
+  ],
+  "execution_eligible": false,
+  "gate_failure_policy": "stop_entire_audit_no_replacement",
+  "generation_device": "cpu",
+  "generation_python": {
+    "path": ".venv_kimodo/bin/python",
+    "sha256": "sha256:bba9c5269e5794349c1b3bf2bcec677315462a4419dadcc3caefd43fb24d8c94"
+  },
+  "generation_runtime": {
+    "packages": {
+      "Jinja2": "3.1.6",
+      "MarkupSafe": "3.0.3",
+      "PyYAML": "6.0.3",
+      "Pygments": "2.21.0",
+      "accelerate": "1.14.0",
+      "annotated-doc": "0.0.5",
+      "annotated-types": "0.8.0",
+      "antlr4-python3-runtime": "4.9.3",
+      "anyio": "4.15.0",
+      "av": "18.1.0",
+      "boto3": "1.43.88",
+      "botocore": "1.43.88",
+      "brotli": "1.2.0",
+      "bvhio": "1.5.4",
+      "certifi": "2026.7.22",
+      "click": "8.5.0",
+      "cuda-bindings": "12.9.7",
+      "cuda-pathfinder": "1.6.0",
+      "cuda-toolkit": "12.8.1",
+      "einops": "0.8.2",
+      "fastapi": "0.141.1",
+      "filelock": "3.32.3",
+      "fsspec": "2026.7.0",
+      "gear_sonic": "0.1.0",
+      "gradio": "6.26.0",
+      "gradio_client": "2.6.1",
+      "groovy": "0.1.2",
+      "h11": "0.16.0",
+      "hf-gradio": "0.4.1",
+      "hf-xet": "1.6.0",
+      "httpcore": "1.0.9",
+      "httpx": "0.28.1",
+      "huggingface_hub": "1.30.0",
+      "hydra-core": "1.3.6",
+      "idna": "3.19",
+      "jmespath": "1.1.0",
+      "kimodo": "1.0.0",
+      "markdown-it-py": "4.2.0",
+      "mdurl": "0.1.2",
+      "mpmath": "1.3.0",
+      "networkx": "3.6.1",
+      "numpy": "2.4.6",
+      "nvidia-cublas-cu12": "12.8.4.1",
+      "nvidia-cuda-cupti-cu12": "12.8.90",
+      "nvidia-cuda-nvrtc-cu12": "12.8.93",
+      "nvidia-cuda-runtime-cu12": "12.8.90",
+      "nvidia-cudnn-cu12": "9.19.0.56",
+      "nvidia-cufft-cu12": "11.3.3.83",
+      "nvidia-cufile-cu12": "1.13.1.3",
+      "nvidia-curand-cu12": "10.3.9.90",
+      "nvidia-cusolver-cu12": "11.7.3.90",
+      "nvidia-cusparse-cu12": "12.5.8.93",
+      "nvidia-cusparselt-cu12": "0.7.1",
+      "nvidia-nccl-cu12": "2.28.9",
+      "nvidia-nvjitlink-cu12": "12.8.93",
+      "nvidia-nvshmem-cu12": "3.4.5",
+      "nvidia-nvtx-cu12": "12.8.90",
+      "omegaconf": "2.3.1",
+      "orjson": "3.12.0",
+      "packaging": "26.3",
+      "pandas": "3.0.5",
+      "peft": "0.20.0",
+      "pillow": "12.3.0",
+      "psutil": "7.2.2",
+      "pydantic": "2.13.5",
+      "pydantic_core": "2.46.5",
+      "pydub": "0.25.1",
+      "pyglm": "2.8.2",
+      "python-dateutil": "2.9.0.post0",
+      "python-multipart": "0.0.32",
+      "pytz": "2026.3.post1",
+      "regex": "2026.9.3",
+      "rich": "15.0.0",
+      "s3transfer": "0.19.2",
+      "safehttpx": "0.1.7",
+      "safetensors": "0.8.0",
+      "scenepic": "1.1.2",
+      "scipy": "1.17.1",
+      "semantic-version": "2.10.0",
+      "setuptools": "78.1.0",
+      "shellingham": "1.5.4",
+      "six": "1.17.0",
+      "spatial-transform": "1.3.3",
+      "starlette": "1.6.0",
+      "sympy": "1.14.0",
+      "tokenizers": "0.22.2",
+      "tomlkit": "0.14.0",
+      "torch": "2.11.0+cu128",
+      "torchvision": "0.26.0+cu128",
+      "tqdm": "4.70.0",
+      "transformers": "5.1.0",
+      "trimesh": "5.1.0",
+      "triton": "3.6.0",
+      "typer": "0.27.2",
+      "typer-slim": "0.24.0",
+      "typing-inspection": "0.4.4",
+      "typing_extensions": "4.16.0",
+      "urllib3": "2.7.0",
+      "uvicorn": "0.52.4"
+    },
+    "python": "3.11.16 (main, Aug 25 2026, 14:00:53) [Clang 22.1.3 ]"
+  },
+  "generation_threads": 4,
+  "gpu_preflight": "name, memory.free [MiB], memory.used [MiB], utilization.gpu [%]\nNVIDIA GeForce RTX 5080, 6288 MiB, 9521 MiB, 99 %\n",
+  "gpu_seconds": 0,
+  "implementations": [
+    {
+      "path": "scripts/research/motion2scene_fresh_sources.py",
+      "sha256": "sha256:0d7ab89ef61bb294df9cd2e9ff382083e0b9ba69512b28bc47926fd69d36bfb8"
+    },
+    {
+      "path": "scripts/research/motion2scene_fresh_audit.py",
+      "sha256": "sha256:7bde668b0b5b389337fd61f94d6da48debbb642bf4dc1643b23c00d0b572e56f"
+    },
+    {
+      "path": "scripts/research/generate_kimodo_motions.py",
+      "sha256": "sha256:0a9d4f40bb40e0b3b9661013cb87a473ecaa478c557d3e94c1f449c77467ed54"
+    },
+    {
+      "path": "gear_sonic/dataset_generation/kimodo_prompt_cache.py",
+      "sha256": "sha256:8241af1762ac75e6a8d0978a632d94a3d380261365955b04e7bd6f658ab79a2d"
+    },
+    {
+      "path": "src/motion2scene/motion/route_semantics.py",
+      "sha256": "sha256:236f0b4dd5ea89dc198ec91ac8777a3704180e5257834be73c97cff53e5915aa"
+    },
+    {
+      "path": "__init__.py",
+      "sha256": "sha256:0f2918216f4c2039502ad431e87790a4c9c689fc5131070d7a33a66e30dca0f2"
+    },
+    {
+      "path": "assets.py",
+      "sha256": "sha256:df261ed2d6021c389ea6578c2f377ac7984806b7fa5f5fcf43be9df1d22bee39"
+    },
+    {
+      "path": "constraints.py",
+      "sha256": "sha256:a2e00c836687ee5b78c1661d9eff123fb8f9dc8f0d121d13ed5e7a0913b3bc96"
+    },
+    {
+      "path": "__init__.py",
+      "sha256": "sha256:c31bb95e356f9f156ed6a2025028cbca1cf51f6d3246624e85c00541796711e3"
+    },
+    {
+      "path": "__main__.py",
+      "sha256": "sha256:de5a330fdc666a961127c63254a01d02723c7ae2e769b78defb9669eec103173"
+    },
+    {
+      "path": "app.py",
+      "sha256": "sha256:3fd83511905b901fbb8530b6a41759474da56637bd0a9a8a2e802ab4ead0aba7"
+    },
+    {
+      "path": "config.py",
+      "sha256": "sha256:70255150ae45553cf0476d97792d327111defefcce19ce49550aede9611a5961"
+    },
+    {
+      "path": "embedding_cache.py",
+      "sha256": "sha256:8ebf98e625dc2a3be262b81c32273eda8ac56d56d04fbb49d149812bcf41eb4e"
+    },
+    {
+      "path": "generation.py",
+      "sha256": "sha256:301500e3d3e181cae17e5d8c031aacee6ab8e3c241275fef56d56537d810044c"
+    },
+    {
+      "path": "queue_manager.py",
+      "sha256": "sha256:5caf66c6ced818c579ced50fb01ad2ba9137b8a5d376e3bafdcfcb1d4bf783f1"
+    },
+    {
+      "path": "state.py",
+      "sha256": "sha256:3ed9c5e1ce92aa099efd2c72f46efdc99b5ca7dd5c7620459a1a23ce15c71313"
+    },
+    {
+      "path": "ui.py",
+      "sha256": "sha256:a7d50224f2fcf11c1a5d2e665ddc02a83cf5cbf059ba1168d0264faa313cbe83"
+    },
+    {
+      "path": "__init__.py",
+      "sha256": "sha256:43dd890b5c4826c1429be47a61b4b48bb013fd2ce71bd9bbfc1f8a24b24935d3"
+    },
+    {
+      "path": "bvh.py",
+      "sha256": "sha256:d46ef26dfcb5780744411b99e2444c09499fec602b80294adc155376905d8949"
+    },
+    {
+      "path": "motion_convert_lib.py",
+      "sha256": "sha256:2607906d7284b8a1036e25de9cb9e17fc46eaa9cb53bbb60050d294cf53c42c7"
+    },
+    {
+      "path": "motion_formats.py",
+      "sha256": "sha256:79ff12086a9713998f919eed4da30648f070bf3cd57ee0164a7bf26d9bfc8477"
+    },
+    {
+      "path": "motion_io.py",
+      "sha256": "sha256:93abc68cecbfe3ac4193550cf5dbf2abfdb2d108e8b7677352b9e892cfa32403"
+    },
+    {
+      "path": "mujoco.py",
+      "sha256": "sha256:6f02790948a325317e8ade85460a95ce318a32359262a428d490b187babfb6d5"
+    },
+    {
+      "path": "smplx.py",
+      "sha256": "sha256:58d7dadb453033b2bb75713fca1c2a149af36ccc00be193abb4b87cb67b4fd22"
+    },
+    {
+      "path": "geometry.py",
+      "sha256": "sha256:9218c72ad39a478f23bdf6b010e4e3b1165f16dbd480168d0e358dee539f3169"
+    },
+    {
+      "path": "meta.py",
+      "sha256": "sha256:33df532d8482fbb1c1e145d3191ac6d1b4112eda80e9989b9e80c9d20ad91606"
+    },
+    {
+      "path": "__init__.py",
+      "sha256": "sha256:e39e4ff1ba979758b781477be289c568371b4949afae982766d787da466c2349"
+    },
+    {
+      "path": "base.py",
+      "sha256": "sha256:9792f04647b3521441dee6ea5f09de3b856b7a4ad2f67b3d7eb488d5ebda9953"
+    },
+    {
+      "path": "constraints.py",
+      "sha256": "sha256:e87c02c88bceaa18b1f1d5febcaa7c8dfc8cfa0d039870f0fbbf76eee726d13c"
+    },
+    {
+      "path": "foot_skate.py",
+      "sha256": "sha256:47fc0a55990644fdb51af51b190d013a5a520ad82d48a05167be3d628d186ae1"
+    },
+    {
+      "path": "tmr.py",
+      "sha256": "sha256:0f8faf60c4a33116facb678743a0016a03d9b3c5be4636285ab72bfae9a6ce12"
+    },
+    {
+      "path": "__init__.py",
+      "sha256": "sha256:dc846a1050bad70d72b6f5efdc3d3aade871c4d8ede0f6203e644b1f4c9fae83"
+    },
+    {
+      "path": "backbone.py",
+      "sha256": "sha256:8c3cb09b52706bab140873c5453ed5a0a182688c1659a3ba0596db07ea2867a5"
+    },
+    {
+      "path": "cfg.py",
+      "sha256": "sha256:e8713de29f4c1534ce1e7be4ecc3c60b2d44ae739dbd80448d19a72584236ae7"
+    },
+    {
+      "path": "common.py",
+      "sha256": "sha256:fa132d2e69e693318181ad9627b53c6874c7f42cb4741e80c1935b288155e0e8"
+    },
+    {
+      "path": "diffusion.py",
+      "sha256": "sha256:52acbdc3f5f2b95511aa01bda5c8b579490b203f743735c3db3394def635b273"
+    },
+    {
+      "path": "kimodo_model.py",
+      "sha256": "sha256:28e57e2ac0d9fa176b81ba2cb400ddaf414178a21833cba19e80b02c35b4f4aa"
+    },
+    {
+      "path": "__init__.py",
+      "sha256": "sha256:a7558eb6849e9fd400d128ef24d5026d9ea99ae03df75b5f1b8b4c71a1b81600"
+    },
+    {
+      "path": "llm2vec.py",
+      "sha256": "sha256:dc6e8b7d38086b4f456e013ab22cd4cc2cd72eb7fd2c13069f037f42aec80857"
+    },
+    {
+      "path": "llm2vec_wrapper.py",
+      "sha256": "sha256:e4dc146dd6a5a6f75a269b99b53d7ae43a873f6020992426ddb39bf3f924a1c4"
+    },
+    {
+      "path": "__init__.py",
+      "sha256": "sha256:62a5a40ee6cb9538d99a71690cf7e9d67314d31ceb70b2400347b49cbc0b2ad8"
+    },
+    {
+      "path": "attn_mask_utils.py",
+      "sha256": "sha256:f7246ce0a2105bfbc75b51e8693ece0468ffffaedb31fed08f251907796f05d9"
+    },
+    {
+      "path": "bidirectional_llama.py",
+      "sha256": "sha256:570e7726ec92db9ca173517bda5ca1404a913234d4f4568ad93fe90a61c8d30f"
+    },
+    {
+      "path": "utils.py",
+      "sha256": "sha256:a426cf605dc015ee766dd06b3ebbbf402a6b2eda732324f533f154e5c29de864"
+    },
+    {
+      "path": "load_model.py",
+      "sha256": "sha256:008092cd0b7adef1faea9fa9075718a61bea8ca9feaf9acf1b1d6caacaa0380a"
+    },
+    {
+      "path": "loading.py",
+      "sha256": "sha256:6430b660bcc7c5bc0f41e4b14c4225065f4f3e68e82b9a147b87f4386c88befb"
+    },
+    {
+      "path": "registry.py",
+      "sha256": "sha256:eba21390e9cab7ed338ee6c9d3f9e27832c3923ac73f2d18e0e8681a88d3c2e4"
+    },
+    {
+      "path": "text_encoder_api.py",
+      "sha256": "sha256:bf8230ee3a5c7d6b69123b0c71b0d7ff1a5624858d137ff66dd61bfb2d42e96b"
+    },
+    {
+      "path": "tmr.py",
+      "sha256": "sha256:f1a014c1d985c705c8e9cbf3efb8ad04985c7f358564f0f057354445ab0ae0a3"
+    },
+    {
+      "path": "twostage_denoiser.py",
+      "sha256": "sha256:50b5131755accc478b0f1cebe77743de0cb1a634116ff602bcd5f5bd13fcd302"
+    },
+    {
+      "path": "__init__.py",
+      "sha256": "sha256:c603b9731f572f33b47b5af1fcae7accc8e588ca38600d8f2ca940fa27f1206e"
+    },
+    {
+      "path": "conditioning.py",
+      "sha256": "sha256:cab545e3325065f4fe5a48a6b2dab807e37ebd22f6fc69e08930f98d542f1944"
+    },
+    {
+      "path": "feature_utils.py",
+      "sha256": "sha256:b4e2ae1b00827aeade3eb9787b7c30c8c96e415edc3862b379a4b71cc85cac40"
+    },
+    {
+      "path": "feet.py",
+      "sha256": "sha256:f086395b51ad2c67d0023e8834b6aabf2f97126e0604ffd536a047b1e6544f1d"
+    },
+    {
+      "path": "__init__.py",
+      "sha256": "sha256:d882b376cc749477acf12f45bb67ea08342774c039a788108d530a19a3535f0c"
+    },
+    {
+      "path": "base.py",
+      "sha256": "sha256:ba5523385fc60c465f9f363e39241870b1b723681d6d680205c1a7beac39633f"
+    },
+    {
+      "path": "kimodo_motionrep.py",
+      "sha256": "sha256:b0b210e09534613ea7e5a684aa1a2f313c9f375d78fcca701e9e85d6820c8a47"
+    },
+    {
+      "path": "tmr_motionrep.py",
+      "sha256": "sha256:56424143ed51f531225c91b95142bac5232b499af7b2deafad149513d9c88402"
+    },
+    {
+      "path": "smooth_root.py",
+      "sha256": "sha256:36a927e6204cf720b86a4b65b612a9c40595ae9acb0151bebb7a381ffc5310f8"
+    },
+    {
+      "path": "stats.py",
+      "sha256": "sha256:914f45ead9e1fc9336df3e4e9a4eb12c84ab7cc9db1f37c14d3c8ea0cecab1f2"
+    },
+    {
+      "path": "postprocess.py",
+      "sha256": "sha256:a6f6b81df44a76d0064efd79ea195b4360dd6aad3995790bdc68c8ceddd6a07a"
+    },
+    {
+      "path": "sanitize.py",
+      "sha256": "sha256:655c6ffa861b7aaa7143b09d9641823158f0fe90636d844dae1549283af50c09"
+    },
+    {
+      "path": "__init__.py",
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "generate.py",
+      "sha256": "sha256:b9e3395a495dff1af91d7ffd516c0a842b2145bf16a2f281c33a20960cd1be5e"
+    },
+    {
+      "path": "gradio_theme.py",
+      "sha256": "sha256:a442c2e168c08a8e4ad4acdf677e13f8920e95927ac5d1820bd6841604897fd4"
+    },
+    {
+      "path": "lock_requirements.py",
+      "sha256": "sha256:74fe4f50d3c31c8048725746850b3a5202fa87a064aa86c1b7b0ddc5ee5a4273"
+    },
+    {
+      "path": "motion_convert.py",
+      "sha256": "sha256:a6c1efe94869ac0cd11b3423d35bbbfc8de7e5b520fa82b93becebc5991e02f7"
+    },
+    {
+      "path": "mujoco_load.py",
+      "sha256": "sha256:ad385231b6510262c5be05df0190b0eb25e1941a6136b0b05f29fb8649da1e62"
+    },
+    {
+      "path": "run_text_encoder_server.py",
+      "sha256": "sha256:50b12972cc6dccbff25078ec44e29209ce34dc71bc54e0b9607b6602be64941f"
+    },
+    {
+      "path": "__init__.py",
+      "sha256": "sha256:9494c2b86434054015bf65c906207db192cdbb5836a795adc2265ff38d387662"
+    },
+    {
+      "path": "base.py",
+      "sha256": "sha256:22a4772dc8c38601d9b7e1ccfadcc0a9bb4680d1169c7d75049e80973b51309e"
+    },
+    {
+      "path": "bvh.py",
+      "sha256": "sha256:cef588c374dc61ad6f469b7108b0426ac5847983b6b5e1bede98e71ffdced81d"
+    },
+    {
+      "path": "definitions.py",
+      "sha256": "sha256:fafe12b5f82ca24096241932d9773b1d3d8c080da1197e74c77cfce8ce3a19fc"
+    },
+    {
+      "path": "kinematics.py",
+      "sha256": "sha256:b565842b3c178e16018d0800024ea4de4d99b455786eb37620a9d7c9d18f3d20"
+    },
+    {
+      "path": "registry.py",
+      "sha256": "sha256:e9c95a69cec9c5dd19257b5c110e517e0f54f510942229d3ae52ac91102bab11"
+    },
+    {
+      "path": "transforms.py",
+      "sha256": "sha256:af0662a962d4674ed4723bdcb56592210c698076af6f8069a54a39d1e3ea2bff"
+    },
+    {
+      "path": "tools.py",
+      "sha256": "sha256:e67a2d469507d7347e0cd115bb5e699b826ac6b52b09cec817d6b0ff9433c1b6"
+    },
+    {
+      "path": "__init__.py",
+      "sha256": "sha256:1afc53aa67cfee4ca0b16d01238fbdd6024df08b4106fe0e63af9c9c08814add"
+    },
+    {
+      "path": "constraint_ui.py",
+      "sha256": "sha256:6ed683685cf102eb26e5f08930be795d13c93b3701d75782a24d166c5217a4f9"
+    },
+    {
+      "path": "coords.py",
+      "sha256": "sha256:9863e21fd89fe1ff173e68b5da437bbd867635709c9c60491a8f0c6315d1db68"
+    },
+    {
+      "path": "g1_rig.py",
+      "sha256": "sha256:353451c8cfa69b3c46abcdfcd9532a1962fdb3a74c8825d77028ff149558e115"
+    },
+    {
+      "path": "gui.py",
+      "sha256": "sha256:73ed4a449f0950c6d2bfd6938de98a86d7df2766181b1062692f3815f591a5d6"
+    },
+    {
+      "path": "playback.py",
+      "sha256": "sha256:a5519e420cb7be83fac0af23ac858dc983d4d59c5b3b11d95a11f7db20ac0d69"
+    },
+    {
+      "path": "scene.py",
+      "sha256": "sha256:02da15ec1ae07072d441f320ba56874cdb8f1ac6d1beca53cb17e6a3d7f8cac5"
+    },
+    {
+      "path": "smplx_skin.py",
+      "sha256": "sha256:b4f7a1cd089046c8b95caaa5abf882a17684a745838bd8a6ea5ee51d4f0891f8"
+    },
+    {
+      "path": "soma_layer_skin.py",
+      "sha256": "sha256:1720f478cb4957a225b0bd66914dcf94d68dfba03d9ec55a9aeaa9b84b6a4fa0"
+    },
+    {
+      "path": "soma_skin.py",
+      "sha256": "sha256:2fd336c528c5dd536b9389952cb74ff21a082b6572cb491615d789b6c86df0fc"
+    },
+    {
+      "path": "viser_utils.py",
+      "sha256": "sha256:213aba61d05e64562352b12ac4e661dfcdc941c5e171b1740d01531072591509"
+    },
+    {
+      "path": ".gitattributes",
+      "sha256": "sha256:11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "sha256:11ccdcb47db87ac30b63765b5e5154403026c4fbb52c19919d99d912ec454e19"
+    },
+    {
+      "path": "README.md",
+      "sha256": "sha256:049f089c927c110d6c28dbe0e04914ba0836416a3ec91e8a19164ed9e1c1ec86"
+    },
+    {
+      "path": "config.yaml",
+      "sha256": "sha256:73b550ba606d69847725ee257d5d99fa5cd56bd8bac320dbe5c2a49f0873846c"
+    },
+    {
+      "path": "model.safetensors",
+      "sha256": "sha256:e18c1de73e2ce17a107b06d85155fbbc5debe68eb35455aa5b033e6ddbe056a5"
+    },
+    {
+      "path": "mean.npy",
+      "sha256": "sha256:185564a7246ee03d7a7aa2a16b3c7e49cffd5a858f637ab2b8fa04574f18d29b"
+    },
+    {
+      "path": "std.npy",
+      "sha256": "sha256:5df7b200de9bdb0d92cf23cd1426d2ded6c7688d1dcb6e403c3886f1d130f59e"
+    },
+    {
+      "path": "mean.npy",
+      "sha256": "sha256:c292f97ed86266332abdbb7e98d464eb91115a4ec1def3c87aa9362ae483b062"
+    },
+    {
+      "path": "std.npy",
+      "sha256": "sha256:691f1ada7ac34f4854d8d5920cafb26fd22f1d5fb9dbc331030292eb6675c6eb"
+    },
+    {
+      "path": "mean.npy",
+      "sha256": "sha256:b0aab16477bd39f03934bb930786526563b6e5955d1ee0b2face7d1e2c04bba8"
+    },
+    {
+      "path": "std.npy",
+      "sha256": "sha256:9b8f34564fda07cffb5689b2f509b6864b4031a764ca53bfa149ce8487495c62"
+    },
+    {
+      "path": "joints.p",
+      "sha256": "sha256:16b6c234face0b93143a45db7677f02da4a62835300da5401b6acf89dc7d985e"
+    },
+    {
+      "path": "head_link.STL",
+      "sha256": "sha256:005fb67fbd3eff94aa8bf4a6e83238174e9f91b6721f7111594322f223724411"
+    },
+    {
+      "path": "left_ankle_pitch_link.STL",
+      "sha256": "sha256:d49e3abc6f5b12e532062cd575b87b5ef40cd2a3fc18f54a1ca5bba4f773d51d"
+    },
+    {
+      "path": "left_ankle_roll_link.STL",
+      "sha256": "sha256:c4092af943141d4d9f74232f3cfa345afc6565f46a077793b8ae0e68b39dc33f"
+    },
+    {
+      "path": "left_elbow_link.STL",
+      "sha256": "sha256:fa752198accd104d5c4c3a01382e45165b944fbbc5acce085059223324e5bed3"
+    },
+    {
+      "path": "left_hand_index_0_link.STL",
+      "sha256": "sha256:6b35f2f77211d5a366f0b9a4e47c4ee35e536731266f1a34e9efa12db579b892"
+    },
+    {
+      "path": "left_hand_index_1_link.STL",
+      "sha256": "sha256:9e315ebc8a7a0cb98e033985b586b20d81cf8aa761181ae61ce56fcb14077a06"
+    },
+    {
+      "path": "left_hand_middle_0_link.STL",
+      "sha256": "sha256:6b35f2f77211d5a366f0b9a4e47c4ee35e536731266f1a34e9efa12db579b892"
+    },
+    {
+      "path": "left_hand_middle_1_link.STL",
+      "sha256": "sha256:9e315ebc8a7a0cb98e033985b586b20d81cf8aa761181ae61ce56fcb14077a06"
+    },
+    {
+      "path": "left_hand_palm_link.STL",
+      "sha256": "sha256:23a486b75bd78a9bf03cec25d84d87f97f3dae038cf21a743b6d469b337e4004"
+    },
+    {
+      "path": "left_hand_thumb_0_link.STL",
+      "sha256": "sha256:a90c721661c0622685488a3c74d1e122c7da89242d3a1daef75edb83422d05e0"
+    },
+    {
+      "path": "left_hand_thumb_1_link.STL",
+      "sha256": "sha256:445c54a45bc13ce36001556f66bc0f49c83cb40321205ae4d676bb2874325684"
+    },
+    {
+      "path": "left_hand_thumb_2_link.STL",
+      "sha256": "sha256:3d8dbe5085acfc213d21aa8b0782e89cd79084e9678f3a85fc7b04a86b029db5"
+    },
+    {
+      "path": "left_hip_pitch_link.STL",
+      "sha256": "sha256:4725168105ee768ee31638ef22b53f6be2d7641bfd7cfefe803488d884776fa4"
+    },
+    {
+      "path": "left_hip_roll_link.STL",
+      "sha256": "sha256:91f25922ee8a7c3152790051bebad17b4d9cd243569c38fe340285ff93a97acf"
+    },
+    {
+      "path": "left_hip_yaw_link.STL",
+      "sha256": "sha256:a16d88aa6ddac8083aa7ad55ed317bea44b1fa003d314fba88965b7ed0f3b55b"
+    },
+    {
+      "path": "left_knee_link.STL",
+      "sha256": "sha256:8d92b9e3d3a636761150bb8025e32514c4602b91c7028d523ee42b3e632de477"
+    },
+    {
+      "path": "left_rubber_hand.STL",
+      "sha256": "sha256:cff2221a690fa69303f61fce68f2d155c1517b52efb6ca9262dd56e0bc6e70fe"
+    },
+    {
+      "path": "left_shoulder_pitch_link.STL",
+      "sha256": "sha256:f0d1cfd02fcf0d42f95e678eeca33da3afbcc366ffba5c052847773ec4f31d52"
+    },
+    {
+      "path": "left_shoulder_roll_link.STL",
+      "sha256": "sha256:fb9df21687773522598dc384f1a2945c7519f11cbc8bd372a49170316d6eee88"
+    },
+    {
+      "path": "left_shoulder_yaw_link.STL",
+      "sha256": "sha256:1aa97e9748e924336567992181f78c7cd0652fd52a4afcca3df6b2ef6f9e712e"
+    },
+    {
+      "path": "left_wrist_pitch_link.STL",
+      "sha256": "sha256:b251d8e05047f695d0f536cd78c11973cfa4e78d08cfe82759336cc3471de3a9"
+    },
+    {
+      "path": "left_wrist_roll_link.STL",
+      "sha256": "sha256:edc387c9a0ba8c2237e9b296d32531426fabeb6f53e58df45c76106bca74148c"
+    },
+    {
+      "path": "left_wrist_roll_rubber_hand.STL",
+      "sha256": "sha256:e81030abd023bd9e4a308ef376d814a2c12d684d8a7670c335bbd5cd7809c909"
+    },
+    {
+      "path": "left_wrist_yaw_link.STL",
+      "sha256": "sha256:83f8fb3a726bf9613d65dd14f0f447cb918c3c95b3938042a0c9c09749267d3b"
+    },
+    {
+      "path": "logo_link.STL",
+      "sha256": "sha256:8571a0a19bc4916fa55f91449f51d5fdefd751000054865a842449429d5f155b"
+    },
+    {
+      "path": "pelvis.STL",
+      "sha256": "sha256:5ba6bbc888e630550140d3c26763f10206da8c8bd30ed886b8ede41c61f57a31"
+    },
+    {
+      "path": "pelvis_contour_link.STL",
+      "sha256": "sha256:5cc5c2c7a312329e3feeb2b03d3fc09fc29705bd01864f6767e51be959662420"
+    },
+    {
+      "path": "right_ankle_pitch_link.STL",
+      "sha256": "sha256:15be426539ec1be70246d4d82a168806db64a41301af8b35c197a33348c787a9"
+    },
+    {
+      "path": "right_ankle_roll_link.STL",
+      "sha256": "sha256:4b66222ea56653e627711b56d0a8949b4920da5df091da0ceb343f54e884e3a5"
+    },
+    {
+      "path": "right_elbow_link.STL",
+      "sha256": "sha256:1be925d7aa268bb8fddf5362b9173066890c7d32092c05638608126e59d1e2ab"
+    },
+    {
+      "path": "right_hand_index_0_link.STL",
+      "sha256": "sha256:12ab4300c95e437e834f9aef772b3b431c671bf34338930b52ad11aef73bbd0d"
+    },
+    {
+      "path": "right_hand_index_1_link.STL",
+      "sha256": "sha256:c9c34efce4563cacdcfd29fc838a982976d40f5442c71219811dcbbf3923a33d"
+    },
+    {
+      "path": "right_hand_middle_0_link.STL",
+      "sha256": "sha256:12ab4300c95e437e834f9aef772b3b431c671bf34338930b52ad11aef73bbd0d"
+    },
+    {
+      "path": "right_hand_middle_1_link.STL",
+      "sha256": "sha256:c9c34efce4563cacdcfd29fc838a982976d40f5442c71219811dcbbf3923a33d"
+    },
+    {
+      "path": "right_hand_palm_link.STL",
+      "sha256": "sha256:86c0b231cc44477d64a6493e5a427ba16617a00738112dd187c652675b086fb9"
+    },
+    {
+      "path": "right_hand_thumb_0_link.STL",
+      "sha256": "sha256:544298d0ea1088f5b276a10cc6a6a9e533efdd91594955fdc956c46211d07f83"
+    },
+    {
+      "path": "right_hand_thumb_1_link.STL",
+      "sha256": "sha256:0a9a820da8dd10f298778b714f1364216e8a5976f4fd3a05689ea26327d44bf6"
+    },
+    {
+      "path": "right_hand_thumb_2_link.STL",
+      "sha256": "sha256:3f1bfb37668e8f61801c8d25f171fa1949e08666be86c67acad7e0079937cc45"
+    },
+    {
+      "path": "right_hip_pitch_link.STL",
+      "sha256": "sha256:e4f3c99d7f4a7d34eadbef9461fc66e3486cb5442db1ec50c86317d459f1a9c6"
+    },
+    {
+      "path": "right_hip_roll_link.STL",
+      "sha256": "sha256:4c254ef66a356f492947f360dd931965477b631e3fcc841f91ccc46d945d54f6"
+    },
+    {
+      "path": "right_hip_yaw_link.STL",
+      "sha256": "sha256:e479c2936ca2057e9eb2f7dff6c189b7419d7b8484dea0b298cbb36a2a6aa668"
+    },
+    {
+      "path": "right_knee_link.STL",
+      "sha256": "sha256:63c4008449c9bbe701a6e2b557b7a252e90cf3a5abcf54cee46862b9a69f8ec8"
+    },
+    {
+      "path": "right_rubber_hand.STL",
+      "sha256": "sha256:99533b778bca6246144fa511bb9d4e555e075c641f2a0251e04372869cd99d67"
+    },
+    {
+      "path": "right_shoulder_pitch_link.STL",
+      "sha256": "sha256:24cdb387e0128dfe602770a81c56cdce3a0181d34d039a11d1aaf8819b7b8c02"
+    },
+    {
+      "path": "right_shoulder_roll_link.STL",
+      "sha256": "sha256:962b97c48f9ce9e8399f45dd9522e0865d19aa9fd299406b2d475a8fc4a53e81"
+    },
+    {
+      "path": "right_shoulder_yaw_link.STL",
+      "sha256": "sha256:a0b76489271da0c72461a344c9ffb0f0c6e64f019ea5014c1624886c442a2fe5"
+    },
+    {
+      "path": "right_wrist_pitch_link.STL",
+      "sha256": "sha256:d22f8f3b3127f15a63e5be1ee273cd5075786c3142f1c3d9f76cbf43d2a26477"
+    },
+    {
+      "path": "right_wrist_roll_link.STL",
+      "sha256": "sha256:a7ee9212ff5b94d6cb7f52bb1bbf3f352194d5b598acff74f4c77d340c5b344f"
+    },
+    {
+      "path": "right_wrist_roll_rubber_hand.STL",
+      "sha256": "sha256:0729aff1ac4356f9314de13a46906267642e58bc47f0d8a7f17f6590a6242ccf"
+    },
+    {
+      "path": "right_wrist_yaw_link.STL",
+      "sha256": "sha256:bc9dece2d12509707e0057ba2e48df8f3d56db0c79410212963a25e8a50f61a6"
+    },
+    {
+      "path": "torso_constraint_L_link.STL",
+      "sha256": "sha256:82be7f93e85b3d303a1d1e1847e2c916939bd61c424ed1ebd28691ec33909dd1"
+    },
+    {
+      "path": "torso_constraint_L_rod_link.STL",
+      "sha256": "sha256:c10de1effa7ea797ac268006aa2a739036c7e1f326b2012d711ee2c20c5a6e96"
+    },
+    {
+      "path": "torso_constraint_R_link.STL",
+      "sha256": "sha256:54ded433a3a0c76027365856fdbd55215643de88846f7d436598a4071e682725"
+    },
+    {
+      "path": "torso_constraint_R_rod_link.STL",
+      "sha256": "sha256:cb83fd38a9f06c99e3f301c70f12d94ae770a8f0cf9501f83580a27f908990b4"
+    },
+    {
+      "path": "torso_link.STL",
+      "sha256": "sha256:e96d023f0368a4e3450b86ca5d4f10227d8141156a373e7da8cb3c93266523e0"
+    },
+    {
+      "path": "torso_link_23dof_rev_1_0.STL",
+      "sha256": "sha256:3cd0d56fde14b73c1623304684805029971c4f84b596f9914e823ca70a107fd2"
+    },
+    {
+      "path": "torso_link_rev_1_0.STL",
+      "sha256": "sha256:11ddb46f2098efbbd8816b1d65893632d8e78be936376c7cdcd6771899ccc723"
+    },
+    {
+      "path": "waist_constraint_L.STL",
+      "sha256": "sha256:8ebafdcb4de6871113f0ca2c356618d6e46b1d50f6c0bf9e37f47b9d8e100d99"
+    },
+    {
+      "path": "waist_constraint_R.STL",
+      "sha256": "sha256:791902a291ffbd35ab97383b7b44ea5d975de7c80eef838797c970790b382ca9"
+    },
+    {
+      "path": "waist_roll_link.STL",
+      "sha256": "sha256:34f0aa73f41131230be4d25876c944fdf6c24d62553f199ff8b980c15e8913df"
+    },
+    {
+      "path": "waist_roll_link_rev_1_0.STL",
+      "sha256": "sha256:b67c347a05abc3e8ddae600d98a082bee273bb39f8e651647708b0a7140a8a97"
+    },
+    {
+      "path": "waist_support_link.STL",
+      "sha256": "sha256:1fae9e1bb609848a1667d32eed8d6083ae443538a306843056a2a660f1b2926a"
+    },
+    {
+      "path": "waist_yaw_link.STL",
+      "sha256": "sha256:2883f20e03f09b669b5b4ce10677ee6b5191c0934b584d7cbaef2d0662856ffb"
+    },
+    {
+      "path": "waist_yaw_link_rev_1_0.STL",
+      "sha256": "sha256:ec6db442b11f25eed898b5add07940c85d804f300de24dcbd264ccd8be7d554c"
+    },
+    {
+      "path": "rest_pose_local_rot.p",
+      "sha256": "sha256:23b364230e55d67bd6400a4618a2e22c4b99924f1f86fccb19b725766990fa41"
+    },
+    {
+      "path": "g1.xml",
+      "sha256": "sha256:5d76cf92f00dd49d6eb9fae38d7d38e46886848b602ac691051e886c3bcccfb1"
+    }
+  ],
+  "inventory": {
+    "path": "m2s-fresh-source-v1/inventory.json",
+    "sha256": "sha256:c3a101c895901b3f238cfe30bb8620169580614706056de2b022b496fda2fde2"
+  },
+  "main_draw_seed_offset": 80000,
+  "max_audit_seconds": 1200,
+  "max_build_seconds": 600,
+  "max_generation_seconds": 1800,
+  "max_search_seconds": 1800,
+  "mjcf": {
+    "path": "g1.xml",
+    "sha256": "sha256:5d76cf92f00dd49d6eb9fae38d7d38e46886848b602ac691051e886c3bcccfb1"
+  },
+  "prompt": {
+    "path": "configs/prompts/kimodo_route_retention_neutral_v1.txt",
+    "sha256": "sha256:e17d9b03c082128217e3deebc5a98245d30d8274c3b669fbf4a772e6b4134b85"
+  },
+  "protocol": {
+    "path": "docs/motion2scene/FRESH_SOURCE_V1.md",
+    "sha256": "sha256:21341689c9c7fafe07e6a680b10b004fa24bdf566f6128a2ee8ff392bd0951dd"
+  },
+  "seeds": [
+    8421,
+    8422,
+    8423
+  ],
+  "snapshot": "3020ad8c419c244e0429d360163730c63c4ed011",
+  "source_ids": [
+    43001,
+    43002,
+    43003,
+    43004,
+    43005,
+    43006,
+    43007,
+    43008
+  ],
+  "source_role": "fresh_audit_permanently_excluded_from_training_and_selection",
+  "station_parent": {
+    "path": "m2s-station-search-v1/registration.json",
+    "sha256": "sha256:adc38d663454431d2b7e63c87dd8a45f9e4e4b30ae778c49fc12fe7ac36677ce"
+  },
+  "training_eligible": false,
+  "uniform_seed_offset": 90000
+}

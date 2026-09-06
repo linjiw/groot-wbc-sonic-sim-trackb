@@ -1,0 +1,107 @@
+{
+  "arms": [
+    "original_raw",
+    "geometry600_raw",
+    "geometry2666_raw",
+    "set600_raw",
+    "hybrid600_raw",
+    "original_pattern17",
+    "hybrid_pattern17",
+    "hybrid_pattern5",
+    "uniform_pattern5"
+  ],
+  "development_ids": [
+    "41005_event3",
+    "41005_event4",
+    "41006_event3",
+    "41006_event4",
+    "41007_event3",
+    "41007_event4",
+    "41008_event3",
+    "41008_event4",
+    "42005_event3",
+    "42005_event4",
+    "42006_event3",
+    "42006_event4",
+    "42007_event3",
+    "42007_event4",
+    "42008_event3",
+    "42008_event4"
+  ],
+  "excluded_source_ids": [
+    43001,
+    43002,
+    43003,
+    43004,
+    43005,
+    43006,
+    43007,
+    43008
+  ],
+  "execution_eligible": false,
+  "fits": {
+    "geometry2666": 2666,
+    "geometry600": 600,
+    "hybrid600": 600,
+    "set600": 600
+  },
+  "gpu_seconds": 0,
+  "implementations": [
+    {
+      "path": "scripts/research/motion2scene_distill_study.py",
+      "sha256": "sha256:3c045d4cdc89151d1aa570d45c8730ec9a086c50ae6ed71d23e0308a1d01def6"
+    },
+    {
+      "path": "gear_sonic/dataset_generation/hallucination/motion2scene_distillation.py",
+      "sha256": "sha256:841ae9379a839d69f9446e4c9c6a66a872de04197c9c46ebed8e0e849a960674"
+    },
+    {
+      "path": "gear_sonic/dataset_generation/hallucination/motion2scene_station_search.py",
+      "sha256": "sha256:45f637cac1cc75b4a75938cdf6506ff7d9a9cfd6717c05c8364a908631aa4c8d"
+    }
+  ],
+  "max_evaluation_seconds": 1800,
+  "max_fit_seconds": 1800,
+  "max_teacher_seconds": 600,
+  "original_bank_training_eligible": false,
+  "parent": {
+    "path": "m2s-refinement-v1/registration.json",
+    "sha256": "sha256:689159717e5e346820f3691ccea1de2c84881f77c435a1a0179255dbeecae083"
+  },
+  "protocol": {
+    "path": "docs/motion2scene/DISTILLATION_V1.md",
+    "sha256": "sha256:ae8d6358be828c434f5d554447da5111b151ef25f5a844716bb197eac993c571"
+  },
+  "role": "observed_source_reference_only_development_distillation",
+  "seeds": [
+    8421,
+    8422,
+    8423
+  ],
+  "training_ids": [
+    "41001_event0",
+    "41001_event1",
+    "41001_event2",
+    "41002_event0",
+    "41002_event1",
+    "41002_event2",
+    "41003_event0",
+    "41003_event1",
+    "41003_event2",
+    "41004_event0",
+    "41004_event1",
+    "41004_event2",
+    "42001_event0",
+    "42001_event1",
+    "42001_event2",
+    "42002_event0",
+    "42002_event1",
+    "42002_event2",
+    "42003_event0",
+    "42003_event1",
+    "42003_event2",
+    "42004_event0",
+    "42004_event1",
+    "42004_event2"
+  ]
+}

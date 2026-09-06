@@ -1,0 +1,16 @@
+#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+def Xform "World" {
+    def Cube "diagnostic_beam" {
+        double size = 1
+        double3 xformOp:translate = (2.696616322673983, 0.22645592215640215, 1.3152671813964845)
+        double xformOp:rotateZ = 4.1133975104068785
+        double3 xformOp:scale = (0.1, 1.2, 0.1)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ", "xformOp:scale"]
+        color3f[] primvars:displayColor = [(0.65, 0.37, 0.15)]
+    }
+}

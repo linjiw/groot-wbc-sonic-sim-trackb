@@ -1,0 +1,78 @@
+{
+  "assumed_absolute_numerical_error_m": 1e-08,
+  "candidates": [
+    {
+      "arm": "margin_no_kl",
+      "proposal_index": 15,
+      "raw": {
+        "path": "m2s-margin-learning-v1/evaluation/margin_no_kl_8121.npz",
+        "sha256": "sha256:7c22db979a5fb0bb9eaacfe829b2e7598dc0557d3cc55fd2c97468593fa1f6e1"
+      },
+      "sampled_margin_slack_m": 0.0031490733107639116,
+      "scene": [
+        0.602011553408488,
+        1.2704149030195588
+      ],
+      "seed": 8121
+    },
+    {
+      "arm": "constraints_no_kl",
+      "proposal_index": 59,
+      "raw": {
+        "path": "m2s-margin-learning-v1/evaluation/constraints_no_kl_8121.npz",
+        "sha256": "sha256:cd1b65231023f2d0fb09bd0e12316be647de684ee6870649f5c294e3177b5f9a"
+      },
+      "sampled_margin_slack_m": 0.00317579218930813,
+      "scene": [
+        0.6017352566545859,
+        1.2708930628980502
+      ],
+      "seed": 8121
+    }
+  ],
+  "execution_eligible": false,
+  "horizontal_radius_m": 0.6020797289396147,
+  "implementations": [
+    {
+      "path": "scripts/research/motion2scene_certify_placements.py",
+      "sha256": "sha256:19d1284d50978e978f86f65298f509651b581812cbd32f17e3fa5e90d4170f64"
+    },
+    {
+      "path": "scripts/research/motion2scene_margin_learning.py",
+      "sha256": "sha256:20d4cecd9de27b5e4ae980e2e3069c4458ee7bb82a1eb4f35ff889715febd29c"
+    },
+    {
+      "path": "gear_sonic/dataset_generation/hallucination/placement_certificate.py",
+      "sha256": "sha256:ebb199d52de20f18034fe25e9db7fe167daad731729caf1464ba8e089f60ecd2"
+    }
+  ],
+  "lower": [
+    -0.02,
+    -0.02,
+    -0.01,
+    -0.02
+  ],
+  "margin_m": 0.01,
+  "max_queries_per_candidate": 4095,
+  "max_seconds_per_candidate": 120,
+  "protocol": {
+    "path": "docs/motion2scene/PLACEMENT_CERTIFICATE_V1.md",
+    "sha256": "sha256:0422b271bb413b68ef380d765f77945cba0d2ab3270ae2ffb221d0f0c5132ccf"
+  },
+  "schema_version": "motion2scene_placement_certificate_v1",
+  "source_manifest": {
+    "path": "m2s-margin-learning-v1/manifest.json",
+    "sha256": "sha256:a6ba7d7d95f185da6bdd5b77c6494c7eea8052fef3ef2d573fb1406a86e70918"
+  },
+  "source_result": {
+    "path": "m2s-margin-learning-v1/result.json",
+    "sha256": "sha256:be6449c44e0e19346ede46c878156e99d912a5f7162d0002f0735aecc6af35db"
+  },
+  "training_eligible": false,
+  "upper": [
+    0.02,
+    0.02,
+    0.01,
+    0.02
+  ]
+}
