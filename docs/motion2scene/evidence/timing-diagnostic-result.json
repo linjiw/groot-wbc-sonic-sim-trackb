@@ -1,0 +1,1744 @@
+{
+  "analysis_complete": true,
+  "analysis_role": "exploratory_controller_diagnostic",
+  "budget": {
+    "actual_contended_gpu_hours": 0.10634173097278106,
+    "daily_limit_gpu_hours": 8.0,
+    "projected_gpu_hours": 1.25
+  },
+  "driver": {
+    "path": "scripts/research/motion2scene_timing_diagnostic.py",
+    "sha256": "sha256:b0843f51d6ed8e1217fbd2dc589362ed686a6c9ea6c192e38182ac454b4a3f7a"
+  },
+  "independent_unit": "generation_seed",
+  "independent_units": 3,
+  "manifest": {
+    "path": "m2s-timing-diagnostic-v1/manifest.json",
+    "sha256": "sha256:d5507b411da8d86f67477e61266c6c3b362aea17747009affc148d9c8e76de7e"
+  },
+  "physics_seed": 7900,
+  "q4_admitted_ladders": 0,
+  "rows": [
+    {
+      "cell_id": "m2s_timing_41001_original__neutral",
+      "condition": "original",
+      "diagnostics": {
+        "contact_decomposition": {
+          "external_contact_bodies": [],
+          "max_external_contact_force_n": 0.0,
+          "max_external_contact_frame": 0,
+          "max_lateral_contact_force_n": 0.0,
+          "max_lateral_contact_frame": 0,
+          "max_overhead_contact_force_n": 0.0,
+          "max_overhead_contact_frame": 0,
+          "max_self_contact_force_n": 129.74531246396214,
+          "max_self_contact_frame": 0,
+          "max_support_contact_force_n": 0.0,
+          "self_contact_events": 51,
+          "self_contact_pairs": [
+            [
+              "left_hip_roll_link",
+              "left_wrist_yaw_link"
+            ],
+            [
+              "right_hip_roll_link",
+              "right_wrist_yaw_link"
+            ]
+          ]
+        },
+        "endpoint_error_m": 0.10744930410646944,
+        "max_reference_root_tilt_rad": 0.1095503578008178,
+        "max_root_height_below_reference_m": 0.029814422130584717,
+        "max_root_height_deficit_frame": 65,
+        "max_root_tilt_above_reference_rad": 0.14703239948318914,
+        "max_self_contact_time_s": 0.0,
+        "min_reference_root_height_m": 0.7397118210792542,
+        "phase_share_of_schedule_error": 0.19947155688391116,
+        "raw_max_nonfoot_contact_force_n": 129.74531246396214,
+        "schedule_error_p95_m": 0.0993188674248777
+      },
+      "generation_seed": 41001,
+      "label": "neutral",
+      "paired_behavior_retained": null,
+      "rejection_reasons": [],
+      "route_decision": {
+        "checks": {
+          "achieved_monotonic_progress": true,
+          "achieved_no_reversal": true,
+          "achieved_no_self_intersection": true,
+          "cross_track_max": true,
+          "cross_track_rmse": true,
+          "endpoint_error": true,
+          "net_displacement_ratio_lower": true,
+          "net_displacement_ratio_upper": true,
+          "path_length_ratio_lower": true,
+          "path_length_ratio_upper": true,
+          "reference_route_valid": true,
+          "signed_heading_error": true
+        },
+        "failure_reasons": [],
+        "retained": true,
+        "route_retention_gate_version": "relative_route_retention_v2_heldout"
+      },
+      "route_metrics": {
+        "achieved_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.062458461358093825,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.034205689902736,
+          "net_to_path_ratio": 0.9951723933285722,
+          "path_length_m": 4.053775724635458,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": 0.08865884606571121,
+          "total_absolute_curvature_rad": 1.0408429350486736,
+          "validity_class": "over_turn"
+        },
+        "alignment": "independent_initial_translation_only_then_normalized_arclength",
+        "along_track_max_abs_error_m": 0.12119358534874382,
+        "along_track_rmse_m": 0.06994249842919359,
+        "cross_track_max_abs_error_m": 0.08667883677180693,
+        "cross_track_rmse_m": 0.05215219403369675,
+        "endpoint_along_chord_error_m": -0.11986298414318444,
+        "endpoint_cross_chord_error_m": 0.05385629048636614,
+        "endpoint_error_m": 0.13140637348569184,
+        "initial_offset_m": 0.07610320404868585,
+        "net_displacement_ratio": 0.9714842994977678,
+        "path_length_ratio": 0.9755758111821681,
+        "reference_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.037432929943467044,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.15262057450472,
+          "net_to_path_ratio": 0.9993636699939814,
+          "path_length_m": 4.1552646941125335,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": 0.04839325840395413,
+          "total_absolute_curvature_rad": 0.38709107834044587,
+          "validity_class": "valid_straight"
+        },
+        "route_retention_version": "reference_achieved_route_retention_v1_descriptive",
+        "route_shape_max_error_m": 0.13222735197441707,
+        "route_shape_rmse_m": 0.08724565564568876,
+        "signed_heading_error_rad": 0.040265587661757085,
+        "station_count": 101,
+        "total_absolute_curvature_excess_rad": 0.6537518567082278
+      },
+      "route_retained": true,
+      "status": "completed",
+      "tracker_accepted": true,
+      "trajectory": {
+        "path": "m2s-timing-diagnostic-v1/rollouts/m2s_timing_41001_original__neutral/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:e64ed79f5b996f758e20f9733c5bb9874d4995fe945df9e20f817f36e228c31d"
+      }
+    },
+    {
+      "achieved_semantic": {
+        "event_duration_progress": 0.42,
+        "event_interval": [
+          0.32,
+          0.74
+        ],
+        "peak_reduction": 0.06934453317154898,
+        "reason": "paired functional change has an onset and recovery",
+        "route_valid": false,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "localized"
+      },
+      "cell_id": "m2s_timing_41001_original__d055",
+      "condition": "original",
+      "controller_retention": {
+        "event_duration_progress": 0.42,
+        "event_interval": [
+          0.32,
+          0.74
+        ],
+        "peak_reduction": 0.06934453317154898,
+        "reason": "paired functional change has an onset and recovery",
+        "route_valid": false,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "localized"
+      },
+      "diagnostics": {
+        "contact_decomposition": {
+          "external_contact_bodies": [],
+          "max_external_contact_force_n": 0.0,
+          "max_external_contact_frame": 0,
+          "max_lateral_contact_force_n": 0.0,
+          "max_lateral_contact_frame": 0,
+          "max_overhead_contact_force_n": 0.0,
+          "max_overhead_contact_frame": 0,
+          "max_self_contact_force_n": 129.85237869139274,
+          "max_self_contact_frame": 11,
+          "max_support_contact_force_n": 0.0,
+          "self_contact_events": 44,
+          "self_contact_pairs": [
+            [
+              "left_hip_roll_link",
+              "left_wrist_yaw_link"
+            ],
+            [
+              "right_hip_roll_link",
+              "right_wrist_yaw_link"
+            ]
+          ]
+        },
+        "endpoint_error_m": 0.4026895323475271,
+        "max_reference_root_tilt_rad": 0.1095503578008178,
+        "max_root_height_below_reference_m": 0.02723473310470581,
+        "max_root_height_deficit_frame": 34,
+        "max_root_tilt_above_reference_rad": 0.14703239948318914,
+        "max_self_contact_time_s": 0.22,
+        "min_reference_root_height_m": 0.6644952297210693,
+        "phase_share_of_schedule_error": 0.5191622953334667,
+        "raw_max_nonfoot_contact_force_n": 129.85237869139274,
+        "schedule_error_p95_m": 0.38412855695459625
+      },
+      "generation_seed": 41001,
+      "label": "d055",
+      "paired_behavior_retained": false,
+      "reference_semantic": {
+        "event_duration_progress": 0.44,
+        "event_interval": [
+          0.31,
+          0.75
+        ],
+        "peak_reduction": 0.08696598309248271,
+        "reason": "localized paired event occurs on a valid route",
+        "route_valid": true,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "route_aligned"
+      },
+      "rejection_reasons": [
+        "reference_endpoint_tracking_error"
+      ],
+      "route_decision": {
+        "checks": {
+          "achieved_monotonic_progress": true,
+          "achieved_no_reversal": true,
+          "achieved_no_self_intersection": true,
+          "cross_track_max": true,
+          "cross_track_rmse": false,
+          "endpoint_error": false,
+          "net_displacement_ratio_lower": true,
+          "net_displacement_ratio_upper": true,
+          "path_length_ratio_lower": true,
+          "path_length_ratio_upper": true,
+          "reference_route_valid": true,
+          "signed_heading_error": true
+        },
+        "failure_reasons": [
+          "endpoint_error",
+          "cross_track_rmse"
+        ],
+        "retained": false,
+        "route_retention_gate_version": "relative_route_retention_v2_heldout"
+      },
+      "route_metrics": {
+        "achieved_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.06710517921696886,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 3.762791791635813,
+          "net_to_path_ratio": 0.9935718216774551,
+          "path_length_m": 3.787136178321827,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": 0.1786751277778945,
+          "total_absolute_curvature_rad": 1.0874187681938583,
+          "validity_class": "over_turn"
+        },
+        "alignment": "independent_initial_translation_only_then_normalized_arclength",
+        "along_track_max_abs_error_m": 0.39812836154491277,
+        "along_track_rmse_m": 0.2282561614629623,
+        "cross_track_max_abs_error_m": 0.18620760103174985,
+        "cross_track_rmse_m": 0.11152922462450561,
+        "endpoint_along_chord_error_m": -0.3940714966799001,
+        "endpoint_cross_chord_error_m": 0.1645661627681912,
+        "endpoint_error_m": 0.42705311897208204,
+        "initial_offset_m": 0.07610320404868585,
+        "net_displacement_ratio": 0.9061246324159048,
+        "path_length_ratio": 0.9114067230633234,
+        "reference_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.037432929943467044,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.15262057450472,
+          "net_to_path_ratio": 0.9993636699939814,
+          "path_length_m": 4.1552646941125335,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": 0.04839325840395413,
+          "total_absolute_curvature_rad": 0.38709107834044587,
+          "validity_class": "valid_straight"
+        },
+        "route_retention_version": "reference_achieved_route_retention_v1_descriptive",
+        "route_shape_max_error_m": 0.42705311897208204,
+        "route_shape_rmse_m": 0.25404653745160416,
+        "signed_heading_error_rad": 0.13028186937394037,
+        "station_count": 101,
+        "total_absolute_curvature_excess_rad": 0.7003276898534124
+      },
+      "route_retained": false,
+      "status": "completed",
+      "tracker_accepted": false,
+      "trajectory": {
+        "path": "m2s-timing-diagnostic-v1/rollouts/m2s_timing_41001_original__d055/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:c367f87bb77856ceade0d00c726f735a42307d24f5b4c7d8385f362f3831376b"
+      }
+    },
+    {
+      "cell_id": "m2s_timing_41001_shared_clock__neutral",
+      "condition": "shared_clock",
+      "diagnostics": {
+        "contact_decomposition": {
+          "external_contact_bodies": [],
+          "max_external_contact_force_n": 0.0,
+          "max_external_contact_frame": 0,
+          "max_lateral_contact_force_n": 0.0,
+          "max_lateral_contact_frame": 0,
+          "max_overhead_contact_force_n": 0.0,
+          "max_overhead_contact_frame": 0,
+          "max_self_contact_force_n": 136.9371142380949,
+          "max_self_contact_frame": 11,
+          "max_support_contact_force_n": 0.0,
+          "self_contact_events": 66,
+          "self_contact_pairs": [
+            [
+              "left_hip_roll_link",
+              "left_wrist_yaw_link"
+            ],
+            [
+              "right_hip_roll_link",
+              "right_wrist_yaw_link"
+            ]
+          ]
+        },
+        "endpoint_error_m": 0.24447966433412685,
+        "max_reference_root_tilt_rad": 0.11055844427313848,
+        "max_root_height_below_reference_m": 0.030226409435272217,
+        "max_root_height_deficit_frame": 34,
+        "max_root_tilt_above_reference_rad": 0.14638722305893306,
+        "max_self_contact_time_s": 0.22,
+        "min_reference_root_height_m": 0.7399293184280396,
+        "phase_share_of_schedule_error": 0.5857576830053537,
+        "raw_max_nonfoot_contact_force_n": 136.9371142380949,
+        "schedule_error_p95_m": 0.237266432373848
+      },
+      "generation_seed": 41001,
+      "label": "neutral",
+      "paired_behavior_retained": null,
+      "rejection_reasons": [],
+      "route_decision": {
+        "checks": {
+          "achieved_monotonic_progress": true,
+          "achieved_no_reversal": true,
+          "achieved_no_self_intersection": true,
+          "cross_track_max": true,
+          "cross_track_rmse": true,
+          "endpoint_error": true,
+          "net_displacement_ratio_lower": true,
+          "net_displacement_ratio_upper": true,
+          "path_length_ratio_lower": true,
+          "path_length_ratio_upper": true,
+          "reference_route_valid": true,
+          "signed_heading_error": true
+        },
+        "failure_reasons": [],
+        "retained": true,
+        "route_retention_gate_version": "relative_route_retention_v2_heldout"
+      },
+      "route_metrics": {
+        "achieved_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.06895583909303439,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 3.882071813732119,
+          "net_to_path_ratio": 0.9905317238376599,
+          "path_length_m": 3.9191796893608215,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": 0.2119831570727046,
+          "total_absolute_curvature_rad": 1.5061558203523426,
+          "validity_class": "over_turn"
+        },
+        "alignment": "independent_initial_translation_only_then_normalized_arclength",
+        "along_track_max_abs_error_m": 0.2694132610878822,
+        "along_track_rmse_m": 0.15643306036108076,
+        "cross_track_max_abs_error_m": 0.10705841546421258,
+        "cross_track_rmse_m": 0.05373976852360332,
+        "endpoint_along_chord_error_m": -0.2678422183885569,
+        "endpoint_cross_chord_error_m": 0.06527915595775058,
+        "endpoint_error_m": 0.2756824661705196,
+        "initial_offset_m": 0.07605028611763094,
+        "net_displacement_ratio": 0.9347662906665898,
+        "path_length_ratio": 0.9430324082809816,
+        "reference_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.03768562874296577,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.1529865298884285,
+          "net_to_path_ratio": 0.9992909739430413,
+          "path_length_m": 4.155933194814532,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": 0.04833310224013353,
+          "total_absolute_curvature_rad": 0.4206873494962252,
+          "validity_class": "valid_straight"
+        },
+        "route_retention_version": "reference_achieved_route_retention_v1_descriptive",
+        "route_shape_max_error_m": 0.2756824661705196,
+        "route_shape_rmse_m": 0.16540636352602642,
+        "signed_heading_error_rad": 0.16365005483257106,
+        "station_count": 101,
+        "total_absolute_curvature_excess_rad": 1.0854684708561173
+      },
+      "route_retained": true,
+      "status": "completed",
+      "tracker_accepted": true,
+      "trajectory": {
+        "path": "m2s-timing-diagnostic-v1/rollouts/m2s_timing_41001_shared_clock__neutral/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:500547daa72bbc8dca2f3ac5cdff32706e1c7ee7d107e4a832b38a863fbae49e"
+      }
+    },
+    {
+      "achieved_semantic": {
+        "event_duration_progress": 0.41,
+        "event_interval": [
+          0.33,
+          0.74
+        ],
+        "peak_reduction": 0.07325399530419396,
+        "reason": "paired functional change has an onset and recovery",
+        "route_valid": false,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "localized"
+      },
+      "cell_id": "m2s_timing_41001_shared_clock__d055",
+      "condition": "shared_clock",
+      "controller_retention": {
+        "event_duration_progress": 0.41,
+        "event_interval": [
+          0.33,
+          0.74
+        ],
+        "peak_reduction": 0.07325399530419396,
+        "reason": "paired functional change has an onset and recovery",
+        "route_valid": false,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "localized"
+      },
+      "diagnostics": {
+        "contact_decomposition": {
+          "external_contact_bodies": [],
+          "max_external_contact_force_n": 0.0,
+          "max_external_contact_frame": 0,
+          "max_lateral_contact_force_n": 0.0,
+          "max_lateral_contact_frame": 0,
+          "max_overhead_contact_force_n": 0.0,
+          "max_overhead_contact_frame": 0,
+          "max_self_contact_force_n": 180.71728426119714,
+          "max_self_contact_frame": 71,
+          "max_support_contact_force_n": 0.0,
+          "self_contact_events": 64,
+          "self_contact_pairs": [
+            [
+              "left_hip_roll_link",
+              "left_wrist_yaw_link"
+            ],
+            [
+              "right_hip_roll_link",
+              "right_wrist_yaw_link"
+            ]
+          ]
+        },
+        "endpoint_error_m": 0.5089545360323892,
+        "max_reference_root_tilt_rad": 0.11055844427313848,
+        "max_root_height_below_reference_m": 0.02957218885421753,
+        "max_root_height_deficit_frame": 196,
+        "max_root_tilt_above_reference_rad": 0.14638722305893306,
+        "max_self_contact_time_s": 1.42,
+        "min_reference_root_height_m": 0.6646032333374023,
+        "phase_share_of_schedule_error": 0.6123777252042113,
+        "raw_max_nonfoot_contact_force_n": 180.71728426119714,
+        "schedule_error_p95_m": 0.4894640304645309
+      },
+      "generation_seed": 41001,
+      "label": "d055",
+      "paired_behavior_retained": false,
+      "reference_semantic": {
+        "event_duration_progress": 0.45,
+        "event_interval": [
+          0.31,
+          0.76
+        ],
+        "peak_reduction": 0.08726443280234708,
+        "reason": "localized paired event occurs on a valid route",
+        "route_valid": true,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "route_aligned"
+      },
+      "rejection_reasons": [
+        "reference_endpoint_tracking_error"
+      ],
+      "route_decision": {
+        "checks": {
+          "achieved_monotonic_progress": true,
+          "achieved_no_reversal": true,
+          "achieved_no_self_intersection": true,
+          "cross_track_max": true,
+          "cross_track_rmse": true,
+          "endpoint_error": false,
+          "net_displacement_ratio_lower": false,
+          "net_displacement_ratio_upper": true,
+          "path_length_ratio_lower": false,
+          "path_length_ratio_upper": true,
+          "reference_route_valid": true,
+          "signed_heading_error": true
+        },
+        "failure_reasons": [
+          "path_length_ratio_lower",
+          "net_displacement_ratio_lower",
+          "endpoint_error"
+        ],
+        "retained": false,
+        "route_retention_gate_version": "relative_route_retention_v2_heldout"
+      },
+      "route_metrics": {
+        "achieved_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.09677415718163385,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 3.647439114050379,
+          "net_to_path_ratio": 0.9892283766227054,
+          "path_length_m": 3.687155767309254,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": 0.24462469336676096,
+          "total_absolute_curvature_rad": 1.5583837374198661,
+          "validity_class": "over_turn"
+        },
+        "alignment": "independent_initial_translation_only_then_normalized_arclength",
+        "along_track_max_abs_error_m": 0.5128423637114559,
+        "along_track_rmse_m": 0.29251796740702185,
+        "cross_track_max_abs_error_m": 0.18847958283899252,
+        "cross_track_rmse_m": 0.09941634767779647,
+        "endpoint_along_chord_error_m": -0.5084219315972969,
+        "endpoint_cross_chord_error_m": 0.18056225210527693,
+        "endpoint_error_m": 0.5395327491584324,
+        "initial_offset_m": 0.07605028611763094,
+        "net_displacement_ratio": 0.8782689488155813,
+        "path_length_ratio": 0.8872028481857737,
+        "reference_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.03768562874296577,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.1529865298884285,
+          "net_to_path_ratio": 0.9992909739430413,
+          "path_length_m": 4.155933194814532,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": 0.04833310224013353,
+          "total_absolute_curvature_rad": 0.4206873494962252,
+          "validity_class": "valid_straight"
+        },
+        "route_retention_version": "reference_achieved_route_retention_v1_descriptive",
+        "route_shape_max_error_m": 0.5395327491584324,
+        "route_shape_rmse_m": 0.30895043525058835,
+        "signed_heading_error_rad": 0.19629159112662742,
+        "station_count": 101,
+        "total_absolute_curvature_excess_rad": 1.1376963879236408
+      },
+      "route_retained": false,
+      "status": "completed",
+      "tracker_accepted": false,
+      "trajectory": {
+        "path": "m2s-timing-diagnostic-v1/rollouts/m2s_timing_41001_shared_clock__d055/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:da853f707f4bf92032df00f9711fa8043484aebce2b1425c5c93776d9b2f9cfb"
+      }
+    },
+    {
+      "cell_id": "m2s_timing_41002_shared_clock__neutral",
+      "condition": "shared_clock",
+      "diagnostics": {
+        "contact_decomposition": {
+          "external_contact_bodies": [],
+          "max_external_contact_force_n": 0.0,
+          "max_external_contact_frame": 0,
+          "max_lateral_contact_force_n": 0.0,
+          "max_lateral_contact_frame": 0,
+          "max_overhead_contact_force_n": 0.0,
+          "max_overhead_contact_frame": 0,
+          "max_self_contact_force_n": 67.07593588767148,
+          "max_self_contact_frame": 53,
+          "max_support_contact_force_n": 0.0,
+          "self_contact_events": 11,
+          "self_contact_pairs": [
+            [
+              "left_hip_roll_link",
+              "left_wrist_yaw_link"
+            ],
+            [
+              "right_hip_roll_link",
+              "right_wrist_yaw_link"
+            ]
+          ]
+        },
+        "endpoint_error_m": 0.1320552923560764,
+        "max_reference_root_tilt_rad": 0.14905032468149082,
+        "max_root_height_below_reference_m": 0.03935593366622925,
+        "max_root_height_deficit_frame": 13,
+        "max_root_tilt_above_reference_rad": 0.054432891113373696,
+        "max_self_contact_time_s": 1.06,
+        "min_reference_root_height_m": 0.7386682033538818,
+        "phase_share_of_schedule_error": 0.16222177557178985,
+        "raw_max_nonfoot_contact_force_n": 67.07593588767148,
+        "schedule_error_p95_m": 0.14138741337290103
+      },
+      "generation_seed": 41002,
+      "label": "neutral",
+      "paired_behavior_retained": null,
+      "rejection_reasons": [],
+      "route_decision": {
+        "checks": {
+          "achieved_monotonic_progress": true,
+          "achieved_no_reversal": true,
+          "achieved_no_self_intersection": true,
+          "cross_track_max": true,
+          "cross_track_rmse": true,
+          "endpoint_error": true,
+          "net_displacement_ratio_lower": true,
+          "net_displacement_ratio_upper": true,
+          "path_length_ratio_lower": true,
+          "path_length_ratio_upper": true,
+          "reference_route_valid": true,
+          "signed_heading_error": true
+        },
+        "failure_reasons": [],
+        "retained": true,
+        "route_retention_gate_version": "relative_route_retention_v2_heldout"
+      },
+      "route_metrics": {
+        "achieved_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.11761023837123094,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.128844011795253,
+          "net_to_path_ratio": 0.9920762664905108,
+          "path_length_m": 4.161821173689719,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": 0.054162182350774246,
+          "total_absolute_curvature_rad": 1.6161783300875658,
+          "validity_class": "over_turn"
+        },
+        "alignment": "independent_initial_translation_only_then_normalized_arclength",
+        "along_track_max_abs_error_m": 0.16247438246934007,
+        "along_track_rmse_m": 0.09133608364340907,
+        "cross_track_max_abs_error_m": 0.12298741825820582,
+        "cross_track_rmse_m": 0.04780034847521355,
+        "endpoint_along_chord_error_m": -0.15901326819775366,
+        "endpoint_cross_chord_error_m": 0.03426376830403081,
+        "endpoint_error_m": 0.1626629191958728,
+        "initial_offset_m": 0.08870326287896986,
+        "net_displacement_ratio": 0.9610927000257133,
+        "path_length_ratio": 0.9680577087059821,
+        "reference_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.05148580242464319,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.295989358450843,
+          "net_to_path_ratio": 0.9992658121060484,
+          "path_length_m": 4.299145739206902,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": -0.03199104416724563,
+          "total_absolute_curvature_rad": 0.4238359281415552,
+          "validity_class": "valid_straight"
+        },
+        "route_retention_version": "reference_achieved_route_retention_v1_descriptive",
+        "route_shape_max_error_m": 0.1626629191958728,
+        "route_shape_rmse_m": 0.10308808607044592,
+        "signed_heading_error_rad": 0.08615322651801988,
+        "station_count": 101,
+        "total_absolute_curvature_excess_rad": 1.1923424019460107
+      },
+      "route_retained": true,
+      "status": "completed",
+      "tracker_accepted": true,
+      "trajectory": {
+        "path": "m2s-timing-diagnostic-v1/rollouts/m2s_timing_41002_shared_clock__neutral/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6b0fc745e7e95151f99a3ff47fe87c21c27f98568d1cd1bf9b5be2d385aea780"
+      }
+    },
+    {
+      "achieved_semantic": {
+        "event_duration_progress": 0.4,
+        "event_interval": [
+          0.38,
+          0.78
+        ],
+        "peak_reduction": 0.07285394263020617,
+        "reason": "paired functional change has an onset and recovery",
+        "route_valid": false,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "localized"
+      },
+      "cell_id": "m2s_timing_41002_shared_clock__d055",
+      "condition": "shared_clock",
+      "controller_retention": {
+        "event_duration_progress": 0.4,
+        "event_interval": [
+          0.38,
+          0.78
+        ],
+        "peak_reduction": 0.07285394263020617,
+        "reason": "paired functional change has an onset and recovery",
+        "route_valid": false,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "localized"
+      },
+      "diagnostics": {
+        "contact_decomposition": {
+          "external_contact_bodies": [],
+          "max_external_contact_force_n": 0.0,
+          "max_external_contact_frame": 0,
+          "max_lateral_contact_force_n": 0.0,
+          "max_lateral_contact_frame": 0,
+          "max_overhead_contact_force_n": 0.0,
+          "max_overhead_contact_frame": 0,
+          "max_self_contact_force_n": 89.67857346558237,
+          "max_self_contact_frame": 128,
+          "max_support_contact_force_n": 0.0,
+          "self_contact_events": 13,
+          "self_contact_pairs": [
+            [
+              "left_hip_roll_link",
+              "left_wrist_yaw_link"
+            ],
+            [
+              "right_hip_roll_link",
+              "right_wrist_yaw_link"
+            ]
+          ]
+        },
+        "endpoint_error_m": 0.4017092053644491,
+        "max_reference_root_tilt_rad": 0.14905032468149082,
+        "max_root_height_below_reference_m": 0.0396343469619751,
+        "max_root_height_deficit_frame": 13,
+        "max_root_tilt_above_reference_rad": 0.053385473945560445,
+        "max_self_contact_time_s": 2.56,
+        "min_reference_root_height_m": 0.6474053859710693,
+        "phase_share_of_schedule_error": 0.7791591731343955,
+        "raw_max_nonfoot_contact_force_n": 89.67857346558237,
+        "schedule_error_p95_m": 0.4067163513376787
+      },
+      "generation_seed": 41002,
+      "label": "d055",
+      "paired_behavior_retained": false,
+      "reference_semantic": {
+        "event_duration_progress": 0.44,
+        "event_interval": [
+          0.34,
+          0.78
+        ],
+        "peak_reduction": 0.09624703826218939,
+        "reason": "localized paired event occurs on a valid route",
+        "route_valid": true,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "route_aligned"
+      },
+      "rejection_reasons": [
+        "reference_endpoint_tracking_error"
+      ],
+      "route_decision": {
+        "checks": {
+          "achieved_monotonic_progress": true,
+          "achieved_no_reversal": true,
+          "achieved_no_self_intersection": true,
+          "cross_track_max": true,
+          "cross_track_rmse": true,
+          "endpoint_error": false,
+          "net_displacement_ratio_lower": false,
+          "net_displacement_ratio_upper": true,
+          "path_length_ratio_lower": true,
+          "path_length_ratio_upper": true,
+          "reference_route_valid": true,
+          "signed_heading_error": true
+        },
+        "failure_reasons": [
+          "net_displacement_ratio_lower",
+          "endpoint_error"
+        ],
+        "retained": false,
+        "route_retention_gate_version": "relative_route_retention_v2_heldout"
+      },
+      "route_metrics": {
+        "achieved_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.07959288896596656,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 3.8580325390716537,
+          "net_to_path_ratio": 0.9943828345463013,
+          "path_length_m": 3.879826164569631,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": 0.02491047473332353,
+          "total_absolute_curvature_rad": 1.2356594283154063,
+          "validity_class": "over_turn"
+        },
+        "alignment": "independent_initial_translation_only_then_normalized_arclength",
+        "along_track_max_abs_error_m": 0.4304278269521287,
+        "along_track_rmse_m": 0.24820604928823492,
+        "cross_track_max_abs_error_m": 0.09036811983404136,
+        "cross_track_rmse_m": 0.04485461477504233,
+        "endpoint_along_chord_error_m": -0.4321046020866776,
+        "endpoint_cross_chord_error_m": 0.025264593008531556,
+        "endpoint_error_m": 0.432842565841638,
+        "initial_offset_m": 0.08870326287896986,
+        "net_displacement_ratio": 0.8980544915648676,
+        "path_length_ratio": 0.9024644429210193,
+        "reference_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.05148580242464319,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.295989358450843,
+          "net_to_path_ratio": 0.9992658121060484,
+          "path_length_m": 4.299145739206902,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": -0.03199104416724563,
+          "total_absolute_curvature_rad": 0.4238359281415552,
+          "validity_class": "valid_straight"
+        },
+        "route_retention_version": "reference_achieved_route_retention_v1_descriptive",
+        "route_shape_max_error_m": 0.432842565841638,
+        "route_shape_rmse_m": 0.2522264446284155,
+        "signed_heading_error_rad": 0.05690151890056916,
+        "station_count": 101,
+        "total_absolute_curvature_excess_rad": 0.8118235001738512
+      },
+      "route_retained": false,
+      "status": "completed",
+      "tracker_accepted": false,
+      "trajectory": {
+        "path": "m2s-timing-diagnostic-v1/rollouts/m2s_timing_41002_shared_clock__d055/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:54e7503d85928214b679e89371ac76fec38a38a7ce86fbf369baa0da9f62a88f"
+      }
+    },
+    {
+      "cell_id": "m2s_timing_41002_original__neutral",
+      "condition": "original",
+      "diagnostics": {
+        "contact_decomposition": {
+          "external_contact_bodies": [],
+          "max_external_contact_force_n": 0.0,
+          "max_external_contact_frame": 0,
+          "max_lateral_contact_force_n": 0.0,
+          "max_lateral_contact_frame": 0,
+          "max_overhead_contact_force_n": 0.0,
+          "max_overhead_contact_frame": 0,
+          "max_self_contact_force_n": 72.73186298599211,
+          "max_self_contact_frame": 135,
+          "max_support_contact_force_n": 0.0,
+          "self_contact_events": 9,
+          "self_contact_pairs": [
+            [
+              "left_hip_roll_link",
+              "left_wrist_yaw_link"
+            ],
+            [
+              "right_hip_roll_link",
+              "right_wrist_yaw_link"
+            ]
+          ]
+        },
+        "endpoint_error_m": 0.05407073019936533,
+        "max_reference_root_tilt_rad": 0.14839837992678245,
+        "max_root_height_below_reference_m": 0.03949815034866333,
+        "max_root_height_deficit_frame": 13,
+        "max_root_tilt_above_reference_rad": 0.056147710648074584,
+        "max_self_contact_time_s": 2.7,
+        "min_reference_root_height_m": 0.7385804653167725,
+        "phase_share_of_schedule_error": 0.09122729118581596,
+        "raw_max_nonfoot_contact_force_n": 72.73186298599211,
+        "schedule_error_p95_m": 0.09134416087554348
+      },
+      "generation_seed": 41002,
+      "label": "neutral",
+      "paired_behavior_retained": null,
+      "rejection_reasons": [],
+      "route_decision": {
+        "checks": {
+          "achieved_monotonic_progress": true,
+          "achieved_no_reversal": true,
+          "achieved_no_self_intersection": true,
+          "cross_track_max": true,
+          "cross_track_rmse": true,
+          "endpoint_error": true,
+          "net_displacement_ratio_lower": true,
+          "net_displacement_ratio_upper": true,
+          "path_length_ratio_lower": true,
+          "path_length_ratio_upper": true,
+          "reference_route_valid": true,
+          "signed_heading_error": true
+        },
+        "failure_reasons": [],
+        "retained": true,
+        "route_retention_gate_version": "relative_route_retention_v2_heldout"
+      },
+      "route_metrics": {
+        "achieved_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.10313885637804003,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.307498608017188,
+          "net_to_path_ratio": 0.9955293424412784,
+          "path_length_m": 4.326842438871928,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": -0.0013453588075157952,
+          "total_absolute_curvature_rad": 1.0915744139603238,
+          "validity_class": "over_turn"
+        },
+        "alignment": "independent_initial_translation_only_then_normalized_arclength",
+        "along_track_max_abs_error_m": 0.02178264233296359,
+        "along_track_rmse_m": 0.012131903479825797,
+        "cross_track_max_abs_error_m": 0.08810785240306421,
+        "cross_track_rmse_m": 0.04800145709469743,
+        "endpoint_along_chord_error_m": 0.016828406932817515,
+        "endpoint_cross_chord_error_m": 0.03091557233939165,
+        "endpoint_error_m": 0.03519897573749353,
+        "initial_offset_m": 0.08874806441232949,
+        "net_displacement_ratio": 1.0027436203583229,
+        "path_length_ratio": 1.0066127778281326,
+        "reference_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.04938741758796045,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.2957128029175955,
+          "net_to_path_ratio": 0.9993706631074175,
+          "path_length_m": 4.298417955916993,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": -0.03201882597213203,
+          "total_absolute_curvature_rad": 0.37888367038653764,
+          "validity_class": "valid_straight"
+        },
+        "route_retention_version": "reference_achieved_route_retention_v1_descriptive",
+        "route_shape_max_error_m": 0.0886474284047708,
+        "route_shape_rmse_m": 0.049510836846673144,
+        "signed_heading_error_rad": 0.030673467164616233,
+        "station_count": 101,
+        "total_absolute_curvature_excess_rad": 0.7126907435737861
+      },
+      "route_retained": true,
+      "status": "completed",
+      "tracker_accepted": true,
+      "trajectory": {
+        "path": "m2s-timing-diagnostic-v1/rollouts/m2s_timing_41002_original__neutral/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:ae1a0bc39465f6c7394a2a827ca5170c72514bae15cab76ac77bc86222e42d01"
+      }
+    },
+    {
+      "achieved_semantic": {
+        "event_duration_progress": 0.38,
+        "event_interval": [
+          0.38,
+          0.76
+        ],
+        "peak_reduction": 0.07075619012762435,
+        "reason": "localized paired event occurs on a valid route",
+        "route_valid": true,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "route_aligned"
+      },
+      "cell_id": "m2s_timing_41002_original__d055",
+      "condition": "original",
+      "controller_retention": {
+        "event_duration_progress": 0.38,
+        "event_interval": [
+          0.38,
+          0.76
+        ],
+        "peak_reduction": 0.07075619012762435,
+        "reason": "execution retained 72.9% magnitude with 88.4% event IoU",
+        "route_valid": true,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "controller_retained"
+      },
+      "diagnostics": {
+        "contact_decomposition": {
+          "external_contact_bodies": [],
+          "max_external_contact_force_n": 0.0,
+          "max_external_contact_frame": 0,
+          "max_lateral_contact_force_n": 0.0,
+          "max_lateral_contact_frame": 0,
+          "max_overhead_contact_force_n": 0.0,
+          "max_overhead_contact_frame": 0,
+          "max_self_contact_force_n": 201.76798379544948,
+          "max_self_contact_frame": 76,
+          "max_support_contact_force_n": 0.0,
+          "self_contact_events": 11,
+          "self_contact_pairs": [
+            [
+              "left_hip_roll_link",
+              "left_wrist_yaw_link"
+            ],
+            [
+              "right_hip_roll_link",
+              "right_wrist_yaw_link"
+            ]
+          ]
+        },
+        "endpoint_error_m": 0.2656127267796975,
+        "max_reference_root_tilt_rad": 0.14839837992678245,
+        "max_root_height_below_reference_m": 0.03935128450393677,
+        "max_root_height_deficit_frame": 13,
+        "max_root_tilt_above_reference_rad": 0.04624147102217288,
+        "max_self_contact_time_s": 1.52,
+        "min_reference_root_height_m": 0.647942066192627,
+        "phase_share_of_schedule_error": 0.7305528948115323,
+        "raw_max_nonfoot_contact_force_n": 201.76798379544948,
+        "schedule_error_p95_m": 0.30068865834104147
+      },
+      "generation_seed": 41002,
+      "label": "d055",
+      "paired_behavior_retained": true,
+      "reference_semantic": {
+        "event_duration_progress": 0.43,
+        "event_interval": [
+          0.35000000000000003,
+          0.78
+        ],
+        "peak_reduction": 0.09704654912857635,
+        "reason": "localized paired event occurs on a valid route",
+        "route_valid": true,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "route_aligned"
+      },
+      "rejection_reasons": [],
+      "route_decision": {
+        "checks": {
+          "achieved_monotonic_progress": true,
+          "achieved_no_reversal": true,
+          "achieved_no_self_intersection": true,
+          "cross_track_max": true,
+          "cross_track_rmse": true,
+          "endpoint_error": true,
+          "net_displacement_ratio_lower": true,
+          "net_displacement_ratio_upper": true,
+          "path_length_ratio_lower": true,
+          "path_length_ratio_upper": true,
+          "reference_route_valid": true,
+          "signed_heading_error": true
+        },
+        "failure_reasons": [],
+        "retained": true,
+        "route_retention_gate_version": "relative_route_retention_v2_heldout"
+      },
+      "route_metrics": {
+        "achieved_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.07710262183899354,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 3.9957215131038284,
+          "net_to_path_ratio": 0.9964957010584805,
+          "path_length_m": 4.009772956230079,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": -0.04247197545206488,
+          "total_absolute_curvature_rad": 0.7974223249477255,
+          "validity_class": "valid_straight"
+        },
+        "alignment": "independent_initial_translation_only_then_normalized_arclength",
+        "along_track_max_abs_error_m": 0.28742046316306646,
+        "along_track_rmse_m": 0.16809988753730257,
+        "cross_track_max_abs_error_m": 0.08265870574738055,
+        "cross_track_rmse_m": 0.04174302314799286,
+        "endpoint_along_chord_error_m": -0.29313682174373534,
+        "endpoint_cross_chord_error_m": -0.0156955007746671,
+        "endpoint_error_m": 0.2935567151447673,
+        "initial_offset_m": 0.08874806441232949,
+        "net_displacement_ratio": 0.9301649566493326,
+        "path_length_ratio": 0.9328485497112771,
+        "reference_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.04938741758796045,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.2957128029175955,
+          "net_to_path_ratio": 0.9993706631074175,
+          "path_length_m": 4.298417955916993,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": -0.03201882597213203,
+          "total_absolute_curvature_rad": 0.37888367038653764,
+          "validity_class": "valid_straight"
+        },
+        "route_retention_version": "reference_achieved_route_retention_v1_descriptive",
+        "route_shape_max_error_m": 0.2935567151447673,
+        "route_shape_rmse_m": 0.17320523136322308,
+        "signed_heading_error_rad": -0.010453149479932852,
+        "station_count": 101,
+        "total_absolute_curvature_excess_rad": 0.41853865456118783
+      },
+      "route_retained": true,
+      "status": "completed",
+      "tracker_accepted": true,
+      "trajectory": {
+        "path": "m2s-timing-diagnostic-v1/rollouts/m2s_timing_41002_original__d055/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:a36ab4d8687825cb4d4db9db819cca45db89ecc01c8a60f61eab9d32dcde881f"
+      }
+    },
+    {
+      "cell_id": "m2s_timing_41003_original__neutral",
+      "condition": "original",
+      "diagnostics": {
+        "contact_decomposition": {
+          "external_contact_bodies": [],
+          "max_external_contact_force_n": 0.0,
+          "max_external_contact_frame": 0,
+          "max_lateral_contact_force_n": 0.0,
+          "max_lateral_contact_frame": 0,
+          "max_overhead_contact_force_n": 0.0,
+          "max_overhead_contact_frame": 0,
+          "max_self_contact_force_n": 4.8499295978870425,
+          "max_self_contact_frame": 44,
+          "max_support_contact_force_n": 0.0,
+          "self_contact_events": 6,
+          "self_contact_pairs": [
+            [
+              "left_hip_roll_link",
+              "left_wrist_yaw_link"
+            ],
+            [
+              "right_hip_roll_link",
+              "right_wrist_yaw_link"
+            ]
+          ]
+        },
+        "endpoint_error_m": 0.13414016303105514,
+        "max_reference_root_tilt_rad": 0.2102166629631699,
+        "max_root_height_below_reference_m": 0.031566083431243896,
+        "max_root_height_deficit_frame": 12,
+        "max_root_tilt_above_reference_rad": 0.018102764799152682,
+        "max_self_contact_time_s": 0.88,
+        "min_reference_root_height_m": 0.7268804311752319,
+        "phase_share_of_schedule_error": 0.184708983270101,
+        "raw_max_nonfoot_contact_force_n": 4.8499295978870425,
+        "schedule_error_p95_m": 0.09448838765906653
+      },
+      "generation_seed": 41003,
+      "label": "neutral",
+      "paired_behavior_retained": null,
+      "rejection_reasons": [],
+      "route_decision": {
+        "checks": {
+          "achieved_monotonic_progress": true,
+          "achieved_no_reversal": true,
+          "achieved_no_self_intersection": true,
+          "cross_track_max": true,
+          "cross_track_rmse": true,
+          "endpoint_error": true,
+          "net_displacement_ratio_lower": true,
+          "net_displacement_ratio_upper": true,
+          "path_length_ratio_lower": true,
+          "path_length_ratio_upper": true,
+          "reference_route_valid": true,
+          "signed_heading_error": true
+        },
+        "failure_reasons": [],
+        "retained": true,
+        "route_retention_gate_version": "relative_route_retention_v2_heldout"
+      },
+      "route_metrics": {
+        "achieved_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.11374314675145711,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.275120854637869,
+          "net_to_path_ratio": 0.9941837971903338,
+          "path_length_m": 4.300131290330624,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": -0.1741279840790478,
+          "total_absolute_curvature_rad": 1.0816694811843108,
+          "validity_class": "over_turn"
+        },
+        "alignment": "independent_initial_translation_only_then_normalized_arclength",
+        "along_track_max_abs_error_m": 0.16476822113767206,
+        "along_track_rmse_m": 0.09499604575808458,
+        "cross_track_max_abs_error_m": 0.08109160902993665,
+        "cross_track_rmse_m": 0.04442870166477704,
+        "endpoint_along_chord_error_m": -0.1661195224591226,
+        "endpoint_cross_chord_error_m": 0.0009472421676591481,
+        "endpoint_error_m": 0.1661222231062754,
+        "initial_offset_m": 0.10016078776253495,
+        "net_displacement_ratio": 0.9649921260986671,
+        "path_length_ratio": 0.969173737291964,
+        "reference_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.06981511412641707,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.430213199688588,
+          "net_to_path_ratio": 0.998491904979081,
+          "path_length_m": 4.436904473232963,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": -0.1512285322750006,
+          "total_absolute_curvature_rad": 0.6814522618608904,
+          "validity_class": "valid_straight"
+        },
+        "route_retention_version": "reference_achieved_route_retention_v1_descriptive",
+        "route_shape_max_error_m": 0.1661222231062754,
+        "route_shape_rmse_m": 0.1048721042093171,
+        "signed_heading_error_rad": -0.022899451804047205,
+        "station_count": 101,
+        "total_absolute_curvature_excess_rad": 0.40021721932342047
+      },
+      "route_retained": true,
+      "status": "completed",
+      "tracker_accepted": true,
+      "trajectory": {
+        "path": "m2s-timing-diagnostic-v1/rollouts/m2s_timing_41003_original__neutral/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:ecbefec01c85b4ac7b1a89d0c8425b271cb3e85ab969f1c7db44cdcdd94f5242"
+      }
+    },
+    {
+      "achieved_semantic": {
+        "event_duration_progress": 0.48000000000000004,
+        "event_interval": [
+          0.33,
+          0.81
+        ],
+        "peak_reduction": 0.07639799883105747,
+        "reason": "paired functional change has an onset and recovery",
+        "route_valid": false,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "localized"
+      },
+      "cell_id": "m2s_timing_41003_original__d055",
+      "condition": "original",
+      "controller_retention": {
+        "event_duration_progress": 0.48000000000000004,
+        "event_interval": [
+          0.33,
+          0.81
+        ],
+        "peak_reduction": 0.07639799883105747,
+        "reason": "paired functional change has an onset and recovery",
+        "route_valid": false,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "localized"
+      },
+      "diagnostics": {
+        "contact_decomposition": {
+          "external_contact_bodies": [],
+          "max_external_contact_force_n": 0.0,
+          "max_external_contact_frame": 0,
+          "max_lateral_contact_force_n": 0.0,
+          "max_lateral_contact_frame": 0,
+          "max_overhead_contact_force_n": 0.0,
+          "max_overhead_contact_frame": 0,
+          "max_self_contact_force_n": 4.007663525476984,
+          "max_self_contact_frame": 44,
+          "max_support_contact_force_n": 0.0,
+          "self_contact_events": 4,
+          "self_contact_pairs": [
+            [
+              "left_hip_roll_link",
+              "left_wrist_yaw_link"
+            ],
+            [
+              "right_hip_roll_link",
+              "right_wrist_yaw_link"
+            ]
+          ]
+        },
+        "endpoint_error_m": 0.4103148562895875,
+        "max_reference_root_tilt_rad": 0.2102166629631699,
+        "max_root_height_below_reference_m": 0.0315815806388855,
+        "max_root_height_deficit_frame": 12,
+        "max_root_tilt_above_reference_rad": 0.02679386984239686,
+        "max_self_contact_time_s": 0.88,
+        "min_reference_root_height_m": 0.6486302018165588,
+        "phase_share_of_schedule_error": 0.6348645699610734,
+        "raw_max_nonfoot_contact_force_n": 4.007663525476984,
+        "schedule_error_p95_m": 0.3687436693335417
+      },
+      "generation_seed": 41003,
+      "label": "d055",
+      "paired_behavior_retained": false,
+      "reference_semantic": {
+        "event_duration_progress": 0.46,
+        "event_interval": [
+          0.31,
+          0.77
+        ],
+        "peak_reduction": 0.09961864201802029,
+        "reason": "localized paired event occurs on a valid route",
+        "route_valid": true,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "route_aligned"
+      },
+      "rejection_reasons": [
+        "reference_endpoint_tracking_error"
+      ],
+      "route_decision": {
+        "checks": {
+          "achieved_monotonic_progress": true,
+          "achieved_no_reversal": true,
+          "achieved_no_self_intersection": true,
+          "cross_track_max": true,
+          "cross_track_rmse": true,
+          "endpoint_error": false,
+          "net_displacement_ratio_lower": true,
+          "net_displacement_ratio_upper": true,
+          "path_length_ratio_lower": true,
+          "path_length_ratio_upper": true,
+          "reference_route_valid": true,
+          "signed_heading_error": true
+        },
+        "failure_reasons": [
+          "endpoint_error"
+        ],
+        "retained": false,
+        "route_retention_gate_version": "relative_route_retention_v2_heldout"
+      },
+      "route_metrics": {
+        "achieved_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.0916305931076288,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.0087403999893745,
+          "net_to_path_ratio": 0.9934787962706675,
+          "path_length_m": 4.035053807929703,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": -0.22430181364710727,
+          "total_absolute_curvature_rad": 1.4004564529060324,
+          "validity_class": "over_turn"
+        },
+        "alignment": "independent_initial_translation_only_then_normalized_arclength",
+        "along_track_max_abs_error_m": 0.43993711739953223,
+        "along_track_rmse_m": 0.24861763212680324,
+        "cross_track_max_abs_error_m": 0.13511056564286678,
+        "cross_track_rmse_m": 0.06842875428181627,
+        "endpoint_along_chord_error_m": -0.43120824372695604,
+        "endpoint_cross_chord_error_m": 0.0944148158169897,
+        "endpoint_error_m": 0.4414235006247878,
+        "initial_offset_m": 0.10016078776253495,
+        "net_displacement_ratio": 0.904863991708381,
+        "path_length_ratio": 0.9094299488015684,
+        "reference_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.06981511412641707,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.430213199688588,
+          "net_to_path_ratio": 0.998491904979081,
+          "path_length_m": 4.436904473232963,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": -0.1512285322750006,
+          "total_absolute_curvature_rad": 0.6814522618608904,
+          "validity_class": "valid_straight"
+        },
+        "route_retention_version": "reference_achieved_route_retention_v1_descriptive",
+        "route_shape_max_error_m": 0.4414235006247878,
+        "route_shape_rmse_m": 0.2578627957207082,
+        "signed_heading_error_rad": -0.07307328137210667,
+        "station_count": 101,
+        "total_absolute_curvature_excess_rad": 0.719004191045142
+      },
+      "route_retained": false,
+      "status": "completed",
+      "tracker_accepted": false,
+      "trajectory": {
+        "path": "m2s-timing-diagnostic-v1/rollouts/m2s_timing_41003_original__d055/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:9a918872ce5f16e91842f48b65608cfeefedec45668db3688028deddb5054419"
+      }
+    },
+    {
+      "cell_id": "m2s_timing_41003_shared_clock__neutral",
+      "condition": "shared_clock",
+      "diagnostics": {
+        "contact_decomposition": {
+          "external_contact_bodies": [],
+          "max_external_contact_force_n": 0.0,
+          "max_external_contact_frame": 0,
+          "max_lateral_contact_force_n": 0.0,
+          "max_lateral_contact_frame": 0,
+          "max_overhead_contact_force_n": 0.0,
+          "max_overhead_contact_frame": 0,
+          "max_self_contact_force_n": 4.429577348850218,
+          "max_self_contact_frame": 216,
+          "max_support_contact_force_n": 0.0,
+          "self_contact_events": 6,
+          "self_contact_pairs": [
+            [
+              "left_hip_roll_link",
+              "left_wrist_yaw_link"
+            ],
+            [
+              "right_hip_roll_link",
+              "right_wrist_yaw_link"
+            ]
+          ]
+        },
+        "endpoint_error_m": 0.25030184190475896,
+        "max_reference_root_tilt_rad": 0.20984403901253995,
+        "max_root_height_below_reference_m": 0.031024932861328125,
+        "max_root_height_deficit_frame": 12,
+        "max_root_tilt_above_reference_rad": 0.04706956445065154,
+        "max_self_contact_time_s": 4.32,
+        "min_reference_root_height_m": 0.7268804311752319,
+        "phase_share_of_schedule_error": 0.6437424449228558,
+        "raw_max_nonfoot_contact_force_n": 4.429577348850218,
+        "schedule_error_p95_m": 0.2247598095901071
+      },
+      "generation_seed": 41003,
+      "label": "neutral",
+      "paired_behavior_retained": null,
+      "rejection_reasons": [],
+      "route_decision": {
+        "checks": {
+          "achieved_monotonic_progress": true,
+          "achieved_no_reversal": true,
+          "achieved_no_self_intersection": true,
+          "cross_track_max": true,
+          "cross_track_rmse": true,
+          "endpoint_error": true,
+          "net_displacement_ratio_lower": true,
+          "net_displacement_ratio_upper": true,
+          "path_length_ratio_lower": true,
+          "path_length_ratio_upper": true,
+          "reference_route_valid": true,
+          "signed_heading_error": true
+        },
+        "failure_reasons": [],
+        "retained": true,
+        "route_retention_gate_version": "relative_route_retention_v2_heldout"
+      },
+      "route_metrics": {
+        "achieved_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.10940047858550755,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.149336330579309,
+          "net_to_path_ratio": 0.9926032948536321,
+          "path_length_m": 4.180256455013243,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": -0.09894975820837892,
+          "total_absolute_curvature_rad": 1.3762361478664122,
+          "validity_class": "over_turn"
+        },
+        "alignment": "independent_initial_translation_only_then_normalized_arclength",
+        "along_track_max_abs_error_m": 0.279175238004936,
+        "along_track_rmse_m": 0.16303283451260342,
+        "cross_track_max_abs_error_m": 0.0785350602442211,
+        "cross_track_rmse_m": 0.039793661250211707,
+        "endpoint_along_chord_error_m": -0.28215544262639236,
+        "endpoint_cross_chord_error_m": -0.0035323083457768946,
+        "endpoint_error_m": 0.2821775522715176,
+        "initial_offset_m": 0.10007273681006484,
+        "net_displacement_ratio": 0.936477033914043,
+        "path_length_ratio": 0.9418520536370151,
+        "reference_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.0719216697294181,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.430793474173085,
+          "net_to_path_ratio": 0.9983004578311654,
+          "path_length_m": 4.4383366144087555,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": -0.1509956817260911,
+          "total_absolute_curvature_rad": 0.7454124061548555,
+          "validity_class": "valid_straight"
+        },
+        "route_retention_version": "reference_achieved_route_retention_v1_descriptive",
+        "route_shape_max_error_m": 0.2821775522715176,
+        "route_shape_rmse_m": 0.16781907104054214,
+        "signed_heading_error_rad": 0.05204592351771217,
+        "station_count": 101,
+        "total_absolute_curvature_excess_rad": 0.6308237417115568
+      },
+      "route_retained": true,
+      "status": "completed",
+      "tracker_accepted": true,
+      "trajectory": {
+        "path": "m2s-timing-diagnostic-v1/rollouts/m2s_timing_41003_shared_clock__neutral/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:f9b0040600f08a6fe323c07cc981ff84281c797289744299a3c20c96a6da5b7b"
+      }
+    },
+    {
+      "achieved_semantic": {
+        "event_duration_progress": 0.48000000000000004,
+        "event_interval": [
+          0.33,
+          0.81
+        ],
+        "peak_reduction": 0.08179631321832215,
+        "reason": "paired functional change has an onset and recovery",
+        "route_valid": false,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "localized"
+      },
+      "cell_id": "m2s_timing_41003_shared_clock__d055",
+      "condition": "shared_clock",
+      "controller_retention": {
+        "event_duration_progress": 0.48000000000000004,
+        "event_interval": [
+          0.33,
+          0.81
+        ],
+        "peak_reduction": 0.08179631321832215,
+        "reason": "paired functional change has an onset and recovery",
+        "route_valid": false,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "localized"
+      },
+      "diagnostics": {
+        "contact_decomposition": {
+          "external_contact_bodies": [],
+          "max_external_contact_force_n": 0.0,
+          "max_external_contact_frame": 0,
+          "max_lateral_contact_force_n": 0.0,
+          "max_lateral_contact_frame": 0,
+          "max_overhead_contact_force_n": 0.0,
+          "max_overhead_contact_frame": 0,
+          "max_self_contact_force_n": 13.10599819479078,
+          "max_self_contact_frame": 216,
+          "max_support_contact_force_n": 0.0,
+          "self_contact_events": 4,
+          "self_contact_pairs": [
+            [
+              "left_hip_roll_link",
+              "left_wrist_yaw_link"
+            ],
+            [
+              "right_hip_roll_link",
+              "right_wrist_yaw_link"
+            ]
+          ]
+        },
+        "endpoint_error_m": 0.5089918452388638,
+        "max_reference_root_tilt_rad": 0.20984403901253995,
+        "max_root_height_below_reference_m": 0.03124767541885376,
+        "max_root_height_deficit_frame": 12,
+        "max_root_tilt_above_reference_rad": 0.04978380226554811,
+        "max_self_contact_time_s": 4.32,
+        "min_reference_root_height_m": 0.6495969891548157,
+        "phase_share_of_schedule_error": 0.8336509295505998,
+        "raw_max_nonfoot_contact_force_n": 13.10599819479078,
+        "schedule_error_p95_m": 0.486636989843378
+      },
+      "generation_seed": 41003,
+      "label": "d055",
+      "paired_behavior_retained": false,
+      "reference_semantic": {
+        "event_duration_progress": 0.45,
+        "event_interval": [
+          0.32,
+          0.77
+        ],
+        "peak_reduction": 0.09557972194554987,
+        "reason": "localized paired event occurs on a valid route",
+        "route_valid": true,
+        "semantic_predicate_version": "paired_functional_reduction_v2",
+        "semantic_status": "route_aligned"
+      },
+      "rejection_reasons": [
+        "reference_endpoint_tracking_error"
+      ],
+      "route_decision": {
+        "checks": {
+          "achieved_monotonic_progress": true,
+          "achieved_no_reversal": true,
+          "achieved_no_self_intersection": true,
+          "cross_track_max": true,
+          "cross_track_rmse": true,
+          "endpoint_error": false,
+          "net_displacement_ratio_lower": false,
+          "net_displacement_ratio_upper": true,
+          "path_length_ratio_lower": false,
+          "path_length_ratio_upper": true,
+          "reference_route_valid": true,
+          "signed_heading_error": true
+        },
+        "failure_reasons": [
+          "path_length_ratio_lower",
+          "net_displacement_ratio_lower",
+          "endpoint_error"
+        ],
+        "retained": false,
+        "route_retention_gate_version": "relative_route_retention_v2_heldout"
+      },
+      "route_metrics": {
+        "achieved_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.1014866494316336,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 3.895303896991889,
+          "net_to_path_ratio": 0.9892268750207688,
+          "path_length_m": 3.9377255060019545,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": 0.020080417135171724,
+          "total_absolute_curvature_rad": 1.6717480024880644,
+          "validity_class": "over_turn"
+        },
+        "alignment": "independent_initial_translation_only_then_normalized_arclength",
+        "along_track_max_abs_error_m": 0.5405218863742954,
+        "along_track_rmse_m": 0.31073923372699225,
+        "cross_track_max_abs_error_m": 0.08078446045379603,
+        "cross_track_rmse_m": 0.04679358424069207,
+        "endpoint_along_chord_error_m": -0.5357707645641488,
+        "endpoint_cross_chord_error_m": 0.07151072402709897,
+        "endpoint_error_m": 0.5405220585808989,
+        "initial_offset_m": 0.10007273681006484,
+        "net_displacement_ratio": 0.8791436386501553,
+        "path_length_ratio": 0.8872074941811305,
+        "reference_route": {
+          "expected_route": "straight",
+          "maximum_lateral_departure_m": 0.0719216697294181,
+          "monotonic_progress_fraction": 1.0,
+          "net_displacement_m": 4.430793474173085,
+          "net_to_path_ratio": 0.9983004578311654,
+          "path_length_m": 4.4383366144087555,
+          "reversal": false,
+          "route_predicate_version": "route_semantics_v2_preregistered",
+          "self_intersection": false,
+          "signed_heading_change_rad": -0.1509956817260911,
+          "total_absolute_curvature_rad": 0.7454124061548555,
+          "validity_class": "valid_straight"
+        },
+        "route_retention_version": "reference_achieved_route_retention_v1_descriptive",
+        "route_shape_max_error_m": 0.5405220585808989,
+        "route_shape_rmse_m": 0.3142427579170745,
+        "signed_heading_error_rad": 0.17107609886126282,
+        "station_count": 101,
+        "total_absolute_curvature_excess_rad": 0.9263355963332089
+      },
+      "route_retained": false,
+      "status": "completed",
+      "tracker_accepted": false,
+      "trajectory": {
+        "path": "m2s-timing-diagnostic-v1/rollouts/m2s_timing_41003_shared_clock__d055/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:f57fdf6f117292230e19ae88748b6a1265fa72f9b2ae1e3dff4fd3a12c88c64d"
+      }
+    }
+  ],
+  "run_record": {
+    "path": "m2s-timing-diagnostic-v1/run_record.json",
+    "sha256": "sha256:5453d8a47c341ff9d52858645fc8bbbb91e0e95bd14716cf75dc553d4ff8439e"
+  },
+  "schema_version": "motion2scene_paired_timing_diagnostic_result_v1",
+  "summary": {
+    "counts": {
+      "original/d055": {
+        "completed": 3,
+        "paired_behavior_retained": 1,
+        "registered": 3,
+        "relative_route_pass": 1,
+        "tracker_accepted": 1
+      },
+      "original/neutral": {
+        "completed": 3,
+        "paired_behavior_retained": 0,
+        "registered": 3,
+        "relative_route_pass": 3,
+        "tracker_accepted": 3
+      },
+      "shared_clock/d055": {
+        "completed": 3,
+        "paired_behavior_retained": 0,
+        "registered": 3,
+        "relative_route_pass": 0,
+        "tracker_accepted": 0
+      },
+      "shared_clock/neutral": {
+        "completed": 3,
+        "paired_behavior_retained": 0,
+        "registered": 3,
+        "relative_route_pass": 3,
+        "tracker_accepted": 3
+      }
+    },
+    "paired_deltas_slower_minus_original": [
+      {
+        "endpoint_error_delta_m": 0.1370303602276574,
+        "generation_seed": 41001,
+        "label": "neutral",
+        "measured": true,
+        "tracker_acceptance_delta": 0
+      },
+      {
+        "endpoint_error_delta_m": 0.10626500368486208,
+        "generation_seed": 41001,
+        "label": "d055",
+        "measured": true,
+        "tracker_acceptance_delta": 0
+      },
+      {
+        "endpoint_error_delta_m": 0.07798456215671108,
+        "generation_seed": 41002,
+        "label": "neutral",
+        "measured": true,
+        "tracker_acceptance_delta": 0
+      },
+      {
+        "endpoint_error_delta_m": 0.1360964785847516,
+        "generation_seed": 41002,
+        "label": "d055",
+        "measured": true,
+        "tracker_acceptance_delta": -1
+      },
+      {
+        "endpoint_error_delta_m": 0.11616167887370382,
+        "generation_seed": 41003,
+        "label": "neutral",
+        "measured": true,
+        "tracker_acceptance_delta": 0
+      },
+      {
+        "endpoint_error_delta_m": 0.09867698894927623,
+        "generation_seed": 41003,
+        "label": "d055",
+        "measured": true,
+        "tracker_acceptance_delta": 0
+      }
+    ],
+    "predictions": {
+      "p1_crouch_endpoint_improves_in_at_least_two_carriers": false,
+      "p2_more_tracker_accepted_crouches": false,
+      "p3_at_least_two_shared_clock_neutrals_accepted": true
+    }
+  },
+  "training_eligible": false
+}

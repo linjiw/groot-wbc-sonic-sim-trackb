@@ -1,0 +1,65 @@
+{
+  "arms": [
+    "raw",
+    "rank",
+    "gradient",
+    "probe_refine",
+    "multistart",
+    "pattern"
+  ],
+  "case_ids": [
+    "41005_event3",
+    "41005_event4",
+    "41006_event3",
+    "41006_event4",
+    "41007_event3",
+    "41007_event4",
+    "41008_event3",
+    "41008_event4",
+    "42005_event3",
+    "42005_event4",
+    "42006_event3",
+    "42006_event4",
+    "42007_event3",
+    "42007_event4",
+    "42008_event3",
+    "42008_event4"
+  ],
+  "execution_eligible": false,
+  "implementations": [
+    {
+      "path": "scripts/research/motion2scene_station_study.py",
+      "sha256": "sha256:8c608c3d852d010de1d4bd987fde42b9cd176fa211d3d19f2c6033109d5ffc22"
+    },
+    {
+      "path": "gear_sonic/dataset_generation/hallucination/motion2scene_station_search.py",
+      "sha256": "sha256:45f637cac1cc75b4a75938cdf6506ff7d9a9cfd6717c05c8364a908631aa4c8d"
+    }
+  ],
+  "main_draw_seed_offset": 60000,
+  "max_audit_seconds": 1200,
+  "max_search_seconds": 1800,
+  "parent": {
+    "path": "m2s-refinement-v1/registration.json",
+    "sha256": "sha256:689159717e5e346820f3691ccea1de2c84881f77c435a1a0179255dbeecae083"
+  },
+  "protocol": {
+    "path": "docs/motion2scene/STATION_SEARCH_V1.md",
+    "sha256": "sha256:5009f3acbd6ce07ec763a11f87974d5e5020fee92002414cf085d6fe4c7ab722"
+  },
+  "replay": {
+    "path": "m2s-refinement-v1/fresh-sampler/result.json",
+    "sha256": "sha256:0320207c81f6e7a2ec07f1ba392a0660b1995955d4760d84cac7920825495747"
+  },
+  "replay_plan": {
+    "path": "m2s-refinement-v1/sampler-plan.json",
+    "sha256": "sha256:4fc39f611b8f45cae93f571a2688c512e41d69b121bc05fbe63ce12ad3c5159e"
+  },
+  "role": "observed_source_development_fresh_draws_with_separate_known_failure_replay",
+  "seeds": [
+    8421,
+    8422,
+    8423
+  ],
+  "training_eligible": false
+}

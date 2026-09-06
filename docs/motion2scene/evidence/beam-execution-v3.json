@@ -1,0 +1,1201 @@
+{
+  "cells": 14,
+  "contact_witnesses": [
+    {
+      "cell_id": "beam_7910_clear_neutral",
+      "passage_pass_with_full_sequence_tracker_rejection": false,
+      "peak_filter": null,
+      "peak_force_n_through_passage": 0.0,
+      "peak_frame": 0
+    },
+    {
+      "cell_id": "beam_7910_intersecting_neutral",
+      "passage_pass_with_full_sequence_tracker_rejection": false,
+      "peak_filter": "/World/envs/env_0/Robot/torso_link",
+      "peak_force_n_through_passage": 131.50909423828125,
+      "peak_frame": 134
+    },
+    {
+      "cell_id": "beam_7911_absent_neutral",
+      "passage_pass_with_full_sequence_tracker_rejection": false,
+      "peak_filter": null,
+      "peak_force_n_through_passage": 0.0,
+      "peak_frame": 0
+    },
+    {
+      "cell_id": "beam_7911_absent_d055",
+      "passage_pass_with_full_sequence_tracker_rejection": false,
+      "peak_filter": null,
+      "peak_force_n_through_passage": 0.0,
+      "peak_frame": 0
+    },
+    {
+      "cell_id": "beam_7911_present_neutral",
+      "passage_pass_with_full_sequence_tracker_rejection": false,
+      "peak_filter": "/World/envs/env_0/Robot/torso_link",
+      "peak_force_n_through_passage": 73.57364654541016,
+      "peak_frame": 116
+    },
+    {
+      "cell_id": "beam_7911_present_d055",
+      "passage_pass_with_full_sequence_tracker_rejection": false,
+      "peak_filter": null,
+      "peak_force_n_through_passage": 0.0,
+      "peak_frame": 0
+    },
+    {
+      "cell_id": "beam_7912_absent_neutral",
+      "passage_pass_with_full_sequence_tracker_rejection": false,
+      "peak_filter": null,
+      "peak_force_n_through_passage": 0.0,
+      "peak_frame": 0
+    },
+    {
+      "cell_id": "beam_7912_absent_d055",
+      "passage_pass_with_full_sequence_tracker_rejection": false,
+      "peak_filter": null,
+      "peak_force_n_through_passage": 0.0,
+      "peak_frame": 0
+    },
+    {
+      "cell_id": "beam_7912_present_neutral",
+      "passage_pass_with_full_sequence_tracker_rejection": false,
+      "peak_filter": "/World/envs/env_0/Robot/torso_link",
+      "peak_force_n_through_passage": 100.48735809326172,
+      "peak_frame": 117
+    },
+    {
+      "cell_id": "beam_7912_present_d055",
+      "passage_pass_with_full_sequence_tracker_rejection": false,
+      "peak_filter": null,
+      "peak_force_n_through_passage": 0.0,
+      "peak_frame": 0
+    },
+    {
+      "cell_id": "beam_7913_absent_neutral",
+      "passage_pass_with_full_sequence_tracker_rejection": false,
+      "peak_filter": null,
+      "peak_force_n_through_passage": 0.0,
+      "peak_frame": 0
+    },
+    {
+      "cell_id": "beam_7913_absent_d055",
+      "passage_pass_with_full_sequence_tracker_rejection": false,
+      "peak_filter": null,
+      "peak_force_n_through_passage": 0.0,
+      "peak_frame": 0
+    },
+    {
+      "cell_id": "beam_7913_present_neutral",
+      "passage_pass_with_full_sequence_tracker_rejection": false,
+      "peak_filter": "/World/envs/env_0/Robot/torso_link",
+      "peak_force_n_through_passage": 762.0899047851562,
+      "peak_frame": 112
+    },
+    {
+      "cell_id": "beam_7913_present_d055",
+      "passage_pass_with_full_sequence_tracker_rejection": false,
+      "peak_filter": null,
+      "peak_force_n_through_passage": 0.0,
+      "peak_frame": 0
+    }
+  ],
+  "contended_gpu_hours": 0.1305698515711265,
+  "elapsed_seconds_by_cell": {
+    "beam_7910_clear_neutral": 40.08,
+    "beam_7910_intersecting_neutral": 53.287,
+    "beam_7911_absent_d055": 31.362,
+    "beam_7911_absent_neutral": 31.166,
+    "beam_7911_present_d055": 31.609,
+    "beam_7911_present_neutral": 31.413,
+    "beam_7912_absent_d055": 31.113,
+    "beam_7912_absent_neutral": 31.06,
+    "beam_7912_present_d055": 31.411,
+    "beam_7912_present_neutral": 30.762,
+    "beam_7913_absent_d055": 31.211,
+    "beam_7913_absent_neutral": 31.362,
+    "beam_7913_present_d055": 32.109,
+    "beam_7913_present_neutral": 32.106
+  },
+  "limitations": [
+    "One selected source and one frozen development beam",
+    "50 Hz force samples and body-origin crossing",
+    "No learned-generator execution-yield claim"
+  ],
+  "results": {
+    "controls": {
+      "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/controls_result.json",
+      "sha256": "sha256:3c7c1047ded28db993bd29f1fc2de865cf89c22a278d683c468f5b66889f1753"
+    },
+    "paired": {
+      "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/paired_result.json",
+      "sha256": "sha256:dabe2bac19c012e2514fe6115da1d08ead06791535d49e222472da94202a3763"
+    }
+  },
+  "runtime_inventory_checks": [
+    {
+      "beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            2.696616322673983,
+            0.22645592215640215,
+            2.05,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "cell_id": "beam_7910_clear_neutral",
+      "control_dt": 0.02,
+      "filter_count": 30,
+      "inventory": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7910_clear_neutral/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:4c384471ee1c1cba08f267e5721e128e75b6e749b3a0b95b2e9332345fcbf6d6"
+      },
+      "physics_dt": 0.005,
+      "robot_collision_declarations": 45,
+      "robot_geometry_types": {
+        "Capsule": 26,
+        "Mesh": 18,
+        "Sphere": 1
+      },
+      "scope": "running composed USD inventory; not a cooked-PhysX shape dump"
+    },
+    {
+      "beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            2.696616322673983,
+            0.22645592215640215,
+            1.1500000000000001,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "cell_id": "beam_7910_intersecting_neutral",
+      "control_dt": 0.02,
+      "filter_count": 30,
+      "inventory": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7910_intersecting_neutral/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:0614e85ca61bb559fa6cc9f379e38a1dcb335d2052792238cdbcb122c44aa4b9"
+      },
+      "physics_dt": 0.005,
+      "robot_collision_declarations": 45,
+      "robot_geometry_types": {
+        "Capsule": 26,
+        "Mesh": 18,
+        "Sphere": 1
+      },
+      "scope": "running composed USD inventory; not a cooked-PhysX shape dump"
+    },
+    {
+      "beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "False",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            2.696616322673983,
+            0.22645592215640215,
+            1.3152671813964845,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "cell_id": "beam_7911_absent_neutral",
+      "control_dt": 0.02,
+      "filter_count": 30,
+      "inventory": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7911_absent_neutral/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:6cc961277ee01e82c6053da454cfb9fd87538e52e08639e19d951fd6ceea2a18"
+      },
+      "physics_dt": 0.005,
+      "robot_collision_declarations": 45,
+      "robot_geometry_types": {
+        "Capsule": 26,
+        "Mesh": 18,
+        "Sphere": 1
+      },
+      "scope": "running composed USD inventory; not a cooked-PhysX shape dump"
+    },
+    {
+      "beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "False",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            2.696616322673983,
+            0.22645592215640215,
+            1.3152671813964845,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "cell_id": "beam_7911_absent_d055",
+      "control_dt": 0.02,
+      "filter_count": 30,
+      "inventory": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7911_absent_d055/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:6cc961277ee01e82c6053da454cfb9fd87538e52e08639e19d951fd6ceea2a18"
+      },
+      "physics_dt": 0.005,
+      "robot_collision_declarations": 45,
+      "robot_geometry_types": {
+        "Capsule": 26,
+        "Mesh": 18,
+        "Sphere": 1
+      },
+      "scope": "running composed USD inventory; not a cooked-PhysX shape dump"
+    },
+    {
+      "beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            2.696616322673983,
+            0.22645592215640215,
+            1.3152671813964845,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "cell_id": "beam_7911_present_neutral",
+      "control_dt": 0.02,
+      "filter_count": 30,
+      "inventory": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7911_present_neutral/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d11b3a0416cefd6ee7b835117df7ef281332cf0554ff3774669ada8273fe79dd"
+      },
+      "physics_dt": 0.005,
+      "robot_collision_declarations": 45,
+      "robot_geometry_types": {
+        "Capsule": 26,
+        "Mesh": 18,
+        "Sphere": 1
+      },
+      "scope": "running composed USD inventory; not a cooked-PhysX shape dump"
+    },
+    {
+      "beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            2.696616322673983,
+            0.22645592215640215,
+            1.3152671813964845,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "cell_id": "beam_7911_present_d055",
+      "control_dt": 0.02,
+      "filter_count": 30,
+      "inventory": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7911_present_d055/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d11b3a0416cefd6ee7b835117df7ef281332cf0554ff3774669ada8273fe79dd"
+      },
+      "physics_dt": 0.005,
+      "robot_collision_declarations": 45,
+      "robot_geometry_types": {
+        "Capsule": 26,
+        "Mesh": 18,
+        "Sphere": 1
+      },
+      "scope": "running composed USD inventory; not a cooked-PhysX shape dump"
+    },
+    {
+      "beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "False",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            2.696616322673983,
+            0.22645592215640215,
+            1.3152671813964845,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "cell_id": "beam_7912_absent_neutral",
+      "control_dt": 0.02,
+      "filter_count": 30,
+      "inventory": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7912_absent_neutral/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:6cc961277ee01e82c6053da454cfb9fd87538e52e08639e19d951fd6ceea2a18"
+      },
+      "physics_dt": 0.005,
+      "robot_collision_declarations": 45,
+      "robot_geometry_types": {
+        "Capsule": 26,
+        "Mesh": 18,
+        "Sphere": 1
+      },
+      "scope": "running composed USD inventory; not a cooked-PhysX shape dump"
+    },
+    {
+      "beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "False",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            2.696616322673983,
+            0.22645592215640215,
+            1.3152671813964845,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "cell_id": "beam_7912_absent_d055",
+      "control_dt": 0.02,
+      "filter_count": 30,
+      "inventory": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7912_absent_d055/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:6cc961277ee01e82c6053da454cfb9fd87538e52e08639e19d951fd6ceea2a18"
+      },
+      "physics_dt": 0.005,
+      "robot_collision_declarations": 45,
+      "robot_geometry_types": {
+        "Capsule": 26,
+        "Mesh": 18,
+        "Sphere": 1
+      },
+      "scope": "running composed USD inventory; not a cooked-PhysX shape dump"
+    },
+    {
+      "beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            2.696616322673983,
+            0.22645592215640215,
+            1.3152671813964845,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "cell_id": "beam_7912_present_neutral",
+      "control_dt": 0.02,
+      "filter_count": 30,
+      "inventory": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7912_present_neutral/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d11b3a0416cefd6ee7b835117df7ef281332cf0554ff3774669ada8273fe79dd"
+      },
+      "physics_dt": 0.005,
+      "robot_collision_declarations": 45,
+      "robot_geometry_types": {
+        "Capsule": 26,
+        "Mesh": 18,
+        "Sphere": 1
+      },
+      "scope": "running composed USD inventory; not a cooked-PhysX shape dump"
+    },
+    {
+      "beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            2.696616322673983,
+            0.22645592215640215,
+            1.3152671813964845,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "cell_id": "beam_7912_present_d055",
+      "control_dt": 0.02,
+      "filter_count": 30,
+      "inventory": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7912_present_d055/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d11b3a0416cefd6ee7b835117df7ef281332cf0554ff3774669ada8273fe79dd"
+      },
+      "physics_dt": 0.005,
+      "robot_collision_declarations": 45,
+      "robot_geometry_types": {
+        "Capsule": 26,
+        "Mesh": 18,
+        "Sphere": 1
+      },
+      "scope": "running composed USD inventory; not a cooked-PhysX shape dump"
+    },
+    {
+      "beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "False",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            2.696616322673983,
+            0.22645592215640215,
+            1.3152671813964845,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "cell_id": "beam_7913_absent_neutral",
+      "control_dt": 0.02,
+      "filter_count": 30,
+      "inventory": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7913_absent_neutral/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:6cc961277ee01e82c6053da454cfb9fd87538e52e08639e19d951fd6ceea2a18"
+      },
+      "physics_dt": 0.005,
+      "robot_collision_declarations": 45,
+      "robot_geometry_types": {
+        "Capsule": 26,
+        "Mesh": 18,
+        "Sphere": 1
+      },
+      "scope": "running composed USD inventory; not a cooked-PhysX shape dump"
+    },
+    {
+      "beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "False",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            2.696616322673983,
+            0.22645592215640215,
+            1.3152671813964845,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "cell_id": "beam_7913_absent_d055",
+      "control_dt": 0.02,
+      "filter_count": 30,
+      "inventory": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7913_absent_d055/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:6cc961277ee01e82c6053da454cfb9fd87538e52e08639e19d951fd6ceea2a18"
+      },
+      "physics_dt": 0.005,
+      "robot_collision_declarations": 45,
+      "robot_geometry_types": {
+        "Capsule": 26,
+        "Mesh": 18,
+        "Sphere": 1
+      },
+      "scope": "running composed USD inventory; not a cooked-PhysX shape dump"
+    },
+    {
+      "beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            2.696616322673983,
+            0.22645592215640215,
+            1.3152671813964845,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "cell_id": "beam_7913_present_neutral",
+      "control_dt": 0.02,
+      "filter_count": 30,
+      "inventory": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7913_present_neutral/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d11b3a0416cefd6ee7b835117df7ef281332cf0554ff3774669ada8273fe79dd"
+      },
+      "physics_dt": 0.005,
+      "robot_collision_declarations": 45,
+      "robot_geometry_types": {
+        "Capsule": 26,
+        "Mesh": 18,
+        "Sphere": 1
+      },
+      "scope": "running composed USD inventory; not a cooked-PhysX shape dump"
+    },
+    {
+      "beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            2.696616322673983,
+            0.22645592215640215,
+            1.3152671813964845,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "cell_id": "beam_7913_present_d055",
+      "control_dt": 0.02,
+      "filter_count": 30,
+      "inventory": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7913_present_d055/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d11b3a0416cefd6ee7b835117df7ef281332cf0554ff3774669ada8273fe79dd"
+      },
+      "physics_dt": 0.005,
+      "robot_collision_declarations": 45,
+      "robot_geometry_types": {
+        "Capsule": 26,
+        "Mesh": 18,
+        "Sphere": 1
+      },
+      "scope": "running composed USD inventory; not a cooked-PhysX shape dump"
+    }
+  ]
+}

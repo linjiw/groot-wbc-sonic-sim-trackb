@@ -1,0 +1,79 @@
+{
+  "controls_pass": true,
+  "manifest": {
+    "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/controls_manifest.json",
+    "sha256": "sha256:3419a92b8c7f0fde4a5c51a3d5c7825b545f6a69bfbdeab8d27e012123070628"
+  },
+  "rows": [
+    {
+      "capture_frames": 199,
+      "cell_id": "beam_7910_clear_neutral",
+      "condition": "clear",
+      "contacts": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7910_clear_neutral/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7910_clear_neutral/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:4c384471ee1c1cba08f267e5721e128e75b6e749b3a0b95b2e9332345fcbf6d6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 1.4705699330937159,
+      "observed_beam_contact": false,
+      "pass": true,
+      "passage_finish_frame_exclusive": 150,
+      "reset_count": 0,
+      "seed": 7910,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "tracker_outcome": "accepted"
+    },
+    {
+      "capture_frames": 199,
+      "cell_id": "beam_7910_intersecting_neutral",
+      "condition": "intersecting",
+      "contacts": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7910_intersecting_neutral/trajectories/beam_contacts.npz",
+        "sha256": "sha256:f354af664a2d92972d06b0458c804a105b447e66302a44e95475a50b0fc83e0f"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "fall_observed": false,
+      "first_episode_frames": 183,
+      "force_threshold_frame_counts": {
+        "0.1": 53,
+        "1": 53,
+        "10": 53
+      },
+      "incomplete_crossing": true,
+      "inventory": {
+        "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/rollouts/beam_7910_intersecting_neutral/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:0614e85ca61bb559fa6cc9f379e38a1dcb335d2052792238cdbcb122c44aa4b9"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 131.50909423828125,
+      "minimum_body_downstream_max_m": -0.06863312852344405,
+      "observed_beam_contact": true,
+      "pass": false,
+      "passage_finish_frame_exclusive": null,
+      "reset_count": 1,
+      "seed": 7910,
+      "stabilization_failed": true,
+      "stabilization_seconds": 0.3,
+      "tracker_outcome": "rejected"
+    }
+  ],
+  "run_record": {
+    "path": "/home/linjiw/research-data/groot-wbc/m2s-beam-intervention-resource-v3/controls_run_record.json",
+    "sha256": "sha256:25e1e16d2c8c81e1e6ce792fb0105d0bd387bd342327223773439afa40a9fbeb"
+  }
+}

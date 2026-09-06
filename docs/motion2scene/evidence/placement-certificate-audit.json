@@ -1,0 +1,31 @@
+{
+  "auditor": {
+    "path": "scripts/research/motion2scene_audit_certificate.py",
+    "sha256": "sha256:5cea9b9d7ec238e9ea1257a731c2cc2e85a83e3dfa013ce38b2fb7d422061266"
+  },
+  "elapsed_s": 5.504656799006625,
+  "numerical_error_bound_formally_validated": false,
+  "rows": [
+    {
+      "all_leaf_inequalities_verified": true,
+      "arm": "margin_no_kl",
+      "leaf_volume_fraction": 1.0000000000000002,
+      "partition_topology_verified": true,
+      "queries": 1419,
+      "torch_numpy_max_error_m": 1.3877787807814457e-17
+    },
+    {
+      "all_leaf_inequalities_verified": true,
+      "arm": "constraints_no_kl",
+      "leaf_volume_fraction": 1.0000000000000047,
+      "partition_topology_verified": true,
+      "queries": 1623,
+      "torch_numpy_max_error_m": 1.3877787807814457e-17
+    }
+  ],
+  "scope": "Finite trace consistency and query agreement; not a formal floating-point proof",
+  "source": {
+    "path": "m2s-placement-certificate-v1/result.json",
+    "sha256": "sha256:903d5d90e879f34d040bb07028028b4dfee386d94041e121557549e5a41d26ad"
+  }
+}

@@ -1,0 +1,287 @@
+{
+  "analysis_role": "post-outcome failure diagnosis; hit identity never fed to selector",
+  "finding": "All four absent/raised controls first trigger on WallEast. A hit in a height band does not establish free space underneath an obstacle.",
+  "implementation": {
+    "path": "repository/scripts/research/audit_motion2scene_reactive_false_positives.py",
+    "sha256": "sha256:0ec7981d41e9efdf5ffbb22b5c9f313bdf3c69a00a17544191f62361e1ea0e4e"
+  },
+  "next_test": "Distinguish overhead occupancy from a wall with lower/upper free-space observations; enforce legal transition timing; freeze fresh tests before execution.",
+  "result": {
+    "path": "research-data/m2s-reactive-interface-typed-v3/result.json",
+    "sha256": "sha256:2bd66a855d8bc090acd2540aba39bb451a1ae4cfa921edd7e2ea359222f2095a"
+  },
+  "rows": [
+    {
+      "cell_id": "typed_8021_absent_reactive",
+      "condition": "absent",
+      "first_occupied_hit": [
+        2.64,
+        {
+          "distance": 2.9929094314575195,
+          "path": "/World/ground/terrain/Structure/WallEast",
+          "position": [
+            6.150199890136719,
+            -0.08871175348758698,
+            1.4101176261901855
+          ]
+        }
+      ],
+      "qualifying_hit_identity_counts": {
+        "/World/ground/terrain/Structure/WallEast": 353
+      },
+      "seed": 8021,
+      "sensor": {
+        "path": "research-data/m2s-reactive-interface-typed-v3/rollouts/typed_8021_absent_reactive/trajectories/reactive_interface.json",
+        "sha256": "sha256:e0ee9b227bfd32d421d50ec2f0878fa0c7569892362b2f5ee14abf2e790e3942"
+      },
+      "switch_contract_pass": false,
+      "switches": [
+        {
+          "clock_unchanged": true,
+          "from": 0,
+          "joint_reference_jump_rad": 0.6355883479118347,
+          "joint_state_unchanged": true,
+          "root_state_unchanged": true,
+          "time_s": 2.64,
+          "to": 1
+        },
+        {
+          "clock_unchanged": true,
+          "from": 1,
+          "joint_reference_jump_rad": 0.0,
+          "joint_state_unchanged": true,
+          "root_state_unchanged": true,
+          "time_s": 3.3,
+          "to": 0
+        }
+      ]
+    },
+    {
+      "cell_id": "typed_8021_present_reactive",
+      "condition": "present",
+      "first_occupied_hit": [
+        0.08,
+        {
+          "distance": 2.3732733726501465,
+          "path": "/World/ground/terrain/CounterfactualBeam",
+          "position": [
+            2.6434543132781982,
+            0.26863059401512146,
+            1.3644417524337769
+          ]
+        }
+      ],
+      "qualifying_hit_identity_counts": {
+        "/World/ground/terrain/CounterfactualBeam": 174,
+        "/World/ground/terrain/Structure/WallEast": 243
+      },
+      "seed": 8021,
+      "sensor": {
+        "path": "research-data/m2s-reactive-interface-typed-v3/rollouts/typed_8021_present_reactive/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd030dfd33128a65684bf6c9afcc41daeb8b552f15b95bfa6a3e8b9f0da8c152"
+      },
+      "switch_contract_pass": true,
+      "switches": [
+        {
+          "clock_unchanged": true,
+          "from": 0,
+          "joint_reference_jump_rad": 0.0,
+          "joint_state_unchanged": true,
+          "root_state_unchanged": true,
+          "time_s": 0.2,
+          "to": 1
+        },
+        {
+          "clock_unchanged": true,
+          "from": 1,
+          "joint_reference_jump_rad": 0.0,
+          "joint_state_unchanged": true,
+          "root_state_unchanged": true,
+          "time_s": 3.3,
+          "to": 0
+        }
+      ]
+    },
+    {
+      "cell_id": "typed_8021_raised_reactive",
+      "condition": "raised",
+      "first_occupied_hit": [
+        2.64,
+        {
+          "distance": 2.9929094314575195,
+          "path": "/World/ground/terrain/Structure/WallEast",
+          "position": [
+            6.150199890136719,
+            -0.08871175348758698,
+            1.4101176261901855
+          ]
+        }
+      ],
+      "qualifying_hit_identity_counts": {
+        "/World/ground/terrain/Structure/WallEast": 353
+      },
+      "seed": 8021,
+      "sensor": {
+        "path": "research-data/m2s-reactive-interface-typed-v3/rollouts/typed_8021_raised_reactive/trajectories/reactive_interface.json",
+        "sha256": "sha256:e0ee9b227bfd32d421d50ec2f0878fa0c7569892362b2f5ee14abf2e790e3942"
+      },
+      "switch_contract_pass": false,
+      "switches": [
+        {
+          "clock_unchanged": true,
+          "from": 0,
+          "joint_reference_jump_rad": 0.6355883479118347,
+          "joint_state_unchanged": true,
+          "root_state_unchanged": true,
+          "time_s": 2.64,
+          "to": 1
+        },
+        {
+          "clock_unchanged": true,
+          "from": 1,
+          "joint_reference_jump_rad": 0.0,
+          "joint_state_unchanged": true,
+          "root_state_unchanged": true,
+          "time_s": 3.3,
+          "to": 0
+        }
+      ]
+    },
+    {
+      "cell_id": "typed_8022_absent_reactive",
+      "condition": "absent",
+      "first_occupied_hit": [
+        2.58,
+        {
+          "distance": 2.9883642196655273,
+          "path": "/World/ground/terrain/Structure/WallEast",
+          "position": [
+            6.150199890136719,
+            -0.025076106190681458,
+            1.3922815322875977
+          ]
+        }
+      ],
+      "qualifying_hit_identity_counts": {
+        "/World/ground/terrain/Structure/WallEast": 334
+      },
+      "seed": 8022,
+      "sensor": {
+        "path": "research-data/m2s-reactive-interface-typed-v3/rollouts/typed_8022_absent_reactive/trajectories/reactive_interface.json",
+        "sha256": "sha256:5d12357ef42da2bbaa54a4d05eb3b6a8d121d8fd3ed1c0a6fdc9e59aa26afef2"
+      },
+      "switch_contract_pass": false,
+      "switches": [
+        {
+          "clock_unchanged": true,
+          "from": 0,
+          "joint_reference_jump_rad": 0.6355886459350586,
+          "joint_state_unchanged": true,
+          "root_state_unchanged": true,
+          "time_s": 2.58,
+          "to": 1
+        },
+        {
+          "clock_unchanged": true,
+          "from": 1,
+          "joint_reference_jump_rad": 0.0,
+          "joint_state_unchanged": true,
+          "root_state_unchanged": true,
+          "time_s": 3.3,
+          "to": 0
+        }
+      ]
+    },
+    {
+      "cell_id": "typed_8022_present_reactive",
+      "condition": "present",
+      "first_occupied_hit": [
+        0.1,
+        {
+          "distance": 2.3718881607055664,
+          "path": "/World/ground/terrain/CounterfactualBeam",
+          "position": [
+            2.675090789794922,
+            -0.1712808907032013,
+            1.3608548641204834
+          ]
+        }
+      ],
+      "qualifying_hit_identity_counts": {
+        "/World/ground/terrain/CounterfactualBeam": 186,
+        "/World/ground/terrain/Structure/WallEast": 273
+      },
+      "seed": 8022,
+      "sensor": {
+        "path": "research-data/m2s-reactive-interface-typed-v3/rollouts/typed_8022_present_reactive/trajectories/reactive_interface.json",
+        "sha256": "sha256:cd100617c15c57fe248a11ab65e11023f51bd883ce75fac3a04412221d59a6b3"
+      },
+      "switch_contract_pass": true,
+      "switches": [
+        {
+          "clock_unchanged": true,
+          "from": 0,
+          "joint_reference_jump_rad": 0.0,
+          "joint_state_unchanged": true,
+          "root_state_unchanged": true,
+          "time_s": 0.2,
+          "to": 1
+        },
+        {
+          "clock_unchanged": true,
+          "from": 1,
+          "joint_reference_jump_rad": 0.0,
+          "joint_state_unchanged": true,
+          "root_state_unchanged": true,
+          "time_s": 3.3,
+          "to": 0
+        }
+      ]
+    },
+    {
+      "cell_id": "typed_8022_raised_reactive",
+      "condition": "raised",
+      "first_occupied_hit": [
+        2.58,
+        {
+          "distance": 2.9883642196655273,
+          "path": "/World/ground/terrain/Structure/WallEast",
+          "position": [
+            6.150199890136719,
+            -0.025076106190681458,
+            1.3922815322875977
+          ]
+        }
+      ],
+      "qualifying_hit_identity_counts": {
+        "/World/ground/terrain/Structure/WallEast": 334
+      },
+      "seed": 8022,
+      "sensor": {
+        "path": "research-data/m2s-reactive-interface-typed-v3/rollouts/typed_8022_raised_reactive/trajectories/reactive_interface.json",
+        "sha256": "sha256:5d12357ef42da2bbaa54a4d05eb3b6a8d121d8fd3ed1c0a6fdc9e59aa26afef2"
+      },
+      "switch_contract_pass": false,
+      "switches": [
+        {
+          "clock_unchanged": true,
+          "from": 0,
+          "joint_reference_jump_rad": 0.6355886459350586,
+          "joint_state_unchanged": true,
+          "root_state_unchanged": true,
+          "time_s": 2.58,
+          "to": 1
+        },
+        {
+          "clock_unchanged": true,
+          "from": 1,
+          "joint_reference_jump_rad": 0.0,
+          "joint_state_unchanged": true,
+          "root_state_unchanged": true,
+          "time_s": 3.3,
+          "to": 0
+        }
+      ]
+    }
+  ]
+}

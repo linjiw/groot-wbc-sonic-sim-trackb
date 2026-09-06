@@ -1,0 +1,381 @@
+{
+  "complete_labels": 10,
+  "features": {
+    "path": "research-data/m2s-policy-readiness-v1/decision_features.npz",
+    "sha256": "sha256:bb0d652ee9602b57e8337e66bb930e03664ebeda83c7b97272864f5a0e932e50"
+  },
+  "learning_runs": 0,
+  "missing_comparators": [
+    {
+      "condition": "absent",
+      "seed": 8041
+    },
+    {
+      "condition": "raised",
+      "seed": 8041
+    },
+    {
+      "condition": "blocked",
+      "seed": 8041
+    },
+    {
+      "condition": "absent",
+      "seed": 8042
+    },
+    {
+      "condition": "raised",
+      "seed": 8042
+    },
+    {
+      "condition": "blocked",
+      "seed": 8042
+    }
+  ],
+  "registration": {
+    "path": "research-data/m2s-policy-readiness-v1/registration.json",
+    "sha256": "sha256:d1c3317c391c5c3c47694f7e001d2a1deeaf66e0b6b037cdbe69456bf8fbd25e"
+  },
+  "requested_scene_seed_groups": 16,
+  "rows": [
+    {
+      "condition": "nominal",
+      "crouch_cell": "variation_8041_nominal_oracle",
+      "feature_cell": "variation_8041_nominal_blind",
+      "feature_row": 0,
+      "label": {
+        "feasible": [
+          false,
+          true
+        ],
+        "minimum_cost_skill": 1,
+        "status": "measured"
+      },
+      "neutral_cell": "variation_8041_nominal_blind",
+      "physics_seed": 8041,
+      "sensor": {
+        "path": "research-data/m2s-overhang-variation-v1/rollouts/variation_8041_nominal_blind/trajectories/reactive_interface.json",
+        "sha256": "sha256:abe66642dac5ea37a0e1b91fbc17c4cf0092e37d9bcfbd98a3d8815786ef4ebc"
+      },
+      "source_ancestor": 41002,
+      "split": "interface_development_only"
+    },
+    {
+      "condition": "height_minus10mm",
+      "crouch_cell": "variation_8041_height_minus10mm_oracle",
+      "feature_cell": "variation_8041_height_minus10mm_blind",
+      "feature_row": 1,
+      "label": {
+        "feasible": [
+          false,
+          true
+        ],
+        "minimum_cost_skill": 1,
+        "status": "measured"
+      },
+      "neutral_cell": "variation_8041_height_minus10mm_blind",
+      "physics_seed": 8041,
+      "sensor": {
+        "path": "research-data/m2s-overhang-variation-v1/rollouts/variation_8041_height_minus10mm_blind/trajectories/reactive_interface.json",
+        "sha256": "sha256:6f8bf07c053c5b3b6edf6547be55d02902dbf59d8753d3dee6962835be204e67"
+      },
+      "source_ancestor": 41002,
+      "split": "interface_development_only"
+    },
+    {
+      "condition": "height_plus10mm",
+      "crouch_cell": "variation_8041_height_plus10mm_oracle",
+      "feature_cell": "variation_8041_height_plus10mm_blind",
+      "feature_row": 2,
+      "label": {
+        "feasible": [
+          false,
+          true
+        ],
+        "minimum_cost_skill": 1,
+        "status": "measured"
+      },
+      "neutral_cell": "variation_8041_height_plus10mm_blind",
+      "physics_seed": 8041,
+      "sensor": {
+        "path": "research-data/m2s-overhang-variation-v1/rollouts/variation_8041_height_plus10mm_blind/trajectories/reactive_interface.json",
+        "sha256": "sha256:0914d0655a851579ed0e4dffdd98cca748ea3bfec93d04c7794c67807572bbf8"
+      },
+      "source_ancestor": 41002,
+      "split": "interface_development_only"
+    },
+    {
+      "condition": "station_minus15cm",
+      "crouch_cell": "variation_8041_station_minus15cm_oracle",
+      "feature_cell": "variation_8041_station_minus15cm_blind",
+      "feature_row": 3,
+      "label": {
+        "feasible": [
+          false,
+          true
+        ],
+        "minimum_cost_skill": 1,
+        "status": "measured"
+      },
+      "neutral_cell": "variation_8041_station_minus15cm_blind",
+      "physics_seed": 8041,
+      "sensor": {
+        "path": "research-data/m2s-overhang-variation-v1/rollouts/variation_8041_station_minus15cm_blind/trajectories/reactive_interface.json",
+        "sha256": "sha256:7d433a2009b90a0e753d47a931c2b84dc187a67b98130ef6f8d1a815dd16b07b"
+      },
+      "source_ancestor": 41002,
+      "split": "interface_development_only"
+    },
+    {
+      "condition": "station_plus15cm",
+      "crouch_cell": "variation_8041_station_plus15cm_oracle",
+      "feature_cell": "variation_8041_station_plus15cm_blind",
+      "feature_row": 4,
+      "label": {
+        "feasible": [
+          false,
+          true
+        ],
+        "minimum_cost_skill": 1,
+        "status": "measured"
+      },
+      "neutral_cell": "variation_8041_station_plus15cm_blind",
+      "physics_seed": 8041,
+      "sensor": {
+        "path": "research-data/m2s-overhang-variation-v1/rollouts/variation_8041_station_plus15cm_blind/trajectories/reactive_interface.json",
+        "sha256": "sha256:2040a28c5ce29b38b763ff17213a493acbfa54326e0238cf425124982dfe4d1d"
+      },
+      "source_ancestor": 41002,
+      "split": "interface_development_only"
+    },
+    {
+      "condition": "absent",
+      "crouch_cell": null,
+      "feature_cell": "variation_8041_absent_reactive",
+      "feature_row": 5,
+      "label": {
+        "feasible": null,
+        "minimum_cost_skill": null,
+        "status": "missing_comparator"
+      },
+      "neutral_cell": "variation_8041_absent_reactive",
+      "physics_seed": 8041,
+      "sensor": {
+        "path": "research-data/m2s-overhang-variation-v1/rollouts/variation_8041_absent_reactive/trajectories/reactive_interface.json",
+        "sha256": "sha256:bf98104820883808df6ab5b853e93aa11691640e0d11dfe03d03c1d70f605632"
+      },
+      "source_ancestor": 41002,
+      "split": "interface_development_only"
+    },
+    {
+      "condition": "raised",
+      "crouch_cell": null,
+      "feature_cell": "variation_8041_raised_reactive",
+      "feature_row": 6,
+      "label": {
+        "feasible": null,
+        "minimum_cost_skill": null,
+        "status": "missing_comparator"
+      },
+      "neutral_cell": "variation_8041_raised_reactive",
+      "physics_seed": 8041,
+      "sensor": {
+        "path": "research-data/m2s-overhang-variation-v1/rollouts/variation_8041_raised_reactive/trajectories/reactive_interface.json",
+        "sha256": "sha256:bf98104820883808df6ab5b853e93aa11691640e0d11dfe03d03c1d70f605632"
+      },
+      "source_ancestor": 41002,
+      "split": "interface_development_only"
+    },
+    {
+      "condition": "blocked",
+      "crouch_cell": null,
+      "feature_cell": "variation_8041_blocked_reactive",
+      "feature_row": 7,
+      "label": {
+        "feasible": null,
+        "minimum_cost_skill": null,
+        "status": "missing_comparator"
+      },
+      "neutral_cell": "variation_8041_blocked_reactive",
+      "physics_seed": 8041,
+      "sensor": {
+        "path": "research-data/m2s-overhang-variation-v1/rollouts/variation_8041_blocked_reactive/trajectories/reactive_interface.json",
+        "sha256": "sha256:947a54ce28b7737767a2be02858b07332433f2d15ce118bf77e861e1e79c50bf"
+      },
+      "source_ancestor": 41002,
+      "split": "interface_development_only"
+    },
+    {
+      "condition": "nominal",
+      "crouch_cell": "variation_8042_nominal_oracle",
+      "feature_cell": "variation_8042_nominal_blind",
+      "feature_row": 8,
+      "label": {
+        "feasible": [
+          false,
+          true
+        ],
+        "minimum_cost_skill": 1,
+        "status": "measured"
+      },
+      "neutral_cell": "variation_8042_nominal_blind",
+      "physics_seed": 8042,
+      "sensor": {
+        "path": "research-data/m2s-overhang-variation-v1/rollouts/variation_8042_nominal_blind/trajectories/reactive_interface.json",
+        "sha256": "sha256:254fe0ced72d6603cb526a07ba470c6bdf33d2115a570fea862eedb4d1bb8899"
+      },
+      "source_ancestor": 41002,
+      "split": "interface_development_only"
+    },
+    {
+      "condition": "height_minus10mm",
+      "crouch_cell": "variation_8042_height_minus10mm_oracle",
+      "feature_cell": "variation_8042_height_minus10mm_blind",
+      "feature_row": 9,
+      "label": {
+        "feasible": [
+          false,
+          true
+        ],
+        "minimum_cost_skill": 1,
+        "status": "measured"
+      },
+      "neutral_cell": "variation_8042_height_minus10mm_blind",
+      "physics_seed": 8042,
+      "sensor": {
+        "path": "research-data/m2s-overhang-variation-v1/rollouts/variation_8042_height_minus10mm_blind/trajectories/reactive_interface.json",
+        "sha256": "sha256:2d67a888f4a73804d2061f6ce07df35c0780bf65830093e0aa72294e27ddbef5"
+      },
+      "source_ancestor": 41002,
+      "split": "interface_development_only"
+    },
+    {
+      "condition": "height_plus10mm",
+      "crouch_cell": "variation_8042_height_plus10mm_oracle",
+      "feature_cell": "variation_8042_height_plus10mm_blind",
+      "feature_row": 10,
+      "label": {
+        "feasible": [
+          false,
+          true
+        ],
+        "minimum_cost_skill": 1,
+        "status": "measured"
+      },
+      "neutral_cell": "variation_8042_height_plus10mm_blind",
+      "physics_seed": 8042,
+      "sensor": {
+        "path": "research-data/m2s-overhang-variation-v1/rollouts/variation_8042_height_plus10mm_blind/trajectories/reactive_interface.json",
+        "sha256": "sha256:dd9b7ea822d6d8b3e0dd466fe1de59a23000e3eed7d78f07eb7fc8597035a2d9"
+      },
+      "source_ancestor": 41002,
+      "split": "interface_development_only"
+    },
+    {
+      "condition": "station_minus15cm",
+      "crouch_cell": "variation_8042_station_minus15cm_oracle",
+      "feature_cell": "variation_8042_station_minus15cm_blind",
+      "feature_row": 11,
+      "label": {
+        "feasible": [
+          false,
+          false
+        ],
+        "minimum_cost_skill": null,
+        "status": "neither_tested_skill_passes"
+      },
+      "neutral_cell": "variation_8042_station_minus15cm_blind",
+      "physics_seed": 8042,
+      "sensor": {
+        "path": "research-data/m2s-overhang-variation-v1/rollouts/variation_8042_station_minus15cm_blind/trajectories/reactive_interface.json",
+        "sha256": "sha256:abc8740b5147819b70605d9df558932ff9a28bac582e8712b7d3a217cfa3233b"
+      },
+      "source_ancestor": 41002,
+      "split": "interface_development_only"
+    },
+    {
+      "condition": "station_plus15cm",
+      "crouch_cell": "variation_8042_station_plus15cm_oracle",
+      "feature_cell": "variation_8042_station_plus15cm_blind",
+      "feature_row": 12,
+      "label": {
+        "feasible": [
+          false,
+          true
+        ],
+        "minimum_cost_skill": 1,
+        "status": "measured"
+      },
+      "neutral_cell": "variation_8042_station_plus15cm_blind",
+      "physics_seed": 8042,
+      "sensor": {
+        "path": "research-data/m2s-overhang-variation-v1/rollouts/variation_8042_station_plus15cm_blind/trajectories/reactive_interface.json",
+        "sha256": "sha256:702daaa705f21a1fc550fab88c94ff25471ed85ee55fbd6c71724ca2ed8279b9"
+      },
+      "source_ancestor": 41002,
+      "split": "interface_development_only"
+    },
+    {
+      "condition": "absent",
+      "crouch_cell": null,
+      "feature_cell": "variation_8042_absent_reactive",
+      "feature_row": 13,
+      "label": {
+        "feasible": null,
+        "minimum_cost_skill": null,
+        "status": "missing_comparator"
+      },
+      "neutral_cell": "variation_8042_absent_reactive",
+      "physics_seed": 8042,
+      "sensor": {
+        "path": "research-data/m2s-overhang-variation-v1/rollouts/variation_8042_absent_reactive/trajectories/reactive_interface.json",
+        "sha256": "sha256:d0369327d63d919be7314becbf3cc173d8a3fbadc18f0ae10a9813ac9e373a0e"
+      },
+      "source_ancestor": 41002,
+      "split": "interface_development_only"
+    },
+    {
+      "condition": "raised",
+      "crouch_cell": null,
+      "feature_cell": "variation_8042_raised_reactive",
+      "feature_row": 14,
+      "label": {
+        "feasible": null,
+        "minimum_cost_skill": null,
+        "status": "missing_comparator"
+      },
+      "neutral_cell": "variation_8042_raised_reactive",
+      "physics_seed": 8042,
+      "sensor": {
+        "path": "research-data/m2s-overhang-variation-v1/rollouts/variation_8042_raised_reactive/trajectories/reactive_interface.json",
+        "sha256": "sha256:d0369327d63d919be7314becbf3cc173d8a3fbadc18f0ae10a9813ac9e373a0e"
+      },
+      "source_ancestor": 41002,
+      "split": "interface_development_only"
+    },
+    {
+      "condition": "blocked",
+      "crouch_cell": null,
+      "feature_cell": "variation_8042_blocked_reactive",
+      "feature_row": 15,
+      "label": {
+        "feasible": null,
+        "minimum_cost_skill": null,
+        "status": "missing_comparator"
+      },
+      "neutral_cell": "variation_8042_blocked_reactive",
+      "physics_seed": 8042,
+      "sensor": {
+        "path": "research-data/m2s-overhang-variation-v1/rollouts/variation_8042_blocked_reactive/trajectories/reactive_interface.json",
+        "sha256": "sha256:cb4fce74a74f2e73da5f270119a6fa0228e79c9a9e0414f9592efd7d51c0c127"
+      },
+      "source_ancestor": 41002,
+      "split": "interface_development_only"
+    }
+  ],
+  "scope": "144 observed range/height/mask values only; metadata is separate. One development ancestor; no fresh-source or learning benefit claim.",
+  "source_result": {
+    "path": "research-data/m2s-overhang-variation-v1/result.json",
+    "sha256": "sha256:2830d62be3ffbb7befd92dc8fd06eb2b6e2db1a8d3fac25795d4d03d6178b8bd"
+  },
+  "training_eligible": false
+}

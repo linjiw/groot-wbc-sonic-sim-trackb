@@ -1,0 +1,595 @@
+{
+  "analysis_dependencies": {
+    "hallucination/keypoints.py": {
+      "path": "gear_sonic/dataset_generation/hallucination/keypoints.py",
+      "sha256": "sha256:f16edb0c63835934ba8efb3c599993ac2523f5eaf2f3dde2a7a44b1269a2238f"
+    },
+    "hallucination/motion_envelope.py": {
+      "path": "gear_sonic/dataset_generation/hallucination/motion_envelope.py",
+      "sha256": "sha256:2536474e15c436ff7db5786ccd96159ef6edb27dfeff263f95f231afab8a5e67"
+    },
+    "io_helpers": {
+      "path": "scripts/research/motion2scene_timing_diagnostic.py",
+      "sha256": "sha256:b0843f51d6ed8e1217fbd2dc589362ed686a6c9ea6c192e38182ac454b4a3f7a"
+    },
+    "swept_volume.py": {
+      "path": "gear_sonic/dataset_generation/swept_volume.py",
+      "sha256": "sha256:7b283d5fe991567629e559bc2121b7649eb2ec27e84b8b3c6a5741e8f1246a68"
+    },
+    "trajectory_acceptance.py": {
+      "path": "gear_sonic/dataset_generation/trajectory_acceptance.py",
+      "sha256": "sha256:5a808c625581add56eb3b618434285dfc9b4c2f7160ba3c50c3fcfffac48809f"
+    },
+    "trajectory_segments.py": {
+      "path": "gear_sonic/dataset_generation/trajectory_segments.py",
+      "sha256": "sha256:7adf547065ab3e30eef648d5a8acf6209841cac7a07bb1ee86f58fea37e2e50d"
+    }
+  },
+  "analysis_role": "selected_carrier_development_repeatability",
+  "authorization": {
+    "authority": "docs/hallucination/GOVERNANCE.md",
+    "claim5_isolation_verified": true,
+    "note": "User requested continued performance research toward learned scene generation; separate diagnostic lineage.",
+    "status": "self_approved"
+  },
+  "candidates": {
+    "path": "cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/candidates.json",
+    "sha256": "sha256:7a0cd98d4f2a1711dc453f2ff414d96fae643b8b17e46bb5944f886632c45b1a"
+  },
+  "cells": [
+    {
+      "base_carrier_id": "000_a_person_walks_at_a_steady_pace_in_a_straight_li_s1",
+      "body_mode": "controlled_crouch",
+      "cell_id": "m2s_ladder_41002_7901__d040",
+      "condition": "original",
+      "expectation": {
+        "status": "registered_measurement_without_cellwise_directional_prediction"
+      },
+      "generation_seed": 41002,
+      "hydra_overrides": [
+        "++seed=7901"
+      ],
+      "label": "d040",
+      "ladder_group_id": "duck_seed_41002",
+      "ladder_level": 1,
+      "motion": {
+        "conversion_provenance": "cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41002/d040.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:3281d0e1f88b2ab7c74e27dd313dce275b9670e1bff90aeb416c145e28a5ca6c",
+        "path": "cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41002/d040.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:e2a0408098723ddc056a31b086d8898d67d13fe6b324db8a4769b670ab520204"
+      },
+      "output": "m2s-ladder-extension-resource-v2/rollouts/m2s_ladder_41002_7901__d040",
+      "reference": {
+        "path": "cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41002/d040.csv",
+        "sha256": "sha256:917ed48eb3da00b31a99a7ca5726c22e06280125e5b5061e7e33229ab2589587",
+        "whole_body_top_m": [
+          1.308713667976337,
+          1.308713667976337,
+          1.308713667976337,
+          1.3062044334823342,
+          1.301088437084852,
+          1.2870631190223594,
+          1.2805039224619335,
+          1.2819489986612758,
+          1.2857025810675706,
+          1.2904281607798158,
+          1.2966985797081592,
+          1.3030066011389574,
+          1.3076042398312449,
+          1.3094004843068139,
+          1.3094004843068139,
+          1.3094004843068139,
+          1.3094004843068139,
+          1.307909969089033,
+          1.296433918602907,
+          1.2886493199882976,
+          1.2797697230327594,
+          1.27647160591521,
+          1.2805883382024201,
+          1.285268496452071,
+          1.2909619044230254,
+          1.2969074014223725,
+          1.3015620343237713,
+          1.3031227958173788,
+          1.3031227958173788,
+          1.3031227958173788,
+          1.3031227958173788,
+          1.3006360297190716,
+          1.294848101345073,
+          1.2866777358008776,
+          1.2707711018106354,
+          1.25926687065053,
+          1.2474906554551504,
+          1.2354469899419382,
+          1.2235070240590178,
+          1.2141473563463572,
+          1.2274565488072662,
+          1.242524933166302,
+          1.2618389430051073,
+          1.2626574569451257,
+          1.2626574569451257,
+          1.2626574569451257,
+          1.2626574569451257,
+          1.259827821853921,
+          1.2546525884187074,
+          1.2384106663586134,
+          1.2310724697367217,
+          1.2205412110660594,
+          1.2128557317814512,
+          1.2097463995077617,
+          1.2213787073397002,
+          1.2348637023228737,
+          1.24752157695001,
+          1.2573852104242433,
+          1.2573852104242433,
+          1.2573852104242433,
+          1.2573852104242433,
+          1.2573852104242433,
+          1.2534308674215817,
+          1.24956688371269,
+          1.2350252592994448,
+          1.2260961573319493,
+          1.2213210780856523,
+          1.214259213211848,
+          1.2192959185459764,
+          1.230173457772831,
+          1.254507300341516,
+          1.267055817213877,
+          1.2689528666916283,
+          1.2689528666916283,
+          1.2689528666916283,
+          1.2689528666916283,
+          1.2689528666916283,
+          1.2670071030231513,
+          1.2590149088755564,
+          1.2633126697056618,
+          1.2701518681206128,
+          1.2772304262921128,
+          1.2835444432966585,
+          1.289502976401028,
+          1.2945940266360225,
+          1.3027928661013888,
+          1.3027928661013888,
+          1.3027928661013888,
+          1.3027928661013888,
+          1.3027928661013888,
+          1.3023184073572325,
+          1.3004622089582754,
+          1.2938194327136203,
+          1.2830494671112191,
+          1.2871002903135658,
+          1.2931582043983727,
+          1.2956627707548019,
+          1.3025854688283403,
+          1.3074441844359312,
+          1.3074441844359312,
+          1.3074441844359312
+        ]
+      },
+      "runtime_seed": 7901,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual/screen_empty.usda",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:195b7837cfe79e164f3b642767851fffefa338f42d0f6a6f6dd7020cf7ee476f"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "task_prompt": "A humanoid walks straight at a steady pace",
+      "turn": "straight",
+      "verdict_policy": "reference_trackability"
+    },
+    {
+      "base_carrier_id": "000_a_person_walks_at_a_steady_pace_in_a_straight_li_s1",
+      "body_mode": "controlled_crouch",
+      "cell_id": "m2s_ladder_41002_7902__d040",
+      "condition": "original",
+      "expectation": {
+        "status": "registered_measurement_without_cellwise_directional_prediction"
+      },
+      "generation_seed": 41002,
+      "hydra_overrides": [
+        "++seed=7902"
+      ],
+      "label": "d040",
+      "ladder_group_id": "duck_seed_41002",
+      "ladder_level": 1,
+      "motion": {
+        "conversion_provenance": "cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41002/d040.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:3281d0e1f88b2ab7c74e27dd313dce275b9670e1bff90aeb416c145e28a5ca6c",
+        "path": "cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41002/d040.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:e2a0408098723ddc056a31b086d8898d67d13fe6b324db8a4769b670ab520204"
+      },
+      "output": "m2s-ladder-extension-resource-v2/rollouts/m2s_ladder_41002_7902__d040",
+      "reference": {
+        "path": "cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41002/d040.csv",
+        "sha256": "sha256:917ed48eb3da00b31a99a7ca5726c22e06280125e5b5061e7e33229ab2589587",
+        "whole_body_top_m": [
+          1.308713667976337,
+          1.308713667976337,
+          1.308713667976337,
+          1.3062044334823342,
+          1.301088437084852,
+          1.2870631190223594,
+          1.2805039224619335,
+          1.2819489986612758,
+          1.2857025810675706,
+          1.2904281607798158,
+          1.2966985797081592,
+          1.3030066011389574,
+          1.3076042398312449,
+          1.3094004843068139,
+          1.3094004843068139,
+          1.3094004843068139,
+          1.3094004843068139,
+          1.307909969089033,
+          1.296433918602907,
+          1.2886493199882976,
+          1.2797697230327594,
+          1.27647160591521,
+          1.2805883382024201,
+          1.285268496452071,
+          1.2909619044230254,
+          1.2969074014223725,
+          1.3015620343237713,
+          1.3031227958173788,
+          1.3031227958173788,
+          1.3031227958173788,
+          1.3031227958173788,
+          1.3006360297190716,
+          1.294848101345073,
+          1.2866777358008776,
+          1.2707711018106354,
+          1.25926687065053,
+          1.2474906554551504,
+          1.2354469899419382,
+          1.2235070240590178,
+          1.2141473563463572,
+          1.2274565488072662,
+          1.242524933166302,
+          1.2618389430051073,
+          1.2626574569451257,
+          1.2626574569451257,
+          1.2626574569451257,
+          1.2626574569451257,
+          1.259827821853921,
+          1.2546525884187074,
+          1.2384106663586134,
+          1.2310724697367217,
+          1.2205412110660594,
+          1.2128557317814512,
+          1.2097463995077617,
+          1.2213787073397002,
+          1.2348637023228737,
+          1.24752157695001,
+          1.2573852104242433,
+          1.2573852104242433,
+          1.2573852104242433,
+          1.2573852104242433,
+          1.2573852104242433,
+          1.2534308674215817,
+          1.24956688371269,
+          1.2350252592994448,
+          1.2260961573319493,
+          1.2213210780856523,
+          1.214259213211848,
+          1.2192959185459764,
+          1.230173457772831,
+          1.254507300341516,
+          1.267055817213877,
+          1.2689528666916283,
+          1.2689528666916283,
+          1.2689528666916283,
+          1.2689528666916283,
+          1.2689528666916283,
+          1.2670071030231513,
+          1.2590149088755564,
+          1.2633126697056618,
+          1.2701518681206128,
+          1.2772304262921128,
+          1.2835444432966585,
+          1.289502976401028,
+          1.2945940266360225,
+          1.3027928661013888,
+          1.3027928661013888,
+          1.3027928661013888,
+          1.3027928661013888,
+          1.3027928661013888,
+          1.3023184073572325,
+          1.3004622089582754,
+          1.2938194327136203,
+          1.2830494671112191,
+          1.2871002903135658,
+          1.2931582043983727,
+          1.2956627707548019,
+          1.3025854688283403,
+          1.3074441844359312,
+          1.3074441844359312,
+          1.3074441844359312
+        ]
+      },
+      "runtime_seed": 7902,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual/screen_empty.usda",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:195b7837cfe79e164f3b642767851fffefa338f42d0f6a6f6dd7020cf7ee476f"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "task_prompt": "A humanoid walks straight at a steady pace",
+      "turn": "straight",
+      "verdict_policy": "reference_trackability"
+    },
+    {
+      "base_carrier_id": "000_a_person_walks_at_a_steady_pace_in_a_straight_li_s1",
+      "body_mode": "controlled_crouch",
+      "cell_id": "m2s_ladder_41002_7903__d040",
+      "condition": "original",
+      "expectation": {
+        "status": "registered_measurement_without_cellwise_directional_prediction"
+      },
+      "generation_seed": 41002,
+      "hydra_overrides": [
+        "++seed=7903"
+      ],
+      "label": "d040",
+      "ladder_group_id": "duck_seed_41002",
+      "ladder_level": 1,
+      "motion": {
+        "conversion_provenance": "cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41002/d040.pkl.manifest.json",
+        "conversion_provenance_sha256": "sha256:3281d0e1f88b2ab7c74e27dd313dce275b9670e1bff90aeb416c145e28a5ca6c",
+        "path": "cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41002/d040.pkl",
+        "scene_start_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "sha256": "sha256:e2a0408098723ddc056a31b086d8898d67d13fe6b324db8a4769b670ab520204"
+      },
+      "output": "m2s-ladder-extension-resource-v2/rollouts/m2s_ladder_41002_7903__d040",
+      "reference": {
+        "path": "cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41002/d040.csv",
+        "sha256": "sha256:917ed48eb3da00b31a99a7ca5726c22e06280125e5b5061e7e33229ab2589587",
+        "whole_body_top_m": [
+          1.308713667976337,
+          1.308713667976337,
+          1.308713667976337,
+          1.3062044334823342,
+          1.301088437084852,
+          1.2870631190223594,
+          1.2805039224619335,
+          1.2819489986612758,
+          1.2857025810675706,
+          1.2904281607798158,
+          1.2966985797081592,
+          1.3030066011389574,
+          1.3076042398312449,
+          1.3094004843068139,
+          1.3094004843068139,
+          1.3094004843068139,
+          1.3094004843068139,
+          1.307909969089033,
+          1.296433918602907,
+          1.2886493199882976,
+          1.2797697230327594,
+          1.27647160591521,
+          1.2805883382024201,
+          1.285268496452071,
+          1.2909619044230254,
+          1.2969074014223725,
+          1.3015620343237713,
+          1.3031227958173788,
+          1.3031227958173788,
+          1.3031227958173788,
+          1.3031227958173788,
+          1.3006360297190716,
+          1.294848101345073,
+          1.2866777358008776,
+          1.2707711018106354,
+          1.25926687065053,
+          1.2474906554551504,
+          1.2354469899419382,
+          1.2235070240590178,
+          1.2141473563463572,
+          1.2274565488072662,
+          1.242524933166302,
+          1.2618389430051073,
+          1.2626574569451257,
+          1.2626574569451257,
+          1.2626574569451257,
+          1.2626574569451257,
+          1.259827821853921,
+          1.2546525884187074,
+          1.2384106663586134,
+          1.2310724697367217,
+          1.2205412110660594,
+          1.2128557317814512,
+          1.2097463995077617,
+          1.2213787073397002,
+          1.2348637023228737,
+          1.24752157695001,
+          1.2573852104242433,
+          1.2573852104242433,
+          1.2573852104242433,
+          1.2573852104242433,
+          1.2573852104242433,
+          1.2534308674215817,
+          1.24956688371269,
+          1.2350252592994448,
+          1.2260961573319493,
+          1.2213210780856523,
+          1.214259213211848,
+          1.2192959185459764,
+          1.230173457772831,
+          1.254507300341516,
+          1.267055817213877,
+          1.2689528666916283,
+          1.2689528666916283,
+          1.2689528666916283,
+          1.2689528666916283,
+          1.2689528666916283,
+          1.2670071030231513,
+          1.2590149088755564,
+          1.2633126697056618,
+          1.2701518681206128,
+          1.2772304262921128,
+          1.2835444432966585,
+          1.289502976401028,
+          1.2945940266360225,
+          1.3027928661013888,
+          1.3027928661013888,
+          1.3027928661013888,
+          1.3027928661013888,
+          1.3027928661013888,
+          1.3023184073572325,
+          1.3004622089582754,
+          1.2938194327136203,
+          1.2830494671112191,
+          1.2871002903135658,
+          1.2931582043983727,
+          1.2956627707548019,
+          1.3025854688283403,
+          1.3074441844359312,
+          1.3074441844359312,
+          1.3074441844359312
+        ]
+      },
+      "runtime_seed": 7903,
+      "scene": {
+        "path": "gear_sonic/data/assets/scenes/g1_counterfactual/screen_empty.usda",
+        "scene_id": "screen_empty",
+        "sha256": "sha256:195b7837cfe79e164f3b642767851fffefa338f42d0f6a6f6dd7020cf7ee476f"
+      },
+      "scene_start_xyz_expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "task_prompt": "A humanoid walks straight at a steady pace",
+      "turn": "straight",
+      "verdict_policy": "reference_trackability"
+    }
+  ],
+  "diagnostic_implementation": {
+    "path": "scripts/research/motion2scene_ladder_extension.py",
+    "sha256": "sha256:dd48d80889d269a15fcd761c5da79926224705f201e879367246a116edecd793"
+  },
+  "eligibility": {
+    "reference_gate": {
+      "path": "m2s-repeatability-v1/result.json",
+      "sha256": "sha256:9b8ec734778650032396f48d0864dc80e08b971bd35d30f3d0368a80cbe143f1"
+    },
+    "rule": "strict development pair retained; intermediate reference Q0/Q1/S3 passes"
+  },
+  "execution_policy": {
+    "cost_ceiling": {
+      "daily_envelope_gpu_hours": 8.0,
+      "gpu_hours_contended": 0.3125,
+      "rollouts": 3,
+      "seconds_per_rollout_contended": 375
+    },
+    "not_authorized": false,
+    "runtime": {
+      "free_gpu_mib_required": 7500,
+      "hang_timeout_seconds": 375,
+      "render_ego": false,
+      "serial_execution": true,
+      "success_requires": [
+        "SONIC_EVAL_SUCCESS marker",
+        "success_manifest.json",
+        "exactly one trajectory pickle",
+        "recorded fps=50"
+      ]
+    },
+    "timing_override": "Resource-only amendment before any extension launch; 7500 MiB prior trajectory-only contract; science unchanged."
+  },
+  "experiment": "M2S-E1-original-clock-ladder-extension-resource-v2",
+  "implementation": {
+    "checkpoint": {
+      "path": "sonic_release/last.pt",
+      "sha256": "sha256:e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909"
+    },
+    "manifest_driver": {
+      "path": "scripts/research/hallucination/run_approved_manifest.py",
+      "sha256": "sha256:ab67817b3ee00730a360c9c5e23dee8c59fafef9163e1c562be5b5c3e5e74383"
+    },
+    "python": ".venv_isaaclab/bin/python",
+    "rollout_driver": {
+      "path": "scripts/research/run_kimodo_sonic_rollout.sh",
+      "sha256": "sha256:0a48eed8d00336ec17a29be761ab6ebfbe0c9f444da71e1cd72fb9159c6d1eb2"
+    },
+    "source_commit": "cfda4299e9ac8240975e921525014f2c3b23769e",
+    "source_repository": "groot-wbc-sonic-sim-trackb"
+  },
+  "motion_analysis_implementation": {
+    "paired_semantics": {
+      "path": "src/motion2scene/motion/paired_semantics.py",
+      "sha256": "sha256:f8933e87d66a8cb7e5165eba729594963857ed35d1e29f50bf84d1d87ce1ad31"
+    },
+    "route_retention": {
+      "path": "src/motion2scene/motion/route_retention.py",
+      "sha256": "sha256:115519ec758170012239053fb98a775ee792545e458993d8b066bf46510ed3cc"
+    },
+    "route_semantics": {
+      "path": "src/motion2scene/motion/route_semantics.py",
+      "sha256": "sha256:236f0b4dd5ea89dc198ec91ac8777a3704180e5257834be73c97cff53e5915aa"
+    }
+  },
+  "promotion": {
+    "q4_admitted_ladders": 0,
+    "training_eligible": false
+  },
+  "purpose": "Intermediate d040 level against frozen seed-matched comparators",
+  "registered_predictions": {
+    "path": "docs/motion2scene/LADDER_EXTENSION_RESOURCE_V2.md",
+    "sha256": "sha256:3587fc4f5bf45f5c6469dceb5b5e8c4528def572e53fe701870f86082d8f3691"
+  },
+  "resource_amendment": {
+    "original_manifest": {
+      "path": "m2s-ladder-extension-v1/manifest.json",
+      "sha256": "sha256:80e3b12ac6f6718820fd462836340112ddcc6053fdfbb473362b06f88fe35027"
+    },
+    "original_predictions": {
+      "path": "docs/motion2scene/LADDER_EXTENSION_V1.md",
+      "sha256": "sha256:e256c7cce5b45f182ee9ffe1b9cd12356ef3ac2fc30e00857a6bc73d1dcd0e52"
+    },
+    "original_prelaunch_run_record": {
+      "path": "m2s-ladder-extension-v1/run_record.json",
+      "sha256": "sha256:c874df20bd10d2c1d571048d4bd300dcd6e049e38a51371c3917ec60833126bc"
+    },
+    "prior_resource_contract": {
+      "path": "experiments/registrations/E0_Q4_PROTOCOL_V1.json",
+      "sha256": "sha256:2711f8841c318d0b5c8af29dcc5afaf1714f3534e38a99081e1d5cdeae77b6dd"
+    }
+  },
+  "schema_version": "motion2scene_physics_manifest_v1",
+  "source_manifest": {
+    "path": "m2s-repeatability-v1/manifest.json",
+    "sha256": "sha256:d54869e3aaec013a478b69b6afc8b76046c85a70ac4ae7e2c09c8aee6ca0f0d2"
+  },
+  "source_result": {
+    "path": "m2s-repeatability-v1/result.json",
+    "sha256": "sha256:9b8ec734778650032396f48d0864dc80e08b971bd35d30f3d0368a80cbe143f1"
+  },
+  "stop_conditions": [
+    "refuse hash mismatches; yield below 7500 MiB free GPU memory",
+    "serial execution; 375 second per-cell timeout; stop on infrastructure failure",
+    "retain rejections and dependency skips; no scientific retries",
+    "no historical relabeling, motion-bank promotion, or learning eligibility"
+  ]
+}

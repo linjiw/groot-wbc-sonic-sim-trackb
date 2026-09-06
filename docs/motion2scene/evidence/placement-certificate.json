@@ -1,0 +1,70 @@
+{
+  "analysis_complete": true,
+  "continuous_time_certified": false,
+  "execution_eligible": false,
+  "imported_robot_geometry_certified": false,
+  "manifest": {
+    "path": "m2s-placement-certificate-v1/manifest.json",
+    "sha256": "sha256:a6af55c13bc62445c18abaa5c449e7235217fbdd6b97356591b8db777f01fa0b"
+  },
+  "numerical_error_bound_formally_validated": false,
+  "rows": [
+    {
+      "arm": "margin_no_kl",
+      "artifact": {
+        "path": "m2s-placement-certificate-v1/runs/margin_no_kl.json",
+        "sha256": "sha256:3e4928cd80dd2409e97d9bf60bc792844a496b2935693884b0a54de2c8604702"
+      },
+      "certificate_summary": {
+        "certified_cells": 710,
+        "certified_slack_lower_bound_m": 1.196088134041047e-06,
+        "queries": 1419,
+        "status": "conditional_pass",
+        "unresolved_cells": 0
+      },
+      "elapsed_s": 3.162431363001815,
+      "proposal_index": 15,
+      "queries": 1419,
+      "raw": {
+        "path": "m2s-margin-learning-v1/evaluation/margin_no_kl_8121.npz",
+        "sha256": "sha256:7c22db979a5fb0bb9eaacfe829b2e7598dc0557d3cc55fd2c97468593fa1f6e1"
+      },
+      "sampled_margin_slack_m": 0.0031490733107639116,
+      "scene": [
+        0.602011553408488,
+        1.2704149030195588
+      ],
+      "seed": 8121,
+      "status": "conditional_pass"
+    },
+    {
+      "arm": "constraints_no_kl",
+      "artifact": {
+        "path": "m2s-placement-certificate-v1/runs/constraints_no_kl.json",
+        "sha256": "sha256:4ab61fe8fc7829763b564a9ce237c2465a369a8f685c895263b91bf381db3dee"
+      },
+      "certificate_summary": {
+        "certified_cells": 812,
+        "certified_slack_lower_bound_m": 2.940927802718221e-06,
+        "queries": 1623,
+        "status": "conditional_pass",
+        "unresolved_cells": 0
+      },
+      "elapsed_s": 3.635502897988772,
+      "proposal_index": 59,
+      "queries": 1623,
+      "raw": {
+        "path": "m2s-margin-learning-v1/evaluation/constraints_no_kl_8121.npz",
+        "sha256": "sha256:cd1b65231023f2d0fb09bd0e12316be647de684ee6870649f5c294e3177b5f9a"
+      },
+      "sampled_margin_slack_m": 0.00317579218930813,
+      "scene": [
+        0.6017352566545859,
+        1.2708930628980502
+      ],
+      "seed": 8121,
+      "status": "conditional_pass"
+    }
+  ],
+  "training_eligible": false
+}
