@@ -1,0 +1,214 @@
+{
+  "acquisition_manifest_pending": true,
+  "action_label_requirement": "common recorded pre-decision state/action/token history; exact deployed command; four binary outcomes; missing labels masked",
+  "background_suites": [
+    "absent",
+    "raised",
+    "blocked"
+  ],
+  "development_bank": {
+    "ancestor": 41002,
+    "decision_time_s": 0.2,
+    "qualification_pending": "m2s-action-label-completion-v1",
+    "skills": [
+      "neutral",
+      "d040"
+    ]
+  },
+  "fresh_source_panel": "not yet acquired/reserved; requires distinct before-generation manifest",
+  "generator": {
+    "checkpoint": {
+      "path": "research-data/m2s-source-phase-v1/runs/all8_8421/1200/checkpoint.pt",
+      "sha256": "sha256:b0f07eb92c7f71cca20314729eea498edcb9a72c251535bb5418f41346f80b5d"
+    },
+    "fit": "all8_8421/1200",
+    "refitting": false,
+    "search": "pattern17"
+  },
+  "independent_common_bank_layouts": [
+    {
+      "id": "layout_00",
+      "station": 0.35,
+      "suite": "traversal",
+      "underside_m": 1.18
+    },
+    {
+      "id": "layout_01",
+      "station": 0.35,
+      "suite": "traversal",
+      "underside_m": 1.27
+    },
+    {
+      "id": "layout_02",
+      "station": 0.35,
+      "suite": "traversal",
+      "underside_m": 1.36
+    },
+    {
+      "id": "layout_03",
+      "station": 0.45,
+      "suite": "traversal",
+      "underside_m": 1.18
+    },
+    {
+      "id": "layout_04",
+      "station": 0.45,
+      "suite": "traversal",
+      "underside_m": 1.27
+    },
+    {
+      "id": "layout_05",
+      "station": 0.45,
+      "suite": "traversal",
+      "underside_m": 1.36
+    },
+    {
+      "id": "layout_06",
+      "station": 0.55,
+      "suite": "traversal",
+      "underside_m": 1.18
+    },
+    {
+      "id": "layout_07",
+      "station": 0.55,
+      "suite": "traversal",
+      "underside_m": 1.27
+    },
+    {
+      "id": "layout_08",
+      "station": 0.55,
+      "suite": "traversal",
+      "underside_m": 1.36
+    },
+    {
+      "id": "layout_09",
+      "station": 0.65,
+      "suite": "traversal",
+      "underside_m": 1.18
+    },
+    {
+      "id": "layout_10",
+      "station": 0.65,
+      "suite": "traversal",
+      "underside_m": 1.27
+    },
+    {
+      "id": "layout_11",
+      "station": 0.65,
+      "suite": "traversal",
+      "underside_m": 1.36
+    }
+  ],
+  "layout_physics_seeds": [
+    8511,
+    8512
+  ],
+  "learner": {
+    "activation": "relu",
+    "checkpoint": "fixed_endpoint",
+    "features": 214,
+    "heads": 2,
+    "hidden": [
+      64,
+      32
+    ],
+    "learning_rate": 0.001,
+    "loss": "masked_binary_cross_entropy",
+    "normalization": "train_only",
+    "optimizer": "Adam",
+    "seeds": [
+      8501,
+      8502,
+      8503,
+      8504,
+      8505
+    ],
+    "steps": 1000
+  },
+  "physics_runs": 0,
+  "primary_comparison": "equal_complete_labeled_encounters_Motion2Scene_vs_strong_analytic",
+  "prohibited_fitting_sources": [
+    43001,
+    43002,
+    43003,
+    43004,
+    43005,
+    43006,
+    43007,
+    43008
+  ],
+  "references": [
+    {
+      "path": "repository/scripts/research/motion2scene_event_scaling.py",
+      "sha256": "sha256:1176bc2a5cb820e103e8409a0e59c8d78744706eb768ec77ee7a70c2dff5cb18"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_distill_study.py",
+      "sha256": "sha256:3c045d4cdc89151d1aa570d45c8730ec9a086c50ae6ed71d23e0308a1d01def6"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_source_execution.py",
+      "sha256": "sha256:867b32aa68450a74d8102a2213873a65e8ed3cc5b6e23da2be337779183cdc02"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_events.py",
+      "sha256": "sha256:b5580feb2db80e64a45313623e299d9e52c3d8b997380b96ce0328f26193ff83"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_station_search.py",
+      "sha256": "sha256:45f637cac1cc75b4a75938cdf6506ff7d9a9cfd6717c05c8364a908631aa4c8d"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_analytic_global.py",
+      "sha256": "sha256:ed3c6f78ae8ff9682c975e7207492d187a590cf0935590d2d6ef90ed6c97bb99"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_analytic_distinct.py",
+      "sha256": "sha256:9985c7487d952e631e96f850a77957df9291db52206e28e7671288775e88ce97"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_coverage.py",
+      "sha256": "sha256:c03dc80b1b645ae15a43ff44dbfc70ebdcf19ce55f8c4bfaf5840d9f7eb9947b"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_action_contract.py",
+      "sha256": "sha256:125f9038f3db30343f295890192e8d09e394b952097233ebc6e85c8cccc4b576"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_outcome_learner.py",
+      "sha256": "sha256:e51619f7a2e84d1125579ee63276548ad7dbbcfb8f2c2b10cc645415929d73d5"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_policy_features.py",
+      "sha256": "sha256:c287b1305529df99096a40f7e0c0e2511171a2a7fd79ed24c8856daa7278931b"
+    },
+    {
+      "path": "repository/docs/motion2scene/LEARNING_UTILITY_PLAN_V1.md",
+      "sha256": "sha256:9d81d5dd03192b58b428efb343af39d38840671877d3a17ba38eb35578303a9f"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_learning_contract.py",
+      "sha256": "sha256:e4341904a92ec8ba21c3a3342e12252837b15119fea9c77a4c1a746c635b0d7b"
+    },
+    {
+      "path": "research-data/m2s-refinement-v1/registration.json",
+      "sha256": "sha256:689159717e5e346820f3691ccea1de2c84881f77c435a1a0179255dbeecae083"
+    },
+    {
+      "path": "research-data/m2s-source-phase-v1/runs/all8_8421/1200/result.json",
+      "sha256": "sha256:2ba6cc1ea66635c1ae7f74f06f16ccc0871721dc03e33068054429ce072469ed"
+    },
+    {
+      "path": "research-data/m2s-source-phase-v1/runs/all8_8421/1200/checkpoint.pt",
+      "sha256": "sha256:b0f07eb92c7f71cca20314729eea498edcb9a72c251535bb5418f41346f80b5d"
+    }
+  ],
+  "robot_data_fits": 0,
+  "role": "prospective generator/learner freeze and independent layout reservation; no fitting or physics authorized by this file",
+  "secondary_comparison": "equal_total_acquisition_budget",
+  "training_eligible": false,
+  "training_exclusion": {
+    "rule": "exclude if abs(station-test_station)<=0.01 AND abs(height-test_height)<=0.005 for any reserved traversal layout; charge all rejected proposals equally",
+    "scope": "common-bank layout evaluation; not fresh-source evidence"
+  }
+}

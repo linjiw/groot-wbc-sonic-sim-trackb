@@ -1,5 +1,23 @@
 # Motion2Scene: progress toward the complete project
 
+**Completed action study (September 6):** [all 12 new runs](ACTION_LABEL_COMPLETION_V1_RESULT.md)
+complete 16/16 matched 0.20 s action-label pairs. In the earlier-beam development case,
+seed 8042 passes at 0.30 s but fails at 0.20 and 0.40 s. The [v2 learning contract](LEARNING_CONTRACT_V2.md)
+therefore selects one common 0.30 s decision for new data in every arm; the old labels
+remain at 0.20 s and cannot be reused as 0.30 s outcomes. The matched no-contrast generator
+baseline is fitted, the shared outcome learner is implemented, and robot-data selector
+fits remain zero. Next acquire the comparative corpus and evaluate learning utility.
+
+
+**Learning-utility priority (September 6):** [the revised comparison plan](LEARNING_UTILITY_PLAN_V1.md)
+freezes the current generator, makes Motion2Scene versus strong analytic data the
+primary question, and uses complete outcomes for explicit encounter commands.
+The [registered 12-cell label/timing study](ACTION_LABEL_COMPLETION_V1.md) is the
+only added diagnostic prerequisite. Continuous certificate expansion, new skills
+and new generator architectures are deferred. The plan also corrects the evaluation
+cost and current ICRA submission/video schedule.
+
+
 Assessment dated 2026-09-06. **We have an embodied research prototype, but not yet a
 complete ICRA experimental contribution.** Geometry generation and simulator execution
 have evidence. The central claim—that generated environments improve policy learning—
@@ -12,7 +30,7 @@ completion, so the status below uses evidence gates instead of a percentage.
 | Collision and time realism | 384/384 nominal authored-native interval bounds, minimum 21.623 mm; separate static proxy pose domains | Bounded progress. Joint pose/time uncertainty, cooked-shape and numerical enclosure guarantees remain open. |
 | Embodied scene validation | 52-cell generated-source pilot; 6/8 source pairs qualify; 18/24 requested slots separate | Demonstrated in Isaac Lab within the development pool. Source refusals remain; walk contacts but can still cross. |
 | Sensing and legal commands | Complete 42-cell stress panel: reactive/oracle 9/10 poses each, 6/6 negative specificity, 500 ms delay fails 2/2 | One observed source. Earlier-beam robustness prediction fails; noisy sensing, later decisions and source transfer remain open. |
-| Downstream learning benefit | 144-value sensor features packaged; 10/16 complete skill-label pairs, six missing comparators; matched comparison designed | Not demonstrated. This is the main scientific bottleneck. |
+| Downstream learning benefit | 16/16 matched development label pairs at 0.20 s; shared 214-input learner and no-contrast baseline implemented; comparison designed | Not demonstrated. This is the main scientific bottleneck. |
 | Paper and release | Public notebook, protocols, complete result tables, failed experiments, source snapshots and recorded-state demos | Research documentation exists. Final comparative figures, claim audit and a reproducible end-to-end benchmark remain. |
 
 Two of the three intended contribution pillars—generation and closed-loop feasibility—
@@ -21,20 +39,22 @@ comparison could reject the motivating thesis. The project is beyond an offline 
 demo and still well short of submission readiness. A strong analytic method tying or
 beating the learned generator must change the contribution statement, not be hidden.
 
+The final transfer ancestors are **not yet reserved**: the first conservative ID inventory
+reported collisions, and the second exceeded its 180 s limit. No sources were generated
+or declared fresh. The twelve independently specified layout tests remain reserved.
+[Reservation failure record](evidence/transfer-reservation-failure.json).
+
 ## Remaining experiments, in decision order
 
-1. **Complete the six missing negative-control skill labels.** Register oracle d040
-   executions for absent/raised/blocked × seeds 8041/8042 before spending physics.
-   Reuse the measured neutral traces only where no switch occurred. Preserve the
-   42-cell panel and its 9/10 pose result; neither skill passing is a valid label,
-   not a row to discard. This closes an interface-data contract, not a training set.
-2. **Freeze the measurement and action contract.** Diagnose the seed-8042 earlier-beam
-   contact using its measured trajectory; do not change the frozen switch window or
-   relabel the failure. The native outer-envelope crossing audit preserves all 14
-   prior classifications (10 passes, four failures), with completion 20–40 ms later.
-   Extend that audit to the new panel before choosing a common learning label horizon.
-   Keep cooked geometry and continuous-time guarantees separate. Qualify any d055
-   addition independently; the present selector remains binary.
+1. **Acquire the comparative corpus at the frozen 0.30 s decision.** The six missing
+   controls are complete; 16/16 development pairs at 0.20 s retain all measured outcomes.
+   They are not a training corpus and cannot be relabeled for 0.30 s. Bind the exact
+   d040 generator input and measure both deployed commands on every assigned scene.
+2. **Keep timing support and measurement scope explicit.** The 12-cell experiment
+   reproduces the old 0.20 s failure and rescues seed 8042 at 0.30 s; 0.40 s fails.
+   This motivates the common future decision phase, not a general safe window. Preserve
+   all historical failures. Use direct decision-state capture for the learning corpus;
+   further geometry, new skills and extended timing sweeps are deferred.
 3. **Run the smallest useful learning-data comparison.** Train the same exteroceptive
    selector with Motion2Scene, uniform, strong analytic/grid, and an explicitly defined
    unconstrained same-family generator. Hold policy architecture, loss, physics-label

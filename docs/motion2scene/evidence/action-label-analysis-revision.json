@@ -1,0 +1,23 @@
+{
+  "change": "validate all reset-separated segments, retain every raw frame; no changes to pairing thresholds, commands, scene, passage, contact horizon or predictions",
+  "original_physics_manifest_unchanged": true,
+  "reason": "pre-execution CPU input audit exposed strict single-episode loader refusal on reset-spanning failures",
+  "references": [
+    {
+      "path": "repository/scripts/research/motion2scene_action_label_analysis_v2.py",
+      "sha256": "sha256:027e4ab119d8156d9522aedf44f9390bfd70f95c73e51ca507a81cd459d7734c"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_action_label_completion.py",
+      "sha256": "sha256:be3e8bc2b2285d033f5d2550a99865c59c2dc0c568404d2869d98a7acec7c05d"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_reset_capture.py",
+      "sha256": "sha256:fd2d48a6c74afd7621b39af7496cf246ce0baa172ddad993ccd878531c0e8098"
+    },
+    {
+      "path": "research-data/m2s-action-label-completion-v1/manifest.json",
+      "sha256": "sha256:628c77987a356bbe53e727659d11c9d07df85e6bb1e8d4a5df28dd35b7762503"
+    }
+  ]
+}

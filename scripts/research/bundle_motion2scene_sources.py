@@ -38,7 +38,7 @@ def closure(seeds):
                 pending.append(init)
         tree = ast.parse(path.read_text())
         for node in ast.walk(tree):
-            modules, bases = [], [ROOT, ROOT / "scripts/research"]
+            modules, bases = [], [ROOT, ROOT / "scripts/research", path.parent]
             if isinstance(node, ast.Import):
                 modules = [a.name for a in node.names]
             elif isinstance(node, ast.ImportFrom):
@@ -61,6 +61,8 @@ def main():
     parser.add_argument("--out", type=Path, default=ROOT / "docs/motion2scene/evidence")
     args = parser.parse_args()
     seeds = list((ROOT / "scripts/research").glob("*motion2scene*.py"))
+    # Hydra targets are string imports; AST import closure alone cannot discover them.
+    seeds += list((ROOT / "gear_sonic/dataset_generation/hallucination").glob("motion2scene*.py"))
     seeds += list((ROOT / "tests/dataset_generation").glob("test_motion2scene*.py"))
     seeds += list((ROOT / "tests/dataset_generation").glob("test_capsule_box*.py"))
     seeds += [ROOT / "tests/dataset_generation/test_placement_certificate.py", Path(__file__)]
