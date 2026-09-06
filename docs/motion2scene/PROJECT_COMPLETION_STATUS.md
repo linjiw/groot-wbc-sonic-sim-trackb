@@ -1,5 +1,15 @@
 # Motion2Scene: progress toward the complete project
 
+**Latest acquisition preparation (September 6):** [the four-arm d040-bound pipeline](COMPARATIVE_ACQUISITION_V1_RESULT.md)
+now records 64 outputs and 36 assigned generated slots, plus a shared background quota.
+The common checks admit 9/9 uniform, 8/9 analytic, 9/9 no-contrast and 9/9 Motion2Scene
+slots; the analytic test-neighborhood rejection is retained. A twenty-cell first-slice
+manifest is frozen, with direct 0.30 s pre-command state capture. **0/20 runs have
+started because GPU memory is below the registered 7500 MiB floor.** No new paired
+labels, robot-data selector fit or learning benefit is claimed. Exact d040 input binding
+is complete within its declared numerical tolerance. Final source reservation remains
+unresolved after the bounded inventory timed out.
+
 **Completed action study (September 6):** [all 12 new runs](ACTION_LABEL_COMPLETION_V1_RESULT.md)
 complete 16/16 matched 0.20 s action-label pairs. In the earlier-beam development case,
 seed 8042 passes at 0.30 s but fails at 0.20 and 0.40 s. The [v2 learning contract](LEARNING_CONTRACT_V2.md)
@@ -48,8 +58,9 @@ or declared fresh. The twelve independently specified layout tests remain reserv
 
 1. **Acquire the comparative corpus at the frozen 0.30 s decision.** The six missing
    controls are complete; 16/16 development pairs at 0.20 s retain all measured outcomes.
-   They are not a training corpus and cannot be relabeled for 0.30 s. Bind the exact
-   d040 generator input and measure both deployed commands on every assigned scene.
+   They are not a training corpus and cannot be relabeled for 0.30 s. The exact d040
+   input is now bound. Resume the first twenty-cell slice when the registered GPU
+   floor is met, then measure both commands for the remaining fixed assignments.
 2. **Keep timing support and measurement scope explicit.** The 12-cell experiment
    reproduces the old 0.20 s failure and rescues seed 8042 at 0.30 s; 0.40 s fails.
    This motivates the common future decision phase, not a general safe window. Preserve

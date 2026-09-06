@@ -1,0 +1,21 @@
+{
+  "bank": {
+    "path": "research-data/m2s-action-label-completion-v1/rollouts/labels_8041_absent_oracle/trajectories/loaded_reference_bank.npz",
+    "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+  },
+  "implementation": {
+    "path": "repository/scripts/research/audit_motion2scene_comparison_capture.py",
+    "sha256": "sha256:6d0021731c6ed3ea2c8076d340ef9038201d11c5e9f48795cbe115c1fb93cc7d"
+  },
+  "manifest": {
+    "path": "research-data/m2s-comparative-acquisition-v1/manifest.json",
+    "sha256": "sha256:b11ac6ad72dd2e761388f97f1f3722f6571a13f9eea89faba3b31385a7a77c18"
+  },
+  "predictions": [
+    "direct features recompute exactly",
+    "rays originate from direct pose within 1e-6 m",
+    "same-index recorder pose/state matches direct callback within 1e-7",
+    "every loaded bank matches previous bound neutral/d040 bank bitwise"
+  ],
+  "scope": "first 0.30 s callback only, no whole-capture index shift"
+}
