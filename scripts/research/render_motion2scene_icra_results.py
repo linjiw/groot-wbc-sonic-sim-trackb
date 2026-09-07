@@ -36,11 +36,16 @@ NAMES = [
 
 
 def main():
-    comparison = LEARN / "comparison_366.json"
+    # Use the newest summary rather than a pinned snapshot, so the final panel renders
+    # with the same code. The narrative assertions below fail loudly if the data stops
+    # supporting the prose, which then has to be rewritten rather than silently reused.
+    comparison = max(LEARN.glob("comparison_*.json"), key=lambda q: int(q.stem.split("_")[1]))
     c = json.loads(comparison.read_text())
     fit = json.loads((LEARN / "fit.json").read_text())
-    assert c["completed"] == 366 and c["pending"] == 174
-    public = DOC / "evidence/icra-results-366-20260907"
+    done = c["completed"]
+    conditions = len({(r["source"], r["layout"], r["physics_seed"]) for r in c["rows"]})
+    assert c["completed"] + c["pending"] == c["assigned"]
+    public = DOC / f"evidence/icra-results-{done}-20260907"
     public.mkdir(exist_ok=False)
     exports = []
 
@@ -62,7 +67,7 @@ def main():
     for source in [
         LEARN / "fit.json",
         comparison,
-        LEARN / "mechanism_366.json",
+        LEARN / f"mechanism_{done}.json",
         LEARN / "evaluation_master.json",
     ]:
         export(source, source.name)
@@ -128,17 +133,23 @@ def main():
         ax.set_xticks(range(0, 24, 2), [f"L{i:02d}" for i in range(12)], fontsize=9)
         ax.set_title(f"Carrier {source}: every assigned layout/seed shown", loc="left", fontsize=11)
     fig.suptitle(
-        "366/432 traversal executions admitted; 66 traversal + 108 background runs pending\nGreen: task pass | red: task fail | gray: pending | D: actual d040 request",
+        f"{c['traversal_completed']}/{c['traversal_assigned']} traversal executions admitted; "
+        f"{c['pending']} runs pending\n"
+        "Green: task pass | red: task fail | gray: pending | D: actual d040 request",
         fontsize=13,
     )
-    fig.savefig(DOC / "assets/icra-366-outcomes.png", dpi=160)
-    fig.savefig(DOC / "assets/icra-366-outcomes.pdf")
+    fig.savefig(DOC / f"assets/icra-{done}-outcomes.png", dpi=160)
+    fig.savefig(DOC / f"assets/icra-{done}-outcomes.pdf")
     plt.close(fig)
     fig, axs = plt.subplots(1, 2, figsize=(11, 4.3), constrained_layout=True)
     x = np.arange(4)
+    generated = [len([i for i in f["training_ids"] if "shared" not in i]) for f in fit["fits"]]
+    useful = [f["outcome_counts"].get("(False, True)", 0) for f in fit["fits"]]
+    # The prose below states one useful contrast overall, from analytic construction.
+    assert sum(useful) == 1 and useful[METHODS.index("analytic")] == 1, useful
     axs[0].bar(x - 0.22, [18] * 4, 0.22, label="Requested generated")
-    axs[0].bar(x, [18, 1, 16, 0], 0.22, label="Complete generated labels")
-    axs[0].bar(x + 0.22, [0, 1, 0, 0], 0.22, label="Useful physical contrasts")
+    axs[0].bar(x, generated, 0.22, label="Complete generated labels")
+    axs[0].bar(x + 0.22, useful, 0.22, label="Useful physical contrasts")
     axs[0].set_xticks(x, ["Uniform", "Analytic", "Target-only", "M2S"])
     axs[0].set_ylim(0, 22)
     axs[0].legend(fontsize=8)
@@ -151,14 +162,18 @@ def main():
     axs[1].invert_yaxis()
     axs[1].set_xlim(0, 80)
     for i, a in enumerate(METHODS):
-        axs[1].text(rates[i] + 1, i, f"{c['per_arm'][a]['pass']}/61", va="center", fontsize=9)
+        axs[1].text(
+            rates[i] + 1, i, f"{c['per_arm'][a]['pass']}/{conditions}", va="center", fontsize=9
+        )
     axs[1].set_xlabel("Carrier-averaged passage (%)")
     axs[1].set_title("Partial panel; unequal training counts")
-    fig.savefig(DOC / "assets/icra-366-yield.png", dpi=160)
-    fig.savefig(DOC / "assets/icra-366-yield.pdf")
+    fig.savefig(DOC / f"assets/icra-{done}-yield.png", dpi=160)
+    fig.savefig(DOC / f"assets/icra-{done}-yield.pdf")
     plt.close(fig)
     table = "\n".join(
-        f"| {name} | {c['per_arm'][arm]['pass']}/61 | {c['per_arm'][arm]['d040_requests']}/61 | {c['per_arm'][arm]['refusals']}/61 |"
+        f"| {name} | {c['per_arm'][arm]['pass']}/{conditions} | "
+        f"{c['per_arm'][arm]['d040_requests']}/{conditions} | "
+        f"{c['per_arm'][arm]['refusals']}/{conditions} |"
         for arm, name in zip(METHODS, NAMES)
     )
     corpus = "\n".join(
