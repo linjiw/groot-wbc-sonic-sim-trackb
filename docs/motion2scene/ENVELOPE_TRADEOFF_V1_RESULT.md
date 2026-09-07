@@ -18,6 +18,8 @@ physics and changed no M2S-ICRA-v1 assignment, refusal or score.
 | +-15 mm / +-7.5 mm | 13 | 4 | 81 |
 | **+-20 mm / +-10 mm (inherited)** | **2** | **0** | **32** |
 
+![Contrast support against placement envelope, and the acquisition funnel under each contract](assets/envelope-tradeoff.png)
+
 The best nominal joint margin — the smaller of target clearance and walk interference
 at the proposal's own pose — is **24.42 mm on 41001, 20.48 mm on 41002 and 26.99 mm on
 41003**. The inherited envelope asks each accepted centre to keep a 10 mm two-sided
@@ -67,7 +69,8 @@ this table then states the price directly: at +-20 mm only 2, 0 and 32 centres s
 so a physical deployment of this contrast would need either a much larger executed
 window or much tighter obstacle placement.
 
-Evidence: `envelope-tradeoff.json` under
+Evidence: [figure and released records](evidence/envelope-tradeoff-20260907/exports.json),
+[reading PDF](assets/envelope-tradeoff.pdf), and `envelope-tradeoff.json` under
 `/home/linjiw/research-data/groot-wbc/m2s-envelope-tradeoff-v1`, marked `analysis_only`
 so it never enters the physics spending ledger.
 
