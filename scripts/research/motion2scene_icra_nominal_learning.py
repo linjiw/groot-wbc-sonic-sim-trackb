@@ -20,6 +20,7 @@ from pathlib import Path
 
 from bundle_motion2scene_sources import closure
 from motion2scene_development_bank import DATA
+from motion2scene_icra_compare import PAIRS, compare
 from motion2scene_icra_eval_audit import execute
 from motion2scene_icra_study import ARMS, BACKGROUNDS, BANK, physical_scene
 from motion2scene_linear_execution_v2 import embed_linear
@@ -306,6 +307,67 @@ def prepare(out):
     )
 
 
+def summarize(out):
+    """Same paired comparison as the parent, with this study's own denominators."""
+    master = json.loads((out / "evaluation_master.json").read_text())
+    rows, waiting, refs = [], [], []
+    for b in master["batches"]:
+        folder = Path(b["directory"])
+        if not (folder / "admission.json").exists():
+            waiting.append(b)
+            continue
+        a = json.loads((folder / "admission.json").read_text())
+        assert a["admitted"]
+        result = json.loads(checked(Path(a["result"]["path"]), a["result"]["sha256"]).read_text())
+        rows.extend(result["rows"])
+        refs.append(artifact(folder / "admission.json"))
+    traversal = [r for r in rows if r["suite"] == "traversal"]
+    per_arm = {}
+    for arm in sorted({r["arm"] for r in traversal}):
+        selected = [r for r in traversal if r["arm"] == arm]
+        carriers = {
+            str(s): [r for r in selected if r["source"] == s]
+            for s in sorted({r["source"] for r in selected})
+        }
+        per_arm[arm] = {
+            "completed": len(selected),
+            "pass": sum(r["pass"] for r in selected),
+            "carrier_passage": {
+                s: sum(r["pass"] for r in rr) / len(rr) for s, rr in carriers.items()
+            },
+            "d040_requests": sum(r["readout"]["requested_action"] == 1 for r in selected),
+            "refusals": sum(r["readout"]["refusal"] for r in selected),
+            "successful_walk_refusals": sum(
+                r["readout"]["refusal"] and r["pass"] for r in selected
+            ),
+        }
+    comparisons = [compare(traversal, a, b) for a, b in PAIRS] if traversal else []
+    result = {
+        "master": artifact(out / "evaluation_master.json"),
+        "admissions": refs,
+        "completed": len(rows),
+        "assigned": master["total"],
+        "pending": sum(b["assigned"] for b in waiting),
+        "traversal_completed": len(traversal),
+        "traversal_assigned": master["traversal"],
+        "per_arm": per_arm,
+        "comparisons": comparisons,
+        "rows": rows,
+        "complete": not waiting,
+        "comparators": master["comparators"],
+        "scope": (
+            "Nominal-contract executions at physics seed 8511 only; comparators are the "
+            "parent study's measurements on these same conditions, not re-executed here. "
+            "Partial results are not equivalence or the finished endpoint"
+        ),
+    }
+    write_new(out / f"comparison_{len(rows):03d}.json", result)
+    print(
+        json.dumps({"complete": not waiting, "admitted": len(rows), "assigned": master["total"]}),
+        flush=True,
+    )
+
+
 def run(out):
     master = json.loads((out / "evaluation_master.json").read_text())
     for b in master["batches"]:
@@ -322,7 +384,15 @@ def run(out):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("command", choices=("register", "fit", "prepare", "run"))
+    p.add_argument("command", choices=("register", "fit", "prepare", "run", "summarize"))
     p.add_argument("--out", type=Path, required=True)
     a = p.parse_args()
-    {"register": register, "fit": fit, "prepare": prepare, "run": run}[a.command](a.out)
+    {
+        "register": register,
+        "fit": fit,
+        "prepare": prepare,
+        "run": run,
+        "summarize": summarize,
+    }[
+        a.command
+    ](a.out)

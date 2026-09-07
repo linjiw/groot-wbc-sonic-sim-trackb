@@ -111,7 +111,7 @@ def main():
                     "sha256": "sha256:" + hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                     "gpu_floor_mib": FLOOR_MIB,
                     "waits_for": "M2S-ICRA-v1 pipeline stage == complete",
-                    "stages": "labels -> register -> fit -> prepare -> evaluation",
+                    "stages": "labels -> register -> fit -> prepare -> evaluation -> summarize",
                     "budgets": "unchanged rolling 8 contended GPU h/day and 24/week",
                     "stops": "changed reference, failed cell, audit rejection, runner failure",
                 },
@@ -157,6 +157,10 @@ def main():
                     LEARNING / "evaluation_master.json",
                 )
             else:
+                if not list(LEARNING.glob("comparison_*.json")):
+                    status("summarizing")
+                    if call("motion2scene_icra_nominal_learning.py", "summarize", LEARNING):
+                        raise RuntimeError("Final analysis failed")
                 status("complete", labels_assigned=72, evaluation_assigned=144)
                 return
             free = free_mib()
