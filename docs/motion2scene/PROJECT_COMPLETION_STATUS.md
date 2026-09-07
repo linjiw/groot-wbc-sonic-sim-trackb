@@ -1,6 +1,28 @@
 # Motion2Scene: progress toward the complete project
 
-**Latest acquisition preparation (September 6):** [the four-arm d040-bound pipeline](COMPARATIVE_ACQUISITION_V1_RESULT.md)
+**Current stage (September 6):** the [comparative command corpus](COMPARATIVE_CORPUS_STAGE_RESULT.md)
+contains 76 completed Isaac Lab executions and 38 paired scene outcomes, captured at
+one common 0.30 s decision. Both-fail outcomes and the analytic test-neighborhood
+rejection remain in the record. All 38 pairs pass the direct-input/bank audits, and all twenty matched learners
+are fitted (eleven complete encounters per arm, five optimizer seeds). All nine
+Motion2Scene generated encounters are both-fail; four of eight analytic encounters
+make d040 useful. This is a development data-yield finding, not a policy ranking.
+Eight final-transfer candidate IDs are now [reserved against explicit acquisition
+provenance](FINAL_SOURCE_PROVENANCE_RESERVATION_V1.md), including canonical fingerprints
+of 212 referenced motion files. They are not yet generated or qualified; the narrower
+provenance scope does not establish global metadata absence or source independence.
+
+**Learned command check:** all twelve actual Isaac Lab integrations match the registered
+features, model requests, full trajectories and outcomes. These are observed development
+scenes, not independent performance evidence. [Integration protocol](LEARNED_COMMAND_CHECK_V1.md).
+
+**Next research stage:** [evaluate the frozen policies on the twelve independently specified layouts](INDEPENDENT_LAYOUT_EVALUATION_V1_PLAN.md).
+Keep the analytic arm as the primary comparator. Report source-specific contact-qualified
+passage/recovery, unnecessary crouching and blocked-scene detection separately. This
+single-source, eleven-encounter development comparison is not the final 24/48/96
+acquisition-budget study or fresh-source transfer experiment.
+
+**Historical prelaunch snapshot (September 6; superseded by the current stage above):** [the four-arm d040-bound pipeline](COMPARATIVE_ACQUISITION_V1_RESULT.md)
 now records 64 outputs and 36 assigned generated slots, plus a shared background quota.
 The common checks admit 9/9 uniform, 8/9 analytic, 9/9 no-contrast and 9/9 Motion2Scene
 slots; the analytic test-neighborhood rejection is retained. A twenty-cell first-slice
@@ -10,7 +32,7 @@ labels, robot-data selector fit or learning benefit is claimed. Exact d040 input
 is complete within its declared numerical tolerance. Final source reservation remains
 unresolved after the bounded inventory timed out.
 
-**Completed action study (September 6):** [all 12 new runs](ACTION_LABEL_COMPLETION_V1_RESULT.md)
+**Earlier action-study snapshot (September 6; counts below are historical):** [all 12 new runs](ACTION_LABEL_COMPLETION_V1_RESULT.md)
 complete 16/16 matched 0.20 s action-label pairs. In the earlier-beam development case,
 seed 8042 passes at 0.30 s but fails at 0.20 and 0.40 s. The [v2 learning contract](LEARNING_CONTRACT_V2.md)
 therefore selects one common 0.30 s decision for new data in every arm; the old labels
@@ -40,7 +62,7 @@ completion, so the status below uses evidence gates instead of a percentage.
 | Collision and time realism | 384/384 nominal authored-native interval bounds, minimum 21.623 mm; separate static proxy pose domains | Bounded progress. Joint pose/time uncertainty, cooked-shape and numerical enclosure guarantees remain open. |
 | Embodied scene validation | 52-cell generated-source pilot; 6/8 source pairs qualify; 18/24 requested slots separate | Demonstrated in Isaac Lab within the development pool. Source refusals remain; walk contacts but can still cross. |
 | Sensing and legal commands | Complete 42-cell stress panel: reactive/oracle 9/10 poses each, 6/6 negative specificity, 500 ms delay fails 2/2 | One observed source. Earlier-beam robustness prediction fails; noisy sensing, later decisions and source transfer remain open. |
-| Downstream learning benefit | 16/16 matched development label pairs at 0.20 s; shared 214-input learner and no-contrast baseline implemented; comparison designed | Not demonstrated. This is the main scientific bottleneck. |
+| Downstream learning benefit | 38 paired 0.30 s development encounters from 76 executions; matched four-arm fitting and learned command check | Not demonstrated. This is the main scientific bottleneck. |
 | Paper and release | Public notebook, protocols, complete result tables, failed experiments, source snapshots and recorded-state demos | Research documentation exists. Final comparative figures, claim audit and a reproducible end-to-end benchmark remain. |
 
 Two of the three intended contribution pillars—generation and closed-loop feasibility—
@@ -49,9 +71,9 @@ comparison could reject the motivating thesis. The project is beyond an offline 
 demo and still well short of submission readiness. A strong analytic method tying or
 beating the learned generator must change the contribution statement, not be hidden.
 
-The final transfer ancestors are **not yet reserved**: the first conservative ID inventory
-reported collisions, and the second exceeded its 180 s limit. No sources were generated
-or declared fresh. The twelve independently specified layout tests remain reserved.
+Eight candidate IDs are reserved under the explicit acquisition-provenance ledger;
+no final ancestors have been generated or qualified. The earlier broad inventory
+failures remain historical records. The twelve independent layout tests remain reserved.
 [Reservation failure record](evidence/transfer-reservation-failure.json).
 
 ## Remaining experiments, in decision order

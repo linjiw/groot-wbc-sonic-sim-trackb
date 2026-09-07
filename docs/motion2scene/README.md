@@ -1,6 +1,28 @@
 # Motion2Scene visual research report
 
-**Latest acquisition preparation (September 6):** [the four-arm d040-bound pipeline](COMPARATIVE_ACQUISITION_V1_RESULT.md)
+**Current stage (September 6):** the [comparative command corpus](COMPARATIVE_CORPUS_STAGE_RESULT.md)
+contains 76 completed Isaac Lab executions and 38 paired scene outcomes, captured at
+one common 0.30 s decision. Both-fail outcomes and the analytic test-neighborhood
+rejection remain in the record. All 38 pairs pass the direct-input/bank audits, and all twenty matched learners
+are fitted (eleven complete encounters per arm, five optimizer seeds). All nine
+Motion2Scene generated encounters are both-fail; four of eight analytic encounters
+make d040 useful. This is a development data-yield finding, not a policy ranking.
+Eight final-transfer candidate IDs are now [reserved against explicit acquisition
+provenance](FINAL_SOURCE_PROVENANCE_RESERVATION_V1.md), including canonical fingerprints
+of 212 referenced motion files. They are not yet generated or qualified; the narrower
+provenance scope does not establish global metadata absence or source independence.
+
+**Learned command check:** all twelve actual Isaac Lab integrations match the registered
+features, model requests, full trajectories and outcomes. These are observed development
+scenes, not independent performance evidence. [Integration protocol](LEARNED_COMMAND_CHECK_V1.md).
+
+**Next research stage:** [evaluate the frozen policies on the twelve independently specified layouts](INDEPENDENT_LAYOUT_EVALUATION_V1_PLAN.md).
+Keep the analytic arm as the primary comparator. Report source-specific contact-qualified
+passage/recovery, unnecessary crouching and blocked-scene detection separately. This
+single-source, eleven-encounter development comparison is not the final 24/48/96
+acquisition-budget study or fresh-source transfer experiment.
+
+**Historical prelaunch snapshot (September 6; superseded by the current stage above):** [the four-arm d040-bound pipeline](COMPARATIVE_ACQUISITION_V1_RESULT.md)
 now records 64 outputs and 36 assigned generated slots, plus a shared background quota.
 The common checks admit 9/9 uniform, 8/9 analytic, 9/9 no-contrast and 9/9 Motion2Scene
 slots; the analytic test-neighborhood rejection is retained. A twenty-cell first-slice
@@ -10,7 +32,7 @@ labels, robot-data selector fit or learning benefit is claimed. Exact d040 input
 is complete within its declared numerical tolerance. Final source reservation remains
 unresolved after the bounded inventory timed out.
 
-**Completed action study (September 6):** [all 12 new runs](ACTION_LABEL_COMPLETION_V1_RESULT.md)
+**Earlier action-study snapshot (September 6; counts below are historical):** [all 12 new runs](ACTION_LABEL_COMPLETION_V1_RESULT.md)
 complete 16/16 matched 0.20 s action-label pairs. In the earlier-beam development case,
 seed 8042 passes at 0.30 s but fails at 0.20 and 0.40 s. The [v2 learning contract](LEARNING_CONTRACT_V2.md)
 therefore selects one common 0.30 s decision for new data in every arm; the old labels
