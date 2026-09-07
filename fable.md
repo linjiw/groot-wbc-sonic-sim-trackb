@@ -1,503 +1,405 @@
-# Fable — research guidance for the ICRA paper
+# Fable — guidance for the Motion2Scene ICRA paper
 
-**Motion → scene generation with Learning-from-Hallucination for humanoids**
-Written 2026-08-26 after reading `docs/lfh/*`, `docs/hallucination/REPORT_*`, the prediction
-register (LFH-E1a … E10b), `docs/paper/sweepcf_draft.md`, `E5_LEARNER_PROBE_DESIGN.md`, and the
-2026-08-22 autoresearch iteration. Where I make a judgement rather than restate a measurement,
+Written 2026-09-07 (00:30 EDT), after reading the full `docs/motion2scene/` trail
+(all `*_RESULT.md` through `SELECTOR_BREAKPOINT_RESULT.md`), the August LfH line
+(`docs/lfh/`, `docs/hallucination/`, the earlier `fable.md`, now archived at
+`docs/guidance/fable_2026-08-26_lfh.md`), `docs/paper/`, the uncommitted transition-bank
+work, and the machine state. Where I make a judgement rather than restate a measurement,
 I say so.
 
-Assumed deadline: ICRA 2027 submission ≈ **15 Sep 2026** (three weeks). If it is later, keep
-the ordering below and stretch the scale, not the scope.
+Deadline per the team's own check of the call: **ICRA 2027, 15 Sep 2026, 11:59 PST.
+Eight pages including references.** Video upload reopens 17–22 Sep, so the video is
+not on the critical path. That leaves eight days, of which at least four must be writing.
 
 ---
 
-## Update — 2026-08-26, after the code audit and first model fits
+## Update — 2026-09-07, 09:00 EDT, after executing this plan
 
-Everything below this section was written before auditing the code. Five things changed, and two
-of them change the paper. Full detail: `docs/hallucination/REPORT_AUDIT_2026-08-26.md` and
-`docs/hallucination/REPORT_DELIVERY_MODEL.md`.
+The plan below was written at 00:30. It has now largely been executed, by an
+autonomous supervisor plus this session. Five things are settled and two change the
+paper. Everything in §1–§9 still stands except where this section overrides it.
 
-**1. The overhead results survive; seven fail-open defects were fixed.** After the fixes,
-recomputing `lfh_089_crouch`'s support from the stored trajectories reproduces
-`critical_support_cal3.json` bit-exact, and the offline suite passes at 828. But
-`lateral_face_reach` was measuring whole-capsule endpoints after a mere AABB test (up to **8×**
-overestimate), and `solve_window` emitted `+inf` margins that fail to serialise — together, **no
-lateral window could ever populate a spec**. The "lateral is unsupported" claim is therefore
-confounded between the E3 physics observation and a broken instrument. Re-derive it on fixed code
-before writing it as C7.
+**A. All three carriers qualified, and the panel ran.** The transition bank finished
+12/12 at 0.105 GPU-h with 41001, 41002 and 41003 qualified at both seeds
+([result](docs/motion2scene/DEVELOPMENT_TRANSITION_BANK_V1_RESULT.md)). M2S-ICRA-v1 was
+registered, 82/82 labels acquired, four learners fitted, and 366 of 540 evaluations
+admitted before the GPU filled with other projects' jobs.
 
-**2. The conditional `q_LFH` result is refuted.** Feature-blind archetype counting with the same
-source balancing and exploration floor scores **1.46416 nats** against the kernel's 1.51373. The
-conditioning *costs* 0.05 nats; the whole reported gain over uniform belongs to frequency counting.
-Top-3 11/12 and 400/400 in-support are true by construction. The cause is the **learning target**:
-the executed pair determines where the face must be (closed form, unlearned) and does not determine
-what it looks like. Archetype identity is the one part of the scene the inputs do not constrain.
-Docs corrected; the register carries the refutation.
+**B. The headline outcome is none of A/B/C. Call it D.** Under the registered contract
+the learned arm acquired **zero** generated groups and the analytic arm **one**. Three
+of the four fitted learners — uniform, target-only and Motion2Scene — are
+*behaviourally identical*: they issue walk on all 61 conditions and pass 21/61. The
+analytic learner issues d040 22 times and passes 30/61, with **9 wins and 0 losses**
+against each of the other three, consistent on all three carriers (5/2/2). Removing its
+single useful label drops its adaptation requests from 22 to 0 and makes it bit-identical
+to the background-only model. So the whole measured effect rests on **one physically
+verified contrast**, and the paper's real subject is contrast scarcity.
 
-**3. A learned component that does survive audit: `D_phi`.** Fitted on the quantity the window is
-actually built from — executed overhead reach at a finite face — over 118 paired rows,
-leave-one-motion-out across **28 distinct clips**: RMSE **9.07 mm** against identity's 14.04 mm, a
-**35.4% reduction**, with the feature-blind control the *worst* model. This is E-D1's first
-evidence. `propose_scene_from_motion.py` now runs the full motion→scene inference on CPU: apply
-the ladder, predict both reaches, solve the window, refuse when it does not survive the model's own
-q90 band. On the three verified sources it lands within 8–15 mm of their known executed windows.
-**Report this as the paper's learned component, together with the baseline that killed the first
-one.** Two models, one refuted by its own honest baseline and one that beats it, is a stronger and
-more credible section than either alone.
+**C. The acquisition failure was the inherited envelope, not the generator.** The
+[envelope sweep](docs/motion2scene/ENVELOPE_TRADEOFF_V1_RESULT.md) over 11,421 centres
+per carrier shows 10 mm contrast witnesses collapsing as the audit envelope grows:
 
-**4. Source supply is not 4 — it is ~58 candidates.** CAL3 screened only the 15 `stand_to_walk`
-clips and then discarded three of its four ladder rungs. The pool holds 150 clips, 94 gated, of
-which **58 have straightness ≥ 0.95** across ten body modes. Of 36 screened so far, every one has
-at least two usable crouch rungs and a third reach the full 85 mm. The 24–30 family bar is a
-screening problem, not a generation problem.
+| envelope | 41001 | 41002 | 41003 |
+|---|---:|---:|---:|
+| nominal pose | 200 | 168 | 337 |
+| ±10 mm / ±5 mm | 50 | 27 | 150 |
+| ±20 mm / ±10 mm (inherited) | **2** | **0** | **32** |
 
-**5. E9a's conclusion is confounded and must not be quoted.** The fresh motion has route
-straightness **0.747** against the `MIN_ROUTE_STRAIGHTNESS = 0.95` the CAL3 selection itself
-imposes (verified sources are 0.985–0.991), and it was commanded at the top of the ladder. It
-varied straightness and amplitude together, outside the calibrated envelope. "A fresh generated
-motion is not yet a valid LFH source" is not supported by it.
+Best nominal joint margin is 24.4 / 20.5 / 27.0 mm, so the inherited ±20 mm placement
+envelope is the size of the entire executed window. It was the right instrument for a
+placement certificate and the wrong one for a study whose beam is authored at an exact
+simulator pose. A separately registered
+[nominal contract](docs/motion2scene/M2S_ICRA_NOMINAL_V1.md) — predictions filed before
+its proposals were drawn — moves eligibility from 1/48 to **41/48** for analytic and
+from 0/48 to **33/48** for Motion2Scene. 36 groups are assigned and 72 label commands
+are prepared and waiting on the card.
 
-**Two new measurements worth a figure each.** The three accepted crouches deliver **63–84%** of
-their commanded window (83–86 mm commanded → 52–72 mm executed), consistently optimistic in one
-direction. And the eight arm-tuck pairs are a genuine null control on the overhead axis — their
-commanded window is exactly zero — giving executed windows within **2.73 mm** of zero. That is a
-measured noise floor, and it is six times tighter than the 18.044 mm engineering margin applied on
-both sides of every window. The two are different quantities (E1a's margin is an in-scene clearance
-range) so the margin is **not** being changed, but it currently spends 36 mm of every 52–72 mm raw
-window, and that is now a registered question rather than an assumption.
+**D. A second, separate defect belongs to the generator.** On 41003 the inherited
+envelope still leaves 32 witnesses and the learned draws reached none of them, and
+across the nominal proposals only **24/34** of the learned arm's critical scenes are
+visible to the sensor at the 0.30 s decision, against **44/47** for analytic — 8 of 12
+invisible on 41003 alone. Placing a contrast where the robot cannot see it is a real
+quality gap, it is independent of the envelope, and it is not gated by either contract.
+Report it; do not add a visibility gate post hoc.
 
-**6. E12 ran, and its primary prediction is falsified — which localised the real bottleneck.**
-47 cells, 0.427 GPU-h. Predicted ≥8 new sources; got **5**. Predicted ≥6 clearing a 20 mm window;
-got **1**. Funnel: 12 motions → 8 nominals accepted → 5 delivered an amplitude → 1 entered
-`P_feas`. Two predictions did hold, and one of them matters: the median delivered amplitude is
-**55 mm**, not 80, and the five motions deliver 40/40/55/70/70 — a fixed command is the wrong
-instrument. Acceptance was also monotone in amplitude for all 8 accepted nominals, which was only
-observable because I made the rungs independent before spending.
+**E. Adaptation is nearly free on this panel, and every learner under-uses it.** Of the
+38 conditions where both commands were executed: 15 d040-only successes, 11 both-pass,
+12 both-fail and **zero walk-only successes**. The scripted ray rule requests d040 38
+times and reaches 36/61, exactly the best-of-observed ceiling; the analytic learner
+requests it 22 times and reaches 30/61. A hand-written rule still beats every learned
+arm. Say so plainly — and note the pending background suites are where unnecessary
+adaptation gets charged, so the ceiling is not the whole story.
 
-But the ladder did not rescue supply, because a shallow crouch tracks without separating. The five
-raw executed windows are 31.5, 43.7, 51.3, 54.5, 70.2 mm — the same range as the three verified
-CAL3 sources — and the symmetric 18.044 mm margin removes 36.1 mm from each:
+**Revised thesis.** Not "learned beats analytic", and not "construction matters" in the
+abstract. It is: *a training scene is useful only if it contains a decision-relevant
+contrast that survives execution and is visible at decision time; such scenes are
+geometrically scarce, the scarcity is measurable and designable, and one verified
+contrast is enough to change a fixed learner's behaviour.*
 
-| margin, each side | pairs clearing the 20 mm floor |
-|---|---|
-| 18.044 mm (current) | **1 / 5** |
-| 10 mm | 4 / 5 |
-| 5 mm | **5 / 5** |
-
-**The binding constraint is the imported engineering margin, not motion supply and not amplitude.**
-Four of five pairs are refused by a margin rule rather than by physics. E1a derived 18.044 mm from
-in-scene *clearance* ranges on overhead cells; the paired null control measures the empty-scene
-window estimator reproducing a true zero to 2.73 mm. Different quantities — so the margin is not
-being changed — but this is now the cheapest large win available.
-
-**7. `D_phi` generalised out of sample.** It was fitted before E12 ran. E12 added 18 unseen clips
-across eight body modes absent from the fit; the refit over 46 clips gives RMSE 9.71 mm against
-identity's 15.95, and the advantage **grew** from 35.4% to 39.2%. That is a relation holding, not a
-fit chasing points.
-
-**8. A verified family from a ladder-discovered source (LFH-E17), and the visuals.** The first
-scene authored by the generalised synthesiser, from `ladder_138` — a `reach_walk` clip the CAL3
-cohort never contained. All four registered predictions confirmed at 0.078 GPU-h:
-accepted/accepted/rejected/accepted, `hard/nominal` rejected for **contact alone** (415.9 N on
-`torso_link` at frame 101, no drift reason recorded at all), zero external contact in the three
-clear cells, and `hard/adapted` endpoint identical to its empty-scene value. The two adapted cells
-come back bit-identical across two genuinely separate rollouts — because the crouched robot never
-touches either plank, so the 85 mm height difference is causally irrelevant to it. That is the
-counterfactual stated as sharply as this corpus can state it.
-
-**9. Acceptance is seed-dependent at the deepest rung, and that reframes E12 (LFH-E16, partial).**
-E16 stopped at 6/18 cells when another user's job took 23.8 GB of the shared card; the runner's
-contention gate and hang timeout held, and no cell was mis-scored as a rejection. The six that ran
-falsify E16's own third prediction and displace its primary. `ladder_138`'s adapted rung accepted
-**1 of 3** seeds, with endpoint error 0.3298 / 0.3300 / 0.3823 / 0.4355 m across four seeds against
-a 0.35 m gate — it straddles the threshold, spread 105.7 mm, twice the nominal's. So E12's
-"delivered amplitude" is a single-seed point estimate at the edge of a cliff, and its best source
-is the one that fails to reproduce. Nothing in E12 is withdrawn, but **delivered amplitude must be
-redefined as accepted at k of n seeds**, and the operating point should sit a rung below the cliff
-rather than on it. That now outranks trimming the placement margin.
-
-**10. The model and its metric.** `scene_distribution.py` implements `q(S | executed pair)` with
-support computed and only the free remainder sampled, plus the eps-delta scorecard. Two closed
-forms fell out and are verified in tests: **regret = xi * |W|**, identically equal to the adapted
-motion's clearance under the face; and **regret + necessity = delta_strike + |W|**, invariant in
-xi. So `xi` *is* normalised regret, the corpus convention of placing hard at the window centre
-spends half the window on it, and neither term improves except by a deeper delivered adaptation —
-which is exactly why E12 and E16 are the experiments that matter. Scored against baselines on 2000
-samples: random placement admits **3.8%**, uniform-in-support **45.9%**, shaped `q_LFH` **100%** at
-half the median regret. Note honestly that most of the jump is the closed-form support, which is
-computed rather than learned.
-
-**11. Archetype freedom is verified (LFH-E18).** Four visually distinct obstacles — a 40 mm
-plank, a lintel with jambs, an I-beam with web and flange, a 0.42 m panel — placed at the *same*
-coordinate inferred from the *same* executed pair, all reproduce accepted/accepted/rejected/
-accepted. `hard/adapted` endpoint error is **0.3297638984283594 m in all four**, identical to the
-empty-scene value: the adaptation is completely insensitive to what the obstacle is, because it
-never touches any of them. This is the two-stage factorisation — critical point computed,
-realisation free — demonstrated rather than assumed, and it is the empirical basis for treating
-archetype as a design choice rather than something to condition on.
-
-One prediction of mine was falsified by its own wording: I required the hard-cell rejection to be
-`disallowed_robot_contact` *alone*, and `ibeam` also trips both tracking gates. But its contact is
-at frame 101 on `torso_link`, the same frame and body as `door_lintel`, with endpoint error 0.4208
-against 0.3432 — the tracking failure is the *consequence* of a harder strike, not a rival cause.
-The predicate conflated "contact is the cause" with "contact is the only line in the report". Fixed
-in the analyzer; the result stands.
-
-Also worth keeping: peak force varies 410–538 N across archetypes at an identical face coordinate,
-and the peak frame moves from 101 to 117 for the thick panel. **Verdict is invariant; contact
-dynamics are not** — which is the standing reason force is never reported as a graded quantity.
-
-**12. The margin question is answered (LFH-E16b).** 24 cells, 0.746 GPU-h. Three motions x three
-rungs x three seeds. Two results matter.
-
-*Acceptance is not a property of a motion.* `ladder_034` accepts 3/3 at **every** rung including
-70 mm; `ladder_126` accepts 3/3 only at 40 mm; `ladder_148` accepts 3/3 at **no** amplitude despite
-a stable 3/3 nominal and an E12 record of "delivered 55 mm". So single-seed delivery is not
-systematically optimistic — E12 was exactly right for two of three — it is *unreliable*, and the
-failures concentrate where rungs sit near the gate. Seed spread also grows with amplitude in all
-three motions (nominal 17–94 mm → deepest rung 89–170 mm): crouching makes tracking not just worse
-but **less predictable**, which is why an operating point near the gate is unsafe even when its
-mean sits below it.
-
-*The executed window is highly reproducible where it is measurable.* On rungs accepting 3/3, the
-three-seed window range is **1.18, 2.66, 3.39, 7.94 mm** — worst case 7.94 mm, against a margin of
-18.044 mm applied to *each* side. Same order as the 2.73 mm null control, now measured by E1a's own
-statistic on the quantity the margin is actually applied to. **The margin removes 36.1 mm from
-every window to guard something that moves by at most 8 mm.** That is now a measured claim, not an
-inference — and it is the registered basis for proposing an empty-scene margin, which is a separate
-decision I did not take.
-
-Net: two **stable** sources established in a sense no earlier source has been — `ladder_034`
-(`walk_look`, 70 mm at 3/3, window 51–55 mm) and `ladder_126` (`carry_walk`, 40 mm at 3/3, window
-36–44 mm). Delivered amplitude is redefined as *deepest rung accepted at 3/3 seeds*; E12's yield
-figure is now an upper bound.
-
-**Revised priorities, in order.**
-
-1. **Register the margin decision** (no GPU). E16b measured what E16 asked. Propose an
-   empty-scene margin derived from empty-scene repeatability — the worst observed three-seed range
-   is 7.94 mm — with the E1a value retained for every existing artifact so nothing is retroactively
-   re-graded. At 10 mm/side, four of E12's five pairs clear the 20 mm floor instead of one. This is
-   the single largest yield gain available and it costs no rollouts.
-2. **Run the ladder + 3-seed protocol over the remaining 55 screened clips.** The pipeline is now
-   fully scripted end to end (screen -> prepare -> manifest -> run -> analyse -> synthesise ->
-   verify -> render). At ~0.25 GPU-h per motion for a 3-seed ladder, 20 more motions is ~5 GPU-h
-   and would take the stable-source count from 2 toward the 24-30 bar.
-2. **E14 — lateral repeatability, redesigned.** Not an E3-style retry. The fixed instrument yields
-   raw lateral gap windows of 8–51 mm on existing executions (grid-maxima, so optimistically
-   biased), all refused by the same imported margin. Measure lateral repeatability first, then
-   pre-register a station and band.
-3. **E11 (regret)** and **E15 (seeds)** unchanged. Note E16 and E15 share machinery — the same
-   three-seed re-rolls answer both.
-4. **E5** keeps its go/no-go, but the paper no longer needs it for a learned component: `D_phi` is
-   one, and the refuted archetype model is a second, more interesting result.
-
-**What to write in the paper about supply.** Not "we have N families". The honest and more
-interesting claim is the funnel with its causes: the clip pool offers 58 straight gated candidates,
-the controller rejects whole gaits (`side_step`, `backward` nominals fail at 0.45 and 0.38 m
-endpoint error on straight routes), the crouch costs tracking budget so delivered amplitude varies
-2× across motions, and the margin rule then removes most of what survives. Each of those four is
-measured, and three of them are fixable.
+**Revised order of remaining work.** (1) Let the supervisor finish v1's 174 runs — it
+is blocked only by other projects holding the card, and it self-resumes. (2) Run the 72
+prepared nominal label commands (~0.6 GPU-h), then fit and evaluate at seed 8511 only
+(144 runs, ~1.3 GPU-h), reusing v1's comparators. (3) Decide Sep 10 on the combined
+funnel. Total remaining ≈ 3.4 GPU-h. **The binding risk is no longer scope or budget —
+it is that three other projects are holding 13.5 of 16.3 GB on the shared card.** If
+that persists through Sep 8, drop the nominal evaluation and publish the nominal
+*acquisition funnel* alone, which is already a complete result.
 
 ---
 
-## 中文摘要（详细内容见下文英文）
+## 0. Verdict in six lines (written 00:30; see the update above)
 
-1. 你写的 $\tau,K,G \to p_\psi(S\mid\tau,K,G)$ 本身是 non-identifiable 的，这一点你已经意识到了。
-   代码库里实际做的、也是**正确**的做法，是把条件改成 **counterfactual pair**
-   $(\tau_0,\tau)$ ——原始动作 + 被编辑的动作。给定这一对，critical window 有闭式解，问题就变成
-   identifiable 的。论文的核心主张应该是这一句：*单个动作不能解释场景，但一对反事实动作可以。*
-2. 你定义的 $\mathcal S_{\epsilon,\delta}$ 四个条件里，现有的 2×2 physics 模式
-   (accepted/accepted/rejected/accepted) 已经**离散地**验证了 Feasible 和 Necessity；
-   Regret ≤ ε（"这个动作是否接近最小编辑"）和 Realism 还**没有**被测量。两者都能便宜地补上（下面 E11、E13）。
-3. 现在的真正瓶颈**不是 GPU**（一个 4-cell family ≈ 0.06 GPU-h），而是**能被控制器跟踪的
-   motion pair 供给**：E9a 的新动作 80 mm crouch 在空场景就被拒了。下一步最重要的实验是
-   **amplitude-ladder source screening**（E12），目标 2 周内从 4 个 source 增到 ≥12。
-4. 三周内能诚实写出的论文：**"Counterfactual inverse scene design"** ——方法 + 物理证伪 +
-   小规模 learning-value（E5）。不要承诺 lateral/floor 的 critical support，除非 E14 在
-   2 天预算内成功；把 E3 的失败作为结果写进去。
-5. Seed 必须当 random effect 报告（E10 vs E10b）。每个 family 至少 3 个 sim seed。
+1. The project has a working embodied pipeline, exact reproducibility, and an unusually
+   honest failure ledger. It does **not** have a paper, and its intended headline
+   ("a learned generator supplies better training scenes than analytic construction")
+   is currently *contradicted* by its own data: all nine Motion2Scene training scenes
+   are both-fail, and the only measured learned rescue came from the analytic arm.
+2. The learner tie was a **bug, not a finding**: the 0.001 normalization clamp on 70
+   constant dimensions blew test inputs up to 1952.75. The linear control on physical
+   scales fixed it. The M2S data failure has a **diagnosed, cheap cause**: proposals
+   were screened against the *reference* trajectory, and the achieved-transition
+   screen catches all 13 false-clears. Both fixes exist. Neither has been run as data.
+3. Compute is not the constraint. A cell costs ~33 s (0.0094 GPU-h); the whole project
+   has spent 4.3 GPU-h. The whole ICRA experiment below costs ~6 GPU-h. The constraint
+   is **scope discipline and GPU contention** (the 7500 MiB floor has already stalled
+   a batch to 0/20 while another job holds 4.2 GB).
+4. **Change the thesis now.** The paper is not "learned beats analytic". It is
+   *"training scenes constructed from executed motion contrasts, with paired physical
+   labels, teach a perceptive selector when to adapt — and here is which part of the
+   construction does the work."* Analytic vs learned proposal becomes one factor in a
+   4-arm ablation, and every outcome of that factor is reportable.
+5. **Cut the plan to one budget, four arms, one learner, at most three carriers, the
+   twelve frozen layouts.** Drop 24/48/96, drop the fifth arm, drop optimizer seeds
+   (the learner is deterministic), drop the 9490xxx final-source acquisition. Those
+   are the RA-L/IROS extension, not the ICRA paper.
+6. Decision point is **Sep 10, 18:00**. If the transition-aware M2S arm has ≥1
+   useful contrast per carrier on ≥2 carriers, write the four-arm paper. If a second
+   carrier never qualifies or M2S is again all both-fail, still write the paper with
+   the narrowed claim in §2.3 — but expect a modest acceptance probability and
+   decide then, in writing, whether the same manuscript goes to RA-L instead.
 
 ---
 
-## 1. Where the theory stands against what is built
+## 1. Where the work actually stands
 
-### 1.1 Your formal target, mapped onto the pipeline
+### 1.1 Established (physics-verified, reproducible, quotable)
 
-Your set
-
-$$\mathcal S_{\epsilon,\delta}(\tau)=\{S:\ \mathrm{Feasible}=1,\ \mathrm{Regret}\le\epsilon,\ \mathrm{Necessity}\ge\delta,\ \mathrm{Realism}\ge r_0\}$$
-
-is the right object. Here is what each term currently is, in the code and in the evidence:
-
-| term | what implements it today | status |
+| Claim | Evidence | Where |
 |---|---|---|
-| $\mathrm{Feasible}(\tau,S,K)=1$ | `adapted_hard` cell **accepted** by the frozen SONIC + Isaac gate (tracking error, drift, contact) | measured, physics-verified. Note that *K* enters twice: the 29-capsule body (`keypoints.py`) and the **controller's tracking capability** — E9a shows the second dominates |
-| $\mathrm{Necessity}(\tau,S)\ge\delta$ | `nominal_hard` **rejected** with contact uniquely attributed to the binding face *before* drift; `nominal_easy` **accepted** (i.e. in $S\setminus e$ the edit is unnecessary) | measured; the "remove $e$" ablation is literally the easy scene |
-| $\mathrm{Regret}(\tau;S)\le\epsilon$ | **nothing** — the 2×2 shows the adapted motion is feasible and the nominal is not, but not that a *smaller* edit would fail | **not measured** (fix: E11) |
-| $\mathrm{Realism}(S)\ge r_0$ | deterministic archetypes (`shelf_plank`, `ibeam`, `door_lintel`, `hanging_panel`, `hvac_duct`) + keep-out-certified context (`q_ctx`, E10b) | designed, not scored (fix: E13) |
+| A generated/analytic overhead beam separates walk from crouch in closed loop under frozen SONIC | absent 3/3 both; present d055 3/3 at 0 N, upright 0/3 (73.6–762.1 N) | `BEAM_EXECUTION_V3_RESULT` |
+| Generated constraints separate motions across sources | 6/8 pairs qualify, 18/24 requested slots separate, upright peaks 93.7–1542 N | `SOURCE_EXECUTION_V1_RESULT` |
+| The deeper adaptation is *not* necessary: d040 clears the selected beam | d040 3/3 at 0 N | `BEAM_D040_EXECUTION_V1_RESULT` |
+| The command timing window is narrow and measurable | seed 8042: 0.20 s fail (429 N), **0.30 s pass**, 0.40 s fail (565 N) | `ACTION_LABEL_COMPLETION_V1_RESULT` |
+| A scripted upper/lower-ray selector works and its limits are mapped | 42 cells: reactive & oracle 9/10 poses; blind 0/10; 500 ms delay 0/2; 6/6 negative controls reject | `OVERHANG_VARIATION_V1_RESULT` |
+| Execution-aware analytic construction is a strong, cheap competitor | 127/128 unique accepted, 99.0 % station coverage vs learned 37.3 % at equal queries | `COUNTERFACTUAL_STAGE_V1_RESULT` |
+| Learned local-event proposals transfer to fresh sources | 384/384 vs uniform 30/384 on 43001–43008, −68.7 % search time; ties gradient | `FRESH_SOURCE_V1_RESULT` |
+| A learned selector can realise a measured action advantage from rays | analytic-trained linear control requests d040 at 1.27 m/8512: 0 N vs walking 57.9 N | `SELECTOR_BREAKPOINT_RESULT` P3 |
+| Reference-based proposal screening is the cause of useless M2S scenes | reference screen: 13 false-clears (9 in M2S); achieved-transition screen: 0 | `SELECTOR_BREAKPOINT_RESULT` P2 |
 
-With the lexicographic cost the draft already uses —
-$J(\tau;S)=\infty$ if infeasible, else $D(\tau,\tau_0)$ — the 2×2 verdict pattern is **exactly** the
-finite-sample membership test for $\mathcal S_{\epsilon,\delta}$ with $\epsilon=0$ over the
-two-candidate set $\{\tau_0,\tau\}$ and $\delta=D(\tau,\tau_0)>0$. Say this in the paper. It ties
-your formalism to the thing that is already verified, and it makes clear what is missing: the
-minimum over *all* $\tau'$ (Regret) has only been taken over two candidates.
+### 1.2 Contradicted or retracted (must not appear as claims)
 
-### 1.2 The non-identifiability point, and how the pipeline already resolves it
+- "d055 is the minimum required adaptation" — d040 clears 3/3.
+- "Learned generator beats analytic / gradient" — ties at best (384/384 both); analytic has 2.7× coverage.
+- "Distillation removes search cost without loss" — 377/384 vs 384/384; only 47 % total query reduction.
+- Pose-robustness prediction (reactive > oracle) — both 9/10.
+- The original 20 MLPs' independent-layout tie — a normalization defect, retained as a failure, not a comparison.
+- Everything in `docs/paper/sweepcf_draft.md` (Aug 19) — different apparatus, Claim 5 never ran. Do not merge it into this paper.
+- The August `q_LFH` conditional result (refuted by its own feature-blind baseline).
 
-You are right that $p(S\mid\tau)$ is badly non-identifiable: a crouch can be explained by a beam,
-a doorway, a branch, or theatre. The pipeline does not try to learn it. What it does instead —
-and this is the paper's real theoretical move, so state it as such — is **condition on the
-counterfactual pair** $(\tau_0,\tau)$ rather than on $\tau$ alone:
+### 1.3 Unproved (the gap the paper must close or explicitly narrow)
 
-- Given executed $\tau_0$ (nominal) and $\tau=O_\alpha(\tau_0)$ (adapted), the set of overhead
-  faces that make $\tau$ necessary and sufficient is a **closed-form interval**
-  $W=[R^\uparrow(\tau)+\delta_{clear},\ R^\uparrow(\tau_0)-\delta_{strike}]$ (`lfh.md` §2.4).
-  That is an identifiable object. Nothing is learned to get it.
-- What is genuinely unidentified — *which archetype, which context, where inside $W$* — is
-  handled by a **designed** proposal distribution $q_{LFH}$ over that support, and the physics
-  gate falsifies each proposal. `q_LFH` is explicitly not $P_{env}$.
+- Any training-data advantage of *transition-aware* M2S scenes over analytic, no-contrast, or uniform scenes with the repaired learner.
+- Any result on more than one carrier under the 0.30 s switching contract (41002 was the only qualified one until tonight; the transition-bank v2 batch finished at 00:30 with **41001, 41002 and 41003 all qualified at both seeds**, 12/12 cells, 0.105 GPU-h. K = 3 is available.)
+- Source-held-out transfer (9490001–9490008 are reserved IDs, nothing generated).
 
-So the honest one-line thesis is:
+### 1.4 The August LfH line
 
-> *A single humanoid motion does not identify the scene that explains it; a counterfactual pair
-> does. LFH computes the identifiable critical support from the pair in closed form, samples
-> appearance and difficulty from a designed distribution over that support, and lets a frozen
-> physics-in-the-loop controller falsify every proposal.*
-
-Two consequences for how you write the problem statement:
-
-1. Replace $p_\psi(S\mid\tau,K,G)$ with $p_\psi(S\mid\tau_0,\tau,K,G)$ and say where $\tau_0$
-   comes from. Today it comes from the *operator*: $\tau=O_\alpha(\tau_0)$, so the pair is
-   constructed. The "from a single observed motion" version needs an **inverse operator**
-   ($\tau_0=O^{-1}(\tau)$ — un-crouch the clip) and is future work. Do not let a reviewer discover
-   this scope; declare it.
-2. $K$ is not just morphology. The decoder in LfH is a planner; here it is a **frozen tracking
-   controller**, and E9a/CAL1/CAL2/P9 show its response is motion- and context-dependent. That
-   is the paper's second contribution (the draft's "controller is a feasibility oracle"
-   section) — keep it.
-
-### 1.3 What is actually established (do not overstate)
-
-- **Overhead axis only.** 4 independent sources (`cf_005_056`, `lfh_086/089/090_crouch`),
-  12 physics-verified source×archetype pairs, all `local_crouch`. Lateral critical support is
-  **zero** (E3 falsified: the binding face changed the executed path). Floor/oblique: zero.
-- **Finite exposure is a necessary design variable** (E6 → E6c: 0.30 m face fails without
-  contact, 0.10 m passes). Real finding; a paragraph in the paper.
-- **Context composition works at one seed** (E10b, 5 obstacles, 288.78 mm keep-out) and
-  **fails at another** (E10, seed 33101, both adapted cells reject with zero contact). Seed is
-  a random effect. You have n=1 per condition.
-- **Fresh motion → pair fails on delivery, not geometry** (E9a: nominal accepted, 80 mm crouch
-  twin rejected, endpoint 0.376 m, zero contact). This is the supply bottleneck.
-- **Conditional `q_LFH`:** LOO log-loss 1.514 vs 1.609 uniform, top-3 11/12, 400/400
-  in-support. The report says correctly that this is a mechanism check, not a density claim.
-  Do **not** put it in the abstract as a learning result.
-- **Claim 5 (learner) has not been run.** The selector harness is validated on synthetic
-  families (0.963 privileged, 0.126 scene-hidden, 0.593 wrong-scene). The gate is closed on a
-  crossed-matrix technicality (`hanging_panel` missing on 3 sources).
+Sound geometry (closed-form window, bit-exact reproduction, `D_phi` at −39 % RMSE), two learned results retracted, Claim 5 never run, two causal families. It shares no apparatus with Motion2Scene and the README correctly refuses to pool it. **Keep it out of this paper** beyond one motivating sentence. It is a separate short paper or the RA-L appendix, not eight-page material.
 
 ---
 
-## 2. The paper you can honestly write in three weeks
+## 2. The paper you can honestly write by Sep 15
 
-**Title direction:** *Counterfactual Inverse Scene Design: Hallucinating the Obstacles that
-Explain Humanoid Whole-Body Motion.*
+### 2.1 Title and thesis
 
-**Claim ladder for the paper (each row must have a number in the paper):**
+**Motion2Scene: Constructing Training Scenes from Executed Humanoid Motion Contrasts.**
+(Keep "Transition-Aware Counterfactual Environments" as the subtitle only if the
+transition-aware arm is the winner; otherwise it over-promises.)
 
-| # | claim | evidence needed | have it? |
+> A humanoid's executed motion contrast — the same approach with and without an
+> adaptation, both run through the frozen controller — identifies where an obstacle
+> must sit to make the adaptation *useful*. We construct training scenes at those
+> locations, label each with the paired physical outcome of both commands, and show
+> that a fixed perceptive selector trained on such scenes learns when to adapt, while
+> selectors trained on uniform or contrast-free scenes do not. We ablate which parts
+> of the construction matter: execution-verified vs reference-based conditioning,
+> contrast vs target-only objectives, and learned vs analytic proposal.
+
+This thesis is true today for the analytic arm on one carrier, and the experiment in
+§3 tests it on two to three carriers with all four arms. Its strength is that **every
+outcome of the learned-vs-analytic factor is a finding**, so the paper cannot be
+killed by that result.
+
+### 2.2 Claim ladder (each row needs a number in the paper)
+
+| # | Claim | Evidence | Have it? |
 |---|---|---|---|
-| C1 | From an executed motion pair, the critical support is closed-form and non-empty for a measurable fraction of pairs | window yield vs random/midpoint/max-separation baselines (draft has 0/55, 0/55, 5/55) | yes — refresh with all sources |
-| C2 | Proposals from that support are **physics-verified** at a reported rate (E-D2 calibration) | fraction of proposed 2×2s whose physics matches target, stratified by source/archetype/seed | partly — needs the seed replication (E12/E15) |
-| C3 | The scene **explains** the motion: necessity (remove $e$) and near-minimality (regret) | 2×2 + amplitude ladder | necessity yes; **regret no** → E11 |
-| C4 | Appearance/context is a free dimension: archetype and clutter transfer preserve verdicts, with measured exceptions | E2/E7/E7c/E10b + seed replication | yes at n=1 per cell; needs seeds |
-| C5 | The controller is part of the inverse problem (delivery ≠ command; fresh motions fail on tracking) | CAL1/2/3, P9, E9a, ladder yields from E12 | yes |
-| C6 | Counterfactual-critical sampling has **learning value** over uniform-feasible / DCS / visual-only at equal budget | E5 on ≥8–12 sources, held-out source×archetype | **no** — decide by day 12 whether it makes the paper |
-| C7 (negative) | Lateral binding is not a scene-invariant intervention for this controller | E3 + one boxed retry (E14) | yes (as negative) |
+| C1 | Executed contrasts identify useful scenes; reference-based conditioning does not | P2 forecast (13 vs 0 false-clears); corpus yield (M2S-ref 0/9 useful vs analytic 4/8) | **yes** |
+| C2 | Constructed scenes separate commands physically across sources | 6/8 sources, 18/24 slots; d040 vs d055; 0.30 s window | **yes** |
+| C3 | Contrast-labelled scenes train a selector that adapts correctly on independent layouts; uniform and no-contrast do not | §3 experiment, four arms, frozen 12 layouts × 2 seeds × K carriers | **no — Sep 8–10** |
+| C4 | The learned proposal model does / does not add value over execution-aware analytic construction at matched labels | same experiment, M2S vs analytic paired by layout | **no — same run** |
+| C5 | Limits: sensing/timing failures are the binding constraint, not scene supply | 42-cell panel, both-fail low beams (1.18 m), 500 ms delay | **yes** |
 
-Ship C1–C5 + C7 with certainty. C6 is the difference between a strong method paper and a
-paper with a learning result; the schedule below gives it exactly one shot.
+Ship C1, C2, C5 with certainty; C3 is the paper's spine and is cheap; C4 is reported
+whichever way it falls.
 
-**Do not** claim: natural obstacle density, simulator invariance (MuJoCo is a renderer here),
-lateral/floor generality, or policy-level (as opposed to selector-level) improvement.
+### 2.3 Pre-declare the three outcomes of C3/C4 now (write them into the register)
 
----
-
-## 3. Experiments, in priority order
-
-Costs use the measured rate: one rollout ≈ 0.015 contended GPU-h; a 4-cell family ≈ 0.06 GPU-h.
-GPU is not the bottleneck. **Register each of these in `docs/prediction_register.md` before
-spending**, house style, predictions first.
-
-### E12 — Source supply via amplitude-ladder screening  (start today; highest value)
-
-*Why first:* everything downstream (C2, C4, C6) scales with independent sources, and E9a says the
-failure is delivery at α=80 mm, not geometry. The draft's own numbers say crouch delivery ≈ 58%
-and the controller resists leg departures, so a fixed 80 mm is the wrong ask.
-
-*Protocol:*
-1. Generate N=30 fresh Kimodo motions across ≥3 prompt families (straight walk, gentle curve,
-   walk-and-turn), 2 seeds each, CPU gate as in E9a.
-2. For each accepted nominal, build `local_crouch` twins at α ∈ {40, 55, 70, 85} mm at route
-   progress 0.55 (or the station selector's choice).
-3. Empty-scene physics on nominal + all twins (5 rollouts/motion ≈ 150 rollouts ≈ 2.3 GPU-h).
-4. Keep the **largest accepted α** per motion. Compute the engineering window with the
-   symmetric 18.044 mm margins; a source enters `P_feas` iff $|W|\ge 20$ mm.
-
-*Predictions to register:* (a) ≥40% of fresh nominals accept; (b) of those, ≥50% have some
-accepted twin; (c) median largest-accepted α is between 40 and 70 mm; (d) ≥8 new sources clear
-the 20 mm window bar. If (d) fails, the paper's C1 yield number becomes the headline and C6 is
-dropped — that is still a result.
-
-*Output:* the source count for everything below, and the C5 "delivery ladder" figure (accepted
-α vs motion), which is new evidence in its own right.
-
-### E11 — Regret / tightness ladder  (the missing term in your definition)
-
-*Question:* is the adapted motion close to the *minimal* edit the scene demands?
-
-*Protocol:* for each verified hard scene (start with the 4 existing sources at their canonical
-hard coordinate), roll the adapted motion at fractional amplitudes
-$\alpha\in\{0.25,0.5,0.75\}\alpha^*$. Let $\alpha_{min}$ be the smallest accepted with zero
-binding contact. Define
-
-$$\widehat{\mathrm{Regret}} = D(O_{\alpha^*}\tau_0,\tau_0)-D(O_{\alpha_{min}}\tau_0,\tau_0)$$
-
-with $D$ = the draft's continuous edit cost (joint-space or capsule-height drop). Report it in mm
-of head/torso drop and as a fraction of $\alpha^*$. 3 rollouts × 4 sources ≈ 0.2 GPU-h.
-
-*Prediction:* at hard = window centre (ξ=0.5), $\alpha_{min}\approx 0.5$–$0.75\,\alpha^*$; regret
-is not zero. Then **the design lever is ξ**: placing hard at ξ→0 drives regret → 0 at the cost
-of tracking margin. One extra family at ξ=0.2 per source (≈0.06 GPU-h each) gives the paper a
-regret-vs-ξ curve. This is the single most direct answer to "the model just put an object next
-to the motion" — the object is placed *as tight as physics allows*.
-
-### E15 — Seeds as random effects  (cheap, mandatory for C2/C4)
-
-For every verified family (existing 12 pairs + E12 additions), rerun the 2×2 at 3 sim seeds
-with geometry seed **fixed** (separate the two seeds in the manifest — E10 conflated them).
-≈ 12 × 3 × 4 × 0.015 ≈ 2.2 GPU-h. Report **per-source, per-seed** pattern survival, never a
-pooled rate. Prediction: ≥80% of (source, archetype, seed) cells reproduce the pattern; failures
-are drift-without-contact (the E10 mode), not context contact.
-
-### E8 — Close the crossed matrix  (prerequisite for E5)
-
-Transfer `hanging_panel` to `cf_005_056`, 089, 090 with easy/context recertification before
-hard. ≈ 0.2 GPU-h. `q_LFH_conditional_v1` already ranks it first — treat that as prioritisation
-only, as the report says.
-
-### E5 — Learning value  (one shot; go/no-go on day 12)
-
-*Gate to run:* ≥8 verified sources with ≥3 common archetypes, all E15-replicated.
-
-*Design:* as in `E5_LEARNER_PROBE_DESIGN.md` — four equal-budget samplers (q_LFH critical,
-uniform-feasible, DCS-ranked, visual-only), held-out source × held-out archetype, 5 training
-seeds, the already-validated selector harness, primary metrics counterfactual choice accuracy /
-unsafe rate / unnecessary-adaptation rate / success-minus-cost. Register the minimum worthwhile
-effect after a power calculation at the attained N.
-
-*Scope decision you must make now, in writing:* the draft's claim 5 currently **excludes
-generated/LFH families**. For an LFH paper that exclusion is self-defeating — the LFH families
-*are* the corpus. Register a scope amendment: "E5 for the ICRA submission is run on LFH-verified
-families; the SweepCF claim-5 pre-registration (mined families, 24–30 bar) is unchanged and is
-not what this paper reports." Two pre-registrations, two papers, no contamination.
-
-*Input modality:* run the privileged-geometry selector first (it is what the harness validates).
-If ≥4 days remain, add an ego-depth variant from the Isaac renders; if not, state plainly that
-the learning result is about **data construction**, with perception held privileged, and that
-the ego-depth version is the next paper. Reviewers accept a declared limitation far more readily
-than a rushed perception model.
-
-### E13 — Realism, scored not asserted  (half a day, no GPU)
-
-Do not run a user study. Do two cheap things:
-1. **Dimensional plausibility:** each archetype carries a published dimension prior (door
-   lintel 2.0–2.1 m, shelf plank 0.3–0.6 m deep, I-beam flange 0.1–0.3 m …). Report the fraction
-   of generated scenes whose *non-binding* dimensions fall inside the prior. This is $r_0$.
-2. **Context density:** number of keep-out-certified context objects per scene and the
-   CPU minimum clearance distribution (E10b's 288.78 mm becomes a histogram).
-
-### E14 — Lateral, time-boxed to 2 days  (optional; write the negative either way)
-
-D2-012 introduced exact `lateral_gap_reach` and the context-recertification rule that E3 lacked.
-One registered retry on the best CAL1/CAL2 arm-tuck source, 0.10 m exposure, recertify easy in
-context before hard. If it passes: one lateral family, reported as n=1. If it fails: C7 is a
-finding — *for a frozen tracking controller, lateral faces alter the executed path before
-contact, so lateral hallucination requires controller-in-the-loop recertification that
-overhead does not.* Either outcome is a paragraph. Do not spend a third day.
-
-### Not now
-
-- Learned trajectory encoder replacing the kernel `q_LFH` — the report's own model-selection
-  criteria (nested LOMO, calibration, support violation) need ≥10 sources first.
-- Multi-binding scenes; floor/`ground_support`; dynamic obstacles; the inverse operator.
-- MuJoCo as a physics oracle. Keep it as the cross-render figure generator.
+- **A. M2S-transition ≥ analytic > uniform, no-contrast.** Headline: transition-aware
+  learned construction; analytic is the matched strong baseline.
+- **B. analytic ≥ M2S-transition > uniform, no-contrast.** Headline: *execution-verified
+  contrast construction* is what matters; the learned proposal buys search time
+  (−69 %) and fresh-source transfer (384/384) but not label quality at this scale.
+  This is a perfectly good ICRA paper and, on current evidence, the likeliest outcome.
+- **C. all arms tie or all fail.** No selector paper. Report C1/C2/C5 as a
+  data-construction and physical-validation study, and send it to RA-L with the
+  larger study rather than to ICRA. Decide on Sep 10.
 
 ---
 
-## 4. Three-week schedule
+## 3. The one experiment: M2S-ICRA-v1
 
-| days | GPU (contended h) | work | gate |
+Everything below is a *narrowing* of `TRANSITION_AWARE_NEXT_STAGE.md` and
+`LEARNING_UTILITY_PLAN_V1.md`, not a new design. Register it as one document before
+spending, house style, predictions first.
+
+### 3.1 Freeze
+
+- **Controller, sensing, contract:** SONIC frozen; ideal 48-ray packet (144 values);
+  single decision at 0.30 s; walk-commit vs request-d040; 3.3–3.5 s return; first-episode
+  scorer (≤1 N, body origins cross 0.1 m, 0.3 s upright). Unchanged.
+- **Learner (one, for all arms):** the deterministic regularized logistic control from
+  P3 — physical scales, zero init, Adam 0.01, 2000 full-batch updates, 0.01 weight
+  penalty, 214 inputs, two heads, walk-preferred rule, refusal→walk. The MLP is a
+  retained failure in the appendix. Because the learner is deterministic, **optimizer
+  seeds are removed**; uncertainty comes from carriers, layouts and physics seeds
+  (§3.5), and from leave-4-out refits scored offline against the paired label table.
+- **Carriers:** 41001, 41002, 41003 — all three qualified at both seeds tonight. Cap at three. No 9490xxx acquisition for ICRA. Say plainly:
+  "unseen-layout transfer on qualified development carriers; source-held-out transfer
+  is future work."
+- **Generator:** the frozen all8/8421/1200 initializer + pattern-17 search, with the
+  proposal *evaluator* switched from the complete-reference trajectory to the achieved
+  empty-scene entry+exit transition (seed 8721 supplies proposals; 8722 is the
+  predeclared repeat). No refitting.
+
+### 3.2 Arms (four, not five)
+
+| Arm | Construction | Role |
+|---|---|---|
+| Uniform | station [0.1, 0.9], underside [1.1, 1.45] m, common validity checks only | untargeted |
+| Analytic | execution-aware capsule–box solver, global distinct search, on the *achieved* transition | claim-bearing comparator |
+| No-contrast | same generator/search, target-clearance objective only, achieved transition | contrast ablation |
+| Motion2Scene | frozen learned initializer + pattern search + independent audit, achieved transition | full method |
+
+The reference-based M2S arm is **not re-run**: its 0/9 useful yield and the P2 forecast
+are C1 and go in the paper as measured. Identical common background quota
+(absent/raised/blocked, one quarter) acquired once per carrier and shared.
+
+### 3.3 Budget
+
+One budget: **24 complete encounter groups per arm**, pooled across carriers (8 per
+carrier at K=3, 12 at K=2), 18 generated + 6 shared background, both commands labelled.
+Charge every proposal, rejection and both-fail. No refills.
+
+### 3.4 Cost (measured 33 s/cell, 375 s reserved, serial, 7500 MiB floor)
+
+| Stage | Cells | GPU-h (measured) |
+|---|---|---|
+| Carrier qualification (running) | 12 | 0.11 |
+| Label acquisition: 4 arms × 18 × 2 + background 6 × 2 × K(3) | 180 | ~1.7 |
+| Evaluation: 12 layouts × 2 physics seeds × K(3) × (4 learned + scripted-ray + oracle-analytic) | 432 | ~4.1 |
+| Reserve for retries / a fourth carrier | — | ~1.5 |
+| **Total** | ~620 | **~7.5** (fits one week's 24 h envelope with margin) |
+
+CPU: 4 fits + 4 × 6 jackknife refits, seconds. Generation: minutes.
+
+### 3.5 Endpoints (register before the first label run)
+
+- **Primary:** carrier-averaged contact-qualified passage on the traversal suite,
+  arm vs arm **paired by (carrier, layout, physics seed)**. Report the paired 2×2
+  counts (both pass / only A / only B / both fail) for M2S–analytic, M2S–uniform,
+  analytic–uniform, M2S–no-contrast. No p-value hunting; with ~72 paired cells at K=3
+  use exact binomial on discordant pairs and report the interval.
+- **Secondary, own suites:** unnecessary d040 on absent/raised; blocked-scene
+  refusal/infeasibility; d040 request rate; refusals that then walked successfully;
+  peak force, resets, returns.
+- **Comparators:** scripted upper/lower-ray rule and privileged analytic oracle,
+  executed on the same cells.
+- **Yield:** useful-contrast groups per requested scene and per GPU-h, per arm.
+- **Predictions to register:** (i) analytic and M2S-transition each produce ≥1 useful
+  contrast (walk-fail/d040-pass) per carrier; (ii) uniform ≤1 in total; (iii) no-contrast
+  ≥6/9 both-pass; (iv) the achieved-transition screen has 0 false-clears among executed
+  cells; (v) passage: contrast arms > uniform by ≥3 discordant cells net; (vi) M2S vs
+  analytic: **no prediction** — declare it a two-sided comparison.
+
+### 3.6 What to cut, explicitly
+
+- 24/48/96 budgets and 60–75 fits → one budget, four fits.
+- Fifth arm (reference-based M2S) → reported from existing data.
+- Five optimizer seeds → deterministic learner, jackknife.
+- Final-source acquisition (9490xxx) → future work; two sentences in Limitations.
+- Any generator refit, sensing change, new skill, continuous certificates, hardware.
+- The 480 paused original-MLP evaluations → stay paused forever; appendix row.
+
+---
+
+## 4. Schedule, Sep 7 → Sep 15
+
+| When | GPU | Work | Gate |
 |---|---:|---|---|
-| 1–3 | ~2.5 | **E12** generate + ladder screen; register E11/E15/E8 | ≥8 new sources? |
-| 3–5 | ~1.5 | **E11** regret ladder on existing 4 + ξ=0.2 families; **E8** hanging_panel | regret curve exists |
-| 5–8 | ~3 | **E15** seed replication over all verified pairs; verify new E12 sources' 2×2s (≈0.06 each) | per-seed survival table |
-| 6–8 | 0 | **E13** realism scoring; refresh C1 yield tables over all sources; figures 1–4 | — |
-| 8–9 | ~0.5 | **E14** lateral box (optional) | pass/negative written |
-| 10–12 | — | **Go/no-go on E5** at attained source count | decide |
-| 12–17 | ~2–4 | **E5** if go; otherwise expand E11/E15 and write | — |
-| 15–21 | 0 | write, internal review (`/ars-reviewer`), freeze evidence hashes | submit |
+| Sep 7 (tonight) | 0.1 | Transition-bank v2 **done: 41001/41002/41003 qualified at both seeds, 12/12**. Write `DEVELOPMENT_TRANSITION_BANK_V1_RESULT.md`. Commit the untracked bank scripts/tests (test passes). Register `M2S_ICRA_V1.md` with §3.5 predictions. | **passed: K = 3** |
+| Sep 8 | 1.7 | CPU: instantiate the 12 frozen layouts in each carrier's route frame; run all four constructions on achieved transitions; audit; freeze the 24-group lists. GPU: acquire labels (180 cells). **Start writing Intro / Method / Related work / C1–C2 sections in parallel — they do not depend on the result.** | all 24 groups labelled per arm |
+| Sep 9 | 4.1 | Fit 4 controls + jackknife; command-check integration (recorded 12/12 protocol); run the 432-cell evaluation. | evaluation complete |
+| Sep 10 | 0.5 | Analysis, paired tables, figures 2–4. **18:00 decision: outcome A / B / C (§2.3).** Freeze evidence hashes. | claim chosen |
+| Sep 11–13 | 0 | Full draft: results, limitations, figure 1 composite; internal review with the `xiao-paper-review` rubric; cut to 8 pages incl. references. | draft complete |
+| Sep 14 | 0 | Final read, hash-pinned evidence bundle, source tarball, README pointers. | — |
+| Sep 15 | 0 | Submit before 11:59 PST. Video during 17–22 Sep from existing replays. | — |
 
-Total ≈ 10–12 contended GPU-h. The constraint is your attention and the register discipline,
-not compute.
-
----
-
-## 5. Paper skeleton (6+n pages, ICRA)
-
-1. **Introduction** — the failure mode (decorated scenes: image changes, trajectory bit-identical);
-   the inverse problem; why a single motion is non-identifiable; the pair fix. Figure 1: the same
-   nominal/crouch pair, the closed-form window drawn on the reach profile, three archetype
-   realisations, and the 2×2 physics verdicts (E7c/E10b renders already exist).
-2. **Problem formulation** — your $\mathcal S_{\epsilon,\delta}$ with the table from §1.1
-   mapping each term to a measurement; lexicographic $J$; the 2×2 as the finite membership test.
-3. **Related work** — LfH, LfLH/Dyna-LfLH, LfH-CP (critical configurations), scene generation
-   for embodied AI (Holodeck/ProcTHOR/Infinigen-style), humanoid motion-tracking controllers
-   (SONIC etc.), counterfactual data generation. Position: *we do not learn a scene generator;
-   we compute identifiable support and learn only the proposal over it.*
-4. **Method** — keypoint critical set; closed-form window; finite exposure; $q_{LFH}$ factorised
-   as binding atom × context; tier discipline (screen → capsule keep-out → physics); the frozen
-   controller as decoder.
-5. **Experiments** — C1 yield; C2 physics agreement stratified by source/archetype/seed (E15);
-   C3 necessity + regret (E11) with the regret-vs-ξ curve; C4 context/archetype transfer incl.
-   the E10/E10b seed lesson; C5 delivery ladder (E12) and CAL1–3; C7 lateral negative; C6 (E5) if
-   it ran.
-6. **Limitations** — overhead only; operator-constructed pairs (no inverse operator); privileged
-   perception in E5; seeds as random effects with small n; one controller.
-
-Figures to make from existing assets: E10b Isaac + MuJoCo cross-render (side-by-side),
-`route-map-2d.png`/`scene-map-3d.png`, `direction-support.png` (make its caption say *only −z is
-verified*), `proposal-distribution.png`. New figures: delivery ladder (E12), regret vs ξ (E11),
-per-seed survival heatmap (E15).
+Risk that actually threatens this: **GPU contention.** The other resident Isaac job holds
+4.2 GB on a 16 GB card, and the floor has already produced a 0/20 launch. Coordinate the
+GPU for the Sep 8–9 windows now, or run overnight; do not lower the floor mid-study.
 
 ---
 
-## 6. Rules that the last two weeks re-taught (keep them)
+## 5. Paper skeleton (8 pages including references)
 
-- Register before spend; record void attempts; infra failure ≠ rejection.
-- Physics is the verdict; geometry, `D_φ`, `q_LFH`, and MuJoCo never re-grade.
-- Accepted-in-context, zero-contact executions are the only certificates for a retry coordinate.
-- Fix the geometry seed and the sim seed separately; report per-seed.
-- One binding obstacle per scene until per-obstacle ablation exists.
-- Causal-reference artifacts and deployable (retimed) artifacts never share a table.
-- Quote source counts by the pre-registered definition (scene instances ≠ families).
+1. **Introduction (¾ p).** Decorated scenes vs *useful* scenes; a single motion does
+   not identify its obstacle, an executed contrast does; three questions the paper
+   answers (does construction matter, which part, does learning the proposal help).
+   Figure 1: one carrier — walk and d040 executions, the achieved transition, the
+   beam placed by each arm, the paired outcomes, and the selector's request on an
+   independent layout. All assets exist (`selector-breakpoint.mp4`, beam renders).
+2. **Related work (½ p).** LfLH / LfH / LfH-CP (motion→scene already includes downstream
+   learning: our distinction is executed humanoid contrasts and paired physical
+   labels); HumanoidPF (generation utility as generalisation standard); Perceptive
+   Humanoid Parkour (perceptive composition — we scope to data construction); SONIC
+   (inherited). Cite rliable for paired small-n reporting. Five to seven more cites
+   on scene generation for embodied AI. No novelty over-claim.
+3. **Problem and construction (1½ p).** The contrast pair; the 0.30 s switching
+   contract; the four constructions; achieved-transition screening; independent audit
+   and refusal; labels as Y(scene, state, phase, history, command). One table.
+4. **Physical validation (1 p).** C2 numbers; d040/d055; timing window; sensing panel
+   summary; the P2 false-clear result as the bridge to C1. Figure 2: force/outcome
+   panel across sources and heights.
+5. **Learning-utility study (2 p).** Setup, arms, learner, frozen layouts, endpoints;
+   paired 2×2 tables; yield per GPU-h; comparators; jackknife stability. Figure 3:
+   per-(carrier, layout, seed) outcome heatmap by arm. Figure 4: yield and cost.
+6. **Limitations and retained failures (½ p).** One beam family, two commands, ideal
+   rays, K ≤ 3 development carriers, no source-held-out transfer, one controller;
+   the MLP normalization failure; low-beam both-fail; 500 ms delay.
+7. **Conclusion (¼ p).** References (~1 p).
+
+Do not spend pages on the CPU generator lineage (inverse → uncertainty → margin →
+carrier → event → refinement → station → fresh → distillation). One paragraph plus a
+supplementary pointer to `docs/motion2scene/`.
 
 ---
 
-## 7. If I had to pick one thing
+## 6. Reviewer objections you will get, and the honest answers
 
-Run **E12 today**. Every claim in the paper gets stronger with sources, the E9a failure mode is
-a fixed-amplitude problem the ladder is designed to route around, and the result of the ladder
-(accepted-α per motion) is itself the cleanest evidence yet that the controller, not the
-geometry, defines what a humanoid scene can explain.
+- *"It's one beam and two commands."* Yes; say so in the first paragraph of Limitations
+  and in the abstract ("a controlled minimal instance"). The paper's value is the
+  construction-and-label protocol and the ablation, not breadth.
+- *"Ideal rays, no perception."* Declared. The scripted-ray comparator bounds what
+  perception could add; the 500 ms delay result shows the selector is timing-limited.
+- *"n=2–3 sources."* Paired design, all cells shown, carrier-grouped reporting, no
+  pooled percentages. Source-held-out transfer is named as the next study.
+- *"The learned generator doesn't beat the analytic one."* If outcome B: that is the
+  finding, and it is more useful to the field than a marginal win. State what the
+  learned model does buy (search time, fresh-source transfer) with numbers.
+- *"Why not RL / a diffusion baseline / hardware?"* Out of scope by design; each is
+  one sentence.
+
+---
+
+## 7. Rules that this project has already paid for (keep)
+
+- Register before spend; predictions first; infra failure ≠ rejection; no retries
+  without charge.
+- Physics is the verdict; screens, forecasts and MuJoCo replays never re-grade.
+- One decision time (0.30 s); old 0.20 s labels are not 0.30 s labels.
+- Fixed learner across arms; any learner change is applied to every arm and declared.
+- Derivatives, physics repeats and layouts stay with their carrier; report grouped.
+- Retained failures go in the paper, not only in the ledger.
+- Never let a test-bank failure tune generation, sensing or the controller.
+
+## 8. Do not
+
+- Do not run 24/48/96, five arms, or 75 fits before Sep 15.
+- Do not acquire or "qualify" the 9490xxx sources this week.
+- Do not resume the 480 paused MLP evaluations.
+- Do not refit the generator on d040 or on achieved transitions.
+- Do not merge the August SweepCF/LfH apparatus or numbers into this manuscript.
+- Do not lower the 7500 MiB floor or the 375 s timeout to make a batch fit.
+- Do not write the abstract until the Sep 10 decision.
+
+---
+
+## 9. If I had to pick one thing
+
+Write up the transition-bank result tonight, register M2S-ICRA-v1 with §3.5's predictions,
+and start the Sep 8 label acquisition on achieved transitions. Everything else in the
+paper is already measured. The single thing standing between this project and a
+submittable manuscript is **one 180-cell labelled corpus built the right way**, and it
+costs under two GPU-hours.
+
+---
+
+## 中文摘要
+
+1. 现状：pipeline 完整、可精确复现、失败记录诚实，但**没有稿子**；原定主张"学习式生成器优于解析式"被自己的数据否定（M2S 9/9 both-fail，唯一的学习式 rescue 来自 analytic arm）。
+2. 两个已诊断的原因都是可修的：selector 的 0.001 归一化 bug（线性 control 已修）；生成器用 reference 轨迹而非实际执行的 transition 做筛选（achieved-transition screen 抓住全部 13 个 false-clear）。修好后的数据一个都还没采。
+3. 算力不是瓶颈（每 cell 33 s，全项目共用 4.3 GPU-h，整个 ICRA 实验约 6–8 GPU-h）；瓶颈是 scope 和 GPU 抢占（7500 MiB 门槛已让一批 0/20 启动）。
+4. **立刻改论点**：不是"学习 vs 解析"，而是"从执行过的动作对比构造训练场景 + 成对物理标签，能教会感知型 selector 何时适应；并消融构造中哪一部分起作用"。学习 vs 解析变成四臂消融里的一个因子，无论结果如何都可写。
+5. **砍到最小**：一个 budget（24 组/臂）、四臂、一个确定性线性 learner、≤3 个 carrier、12 个冻结 layout。去掉 24/48/96、第五臂、optimizer seeds、9490xxx 新 source。
+6. 时间：9/7 晚完成 carrier 资格 + 注册；9/8 采标签（~1.7 h）并同步开写不依赖结果的章节；9/9 评估（~4.1 h）；**9/10 18:00 决定 A/B/C**；9/11–14 写；9/15 提交。若只有单 carrier 或全臂平局，则同一稿改投 RA-L。

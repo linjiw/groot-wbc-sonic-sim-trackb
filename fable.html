@@ -1,0 +1,305 @@
+<title>Motion2Scene ICRA Guidance</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#F5F7F6; --panel:#FFFFFF; --ink:#1A2229; --muted:#5B6670; --line:#D5DBD9;
+  --accent:#1E6E86; --accent-soft:#E2EEF2; --alert:#A3491F; --alert-soft:#F6E7DE;
+  --ok:#2E6B45; --ok-soft:#E1EEE5; --bad:#8E2F2F; --bad-soft:#F3E1E1;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#12181D; --panel:#1A2229; --ink:#E4E9EC; --muted:#9AA7B0; --line:#2C3740;
+    --accent:#6DB6CF; --accent-soft:#1B303A; --alert:#E39A6B; --alert-soft:#3A2619;
+    --ok:#7CC496; --ok-soft:#1B3225; --bad:#E08A8A; --bad-soft:#3A1F1F;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#12181D; --panel:#1A2229; --ink:#E4E9EC; --muted:#9AA7B0; --line:#2C3740;
+  --accent:#6DB6CF; --accent-soft:#1B303A; --alert:#E39A6B; --alert-soft:#3A2619;
+  --ok:#7CC496; --ok-soft:#1B3225; --bad:#E08A8A; --bad-soft:#3A1F1F;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55}
+.wrap{max-width:72ch;margin:0 auto;padding:40px 24px 96px}
+.wide{max-width:104ch}
+header.mast{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:36px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--serif);font-weight:600;font-size:38px;line-height:1.12;margin:8px 0 12px;text-wrap:balance}
+.lede{font-size:17px;color:var(--muted);max-width:64ch}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.chip{font-family:var(--mono);font-size:12.5px;padding:5px 10px;border:1px solid var(--line);border-radius:4px;background:var(--panel)}
+.chip.alert{border-color:var(--alert);color:var(--alert);background:var(--alert-soft)}
+h2{font-family:var(--serif);font-weight:600;font-size:26px;line-height:1.2;margin:48px 0 12px;text-wrap:balance}
+h3{font-family:var(--sans);font-weight:600;font-size:16px;margin:28px 0 8px;letter-spacing:.01em}
+p{margin:0 0 14px}
+ul,ol{padding-left:22px;margin:0 0 14px}
+li{margin-bottom:6px}
+strong{font-weight:600}
+code{font-family:var(--mono);font-size:.9em;background:var(--accent-soft);padding:1px 5px;border-radius:3px}
+.verdict{counter-reset:v;list-style:none;padding:0;margin:0 0 8px}
+.verdict li{counter-increment:v;display:grid;grid-template-columns:34px 1fr;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.verdict li::before{content:counter(v);font-family:var(--mono);font-size:13px;color:var(--accent);padding-top:3px}
+.verdict li:last-child{border-bottom:1px solid var(--line)}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:14px 18px;margin:18px 0;border-radius:0 4px 4px 0}
+.callout.alert{border-left-color:var(--alert);background:var(--alert-soft)}
+blockquote{margin:16px 0;padding:0 0 0 18px;border-left:2px solid var(--line);font-family:var(--serif);font-size:18px;line-height:1.45;color:var(--ink)}
+.tbl{overflow-x:auto;margin:14px 0 20px;border:1px solid var(--line);border-radius:4px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+th{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--ground)}
+tr:last-child td{border-bottom:none}
+td.num,th.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+td.mono{font-family:var(--mono);font-size:13px;white-space:nowrap}
+.tag{display:inline-block;font-family:var(--mono);font-size:11.5px;padding:2px 7px;border-radius:3px;white-space:nowrap}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.bad{background:var(--bad-soft);color:var(--bad)}
+.tag.todo{background:var(--alert-soft);color:var(--alert)}
+.sched td:first-child{font-family:var(--mono);white-space:nowrap}
+.sched tr.decide td{background:var(--alert-soft)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:720px){.two{grid-template-columns:1fr}}
+.box{border:1px solid var(--line);border-radius:4px;padding:14px 16px;background:var(--panel)}
+.box h3{margin-top:0}
+.foot{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px}
+.zh{font-size:15.5px}
+a{color:var(--accent)}
+</style>
+
+<div class="wrap">
+<header class="mast">
+  <div class="eyebrow">Fable · research guidance · 2026-09-07</div>
+  <h1>Motion2Scene: the minimal solid path to an ICRA paper</h1>
+  <p class="lede">Read after the full <code>docs/motion2scene</code> result trail through the selector breakpoint study, the August LfH line, <code>docs/paper</code>, the uncommitted transition-bank work, and the machine state. Judgements are marked as such; everything else is a measurement quoted from a named result document.</p>
+  <div class="chips">
+    <span class="chip alert">Deadline ICRA 2027 · 15 Sep 2026 · 11:59 PST</span>
+    <span class="chip">8 pages incl. references</span>
+    <span class="chip">Video window reopens 17–22 Sep</span>
+    <span class="chip">8 days left · ≥4 must be writing</span>
+  </div>
+</header>
+
+<h2>Update: after executing this plan</h2>
+<p class="lede" style="margin-bottom:18px">Written 09:00 EDT, September 7. The plan below was written at 00:30 and has now largely been executed by an autonomous supervisor plus this session. Five things are settled; two change the paper. Everything further down still stands except where this section overrides it.</p>
+
+<h3>A · The panel ran</h3>
+<p>The transition bank finished 12/12 at 0.105 GPU-hours with 41001, 41002 and 41003 qualified at both seeds. The four-arm study was registered, 82 of 82 labels acquired, four learners fitted, and 366 of 540 evaluations admitted before other projects filled the shared card.</p>
+
+<h3>B · The outcome is none of A, B or C. Call it D.</h3>
+<p>Under the registered contract the learned arm acquired <strong>zero</strong> generated groups and the analytic arm <strong>one</strong>. Three of the four fitted learners are <em>behaviourally identical</em>: uniform, target-only and Motion2Scene issue walk on all 61 conditions and pass 21/61. The analytic learner issues the crouch 22 times and passes 30/61, with <strong>9 wins and 0 losses</strong> against each of the others, consistent on all three carriers. Removing its single useful label drops its adaptation requests from 22 to zero and makes it bit-identical to the background-only model. The entire measured effect rests on one physically verified contrast, so the paper's real subject is contrast scarcity.</p>
+
+<h3>C · The acquisition failure was the inherited envelope, not the generator</h3>
+<div class="tbl"><table>
+<tr><th>Audit envelope (xy / z)</th><th class="num">41001</th><th class="num">41002</th><th class="num">41003</th></tr>
+<tr><td>nominal pose</td><td class="num">200</td><td class="num">168</td><td class="num">337</td></tr>
+<tr><td>±10 mm / ±5 mm</td><td class="num">50</td><td class="num">27</td><td class="num">150</td></tr>
+<tr><td><strong>±20 mm / ±10 mm (inherited)</strong></td><td class="num"><strong>2</strong></td><td class="num"><strong>0</strong></td><td class="num"><strong>32</strong></td></tr>
+</table></div>
+<p>Sweeping 11,421 centres per carrier on the achieved transitions shows 10 mm contrast witnesses collapsing as the envelope grows. The best nominal joint margin is 24.4, 20.5 and 27.0 mm, so the inherited ±20 mm placement envelope is the size of the entire executed window. It was the right instrument for a placement certificate and the wrong one for a study whose beam is authored at an exact simulator pose. A separately registered nominal contract, with predictions filed before its proposals were drawn, moves eligibility from 1/48 to <strong>41/48</strong> for analytic and from 0/48 to <strong>33/48</strong> for Motion2Scene. Thirty-six groups are assigned and 72 label commands are prepared, waiting on the card.</p>
+
+<h3>D · A second defect does belong to the generator</h3>
+<p>On 41003 the inherited envelope still leaves 32 witnesses and the learned draws reached none of them. Across the nominal proposals only 24 of 34 of the learned arm's critical scenes are visible to the sensor at the 0.30 s decision, against 44 of 47 for analytic, with 8 of 12 invisible on 41003 alone. Placing a contrast where the robot cannot see it is a real quality gap, independent of the envelope, and gated by neither contract. Report it; do not add a visibility gate after the fact.</p>
+
+<h3>E · Adaptation is nearly free here, and every learner under-uses it</h3>
+<p>Of the 38 conditions where both commands were executed there are 15 crouch-only successes, 11 both-pass, 12 both-fail and <strong>zero</strong> walk-only successes. The scripted ray rule requests the crouch 38 times and reaches 36/61, exactly the best-of-observed ceiling; the analytic learner requests it 22 times and reaches 30/61. A hand-written rule still beats every learned arm. Say so plainly, and note that the pending background suites are where unnecessary adaptation gets charged, so the ceiling is not the whole story.</p>
+
+<div class="callout"><strong>Revised thesis.</strong> Not "learned beats analytic", and not "construction matters" in the abstract. It is: <em>a training scene is useful only if it contains a decision-relevant contrast that survives execution and is visible at decision time; such scenes are geometrically scarce, the scarcity is measurable and designable, and one verified contrast is enough to change a fixed learner's behaviour.</em></div>
+
+<div class="callout alert"><strong>Revised order of remaining work.</strong> Let the supervisor finish the 174 outstanding runs; it is blocked only by other projects holding the card and self-resumes. Then run the 72 prepared nominal label commands (~0.6 GPU-h), fit, and evaluate at one seed (144 runs, ~1.3 GPU-h), reusing the existing comparators. Decide on September 10 from the combined funnel. Remaining total is about 3.4 GPU-hours. The binding risk is no longer scope or budget: three other projects hold 13.5 of the card's 16.3 GB. If that persists through September 8, drop the nominal evaluation and publish the nominal acquisition funnel alone, which is already a complete result.</div>
+
+<h2>Verdict, as written at 00:30</h2>
+<ol class="verdict">
+  <li><div>The project has a working embodied pipeline, exact reproducibility, and an unusually honest failure ledger. It does <strong>not</strong> have a paper, and its intended headline (a learned generator supplies better training scenes than analytic construction) is currently <em>contradicted</em> by its own data: all nine Motion2Scene training scenes are both-fail, and the only measured learned rescue came from the analytic arm.</div></li>
+  <li><div>The learner tie was a <strong>bug, not a finding</strong>. The 0.001 normalization clamp on 70 constant dimensions inflated test inputs to 1952.75; the linear control on physical scales fixed it. The M2S data failure has a <strong>diagnosed, cheap cause</strong>: proposals were screened against the reference trajectory, and the achieved-transition screen catches all 13 false-clears. Both fixes exist. Neither has yet been run as data.</div></li>
+  <li><div>Compute is not the constraint. A cell costs about 33 s (0.0094 GPU-h); the whole project has spent 4.3 GPU-h; the whole ICRA experiment below costs about 6 to 8 GPU-h. The constraint is <strong>scope discipline and GPU contention</strong>: the 7500 MiB floor already stalled one batch at 0/20 while another job held 4.2 GB.</div></li>
+  <li><div><strong>Change the thesis now.</strong> Not "learned beats analytic". Instead: <em>training scenes constructed from executed motion contrasts, with paired physical labels, teach a perceptive selector when to adapt, and here is which part of the construction does the work.</em> Learned vs analytic proposal becomes one factor in a four-arm ablation, and every outcome of that factor is reportable.</div></li>
+  <li><div><strong>Cut to one budget, four arms, one learner, at most three carriers, the twelve frozen layouts.</strong> Drop 24/48/96, the fifth arm, optimizer seeds (the learner is deterministic), and the 9490xxx final-source acquisition. Those are the RA-L or IROS extension.</div></li>
+  <li><div>Decision point is <strong>Sep 10, 18:00</strong>. If the transition-aware M2S arm yields at least one useful contrast per carrier on two or more carriers, write the four-arm paper. If a second carrier never qualifies or M2S is again all both-fail, still write the narrowed paper, but expect modest acceptance odds and decide in writing whether the same manuscript goes to RA-L.</div></li>
+</ol>
+
+<h2>Where the work actually stands</h2>
+<h3>Established: physics-verified, reproducible, quotable</h3>
+<div class="tbl"><table>
+<tr><th>Claim</th><th>Evidence</th><th>Source</th></tr>
+<tr><td>A beam separates walk from crouch in closed loop under frozen SONIC</td><td>absent 3/3 both; present d055 3/3 at 0 N, upright 0/3 (73.6–762.1 N)</td><td class="mono">BEAM_EXECUTION_V3</td></tr>
+<tr><td>Constructed constraints separate motions across sources</td><td>6/8 pairs qualify, 18/24 slots separate, upright peaks 93.7–1542 N</td><td class="mono">SOURCE_EXECUTION_V1</td></tr>
+<tr><td>The deeper adaptation is not necessary</td><td>d040 clears the selected beam 3/3 at 0 N</td><td class="mono">BEAM_D040_EXECUTION_V1</td></tr>
+<tr><td>The command timing window is narrow and measurable</td><td>seed 8042: 0.20 s fail (429 N), 0.30 s pass, 0.40 s fail (565 N)</td><td class="mono">ACTION_LABEL_COMPLETION_V1</td></tr>
+<tr><td>Scripted ray selector works; limits mapped</td><td>reactive and oracle 9/10 poses; blind 0/10; 500 ms delay 0/2; 6/6 negatives reject</td><td class="mono">OVERHANG_VARIATION_V1</td></tr>
+<tr><td>Execution-aware analytic construction is a strong, cheap competitor</td><td>127/128 unique accepted, 99.0 % coverage vs learned 37.3 % at equal queries</td><td class="mono">COUNTERFACTUAL_STAGE_V1</td></tr>
+<tr><td>Learned proposals transfer to fresh sources</td><td>384/384 vs uniform 30/384; −68.7 % search time; ties gradient</td><td class="mono">FRESH_SOURCE_V1</td></tr>
+<tr><td>A learned selector can realise a measured action advantage</td><td>analytic-trained linear control requests d040 at 1.27 m / 8512: 0 N vs walking 57.9 N</td><td class="mono">SELECTOR_BREAKPOINT P3</td></tr>
+<tr><td>Reference-based screening causes useless M2S scenes</td><td>reference screen 13 false-clears (9 in M2S); achieved-transition screen 0</td><td class="mono">SELECTOR_BREAKPOINT P2</td></tr>
+</table></div>
+
+<h3>Contradicted or retracted: must not appear as claims</h3>
+<ul>
+  <li>"d055 is the minimum required adaptation": d040 clears 3/3.</li>
+  <li>"Learned generator beats analytic or gradient": ties at best; analytic has 2.7× coverage.</li>
+  <li>"Distillation removes search cost without loss": 377/384 vs 384/384; 47 % total query reduction.</li>
+  <li>Pose-robustness prediction (reactive beats oracle): both 9/10.</li>
+  <li>The original twenty MLPs' independent-layout tie: a normalization defect, retained as a failure.</li>
+  <li>Everything in <code>docs/paper/sweepcf_draft.md</code> (Aug 19): different apparatus, its Claim 5 never ran. Do not merge it.</li>
+  <li>The August conditional <code>q_LFH</code> result, refuted by its own feature-blind baseline.</li>
+</ul>
+
+<h3>Unproved: the gap the paper must close or narrow</h3>
+<ul>
+  <li>Any training-data advantage of transition-aware M2S scenes over analytic, no-contrast, or uniform scenes with the repaired learner.</li>
+  <li>Any result on more than one carrier under the 0.30 s switching contract. 41002 was the only qualified one until tonight: the transition-bank v2 batch finished with <strong>41001, 41002 and 41003 all qualified at both seeds</strong>, 12/12 cells, 0.105 GPU-h. K = 3 is available.</li>
+  <li>Source-held-out transfer: 9490001–9490008 are reserved IDs only.</li>
+</ul>
+
+<div class="callout"><strong>The August LfH line</strong> (closed-form window, bit-exact reproduction, <code>D_phi</code> at −39 % RMSE, two retracted learned results, Claim 5 never run) shares no apparatus with Motion2Scene. Keep it out of this paper beyond one motivating sentence. It is a separate short paper or an RA-L appendix. The previous guidance is archived at <code>docs/guidance/fable_2026-08-26_lfh.md</code>.</div>
+
+<h2>The paper you can honestly write by Sep 15</h2>
+<h3>Title and thesis</h3>
+<p><strong>Motion2Scene: Constructing Training Scenes from Executed Humanoid Motion Contrasts.</strong> Keep "Transition-Aware Counterfactual Environments" as a subtitle only if the transition-aware arm wins.</p>
+<blockquote>A humanoid's executed motion contrast, the same approach with and without an adaptation, both run through the frozen controller, identifies where an obstacle must sit to make the adaptation useful. We construct training scenes at those locations, label each with the paired physical outcome of both commands, and show that a fixed perceptive selector trained on such scenes learns when to adapt, while selectors trained on uniform or contrast-free scenes do not. We ablate which parts of the construction matter: execution-verified versus reference-based conditioning, contrast versus target-only objectives, and learned versus analytic proposal.</blockquote>
+<p>This is true today for the analytic arm on one carrier. The experiment below tests it on two to three carriers with all four arms. Its strength is that every outcome of the learned-versus-analytic factor is a finding, so the paper cannot be killed by that result.</p>
+
+<h3>Claim ladder</h3>
+<div class="tbl"><table>
+<tr><th>#</th><th>Claim</th><th>Evidence</th><th>Status</th></tr>
+<tr><td class="mono">C1</td><td>Executed contrasts identify useful scenes; reference-based conditioning does not</td><td>P2 forecast 13 vs 0 false-clears; M2S-ref 0/9 useful vs analytic 4/8</td><td><span class="tag ok">have</span></td></tr>
+<tr><td class="mono">C2</td><td>Constructed scenes separate commands physically across sources</td><td>6/8 sources, 18/24 slots; d040 vs d055; 0.30 s window</td><td><span class="tag ok">have</span></td></tr>
+<tr><td class="mono">C3</td><td>Contrast-labelled scenes train a selector that adapts correctly on independent layouts; uniform and no-contrast do not</td><td>four arms, 12 layouts × 2 seeds × K carriers</td><td><span class="tag todo">Sep 8–10</span></td></tr>
+<tr><td class="mono">C4</td><td>The learned proposal does or does not add value over analytic construction at matched labels</td><td>same run, M2S vs analytic paired by layout</td><td><span class="tag todo">same run</span></td></tr>
+<tr><td class="mono">C5</td><td>Sensing and timing, not scene supply, are the binding limits</td><td>42-cell panel; low beams both-fail; 500 ms delay</td><td><span class="tag ok">have</span></td></tr>
+</table></div>
+
+<h3>Pre-declare the three outcomes now</h3>
+<div class="two">
+  <div class="box"><h3>A · M2S ≥ analytic &gt; uniform, no-contrast</h3><p>Headline: transition-aware learned construction, analytic as the matched strong baseline.</p></div>
+  <div class="box"><h3>B · analytic ≥ M2S &gt; uniform, no-contrast</h3><p>Headline: execution-verified contrast construction is what matters; the learned proposal buys search time (−69 %) and fresh-source transfer (384/384), not label quality at this scale. A good ICRA paper, and on current evidence the likeliest outcome.</p></div>
+  <div class="box"><h3>C · all arms tie or fail</h3><p>No selector paper. Report C1, C2, C5 as a construction-and-validation study and send it to RA-L with the larger study. Decide on Sep 10.</p></div>
+</div>
+
+<h2>The one experiment: M2S-ICRA-v1</h2>
+<p>A narrowing of <code>TRANSITION_AWARE_NEXT_STAGE.md</code> and <code>LEARNING_UTILITY_PLAN_V1.md</code>, not a new design. Register it as one document before spending, predictions first.</p>
+
+<h3>Freeze</h3>
+<ul>
+  <li><strong>Controller, sensing, contract:</strong> SONIC frozen; ideal 48-ray packet; single decision at 0.30 s; walk-commit vs request-d040; 3.3–3.5 s return; first-episode scorer. Unchanged.</li>
+  <li><strong>One learner for all arms:</strong> the deterministic regularized logistic control from P3 (physical scales, zero init, Adam 0.01, 2000 updates, 0.01 weight penalty, 214 inputs, two heads, walk-preferred, refusal to walk). The MLP is an appendix failure. Optimizer seeds are removed; uncertainty comes from carriers, layouts, physics seeds, and leave-4-out refits scored offline against the paired label table.</li>
+  <li><strong>Carriers:</strong> 41001, 41002, 41003, all three qualified at both seeds tonight. Cap at three. No 9490xxx acquisition. Say plainly: unseen-layout transfer on qualified development carriers; source-held-out transfer is future work.</li>
+  <li><strong>Generator:</strong> the frozen all8/8421/1200 initializer plus pattern-17 search, with the proposal evaluator switched from the reference trajectory to the achieved empty-scene transition (seed 8721 proposes, 8722 is the predeclared repeat). No refitting.</li>
+</ul>
+
+<h3>Arms</h3>
+<div class="tbl"><table>
+<tr><th>Arm</th><th>Construction</th><th>Role</th></tr>
+<tr><td>Uniform</td><td>station [0.1, 0.9], underside [1.1, 1.45] m, common validity checks only</td><td>untargeted</td></tr>
+<tr><td>Analytic</td><td>execution-aware capsule–box solver, global distinct search, on the achieved transition</td><td>claim-bearing comparator</td></tr>
+<tr><td>No-contrast</td><td>same generator and search, target-clearance objective only, achieved transition</td><td>contrast ablation</td></tr>
+<tr><td>Motion2Scene</td><td>frozen learned initializer, pattern search, independent audit, achieved transition</td><td>full method</td></tr>
+</table></div>
+<p>The reference-based M2S arm is not re-run: its 0/9 useful yield and the P2 forecast are C1. One shared background quota (absent, raised, blocked; one quarter) acquired once per carrier.</p>
+
+<h3>Budget and cost</h3>
+<p>One budget: <strong>24 complete encounter groups per arm</strong>, pooled across carriers, 18 generated plus 6 shared background, both commands labelled. Charge every proposal, rejection and both-fail. No refills.</p>
+<div class="tbl"><table>
+<tr><th>Stage</th><th class="num">Cells</th><th class="num">GPU-h</th></tr>
+<tr><td>Carrier qualification (running)</td><td class="num">12</td><td class="num">0.11</td></tr>
+<tr><td>Label acquisition: 4 arms × 18 × 2 commands, plus background 6 × 2 × 3 carriers</td><td class="num">180</td><td class="num">~1.7</td></tr>
+<tr><td>Evaluation: 12 layouts × 2 seeds × 3 carriers × (4 learned + scripted-ray + oracle)</td><td class="num">432</td><td class="num">~4.1</td></tr>
+<tr><td>Reserve for retries or a fourth carrier</td><td class="num">—</td><td class="num">~1.5</td></tr>
+<tr><td><strong>Total</strong> (measured 33 s/cell; 375 s reserved; serial; 7500 MiB floor)</td><td class="num">~620</td><td class="num"><strong>~7.5</strong></td></tr>
+</table></div>
+
+<h3>Endpoints to register before the first label run</h3>
+<ul>
+  <li><strong>Primary:</strong> carrier-averaged contact-qualified passage, arm vs arm, paired by (carrier, layout, physics seed). Report the paired 2×2 counts for M2S–analytic, M2S–uniform, analytic–uniform, M2S–no-contrast. Exact binomial on discordant pairs; no p-value hunting.</li>
+  <li><strong>Secondary, own suites:</strong> unnecessary d040 on absent and raised; blocked-scene refusal; d040 request rate; refusals that then walked; peak force, resets, returns.</li>
+  <li><strong>Comparators:</strong> scripted ray rule and privileged analytic oracle on the same cells.</li>
+  <li><strong>Yield:</strong> useful-contrast groups per requested scene and per GPU-h, per arm.</li>
+  <li><strong>Predictions:</strong> analytic and M2S each produce ≥1 useful contrast per carrier; uniform ≤1 total; no-contrast ≥6/9 both-pass; achieved-transition screen has 0 false-clears among executed cells; contrast arms beat uniform by ≥3 net discordant cells; M2S vs analytic is declared two-sided with no prediction.</li>
+</ul>
+
+<h3>Cut explicitly</h3>
+<ul>
+  <li>24/48/96 budgets and 60–75 fits → one budget, four fits.</li>
+  <li>Fifth arm (reference-based M2S) → reported from existing data.</li>
+  <li>Five optimizer seeds → deterministic learner, jackknife.</li>
+  <li>Final-source acquisition → future work, two sentences in Limitations.</li>
+  <li>Any generator refit, sensing change, new skill, continuous certificate, hardware.</li>
+  <li>The 480 paused MLP evaluations → paused forever; one appendix row.</li>
+</ul>
+</div>
+
+<div class="wrap wide">
+<h2>Schedule, Sep 7 to Sep 15</h2>
+<div class="tbl"><table class="sched">
+<tr><th>When</th><th class="num">GPU-h</th><th>Work</th><th>Gate</th></tr>
+<tr><td>Sep 7 tonight</td><td class="num">0.1</td><td>Transition-bank v2 <strong>done: 41001, 41002, 41003 qualified at both seeds, 12/12</strong>. Write its RESULT doc. Commit the untracked bank scripts and test (the test passes). Register M2S-ICRA-v1 with the predictions above.</td><td><span class="tag ok">passed: K = 3</span></td></tr>
+<tr><td>Sep 8</td><td class="num">1.7</td><td>CPU: instantiate the 12 frozen layouts in each carrier's route frame; run all four constructions on achieved transitions; audit; freeze the 24-group lists. GPU: acquire labels. <strong>Start writing Intro, Method, Related work, C1–C2 in parallel; none depend on the result.</strong></td><td>24 groups labelled per arm</td></tr>
+<tr><td>Sep 9</td><td class="num">4.1</td><td>Fit four controls plus jackknife; command-check integration (recorded 12/12 protocol); run the 432-cell evaluation.</td><td>evaluation complete</td></tr>
+<tr class="decide"><td>Sep 10</td><td class="num">0.5</td><td>Analysis, paired tables, figures 2–4. <strong>18:00 decision: outcome A, B or C.</strong> Freeze evidence hashes.</td><td>claim chosen</td></tr>
+<tr><td>Sep 11–13</td><td class="num">0</td><td>Full draft: results, limitations, figure 1 composite; internal review against the Xiao paper-review rubric; cut to 8 pages including references.</td><td>draft complete</td></tr>
+<tr><td>Sep 14</td><td class="num">0</td><td>Final read, hash-pinned evidence bundle, source tarball, README pointers.</td><td>—</td></tr>
+<tr><td>Sep 15</td><td class="num">0</td><td>Submit before 11:59 PST. Video from existing replays during 17–22 Sep.</td><td>—</td></tr>
+</table></div>
+<div class="callout alert"><strong>The risk that actually threatens this is GPU contention.</strong> The other resident Isaac job holds 4.2 GB on a 16 GB card, and the floor has already produced a 0/20 launch. Coordinate the GPU for the Sep 8–9 windows now, or run overnight. Do not lower the floor mid-study.</div>
+</div>
+
+<div class="wrap">
+<h2>Paper skeleton, eight pages including references</h2>
+<ol>
+  <li><strong>Introduction (¾ p).</strong> Decorated scenes vs useful scenes; a single motion does not identify its obstacle, an executed contrast does; the three questions. Figure 1: one carrier, walk and d040 executions, the achieved transition, the beam placed by each arm, the paired outcomes, the selector's request on an independent layout. All assets exist.</li>
+  <li><strong>Related work (½ p).</strong> LfLH, LfH, LfH-CP (motion-to-scene already includes downstream learning; our distinction is executed humanoid contrasts and paired physical labels); HumanoidPF; Perceptive Humanoid Parkour; SONIC as inherited; rliable for paired small-n reporting; five to seven scene-generation cites. No novelty over-claim.</li>
+  <li><strong>Problem and construction (1½ p).</strong> The contrast pair; the 0.30 s contract; four constructions; achieved-transition screening; audit and refusal; labels as Y(scene, state, phase, history, command). One table.</li>
+  <li><strong>Physical validation (1 p).</strong> C2 numbers; d040 and d055; timing window; sensing panel; the P2 false-clear result as the bridge to C1. Figure 2: force and outcome panel across sources and heights.</li>
+  <li><strong>Learning-utility study (2 p).</strong> Setup, arms, learner, frozen layouts, endpoints; paired 2×2 tables; yield per GPU-h; comparators; jackknife stability. Figure 3: per-(carrier, layout, seed) outcome heatmap by arm. Figure 4: yield and cost.</li>
+  <li><strong>Limitations and retained failures (½ p).</strong> One beam family, two commands, ideal rays, K ≤ 3 carriers, no source-held-out transfer, one controller; the MLP normalization failure; low-beam both-fail; 500 ms delay.</li>
+  <li><strong>Conclusion (¼ p)</strong> and references (about 1 p).</li>
+</ol>
+<p>Do not spend pages on the CPU generator lineage. One paragraph plus a supplementary pointer to <code>docs/motion2scene/</code>.</p>
+
+<h2>Reviewer objections and the honest answers</h2>
+<ul>
+  <li><em>"One beam and two commands."</em> Yes; say so in the first paragraph of Limitations and in the abstract as a controlled minimal instance. The value is the protocol and the ablation, not breadth.</li>
+  <li><em>"Ideal rays, no perception."</em> Declared. The scripted-ray comparator bounds what perception could add; the 500 ms result shows the selector is timing-limited.</li>
+  <li><em>"n = 2–3 sources."</em> Paired design, all cells shown, carrier-grouped reporting, no pooled percentages. Source-held-out transfer is the named next study.</li>
+  <li><em>"The learned generator doesn't beat the analytic one."</em> If outcome B, that is the finding, and more useful than a marginal win. State what the learned model does buy, with numbers.</li>
+  <li><em>"Why not RL, a diffusion baseline, hardware?"</em> Out of scope by design; one sentence each.</li>
+</ul>
+
+<h2>Rules this project has already paid for</h2>
+<ul>
+  <li>Register before spend; predictions first; infra failure is not a rejection; no uncharged retries.</li>
+  <li>Physics is the verdict; screens, forecasts and MuJoCo replays never re-grade.</li>
+  <li>One decision time (0.30 s); old 0.20 s labels are not 0.30 s labels.</li>
+  <li>Fixed learner across arms; any learner change applies to every arm and is declared.</li>
+  <li>Derivatives, physics repeats and layouts stay with their carrier; report grouped.</li>
+  <li>Retained failures go in the paper, not only in the ledger.</li>
+  <li>Never let a test-bank failure tune generation, sensing or the controller.</li>
+</ul>
+
+<h2>Do not</h2>
+<ul>
+  <li>Run 24/48/96, five arms, or 75 fits before Sep 15.</li>
+  <li>Acquire or qualify the 9490xxx sources this week.</li>
+  <li>Resume the 480 paused MLP evaluations.</li>
+  <li>Refit the generator on d040 or on achieved transitions.</li>
+  <li>Merge the August SweepCF or LfH apparatus or numbers into this manuscript.</li>
+  <li>Lower the 7500 MiB floor or the 375 s timeout to make a batch fit.</li>
+  <li>Write the abstract before the Sep 10 decision.</li>
+</ul>
+
+<h2>If I had to pick one thing</h2>
+<p>Write up the transition-bank result tonight, register M2S-ICRA-v1 with its predictions, and start the Sep 8 label acquisition on achieved transitions. Everything else in the paper is already measured. The single thing between this project and a submittable manuscript is <strong>one 180-cell labelled corpus built the right way</strong>, and it costs under two GPU-hours.</p>
+
+<h2>中文摘要</h2>
+<ol class="zh">
+  <li>现状：pipeline 完整、可精确复现、失败记录诚实，但没有稿子；原定主张"学习式生成器优于解析式"被自己的数据否定（M2S 9/9 both-fail，唯一的学习式 rescue 来自 analytic arm）。</li>
+  <li>两个已诊断的原因都可修：selector 的 0.001 归一化 bug（线性 control 已修）；生成器用 reference 轨迹而非实际执行的 transition 做筛选（achieved-transition screen 抓住全部 13 个 false-clear）。修好后的数据一个都还没采。</li>
+  <li>算力不是瓶颈（每 cell 33 s，全项目共用 4.3 GPU-h，整个 ICRA 实验约 6–8 GPU-h）；瓶颈是 scope 和 GPU 抢占（7500 MiB 门槛已让一批 0/20 启动）。</li>
+  <li>立刻改论点：不是"学习 vs 解析"，而是"从执行过的动作对比构造训练场景 + 成对物理标签，能教会感知型 selector 何时适应；并消融构造中哪一部分起作用"。学习 vs 解析变成四臂消融里的一个因子，无论结果如何都可写。</li>
+  <li>砍到最小：一个 budget（24 组/臂）、四臂、一个确定性线性 learner、≤3 个 carrier、12 个冻结 layout。去掉 24/48/96、第五臂、optimizer seeds、9490xxx 新 source。</li>
+  <li>时间：9/7 晚完成 carrier 资格与注册；9/8 采标签（约 1.7 h）并同步开写不依赖结果的章节；9/9 评估（约 4.1 h）；9/10 18:00 决定 A/B/C；9/11–14 写；9/15 提交。若只有单 carrier 或全臂平局，同一稿改投 RA-L。</li>
+</ol>
+
+<div class="foot">Markdown twin: <code>fable.md</code> at the repo root. Previous guidance (LfH line, 2026-08-26): <code>docs/guidance/fable_2026-08-26_lfh.md</code>. Numbers quoted from <code>docs/motion2scene/*_RESULT.md</code>; costs from the run records under <code>research-data/groot-wbc/m2s-*</code>.</div>
+</div>

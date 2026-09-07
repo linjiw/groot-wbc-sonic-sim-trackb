@@ -64,6 +64,46 @@ env -u PYTHONPATH PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
 For **physics** you additionally need Isaac Lab, `sonic_release/last.pt`, and `git lfs pull`.
 `python check_environment.py --training` verifies this.
 
+### Building the CPU-side environment from scratch
+
+The `env_isaaclab` conda env above is the robotixx machine's. On a box that does not have it,
+`install_scripts/install_research.sh` builds an equivalent standalone venv at `.venv_research`
+with `uv`, and is the faster path when physics is not needed:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh          # if uv is absent
+bash install_scripts/install_research.sh                 # -> .venv_research, python 3.11
+env -u PYTHONPATH PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
+  .venv_research/bin/python -m pytest tests/dataset_generation -q -p no:cacheprovider
+```
+
+`install_scripts/research_requirements.txt` is a freeze of a known-good resolution if the open
+ranges above ever drift.
+
+Notes from doing this on a Blackwell box (RTX 5080, sm_120):
+
+* torch must come from the **cu128** index; the default wheels stop at sm_90 and every CUDA
+  launch dies with "no kernel image is available". The script probes for this before installing
+  anything else.
+* This venv has no ROS on `PYTHONPATH` and no isaacsim, so neither of the two flags above is
+  strictly required — but keep using them, since the same commands must work in `env_isaaclab`.
+* The teardown abort has a different signature here: an `OpenGL.raw.EGL._errors.EGLError`
+  traceback printed *after* a successful render, from `Renderer.__del__`. Same rule — read the
+  result line, not the exit status.
+* Four packages are needed that the bare research imports do not name: `pyarrow` (the parquet
+  engine `create_tiny_sonic_vla_fixture` writes through), `loguru` and `tqdm` (imported by
+  `gear_sonic/envs/manager_env/mdp/recorders.py`, which the camera-recorder tests import with
+  `isaaclab` stubbed), and `vector-quantize-pytorch` (or `test_latent_parity` skips).
+
+Verified on 2026-08-28: **871 passed, 1 skipped**. The single skip is
+`test_hallucination_keypoint_window.py` wanting `duck_003`, i.e. the missing artifact tree of
+section 1 — every test that does not need `DATA_ROOT` passes.
+
+`fit_reach_delivery_model.py` reproduces the published `D_phi` numbers on this env — linear RMSE
+9.706 mm vs identity 15.95, 39.2% reduction — matching `docs/hallucination/reach_delivery_model.json`
+to ~1e-13 relative (BLAS-level float noise). Use it as the cheap cross-machine check for the
+learned side, the way the CAL3 golden in section 5 checks the geometry side.
+
 ## 3. The LfLH pipeline, end to end
 
 ```bash
