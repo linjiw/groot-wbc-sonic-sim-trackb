@@ -1,0 +1,3380 @@
+{
+  "actual_contended_gpu_hours": 0.16898542595918115,
+  "manifest": {
+    "path": "research-data/m2s-independent-layout-v1-b02/manifest.json",
+    "sha256": "sha256:4844f4b9bbdbd2e9ddede85da66d2833aa22636adcc04c344b1eb5227928a163"
+  },
+  "predictions": {
+    "legal_switches": true,
+    "matched_inputs": true,
+    "model_request_matches": true,
+    "scene_matches": true
+  },
+  "rows": [
+    {
+      "arm": "uniform",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8501/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_uniform_s8501",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8501/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8501/trajectories/decision_capture.json",
+        "sha256": "sha256:956d9fa7b37159a9e60de484991252e18cf9706854237fdc25ee5d442a9c2552"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8501/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8501,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8501/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": "neutral_commitment_not_stop",
+        "inference_seconds": 0.00011977399117313325,
+        "probabilities": [
+          0.0,
+          0.0
+        ],
+        "refusal": true,
+        "requested_action": 0,
+        "selected_action": -1
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8501/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8501/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "uniform",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8502/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_uniform_s8502",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8502/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8502/trajectories/decision_capture.json",
+        "sha256": "sha256:2b43735b8cde1afcc6ecfdece9477777c008bf8eb8637ea0c61cc31751f7b0d1"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8502/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8502,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8502/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": "neutral_commitment_not_stop",
+        "inference_seconds": 0.00011759999324567616,
+        "probabilities": [
+          0.0,
+          0.0
+        ],
+        "refusal": true,
+        "requested_action": 0,
+        "selected_action": -1
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8502/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8502/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "uniform",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8503/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_uniform_s8503",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8503/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8503/trajectories/decision_capture.json",
+        "sha256": "sha256:de2f3e7c0ff005f940e8f8bc4e46894b4ff5e12681a277a85cae6addeff7a3ce"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8503/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8503,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8503/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": "neutral_commitment_not_stop",
+        "inference_seconds": 0.00015598200843669474,
+        "probabilities": [
+          0.0,
+          0.0
+        ],
+        "refusal": true,
+        "requested_action": 0,
+        "selected_action": -1
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8503/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8503/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "uniform",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8504/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_uniform_s8504",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8504/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8504/trajectories/decision_capture.json",
+        "sha256": "sha256:949d3c5cb318ad52b1db60a257dd87c4ff8e48252f4c2ec557447f29a280fdcf"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8504/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8504,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8504/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": "neutral_commitment_not_stop",
+        "inference_seconds": 0.00012255899491719902,
+        "probabilities": [
+          0.0,
+          0.0
+        ],
+        "refusal": true,
+        "requested_action": 0,
+        "selected_action": -1
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8504/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8504/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "uniform",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8505/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_uniform_s8505",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8505/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8505/trajectories/decision_capture.json",
+        "sha256": "sha256:f38f7b6e691b8ee27c899db102eb8fa49fd8180654b54af4f1ea76b693d99248"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8505/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8505,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8505/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": "neutral_commitment_not_stop",
+        "inference_seconds": 0.00011689899838529527,
+        "probabilities": [
+          0.0,
+          0.0
+        ],
+        "refusal": true,
+        "requested_action": 0,
+        "selected_action": -1
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8505/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_uniform_s8505/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "analytic",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8501/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_analytic_s8501",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8501/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8501/trajectories/decision_capture.json",
+        "sha256": "sha256:5420b57aa5fd3f185df0144291e1742a5050fd04f643534ec687b54a1907237d"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8501/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8501,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8501/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": "neutral_commitment_not_stop",
+        "inference_seconds": 0.00011288101086392999,
+        "probabilities": [
+          0.0,
+          0.0
+        ],
+        "refusal": true,
+        "requested_action": 0,
+        "selected_action": -1
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8501/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8501/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "analytic",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8502/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_analytic_s8502",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8502/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8502/trajectories/decision_capture.json",
+        "sha256": "sha256:a29053957a20d0d4e560ee719e7e889ade6a25d3558b6a8103a74c13cbbf2711"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8502/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8502,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8502/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": "neutral_commitment_not_stop",
+        "inference_seconds": 0.00011834100587293506,
+        "probabilities": [
+          0.0,
+          0.0
+        ],
+        "refusal": true,
+        "requested_action": 0,
+        "selected_action": -1
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8502/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8502/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "analytic",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8503/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_analytic_s8503",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8503/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8503/trajectories/decision_capture.json",
+        "sha256": "sha256:14155dbb933378f94fdd3b7bd719e47e5ad70afe292dd4bbcd853bf2eeceb92a"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8503/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8503,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8503/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": "neutral_commitment_not_stop",
+        "inference_seconds": 0.0001154460187535733,
+        "probabilities": [
+          0.0,
+          0.0
+        ],
+        "refusal": true,
+        "requested_action": 0,
+        "selected_action": -1
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8503/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8503/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "analytic",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8504/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_analytic_s8504",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8504/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8504/trajectories/decision_capture.json",
+        "sha256": "sha256:4d59a6850b42665deac82614a8633e73b688d9ef73f3191d77171ecbbf1e6a77"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8504/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8504,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8504/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": "neutral_commitment_not_stop",
+        "inference_seconds": 0.00014370802091434598,
+        "probabilities": [
+          0.0,
+          0.0
+        ],
+        "refusal": true,
+        "requested_action": 0,
+        "selected_action": -1
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8504/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8504/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "analytic",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8505/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_analytic_s8505",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8505/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8505/trajectories/decision_capture.json",
+        "sha256": "sha256:bf2af196b1688fa52ece71edb603e4abd25053f137ea4d28ebc6ca77bb56781c"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8505/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8505,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8505/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": "neutral_commitment_not_stop",
+        "inference_seconds": 0.0001151449978351593,
+        "probabilities": [
+          0.0,
+          0.0
+        ],
+        "refusal": true,
+        "requested_action": 0,
+        "selected_action": -1
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8505/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_analytic_s8505/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "no_contrast",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8501/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_no_contrast_s8501",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8501/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8501/trajectories/decision_capture.json",
+        "sha256": "sha256:f9379d0dbfb83ee16c9756fb8b87b0ad272a64796f9bf5f4a68cedc7dacffc73"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8501/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8501,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8501/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": null,
+        "inference_seconds": 0.00012195800081826746,
+        "probabilities": [
+          1.0,
+          1.0
+        ],
+        "refusal": false,
+        "requested_action": 0,
+        "selected_action": 0
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8501/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8501/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "no_contrast",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8502/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_no_contrast_s8502",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8502/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8502/trajectories/decision_capture.json",
+        "sha256": "sha256:58307071058dd532f81dc3a09453ce91ea56cd0c964968f58dd64ca9f815e3ff"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8502/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8502,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8502/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": "neutral_commitment_not_stop",
+        "inference_seconds": 0.00011507500312291086,
+        "probabilities": [
+          1.8921108071567904e-27,
+          6.055398190170545e-28
+        ],
+        "refusal": true,
+        "requested_action": 0,
+        "selected_action": -1
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8502/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8502/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "no_contrast",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8503/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_no_contrast_s8503",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8503/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8503/trajectories/decision_capture.json",
+        "sha256": "sha256:d7dab4bb9add3275e3ea0e20d0f2107288c3b02895230151657b828a4e68d2c7"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8503/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8503,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8503/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": null,
+        "inference_seconds": 0.00013609501183964312,
+        "probabilities": [
+          1.0,
+          1.0
+        ],
+        "refusal": false,
+        "requested_action": 0,
+        "selected_action": 0
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8503/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8503/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "no_contrast",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8504/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_no_contrast_s8504",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8504/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8504/trajectories/decision_capture.json",
+        "sha256": "sha256:4e7e32f5056a6cb657e546a680328749df244b73b49855d09302a40f2045cffb"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8504/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8504,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8504/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": "neutral_commitment_not_stop",
+        "inference_seconds": 0.00011845101835206151,
+        "probabilities": [
+          4.044361247540051e-15,
+          1.5070462828290759e-24
+        ],
+        "refusal": true,
+        "requested_action": 0,
+        "selected_action": -1
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8504/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8504/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "no_contrast",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8505/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_no_contrast_s8505",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8505/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8505/trajectories/decision_capture.json",
+        "sha256": "sha256:b7842d4a1e5453ad6294ee2cdb97ef5f05eafbf7e16549efa21288b23ab83f05"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8505/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8505,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8505/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": null,
+        "inference_seconds": 0.00011323098442517221,
+        "probabilities": [
+          1.0,
+          0.12399578094482422
+        ],
+        "refusal": false,
+        "requested_action": 0,
+        "selected_action": 0
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8505/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_no_contrast_s8505/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "motion2scene",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8501/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_motion2scene_s8501",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8501/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8501/trajectories/decision_capture.json",
+        "sha256": "sha256:6fe92441eff21bd796142549b61c93f5fc45cbfdd17040ee7a409dc28de24913"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8501/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8501,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8501/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": null,
+        "inference_seconds": 0.00011139802518300712,
+        "probabilities": [
+          1.0,
+          1.0
+        ],
+        "refusal": false,
+        "requested_action": 0,
+        "selected_action": 0
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8501/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8501/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "motion2scene",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8502/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_motion2scene_s8502",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8502/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8502/trajectories/decision_capture.json",
+        "sha256": "sha256:d2d45c63c81c18b8f67444c46d07aeee31503f6e5eb0bffdb3580c7903f93d0d"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8502/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8502,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8502/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": "neutral_commitment_not_stop",
+        "inference_seconds": 0.0001210249902214855,
+        "probabilities": [
+          0.0,
+          0.0
+        ],
+        "refusal": true,
+        "requested_action": 0,
+        "selected_action": -1
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8502/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8502/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "motion2scene",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8503/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_motion2scene_s8503",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8503/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8503/trajectories/decision_capture.json",
+        "sha256": "sha256:88931d8ab2eebf6c868ca861718da64c8b48a21835c72d0567310b9319be5760"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8503/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8503,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8503/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": null,
+        "inference_seconds": 0.0001179389946628362,
+        "probabilities": [
+          1.0,
+          1.0
+        ],
+        "refusal": false,
+        "requested_action": 0,
+        "selected_action": 0
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8503/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8503/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "motion2scene",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8504/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_motion2scene_s8504",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8504/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8504/trajectories/decision_capture.json",
+        "sha256": "sha256:0ec16b9b2189075a673ab4ab657a5c941f39bf6f136d7e8931a1b41c42400149"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8504/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8504,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8504/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": null,
+        "inference_seconds": 0.00011613598326221108,
+        "probabilities": [
+          1.0,
+          4.972833700378487e-09
+        ],
+        "refusal": false,
+        "requested_action": 0,
+        "selected_action": 0
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8504/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8504/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    },
+    {
+      "arm": "motion2scene",
+      "bank": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8505/trajectories/loaded_reference_bank.npz",
+        "sha256": "sha256:706e8eecd861bdb7eba27e786172cca87672cbd2bd7d33a7793012833c317436"
+      },
+      "beam": {
+        "center_xy_m": [
+          1.5412544106863708,
+          0.12879912801780016
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35,
+        "thickness_m": 0.1,
+        "underside_m": 1.27,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "capture_frames": 199,
+      "cell_id": "layout_01_p8511_motion2scene_s8505",
+      "condition": "present",
+      "contact_sync_error_n": 0.0,
+      "contacts": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8505/trajectories/beam_contacts.npz",
+        "sha256": "sha256:35175795d927a7c1503aa9a36a2eb00461590649b6c5535f4634a9ec30d16aaa"
+      },
+      "crossing_geometry": "all recorded body origins; not all native collider extents",
+      "decision": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8505/trajectories/decision_capture.json",
+        "sha256": "sha256:0d0b4bce22be7d45a960fe91623e0b520463c4617c416e0091f5e622819d47a8"
+      },
+      "denied_requests": 0,
+      "entry_logged": false,
+      "fall_observed": false,
+      "first_episode_frames": 199,
+      "force_threshold_frame_counts": {
+        "0.1": 0,
+        "1": 0,
+        "10": 0
+      },
+      "group_id": "layout_01",
+      "imported_beam": {
+        "attributes": {
+          "physics:angularVelocity": "(0, 0, 0)",
+          "physics:collisionEnabled": "True",
+          "physics:kinematicEnabled": "True",
+          "physics:rigidBodyEnabled": "True",
+          "physics:startsAsleep": "False",
+          "physics:velocity": "(0, 0, 0)",
+          "physxCollision:contactOffset": "0.0020000000949949026",
+          "physxCollision:minTorsionalPatchRadius": "0.0",
+          "physxCollision:restOffset": "0.0",
+          "physxCollision:torsionalPatchRadius": "0.0",
+          "physxContactReport:threshold": "0.0",
+          "size": "1.0"
+        },
+        "collision": true,
+        "collision_ancestor": null,
+        "instance_proxy": false,
+        "local_to_world_at_capture_start": [
+          [
+            0.09974240373674899,
+            0.007173067462066846,
+            0.0,
+            0.0
+          ],
+          [
+            -0.08607680954480214,
+            1.1969088448409877,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.1,
+            0.0
+          ],
+          [
+            1.5412544106863708,
+            0.12879912801780016,
+            1.32,
+            1.0
+          ]
+        ],
+        "path": "/World/ground/terrain/CounterfactualBeam",
+        "relationships": {
+          "physics:simulationOwner": [],
+          "physxContactReport:reportPairs": [],
+          "proxyPrim": []
+        },
+        "rigid_body": true,
+        "schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysxCollisionAPI",
+          "PhysxContactReportAPI"
+        ],
+        "type": "Cube"
+      },
+      "incomplete_crossing": false,
+      "inventory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8505/trajectories/native_collision_inventory.json",
+        "sha256": "sha256:d03c6a84d2f5342b6fb59e98a0d88a99306ba66f34b55da2c9dc66cd913b85f6"
+      },
+      "label": "neutral",
+      "maximum_beam_normal_force_n_through_passage": 0.0,
+      "minimum_body_downstream_max_m": 2.5968872177787974,
+      "observed_beam_contact": false,
+      "optimizer_seed": 8505,
+      "pass": true,
+      "passage_finish_frame_exclusive": 96,
+      "physics": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8505/trajectories/physics_beam_contacts.npz",
+        "sha256": "sha256:66b297c4d8755a1345971faef9d0013d785ca7750d40617c8dafb03eda2928e3"
+      },
+      "physics_seed": 8511,
+      "predictions": {
+        "legal_switches": true,
+        "matched_inputs": true,
+        "model_request_matches": true,
+        "scene_matches": true
+      },
+      "prefix": {
+        "exact_match": true,
+        "frames": 15,
+        "max_abs_errors": {
+          "action_motion_token": 0.0,
+          "applied_joint_action": 0.0,
+          "dof_pos": 0.0,
+          "dof_vel": 0.0,
+          "motion_time_s": 0.0,
+          "reference_g1_qpos": 0.0,
+          "root_ang_vel_w": 0.0,
+          "root_lin_vel_w": 0.0,
+          "root_pos_w": 0.0,
+          "root_quat_w": 0.0
+        }
+      },
+      "probability_error": 0.0,
+      "readout": {
+        "fallback": "neutral_commitment_not_stop",
+        "inference_seconds": 0.00011272999108769,
+        "probabilities": [
+          0.0,
+          0.0
+        ],
+        "refusal": true,
+        "requested_action": 0,
+        "selected_action": -1
+      },
+      "reset_count": 0,
+      "return_logged": false,
+      "sensor": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8505/trajectories/reactive_interface.json",
+        "sha256": "sha256:bd34517a50b986f5d1577e3213d86117374613631a11895c4052e621356713c0"
+      },
+      "source": 41002,
+      "stabilization_failed": false,
+      "stabilization_seconds": 0.3,
+      "suite": "traversal",
+      "tracker_outcome": "accepted",
+      "tracker_rejection_reasons": [],
+      "trajectory": {
+        "path": "research-data/m2s-independent-layout-v1-b02/rollouts/layout_01_p8511_motion2scene_s8505/trajectories/000000.trajectory.pkl",
+        "sha256": "sha256:6e9718eb7af532c2e0ebaf9592034b94a6a3a0d4712adef857b8f1820d6b33b9"
+      }
+    }
+  ],
+  "run_record": {
+    "path": "research-data/m2s-independent-layout-v1-b02/run_record.json",
+    "sha256": "sha256:d035cf22f3c3d8ab284707330ac6c508fd21efe418db234e7641f0ee242b650e"
+  },
+  "scope": "one block of assigned independent layouts, one observed source"
+}

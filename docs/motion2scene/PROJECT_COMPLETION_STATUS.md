@@ -1,6 +1,34 @@
 # Motion2Scene: progress toward the complete project
 
-**Current stage (September 6):** the [comparative command corpus](COMPARATIVE_CORPUS_STAGE_RESULT.md)
+**Current stage (September 6):** [the independent-layout evaluation](INDEPENDENT_LAYOUT_V1_RESULT.md)
+has completed 120/600 assigned Isaac Lab executions, with
+120 admitted after input, command, geometry and contact audits.
+The first wave covers one reserved station, three heights and two physics seeds
+for all twenty frozen learners. The remaining 480 assignments stay pending.
+This is a partial evaluation on observed source 41002, not source-held-out transfer.
+Training remains eleven complete encounters per arm. The learned generator's
+advantage over analytic training data remains unproved. All four arms tie on these
+first six blocks, and none requests d040; the remaining panel is still pending.
+
+**Reproducibility and demos:** all twenty original selectors are now
+[downloadable with their exact training inputs](evidence/selector-bundle-20260906/selectors.tar.gz);
+CPU refitting reproduces every weight, normalization value and final loss exactly.
+The [new replay](assets/independent-layout-wave1.mp4) shows a fixed twenty-four-run subset
+covering all four data arms, both physics seeds and all three first-station heights. Isaac Lab supplies
+the dynamics and measured contacts; MuJoCo renders recorded states only.
+The [post hoc readout diagnostic](LAYOUT_READOUT_DIAGNOSTIC_V1.md) tests sensor
+sensitivity without adding physics or changing the frozen policies.
+
+**Next research stage:** finish the remaining frozen layout and control assignments,
+then evaluate shared scripted comparators. Preserve every failure and keep controls
+separate from traversal. Larger 24/48/96 data budgets require new corpora and
+separate fits; the reserved final-source candidates still require acquisition and
+qualification under the same switching contract. A complete ICRA learning claim
+also needs source-grouped effects and full acquisition cost accounting. See the
+[methods draft](LEARNING_COMPARISON_METHODS_DRAFT.md) and
+[focused prior-work comparison](RELATED_WORK_POSITIONING_20260906.md).
+
+**Historical corpus stage (September 6; superseded above):** the [comparative command corpus](COMPARATIVE_CORPUS_STAGE_RESULT.md)
 contains 76 completed Isaac Lab executions and 38 paired scene outcomes, captured at
 one common 0.30 s decision. Both-fail outcomes and the analytic test-neighborhood
 rejection remain in the record. All 38 pairs pass the direct-input/bank audits, and all twenty matched learners
@@ -16,7 +44,7 @@ provenance scope does not establish global metadata absence or source independen
 features, model requests, full trajectories and outcomes. These are observed development
 scenes, not independent performance evidence. [Integration protocol](LEARNED_COMMAND_CHECK_V1.md).
 
-**Next research stage:** [evaluate the frozen policies on the twelve independently specified layouts](INDEPENDENT_LAYOUT_EVALUATION_V1_PLAN.md).
+**Historical next step:** [evaluate the frozen policies on the twelve independently specified layouts](INDEPENDENT_LAYOUT_EVALUATION_V1_PLAN.md).
 Keep the analytic arm as the primary comparator. Report source-specific contact-qualified
 passage/recovery, unnecessary crouching and blocked-scene detection separately. This
 single-source, eleven-encounter development comparison is not the final 24/48/96
@@ -53,7 +81,7 @@ cost and current ICRA submission/video schedule.
 Assessment dated 2026-09-06. **We have an embodied research prototype, but not yet a
 complete ICRA experimental contribution.** Geometry generation and simulator execution
 have evidence. The central claim—that generated environments improve policy learning—
-has no comparative result yet. Counting finished scripts or rollouts would overstate
+has a partial independent-layout comparison but no demonstrated advantage. Counting finished scripts or rollouts would overstate
 completion, so the status below uses evidence gates instead of a percentage.
 
 | Workstream | Current evidence | Completion assessment |
@@ -62,7 +90,7 @@ completion, so the status below uses evidence gates instead of a percentage.
 | Collision and time realism | 384/384 nominal authored-native interval bounds, minimum 21.623 mm; separate static proxy pose domains | Bounded progress. Joint pose/time uncertainty, cooked-shape and numerical enclosure guarantees remain open. |
 | Embodied scene validation | 52-cell generated-source pilot; 6/8 source pairs qualify; 18/24 requested slots separate | Demonstrated in Isaac Lab within the development pool. Source refusals remain; walk contacts but can still cross. |
 | Sensing and legal commands | Complete 42-cell stress panel: reactive/oracle 9/10 poses each, 6/6 negative specificity, 500 ms delay fails 2/2 | One observed source. Earlier-beam robustness prediction fails; noisy sensing, later decisions and source transfer remain open. |
-| Downstream learning benefit | 38 paired 0.30 s development encounters from 76 executions; matched four-arm fitting and learned command check | Not demonstrated. This is the main scientific bottleneck. |
+| Downstream learning benefit | 38 paired development encounters; twenty frozen fits; 120/600 independent-layout executions admitted | Partial single-source evaluation; the training-data advantage remains unproved. |
 | Paper and release | Public notebook, protocols, complete result tables, failed experiments, source snapshots and recorded-state demos | Research documentation exists. Final comparative figures, claim audit and a reproducible end-to-end benchmark remain. |
 
 Two of the three intended contribution pillars—generation and closed-loop feasibility—
@@ -73,40 +101,21 @@ beating the learned generator must change the contribution statement, not be hid
 
 Eight candidate IDs are reserved under the explicit acquisition-provenance ledger;
 no final ancestors have been generated or qualified. The earlier broad inventory
-failures remain historical records. The twelve independent layout tests remain reserved.
+failures remain historical records. The twelve layouts remain frozen; the first station is now measured and the remaining assignments are pending.
 [Reservation failure record](evidence/transfer-reservation-failure.json).
 
 ## Remaining experiments, in decision order
 
-1. **Acquire the comparative corpus at the frozen 0.30 s decision.** The six missing
-   controls are complete; 16/16 development pairs at 0.20 s retain all measured outcomes.
-   They are not a training corpus and cannot be relabeled for 0.30 s. The exact d040
-   input is now bound. Resume the first twenty-cell slice when the registered GPU
-   floor is met, then measure both commands for the remaining fixed assignments.
-2. **Keep timing support and measurement scope explicit.** The 12-cell experiment
-   reproduces the old 0.20 s failure and rescues seed 8042 at 0.30 s; 0.40 s fails.
-   This motivates the common future decision phase, not a general safe window. Preserve
-   all historical failures. Use direct decision-state capture for the learning corpus;
-   further geometry, new skills and extended timing sweeps are deferred.
-3. **Run the smallest useful learning-data comparison.** Train the same exteroceptive
-   selector with Motion2Scene, uniform, strong analytic/grid, and an explicitly defined
-   unconstrained same-family generator. Hold policy architecture, loss, physics-label
-   budget and optimizer steps fixed. Test every legal alternative for labels; retain
-   infeasible scenes. Report acquisition, rejection, synthesis and training costs.
-4. **Test transfer with the split frozen before fitting.** Keep motion ancestors,
-   derivatives and scene perturbations together. Acquire a new test bank; 430xx remains
-   excluded from tuning and the inspected 410xx/420xx sources are not fresh tests. Use
-   five optimizer seeds, source-level outcomes and fixed learning-curve checkpoints.
-5. **Stress the supported policy and complete the paper evidence.** Test range/depth
-   noise, latency and tracking disturbances in the frozen supported domain; report
-   missed detections, contacts, falls, refusals and time-to-traverse. Add hardware only
-   if the final claim requires physical deployment; no hardware result is currently
-   claimed. Finish relevant literature positioning, ablations and artifact instructions.
+1. **Finish the frozen independent-layout panel.** Complete the remaining 480 assignments under the per-block budget and admission gates. Keep traversal, absent/raised adaptation and blocked refusal outcomes separate. Do not revise learners or the test panel from the first-wave results.
+2. **Measure shared scripted comparators.** Execute the same legal command interface with the existing sensor rule and privileged baseline. Use paired action labels to distinguish unsupported transitions from wrong predictions; an unexecuted alternative is unknown.
+3. **Run the larger learning-data comparison.** The present eleven-example fits are a development study. Acquire the declared 24/48/96 complete-encounter budgets, fit each arm and optimizer seed separately, and account for fitting, proposals, rejections, verification and paired physics labeling. Avoid a phase or timing shortcut with matched controls and observation diagnostics.
+4. **Qualify and evaluate final source transfer.** The eight reserved candidate IDs are not qualified sources. Acquire their motions and legal switching bank; keep every derivative and physics repeat with its ancestor. Previously inspected 430xx sources remain excluded from fitting and are not newly untouched tests.
+5. **Finish the evidence-driven manuscript and release.** Use source-grouped effects, tail failures and cost measurements to decide whether the learned generator earns its claim against analytic generation. Complete the fixed-learner and generator ablations, operating limits and reproducible benchmark. Hardware requires a separately qualified deployment study if included in the final claim.
 
-The next go/no-go decision is whether a fixed legal selector can produce dependable
-physics labels over the declared scene support. After that, prioritize the learning
-comparison over further nominal-demo polishing. Better sensing alone does not show that
-Motion2Scene environments are better training data.
+The decisive missing result is learning utility beyond the analytic data generator.
+Completed software, exact CPU reproduction and contact-qualified passage in easy
+encounters cannot establish that advantage. If the full comparison ties or loses,
+report it and narrow the contribution.
 
 ## What the demos mean
 
