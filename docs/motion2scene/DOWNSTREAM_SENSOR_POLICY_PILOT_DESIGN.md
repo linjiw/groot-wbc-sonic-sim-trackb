@@ -1,6 +1,30 @@
 # Next experiment design: from interface to a useful training comparison
 
-**Current stage (September 7):** [the selector breakpoint study](SELECTOR_BREAKPOINT_RESULT.md)
+**Current stage (September 7):** [the transition-construction pilot](TRANSITION_CONSTRUCTION_RESULT.md)
+adds twelve matched empty-scene executions, qualifying carriers 41001/41002/41003 in
+both physics seeds. Only **1/12 assigned scene slots** survives screening, from the
+analytic arm on 41001; all learned slots are refused. Its four physical executions
+produce walk-fail/d040-pass contrasts in both seeds. d040 records 0 N beam contact
+and returns, while the separate endpoint-tracking metric still rejects both runs.
+
+A finite support map finds 67 nominal witnesses after basic/visibility/reservation
+checks, but only one under the inherited perturbation audit. The frozen initializer's
+trust boxes cover none of the robust grid witnesses. This identifies both limited
+geometric support and limited proposal reach. It does not prove infeasibility or
+establish a learned-generator advantage. Original v1 remains 120/600 with 480 paused.
+
+**Next stage:** [a separately registered nominal-task acquisition study](NOMINAL_TRANSITION_NEXT_STAGE.md),
+with perturbation results reported separately, transition-conditioned initializer
+supervision and equally informed analytic construction. Complete physical labels
+before the next shared-learner comparison. The final five-arm 24/48/96 curves and
+actual new-source acquisition/evaluation remain outstanding.
+
+[All four new physical replays](assets/transition-construction.mp4) ·
+[Full funnel, failed predictions and costs](TRANSITION_CONSTRUCTION_RESULT.md) ·
+[Source archive](evidence/transition-stage-source-20260907/research-source.tar.gz).
+These are forced-command development experiments; no new selector is trained.
+
+**Previous breakpoint snapshot (September 7; superseded above):** [the selector breakpoint study](SELECTOR_BREAKPOINT_RESULT.md)
 completes twelve matched command executions and twenty-four shared linear-control
 executions in Isaac Lab. Walking fails at the middle-height seed-8512 encounter;
 d040 passes. The analytic-trained linear control observes the scene, requests d040
