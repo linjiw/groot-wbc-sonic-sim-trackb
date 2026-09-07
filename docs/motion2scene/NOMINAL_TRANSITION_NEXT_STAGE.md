@@ -1,5 +1,19 @@
 # Next development decision after the robust construction pilot
 
+**Current ICRA scope (September 7, adopted from the user's fable guidance):**
+[Four arms, one 24-requested-group budget, one deterministic learner and three already
+qualified development carriers](FABLE_ICRA_STATUS.md). No generator refit, five-arm
+24/48/96 campaign or final-source acquisition for this submission. The frozen proposal
+pass admits uniform 18/18, analytic 1/18, target-only 16/18 and Motion2Scene 0/18 generated
+groups. Including six shared backgrounds gives 82 assigned physical commands; acquisition
+and the fixed policy evaluation are ongoing. Unequal acquired counts prevent an
+equal-24-complete-label claim. [Working manuscript](ICRA_MANUSCRIPT.md).
+
+Earlier plans and snapshots below are historical; the current protocol is
+[M2S-ICRA-v1](M2S_ICRA_V1.md). The 480 original MLP assignments remain paused.
+
+## Historical material before the fable scope revision
+
 The [completed pilot](TRANSITION_CONSTRUCTION_RESULT.md) gives us three qualified
 empty-transition carriers, one analytic scene that separates physical command
 outcomes in both seeds, and zero admitted learned scenes. Its twelve scene assignments

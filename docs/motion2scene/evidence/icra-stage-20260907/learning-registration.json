@@ -1,0 +1,628 @@
+{
+  "arms": [
+    "uniform",
+    "analytic",
+    "no_contrast",
+    "motion2scene"
+  ],
+  "background_assignments": 108,
+  "diagnostic_refits": 24,
+  "maximum_fit_groups_per_arm": 24,
+  "methods": [
+    "uniform",
+    "analytic",
+    "no_contrast",
+    "motion2scene",
+    "scripted_rays",
+    "privileged_geometry"
+  ],
+  "no_refits_on_test": true,
+  "primary_fits": 4,
+  "references": [
+    {
+      "path": "repository/docs/motion2scene/M2S_ICRA_EXECUTION_V1.md",
+      "sha256": "sha256:0e99aa8bb8599845cfb43dde50ae9e51ae99ef24e78ba8dd7799aff6908ee95e"
+    },
+    {
+      "path": "research-data/m2s-icra-v1/registration.json",
+      "sha256": "sha256:a4e39e4a7b2770ed3312ebf65e7807bded7e7e51c11ba906aa3c96a057c39b01"
+    },
+    {
+      "path": "research-data/m2s-icra-v1/prepared.json",
+      "sha256": "sha256:c2144f1557161713c401a1c24a62b5f4bcb7c8d3a78b1b4f56268e3e9bb98fb4"
+    },
+    {
+      "path": "repository/gear_sonic/__init__.py",
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "repository/gear_sonic/data_process/convert_soma_csv_to_motion_lib.py",
+      "sha256": "sha256:ab8361a08894c19b7160278d25cf3d47aad924f5be78c72fc0f1a38eba68e9dd"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/__init__.py",
+      "sha256": "sha256:59de2061275cb4365f847f2b0b2f089f87d72186b30c6085552e6af0735e04e6"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/behaviour_predicates.py",
+      "sha256": "sha256:68b8b847cd99ef54fb877954983577ff683342742336ceb51e8f2d3a67ec0380"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/capsule_box_exact.py",
+      "sha256": "sha256:389d642a209fb0e718cc0dddbadcc28eb91b25bcb76c35dc7ec6bceaef12da10"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/capsule_box_torch.py",
+      "sha256": "sha256:c213fb355d650b983eb478d59d255b0d9e2c35e528317701cb33c79a8fff9b90"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/__init__.py",
+      "sha256": "sha256:53868897b56c73ff1d681e694b8b76143278ed25e22065cd5e01dd1b28885be1"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/constraint_spec.py",
+      "sha256": "sha256:9eb388c8ee82506b74ad4d74f66f21b86b01e122eecc6c06a05e20a6e9e41e93"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/keypoints.py",
+      "sha256": "sha256:f16edb0c63835934ba8efb3c599993ac2523f5eaf2f3dde2a7a44b1269a2238f"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_action_contract.py",
+      "sha256": "sha256:125f9038f3db30343f295890192e8d09e394b952097233ebc6e85c8cccc4b576"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_analytic_distinct.py",
+      "sha256": "sha256:9985c7487d952e631e96f850a77957df9291db52206e28e7671288775e88ce97"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_analytic_global.py",
+      "sha256": "sha256:ed3c6f78ae8ff9682c975e7207492d187a590cf0935590d2d6ef90ed6c97bb99"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_beam_execution.py",
+      "sha256": "sha256:e7a124d31bde8109f4cf0d34f3d1ea095058f06f0637a38bafaeb6946dc320b9"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_beam_visibility.py",
+      "sha256": "sha256:729333cf2ea5c567f90b89dfef2c3327fb7d98b60e0e98fd76a60083f654c00f"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_carriers.py",
+      "sha256": "sha256:413f6ed0686d7fe764a2dff084ff7f4d4ff34518ff1e3929c1425fce364961f0"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_collision_inventory.py",
+      "sha256": "sha256:22d09e10aa5e8d7fbc0a4142f485d5318e6d469b5a5a7f77e19f87917ee60e7c"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_comparison_contract.py",
+      "sha256": "sha256:3a4ffdb884f8476bdc9961091b6737f79169e7dcbae28a185bb3813af3a9ea2f"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_coverage.py",
+      "sha256": "sha256:c03dc80b1b645ae15a43ff44dbfc70ebdcf19ce55f8c4bfaf5840d9f7eb9947b"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_distillation.py",
+      "sha256": "sha256:841ae9379a839d69f9446e4c9c6a66a872de04197c9c46ebed8e0e849a960674"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_empirical_ambiguity.py",
+      "sha256": "sha256:1dda5bbb6333291a38d61bd54a34855f2415629ee28bd87eef3fa70550415962"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_events.py",
+      "sha256": "sha256:b5580feb2db80e64a45313623e299d9e52c3d8b997380b96ce0328f26193ff83"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_icra_execution.py",
+      "sha256": "sha256:2438789aa119aca8dc99e6875a42bff504c89a547f8c32d7613bdcaf7abcd849"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_icra_readout.py",
+      "sha256": "sha256:4e0726eaf893c64acd2127a81cee5d2510a12cbf4e572b33a2d7f626218add0c"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_inverse.py",
+      "sha256": "sha256:67bf4b20a8bdc7bf5c89a52a2d97067307cf48479d0cd73a213eba06e4f16aef"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_learned_readout.py",
+      "sha256": "sha256:ffdc7f11d5ccaa9fb11f8030f1381c7bdb03ae8c4edafa2776a6e0448d34281b"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_margins.py",
+      "sha256": "sha256:48c0f7d0560d238164215f1ee7e8501da4a2157354865cb057a8a009864d3c2b"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_no_contrast.py",
+      "sha256": "sha256:a174614c6a08aef3bee05e1b7637dcfdeff4efae4d92ca71e4ad64cfa1168563"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_observation_delay.py",
+      "sha256": "sha256:e0b16e57f77c7035cae4caf2b7035bebf79bcb51ac576921a776481740514f4b"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_outcome_learner.py",
+      "sha256": "sha256:e51619f7a2e84d1125579ee63276548ad7dbbcfb8f2c2b10cc645415929d73d5"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_overhang_eval_execution.py",
+      "sha256": "sha256:c61d583a807bc3e3902739b181c2c68725ef3b7bc6e4991037d3908d066560db"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_overhang_execution.py",
+      "sha256": "sha256:09176db9de26aa3e8e51ec26fa24c55fc17bb30a5da13cdd4cc3069d02f26c24"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_overhang_observer.py",
+      "sha256": "sha256:ac6ff7d837641469c5c743e0065a14e94e371a3970497f1b0221aa7b151f7ffa"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_passage.py",
+      "sha256": "sha256:0e785d6263e66e12059f734d41a64331fb519cfd14832fe884125e2856b04a06"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_policy_features.py",
+      "sha256": "sha256:c287b1305529df99096a40f7e0c0e2511171a2a7fd79ed24c8856daa7278931b"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_ray_observer.py",
+      "sha256": "sha256:48451c7103f397a9b8595efb731806ffe4e850b89288ccae5c85210ac1d10bb7"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_reactive_execution.py",
+      "sha256": "sha256:74e033c5df4ecc2cf73ebca3e254accdf28c77dd167aa6790938407bb38f50d1"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_reactive_query_execution.py",
+      "sha256": "sha256:6b5ba7af621bdc236430eb5151fe4a4f58a29ce2823be4917da8ebcbe5151871"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_reactive_rule.py",
+      "sha256": "sha256:21f95864ee71e28b7448df4f6694452ce2e9422c2b601c5fe5bb5ef70ee8b8f3"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_reference_bank.py",
+      "sha256": "sha256:36fe2377c0948ef1b499242606365ec27c617979d599a2ea0347ab0b416ea78c"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_refinement.py",
+      "sha256": "sha256:f01b8bea385249f459bbbd006bb40ce85cdbf30f912e457f94b2fb67d08e68d4"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_reset_capture.py",
+      "sha256": "sha256:fd2d48a6c74afd7621b39af7496cf246ce0baa172ddad993ccd878531c0e8098"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_source_bank_audit.py",
+      "sha256": "sha256:ac0ae295b0e519278f97b6659b712608abd3435ef7e49deda91d4c0e53b40f1a"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_station_search.py",
+      "sha256": "sha256:45f637cac1cc75b4a75938cdf6506ff7d9a9cfd6717c05c8364a908631aa4c8d"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion2scene_uncertainty.py",
+      "sha256": "sha256:5acc823d151968710bd6d343c60a1ccd74f036593617f95c142fb8640c475686"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/hallucination/motion_envelope.py",
+      "sha256": "sha256:2536474e15c436ff7db5786ccd96159ef6edb27dfeff263f95f231afab8a5e67"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/kimodo_motion_adapter.py",
+      "sha256": "sha256:bcd4d1f7a2145304864404f10ee6ddafeea5e652e134fade072d3076e14cc68f"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/local_adaptation.py",
+      "sha256": "sha256:e9b14fc66d447862c5733e366b0cbe9d59931c6e585bf8c29b45ecac7f4823f4"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/motion_envelope.py",
+      "sha256": "sha256:d9366aaa2241137d36ac9b6636f720916da9027b976cf8d40982fe8eca6855d4"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/motion_prefilter.py",
+      "sha256": "sha256:eb7ba6463cd0dc16f1e524b70a3ca028deef30078c68db9634368bcc8c9c441e"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/reference_gate.py",
+      "sha256": "sha256:bd279e66ee97f98d20996b5a67db5d7662e93a4c658fbf2b5b0fa1ff86a9f90a"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/reference_payload.py",
+      "sha256": "sha256:1f45326fef9cd896cf46d3e2c03a6996831aeb5713dc2d8e0e8c64301e25eb67"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/schemas.py",
+      "sha256": "sha256:8f0f0b3314b242679da42b30c479e7cd3c0d8a9c85f80fad21f33bbd25a8ee35"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/self_intersection.py",
+      "sha256": "sha256:f7878ca1a25c6160236b8f093e048b9314364d095b4aa04e200efdeffc6a8207"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/sweepcf_coverage.py",
+      "sha256": "sha256:609ebf80fb3a0cc538a462645c515fd71863c2eb0c6812dfa3eaa59cdd7b4b08"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/swept_volume.py",
+      "sha256": "sha256:7b283d5fe991567629e559bc2121b7649eb2ec27e84b8b3c6a5741e8f1246a68"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/trajectory_segments.py",
+      "sha256": "sha256:7adf547065ab3e30eef648d5a8acf6209841cac7a07bb1ee86f58fea37e2e50d"
+    },
+    {
+      "path": "repository/gear_sonic/dataset_generation/trajectory_validation.py",
+      "sha256": "sha256:d2528201481d46b4c46d04f033fc9298d63ae01576c95e8ed4d05b9141c55f12"
+    },
+    {
+      "path": "repository/gear_sonic/envs/__init__.py",
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "repository/gear_sonic/envs/env_utils/__init__.py",
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "repository/gear_sonic/envs/env_utils/joint_utils.py",
+      "sha256": "sha256:b69a07f6bd1850370f8b7d6161e9e099222eebc6eec967b3dc5a936bc8b87f4a"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/__init__.py",
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/mdp/__init__.py",
+      "sha256": "sha256:03d02f26cab1144d527a8091d6ebc02778e282b50f2d54563535f9aad452bc48"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/mdp/actions.py",
+      "sha256": "sha256:d678c1f4fbaa8e314ac3fd068e905d455cf2ebfcd88bb9c5f70a56827694e8b2"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/mdp/commands.py",
+      "sha256": "sha256:0933e3f38e0da6a9633328f63ab3e934fabd54dd141f1ef25cdf109ce40bad86"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/mdp/curriculum.py",
+      "sha256": "sha256:5405accd219561c9a31d3c757dc83c215f19a813063a91d51ce2ea8e2c2eb625"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/mdp/events.py",
+      "sha256": "sha256:0bb79771f02a891750aaae1bd7242f3316dd5acf0c95c170d03ac5f1c803879a"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/mdp/observations.py",
+      "sha256": "sha256:08ebb1a7b919547fef657ea3f6644e7168ca7c5e2db6c18c9786ed6ecb8d45aa"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/mdp/recorders.py",
+      "sha256": "sha256:204f33e671f5ec5d5b9197c481449e88c535e0ff419fd550e7e55ac6448b79b1"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/mdp/rewards.py",
+      "sha256": "sha256:3de4ba4e83a579c13df8985769377a993518266ba79944e93cf5de134c5a57c4"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/mdp/terminations.py",
+      "sha256": "sha256:663fc44ea95d8f965aa96061289a68126a18f29ff39ee114007a90e9f04ea06c"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/mdp/terrain.py",
+      "sha256": "sha256:cd18054abdfdad9c967e3abdf2f51ae7198d4ecb396256d60e4024297423b2e6"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/mdp/utils.py",
+      "sha256": "sha256:a83c8be573e2eab142209fd7b891f935a0df0ad8057c9dbac5eb41d35ecdc3b4"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/modular_tracking_env_cfg.py",
+      "sha256": "sha256:0ee17213386bfd3c02910c113a13ddc833ed269a90fc603b99eee4fd2b38719f"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/robots/__init__.py",
+      "sha256": "sha256:cf8bfe34612e06ba2ec40007d76de24ac515e17c4270c5a50ffed4ac34f65763"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/robots/g1.py",
+      "sha256": "sha256:74d6f22e305c0e74494f33f388491d8754e49c211b113947bf739e7359b946f7"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/robots/h2.py",
+      "sha256": "sha256:82829432a1cb73220aadb94a6b11968812bf835e0bf79e5dcda389a1a4074f54"
+    },
+    {
+      "path": "repository/gear_sonic/envs/manager_env/scene_usd.py",
+      "sha256": "sha256:58ed4439f062802426ea9df895de81a161f79eb6d5061cce07325467cf982edd"
+    },
+    {
+      "path": "repository/gear_sonic/isaac_utils/__init__.py",
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "repository/gear_sonic/isaac_utils/maths.py",
+      "sha256": "sha256:6664aca11cf24e78d749a6c415422566a8c1c29ddd7b8221732874a423ce5bce"
+    },
+    {
+      "path": "repository/gear_sonic/isaac_utils/rotations.py",
+      "sha256": "sha256:b800cc97757ea452e04c12b16b70a2847b5cb08c041b521e32e7347b05479d99"
+    },
+    {
+      "path": "repository/gear_sonic/research/__init__.py",
+      "sha256": "sha256:3502edb694409610ff5971eced99e817be812dc0e1af717c6c418e8a067f6a16"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/__init__.py",
+      "sha256": "sha256:1f6d755e540459b3ee38db86a318eff211019006d7917ec98d0fa43b228953d6"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/analysis_protocol.py",
+      "sha256": "sha256:c9282e357438ae4f5073efd5db56983e57a710458bd47a31f946cc1e98a95593"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/analysis_protocol_lock.py",
+      "sha256": "sha256:90b124a7d2c1cad2fe8a2994987db1d4387649af65f1d793502d1555c97e92d7"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/atlas.py",
+      "sha256": "sha256:d004caa77a699d68455f0f9d8ad104bdfa623c14d45cef0ea34ebf371e3177f8"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/atlas_probe_mode.py",
+      "sha256": "sha256:df03b4d7685c19300f521741cc415db1c36582e322ded10020e70ae1edcb6622"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/compute.py",
+      "sha256": "sha256:2047c823fa5275706f9247eeb0af46260b8a17ea7ca9b975e993e98bdb1ce446"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/fixed_distribution.py",
+      "sha256": "sha256:424afdc94c7cf7d1a63c052d3689fe0c790ef4d6f430a62a28f23136e1dd7b72"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/instrument.py",
+      "sha256": "sha256:4d7c84d8a92a0f385c1fb60c703370c48f5c51e7260eced70887e0422f1595cb"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/instrument_collection.py",
+      "sha256": "sha256:a26b4770e965ec4acab6de83ebf991a6b84ea612aabdb0b5305849d6953a2c16"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/instrument_runtime.py",
+      "sha256": "sha256:08a2aa37d2d5f0140a1e3feae0aafa69ab026752546de7b3a3ec6f041a3ad133"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/intervention_plan.py",
+      "sha256": "sha256:a637d276f47abbffc3324706d9db0499ef992f0f96b7faeea70f4ed130b45b90"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/interventions.py",
+      "sha256": "sha256:84547df2942f38d59dcedd1c2e3782c2105054e8cdc909cfcbdab0d62a008745"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/isaac_recorder.py",
+      "sha256": "sha256:53397aa8127608b244e49d002c68d2cee6cddec77ac7db6e2b4e20d3de2a027f"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/normalizer.py",
+      "sha256": "sha256:375dd73705c7a8348aa5964d8a5f2c5c5648dd3b0c63b6f80335584d23457ae1"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/panels.py",
+      "sha256": "sha256:166af9b829238d1441b1df0666f609f9a7b45633d5b0666b80f71e246fae2e80"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/probes.py",
+      "sha256": "sha256:f8df75565ce6f065be33069f98f6b66537de35ed52d726ee6fd00875e12ac439"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/protocol_preflight.py",
+      "sha256": "sha256:ec5fb4a762082b6f131d73f96f2a279395c253226a28877eaf68a38ddd2054b7"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/reference_feasibility.py",
+      "sha256": "sha256:1641db6c6475e754f777f43e2ab1b7d719116cacba43d82a42d5e9c7e80c6778"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/reference_lengths.py",
+      "sha256": "sha256:684380dbb7bb2e265c5eaf0b1072624217db94b9c4b090e1c1cd56bd8be93f11"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/schedule.py",
+      "sha256": "sha256:55fae6114101f3602160a7b1bb8e5ec77ea836474e931f3cfa358e1cb230edce"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/schedule_batch_loader.py",
+      "sha256": "sha256:bbe0ab9dc194cc64a96ba1c25a780533d09caf63f9d56f3b0ca993643146e3bb"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/schema.py",
+      "sha256": "sha256:2cf51a5f91cef6f893dc92146e32e83bd6b88a4ae78dd40be87ea90118c4ec86"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/signatures.py",
+      "sha256": "sha256:31fccfde84505493751a814c7343967f8c244ab035aaf83c7a9493e3fd4a1358"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/sonic_lite.py",
+      "sha256": "sha256:6112f6d5f98a74b4af75f0d907437cff55b5a50a6a3591b6f68fd8718df4577b"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/stability.py",
+      "sha256": "sha256:e5c5dbd86ecbebc3d5e0ee63cbe9a4857b15009c138616bd060ca42022e38fc4"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/transfer_analysis.py",
+      "sha256": "sha256:a587f95898bad55671c8dc81ecbf20170146125caad89dab51ef37e473e874b0"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/transfer_features.py",
+      "sha256": "sha256:977b4499253222b26abd45db4fd6b98555d0522bccf0645356f2608f06c0db5b"
+    },
+    {
+      "path": "repository/gear_sonic/research/lace/trust_region.py",
+      "sha256": "sha256:2d1ea25fba3833bad2d18cd996183de9c7edd02c73743fe75c2ca666db638957"
+    },
+    {
+      "path": "repository/gear_sonic/trl/__init__.py",
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "repository/gear_sonic/trl/utils/__init__.py",
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "repository/gear_sonic/trl/utils/common.py",
+      "sha256": "sha256:26263d3a3dabcf2bfb9ad0766ba90b910c45246728719497481ec72b28f3e0ad"
+    },
+    {
+      "path": "repository/gear_sonic/trl/utils/kornia_transform.py",
+      "sha256": "sha256:576c2209f8f85f38c59c182d6f504cde34899adca68fea2ad50e626c5e03a0f1"
+    },
+    {
+      "path": "repository/gear_sonic/trl/utils/math.py",
+      "sha256": "sha256:280dbe8eaeb7413a703e441e2feae02b7d4388f73878f0d2ffe93f4f29324638"
+    },
+    {
+      "path": "repository/gear_sonic/trl/utils/order_converter.py",
+      "sha256": "sha256:236e2705d306ab1c938af5baf973fbcd291b04fbdd372bc87e3fa56c907d069f"
+    },
+    {
+      "path": "repository/gear_sonic/trl/utils/torch_transform.py",
+      "sha256": "sha256:4d40e3ac765cb2541aacd8af60f1162914e4ce97b4cc8fadc871a7c6a2fe7b41"
+    },
+    {
+      "path": "repository/gear_sonic/utils/__init__.py",
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "repository/gear_sonic/utils/m5t_telemetry.py",
+      "sha256": "sha256:81e826259e99e7caae19163797098e54bfca1d0f8c9d93c764e0d476fdf315d8"
+    },
+    {
+      "path": "repository/gear_sonic/utils/motion_lib/__init__.py",
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "repository/gear_sonic/utils/motion_lib/motion_lib_base.py",
+      "sha256": "sha256:608d57e5f4933b5850dc6e687f7c006e0ed72dc888b84cd9b74fc515fad5bcb0"
+    },
+    {
+      "path": "repository/gear_sonic/utils/motion_lib/motion_lib_robot.py",
+      "sha256": "sha256:db1d9ad5011e98f5e0c7de8710714753213fd8322beafe2d019035455f76bf75"
+    },
+    {
+      "path": "repository/gear_sonic/utils/motion_lib/skeleton.py",
+      "sha256": "sha256:9e593ed72145add9e7b5711602913494128b0853a3ee3a682dfc4609deed0b8e"
+    },
+    {
+      "path": "repository/gear_sonic/utils/motion_lib/torch_humanoid_batch.py",
+      "sha256": "sha256:41e5d4a44497547784a1f22fb968d112039f0a7b0eb85e166022e6ac3c4988d1"
+    },
+    {
+      "path": "repository/gear_sonic/utils/root_xy_diagnostic.py",
+      "sha256": "sha256:dfc4cf3ff5db9dcdbeb3a5099229647797c5a40f5101ea7e585b7f62d1811e9d"
+    },
+    {
+      "path": "repository/scripts/__init__.py",
+      "sha256": "sha256:778fea6f887f6701c8283c6943442064bf6a9015936138bc7a6dd13b7cc8e323"
+    },
+    {
+      "path": "repository/scripts/research/__init__.py",
+      "sha256": "sha256:90b901bfc4fff0ac7fa148c0df4804d623e480042807a30bedb97a62e38637ae"
+    },
+    {
+      "path": "repository/scripts/research/bundle_motion2scene_sources.py",
+      "sha256": "sha256:23840bb8604fc9fb92c6d49c5acd0820bae6497f92f40412c3365ed745f880d7"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_beam_teacher.py",
+      "sha256": "sha256:9ef4a3d29b5e1c33116a81c9c42a79fac0cbe25f67a60d55bc240e37df3bd49b"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_carrier_learning.py",
+      "sha256": "sha256:15e38be543fcc83b8ddce0039a3a511b9f279789cdb0b617357da1a0cef7289c"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_development_bank.py",
+      "sha256": "sha256:afe37dc4bf8f8ab7c3ea8469098b82d219b223cfe62681523482f27e87b38583"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_distill_study.py",
+      "sha256": "sha256:3c045d4cdc89151d1aa570d45c8730ec9a086c50ae6ed71d23e0308a1d01def6"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_event_scaling.py",
+      "sha256": "sha256:1176bc2a5cb820e103e8409a0e59c8d78744706eb768ec77ee7a70c2dff5cb18"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_icra_audit.py",
+      "sha256": "sha256:a3e1860aacbd40e35138c465cbbc1a8809ab03dc5c1a3dd1fa7e1bf7545467e8"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_icra_compare.py",
+      "sha256": "sha256:88c40ede37ab7d504492ef131d446b688a6c70e9c27c6f9ed6ea36dc2740fd34"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_icra_eval_audit.py",
+      "sha256": "sha256:42354c0eda485259df03dc9cc1afb824a7f37971e44b2cf1fea7d9d660a1a1be"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_icra_learning.py",
+      "sha256": "sha256:ae7a083abb14443d1385e150663e7821761b52a9b0f16eaf2c4eec963b28e83c"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_icra_study.py",
+      "sha256": "sha256:872c8f67ce3fb31ac5bba0a6652e8e443d87fff31d0cdfb0cb845c068af6d16c"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_inverse_learning.py",
+      "sha256": "sha256:b77a2f7e4bac6a62902153b7c127fee28ebb6d26176b4ba645476a0ef413988d"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_layout_budget_review.py",
+      "sha256": "sha256:cb7dfb4dbe03063ef47085349adf5558b39b0ce1bebf8ff7132bd6d321f81e2f"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_linear_execution_v2.py",
+      "sha256": "sha256:ecead4afad7b61a4860fffdd702b113416327b20fe016a03b07a7b01998c1bba"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_reactive_interface.py",
+      "sha256": "sha256:017d14b314498cfd803b3f37e532eca06631412cebb716279c9d885c241345f6"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_refinement_study.py",
+      "sha256": "sha256:1fc1ee1bed6075bf387383ff4f6f18c4953045427603d08ee7a57aad99eba525"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_selector_diagnosis_v2.py",
+      "sha256": "sha256:57fed49f9b84ef95c5ae2c5f8b832f0590069b8bdc2671f51e6547b2ba59193f"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_source_execution.py",
+      "sha256": "sha256:867b32aa68450a74d8102a2213873a65e8ed3cc5b6e23da2be337779183cdc02"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_source_phase.py",
+      "sha256": "sha256:b3c940f4a0665db54ae3b4f70e5dfd7b8d5ffb402aa37648aad30bae652b366d"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_timing_diagnostic.py",
+      "sha256": "sha256:b0843f51d6ed8e1217fbd2dc589362ed686a6c9ea6c192e38182ac454b4a3f7a"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_transition_construction.py",
+      "sha256": "sha256:56e8f1b50b14fcd486bd039b1bc2bb607875c643e1b578c93fb5d0a77c7684af"
+    },
+    {
+      "path": "repository/scripts/research/motion2scene_uncertainty_learning.py",
+      "sha256": "sha256:ccdf9e2cd90fe72fc7067810a09d0c7f92b74fe68aa09a1ff3ff176e4860a3b1"
+    }
+  ],
+  "traversal_assignments": 432
+}
