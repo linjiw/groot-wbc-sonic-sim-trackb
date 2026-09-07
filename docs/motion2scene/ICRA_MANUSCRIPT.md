@@ -40,6 +40,15 @@ construction—with one shared outcome learner. The third contribution remains a
 experimental question: acquisition is complete, but policy evaluation is partial.
 The learned proposal is a tested factor, not an assumed source of superiority.
 
+The experiment's most transferable outcome is about scarcity rather than about which
+generator wins. A training scene helps this decision only if it carries a contrast
+that survives execution and is visible when the command must be issued, and such
+scenes are rare in a way that is measurable before any simulation: the acceptance
+geometry alone can remove almost all of them, and we report the price of that choice
+as a curve rather than a single threshold. On the other side, scarcity cuts both ways.
+A single verified contrast is enough to change what the fixed learner does, which is
+what the removal diagnostic in Section VI shows.
+
 ## II. Related work
 
 LfLH learns hallucinated environments in which open-space plans are useful and trains
@@ -145,10 +154,45 @@ from analytic construction on 41001; no learned slot survives. Both seeds then s
 walking contact (1635.077 and 1130.936 N) and d040 contact-qualified passage (0 N).
 Both d040 runs also receive reference_endpoint_tracking_error rejections. The full
 funnel therefore demonstrates one unique analytic scene, not broad learned-scene yield.
-A finite support map finds 67 nominal candidate centres after other checks, but only
-one under the inherited perturbation audit. None of its four pre-filter robust
-centres lies inside the frozen learned draws' trust boxes. These finite samples do
-not prove infeasibility or justify revising the earlier outcomes.
+
+### Why almost nothing is acceptable: the placement envelope consumes the window
+
+The acceptance geometry, not the proposal model, is the dominant cause. Sweeping
+11,421 station/height centres per carrier over the recorded achieved transitions and
+scaling the inherited audit envelope gives the number of 10 mm two-sided contrast
+witnesses below. The nominal-pose column is the achievable support; the last row is
+the envelope the study inherited.
+
+| Envelope (xy / z) | 41001 | 41002 | 41003 |
+| --- | ---: | ---: | ---: |
+| nominal pose | 200 | 168 | 337 |
+| +-5 mm / +-2.5 mm | 120 | 86 | 238 |
+| +-10 mm / +-5 mm | 50 | 27 | 150 |
+| +-20 mm / +-10 mm (inherited) | 2 | 0 | 32 |
+
+The best nominal joint margin, the smaller of target clearance and walk interference
+at a centre's own pose, is 24.42, 20.48 and 26.99 mm. The inherited envelope asks a
+centre to keep a 10 mm two-sided contrast while the beam moves +-20 mm horizontally,
+which is the size of the entire executed window. It is the correct instrument for a
+placement certificate and for any hardware claim, where the obstacle's realized pose
+is uncertain, and the wrong one for a simulator study that authors the beam at an
+exact pose. Reported this way the table also prices a future hardware claim directly.
+
+A second and separable cause belongs to the proposals. On 41003 the inherited envelope
+still leaves 32 sampled witnesses and the frozen learned draws, whose +-0.05 station
+and +-0.03 m trust boxes are unchanged, reach none of them. Reachability and acceptance
+therefore fail independently, and only the first is addressed by a different contract.
+
+A third property is measured and not gated by either contract. Among proposals that
+are critical at the nominal pose, 44 of 47 analytic scenes but only 24 of 34 learned
+scenes are visible to the decision-time sensor, with 8 of 12 invisible on 41003, where
+the learned initializer concentrates late-station draws. A contrast the robot cannot
+observe cannot inform the selector whatever its geometry. No visibility gate is added
+after the fact; the quantity is reported as a covariate.
+
+These are sampled witnesses on one finite grid at one physics seed per carrier. They
+do not prove infeasibility, do not estimate feasible volume, and do not revise any
+earlier outcome.
 
 ## VI. Registered learning-utility experiment
 
@@ -191,6 +235,26 @@ no reverse difference. This supports useful learned adaptation on the inspected
 layouts, while the script remains the stronger observed baseline. It does not
 establish a learned-generator advantage or source-held-out generalization.
 
+The comparison is one contrast against three copies of the same policy, and must be
+reported as such. The uniform, target-only and background-only Motion2Scene learners
+issue walking on all 61 conditions and are behaviourally identical; each therefore
+gives the same 21/61 and the same nine-to-zero paired table against analytic. The
+condition-level sign test over nine one-directional discordant pairs gives p = 0.0039,
+but the 61 conditions are twelve layouts and two seeds inside only three carriers, so
+that figure overstates independence. The carrier-level statement is the honest one:
+the direction is the same on all three carriers, with five, two and two extra passes
+and no reverse case, which is n = 3.
+
+Adaptation is close to free on this panel and every learner under-uses it. Of the 38
+conditions in which both commands were actually executed, 15 are d040-only successes,
+11 both-pass, 12 both-fail, and none is a walking-only success. The best outcome
+available from the observed commands is 36 of 61, which the scripted rule attains
+by requesting d040 38 times; analytic requests it 22 times and reaches 30, and the
+privileged geometric forecast requests it only 10 times, succeeding in all 10. Under-
+adaptation, not misfiring adaptation, is what separates the learners from the ceiling
+here. The separately reported background suites are where unnecessary adaptation is
+charged, so this panel alone does not argue for always crouching.
+
 The first analytic refit removes the sole useful generated label and three refused
 assignments. Its remaining training IDs, weights, biases and scales exactly equal
 the background-only Motion2Scene primary model. On the 61 recorded inputs, its d040
@@ -205,6 +269,27 @@ comparison: generator fitting, proposals, rejected searches and shared bank cost
 remain separately recorded. Remaining evaluation and the final grouped uncertainty
 analysis must precede the registered result decision. [Internal evidence:
 M2S_ICRA_366_RESULT; all assigned outcomes and refit checkpoints are released.]
+
+### A second contract, registered before its proposals
+
+Because the envelope and not the proposal model dominates the funnel, a second
+contract is registered separately, with its predictions filed before any proposal was
+drawn. It changes exactly one thing: criticality is judged at the nominal pose, with
+the 17-offset and 113-offset survivals still computed and stored for every proposal
+as reported diagnostics that never gate acceptance. Everything else is unchanged, and
+the six shared background groups are reused by reference rather than re-executed, so
+no reused trace counts as a new example. A unit test asserts that both contracts reach
+identical decisions whenever their geometry verdicts agree.
+
+Under this contract eligible generated proposals move from 1 of 48 to 41 of 48 for
+analytic and from 0 of 48 to 33 of 48 for Motion2Scene, with at least one eligible
+group on every carrier for both. Three groups per carrier and arm are assigned, giving
+36 groups and 72 label commands. Of the 18 assigned contrast-arm proposals, 17 fail
+the 113-offset diagnostic, which is the expected consequence of the measured envelope
+price rather than a new finding. Larger accepted yield is geometric acceptance only:
+whether these are useful contrasts is decided by the paired physical labels, and
+whether they teach is decided by the evaluation. Both are pending at this snapshot,
+and no learning conclusion is drawn from acceptance counts.
 
 ## VII. Limitations and result decision
 
