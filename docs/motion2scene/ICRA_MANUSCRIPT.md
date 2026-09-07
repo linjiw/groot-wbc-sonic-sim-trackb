@@ -212,12 +212,27 @@ method-B-only and both-fail. Repeats share carriers and do not create independen
 source evidence. Background adaptation/refusal outcomes form separate suites.
 
 All 82 assigned labeling executions and 41 unique pairs pass measurement admission.
-Complete groups are 24 uniform, seven analytic, 22 target-only and six Motion2Scene,
-including the same six shared backgrounds per arm. Only one generated group, from
-analytic construction on 41001, is walk-fail/d040-pass. Uniform supplies six generated
-both-pass and twelve both-fail groups; all sixteen target-only generated groups are
-both-pass. Motion2Scene supplies no accepted generated groups. Its fitted learner is
-therefore background-only. The equal-24-complete-label target fails in three arms.
+The resulting training sets are the study's central observation.
+
+| Arm | Groups | Generated | Both pass | d040 only | Walk only | Both fail |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Uniform | 24 | 18 | 10 | 0 | 0 | 14 |
+| Analytic | 7 | 1 | 4 | **1** | 0 | 2 |
+| Target-only | 22 | 16 | 20 | 0 | 0 | 2 |
+| Motion2Scene | 6 | 0 | 4 | 0 | 0 | 2 |
+
+Every arm contains the same six shared background groups. Across 192 proposals, 72
+assigned generated slots and 82 executed label commands, **exactly one** acquired group
+is a walk-fail/d040-pass contrast, from analytic construction on 41001. Consequently
+the analytic and Motion2Scene training sets differ by exactly that one group and are
+otherwise identical, and the equal-24-complete-label target fails in three arms. This
+is an equal-requested-slot comparison with unequal acquired data, and the acquisition
+shortfall must be disclosed wherever the downstream numbers are quoted.
+
+The comparison this creates is unusually clean and unusually narrow at the same time.
+Adding eighteen untargeted groups (uniform) or sixteen target-only groups changes the
+fitted policy not at all; adding one contrast changes it completely. Both statements
+rest on a single acquired example, so the effect size is not estimable from this study.
 
 Four primary fits and 24 registered leave-four-assignment-out refits are complete.
 At the September 7 snapshot, 366 of 540 policy evaluations are admitted: all six methods
