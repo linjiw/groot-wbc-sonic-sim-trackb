@@ -1,0 +1,6915 @@
+{
+  "backgrounds": [
+    {
+      "arm": "shared",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.555182839176906,
+          0.2843436731469414
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6,
+        "thickness_m": 0.1,
+        "underside_m": 1.5,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "eligible": true,
+      "group_id": "icra_41001_shared_absent",
+      "source": 41001,
+      "suite": "absent"
+    },
+    {
+      "arm": "shared",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.555182839176906,
+          0.2843436731469414
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6,
+        "thickness_m": 0.1,
+        "underside_m": 2.0,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "eligible": true,
+      "group_id": "icra_41001_shared_raised",
+      "source": 41001,
+      "suite": "raised"
+    },
+    {
+      "arm": "shared",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.641682847516519,
+          0.22023720366196864
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6,
+        "thickness_m": 0.1,
+        "underside_m": 1.5,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "eligible": true,
+      "group_id": "icra_41002_shared_absent",
+      "source": 41002,
+      "suite": "absent"
+    },
+    {
+      "arm": "shared",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.641682847516519,
+          0.22023720366196864
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6,
+        "thickness_m": 1.4,
+        "underside_m": 0.0,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "eligible": true,
+      "group_id": "icra_41002_shared_blocked",
+      "source": 41002,
+      "suite": "blocked"
+    },
+    {
+      "arm": "shared",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.7389709758811702,
+          0.16760704586608605
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6,
+        "thickness_m": 0.1,
+        "underside_m": 2.0,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "eligible": true,
+      "group_id": "icra_41003_shared_raised",
+      "source": 41003,
+      "suite": "raised"
+    },
+    {
+      "arm": "shared",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.7389709758811702,
+          0.16760704586608605
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6,
+        "thickness_m": 1.4,
+        "underside_m": 0.0,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "eligible": true,
+      "group_id": "icra_41003_shared_blocked",
+      "source": 41003,
+      "suite": "blocked"
+    }
+  ],
+  "costs": [
+    {
+      "arm": "uniform",
+      "audit_queries": 3616,
+      "crosscheck_queries": 452,
+      "independent_error_m": 6.938893903907228e-18,
+      "predecision_queries": 32,
+      "search_queries": 0,
+      "seconds": 1.1496509380231146,
+      "source": 41001,
+      "trace": {
+        "path": "research-data/m2s-icra-v1/41001_uniform.npz",
+        "sha256": "sha256:a6d62baf282be4576dcceca7d6380a2cbcec5e528c8c1b998a313fa3a33112ee"
+      }
+    },
+    {
+      "arm": "analytic",
+      "audit_queries": 3616,
+      "crosscheck_queries": 452,
+      "independent_error_m": 1.3877787807814457e-17,
+      "predecision_queries": 32,
+      "search_queries": 4624,
+      "seconds": 2.9779907490010373,
+      "source": 41001,
+      "trace": {
+        "path": "research-data/m2s-icra-v1/41001_analytic.npz",
+        "sha256": "sha256:baeb7eb80f428e175e3f9ea28ebbb43ca74d4b62a518cdafe6260bc53e03fcfd"
+      }
+    },
+    {
+      "arm": "no_contrast",
+      "audit_queries": 3616,
+      "crosscheck_queries": 452,
+      "independent_error_m": 2.7755575615628914e-17,
+      "predecision_queries": 32,
+      "search_queries": 4624,
+      "seconds": 3.1773481880081818,
+      "source": 41001,
+      "trace": {
+        "path": "research-data/m2s-icra-v1/41001_no_contrast.npz",
+        "sha256": "sha256:de9c35a7e026eda51fa49d7ee2a9e6b66c53c44ac31d8681e10b2007e4a8ecdf"
+      }
+    },
+    {
+      "arm": "motion2scene",
+      "audit_queries": 3616,
+      "crosscheck_queries": 452,
+      "independent_error_m": 1.3877787807814457e-17,
+      "predecision_queries": 32,
+      "search_queries": 9248,
+      "seconds": 5.492968597012805,
+      "source": 41001,
+      "trace": {
+        "path": "research-data/m2s-icra-v1/41001_motion2scene.npz",
+        "sha256": "sha256:3757a0155e040986150d94db8fd8f0740e0956ddc2e1aaa40eab3181e48a2722"
+      }
+    },
+    {
+      "arm": "uniform",
+      "audit_queries": 3616,
+      "crosscheck_queries": 452,
+      "independent_error_m": 6.938893903907228e-18,
+      "predecision_queries": 32,
+      "search_queries": 0,
+      "seconds": 1.1487925290130079,
+      "source": 41002,
+      "trace": {
+        "path": "research-data/m2s-icra-v1/41002_uniform.npz",
+        "sha256": "sha256:2549404f4382504206bd382d4d88f8d828d75f00cdeec91a3d60f23510dd69d4"
+      }
+    },
+    {
+      "arm": "analytic",
+      "audit_queries": 3616,
+      "crosscheck_queries": 452,
+      "independent_error_m": 1.3877787807814457e-17,
+      "predecision_queries": 32,
+      "search_queries": 4624,
+      "seconds": 2.725039408018347,
+      "source": 41002,
+      "trace": {
+        "path": "research-data/m2s-icra-v1/41002_analytic.npz",
+        "sha256": "sha256:85fc6539946a02b34ee022c61000587a3420e50a55c4274f6fa47aed2bb79e9b"
+      }
+    },
+    {
+      "arm": "no_contrast",
+      "audit_queries": 3616,
+      "crosscheck_queries": 452,
+      "independent_error_m": 2.7755575615628914e-17,
+      "predecision_queries": 32,
+      "search_queries": 4624,
+      "seconds": 3.2535036420158576,
+      "source": 41002,
+      "trace": {
+        "path": "research-data/m2s-icra-v1/41002_no_contrast.npz",
+        "sha256": "sha256:c3d5a4e1cfeef21215e7c85318e81b886f7a936cb8e5251218e505f266f1677c"
+      }
+    },
+    {
+      "arm": "motion2scene",
+      "audit_queries": 3616,
+      "crosscheck_queries": 452,
+      "independent_error_m": 1.3877787807814457e-17,
+      "predecision_queries": 32,
+      "search_queries": 9248,
+      "seconds": 6.134761484019691,
+      "source": 41002,
+      "trace": {
+        "path": "research-data/m2s-icra-v1/41002_motion2scene.npz",
+        "sha256": "sha256:853b67d1baade3426f45b9bf4ebd0407db3d4d2fe2545bdac9a0f3dce784442a"
+      }
+    },
+    {
+      "arm": "uniform",
+      "audit_queries": 3616,
+      "crosscheck_queries": 452,
+      "independent_error_m": 1.3877787807814457e-17,
+      "predecision_queries": 32,
+      "search_queries": 0,
+      "seconds": 1.1217328069906216,
+      "source": 41003,
+      "trace": {
+        "path": "research-data/m2s-icra-v1/41003_uniform.npz",
+        "sha256": "sha256:0a988c5436066dc10c3d4ae15b5bf68c37446a93bf7b42b0cf96e76ce39494fb"
+      }
+    },
+    {
+      "arm": "analytic",
+      "audit_queries": 3616,
+      "crosscheck_queries": 452,
+      "independent_error_m": 1.3877787807814457e-17,
+      "predecision_queries": 32,
+      "search_queries": 4624,
+      "seconds": 2.572925712011056,
+      "source": 41003,
+      "trace": {
+        "path": "research-data/m2s-icra-v1/41003_analytic.npz",
+        "sha256": "sha256:a36872a730ab97279c5587fb8dcc3891d9765c0fba92b1664becb9f57eca6bd0"
+      }
+    },
+    {
+      "arm": "no_contrast",
+      "audit_queries": 3616,
+      "crosscheck_queries": 452,
+      "independent_error_m": 2.7755575615628914e-17,
+      "predecision_queries": 32,
+      "search_queries": 4624,
+      "seconds": 2.4420557970006485,
+      "source": 41003,
+      "trace": {
+        "path": "research-data/m2s-icra-v1/41003_no_contrast.npz",
+        "sha256": "sha256:c10b79c84085b494fa41503d786e9e0b81e0c153f7e0d31439d6f6966096e4c8"
+      }
+    },
+    {
+      "arm": "motion2scene",
+      "audit_queries": 3616,
+      "crosscheck_queries": 452,
+      "independent_error_m": 1.3877787807814457e-17,
+      "predecision_queries": 32,
+      "search_queries": 9248,
+      "seconds": 5.614571231009904,
+      "source": 41003,
+      "trace": {
+        "path": "research-data/m2s-icra-v1/41003_motion2scene.npz",
+        "sha256": "sha256:01460f6daf0f36541ccbb04b9e08b1d3a5259837d337db6320e909cf993793ce"
+      }
+    }
+  ],
+  "registration": {
+    "path": "research-data/m2s-icra-v1/registration.json",
+    "sha256": "sha256:a4e39e4a7b2770ed3312ebf65e7807bded7e7e51c11ba906aa3c96a057c39b01"
+  },
+  "requested_generated": 72,
+  "rows": [
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.2874762782932574,
+          0.14428572932215902
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3022818126093627,
+        "thickness_m": 0.1,
+        "underside_m": 1.1957292286432597,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_uniform_00",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 0,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 0.7389954693848878,
+          "height_m": 1.2314326929178785,
+          "ray": 6
+        },
+        {
+          "distance_m": 0.7256418190574135,
+          "height_m": 1.230268845605195,
+          "ray": 7
+        },
+        {
+          "distance_m": 0.7346891418862037,
+          "height_m": 1.2310573717462159,
+          "ray": 8
+        },
+        {
+          "distance_m": 0.7340321302788161,
+          "height_m": 1.2944883356683754,
+          "ray": 10
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.2983445287190145,
+          0.24020997752901124
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5392685527749628,
+        "thickness_m": 0.1,
+        "underside_m": 1.2333803032759434,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_uniform_01",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 1,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.7768875600989182,
+          "height_m": 1.3218909489759796,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.7447791966084762,
+          "height_m": 1.3190925207075583,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.7665331532329427,
+          "height_m": 1.320988502954864,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.8338455141905832,
+          0.21530937156892407
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.43078859675440895,
+        "thickness_m": 0.1,
+        "underside_m": 1.3264215607684884,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_uniform_02",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 2,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.3173465903347055,
+          "height_m": 1.39577982866385,
+          "ray": 9
+        },
+        {
+          "distance_m": 1.293542133533282,
+          "height_m": 1.3916462281199318,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.3096700536274124,
+          "height_m": 1.3944468120538354,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          3.698329323222823,
+          0.40928937396872567
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.8684072924663139,
+        "thickness_m": 0.1,
+        "underside_m": 1.112822495669907,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_uniform_03",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 3,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.525805157018038,
+          0.18517155488790543
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35862546371215376,
+        "thickness_m": 0.1,
+        "underside_m": 1.1395468125973311,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_uniform_04",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 4,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 0.982152166630208,
+          "height_m": 1.1670249938964843,
+          "ray": 3
+        },
+        {
+          "distance_m": 0.964404674061048,
+          "height_m": 1.1670249938964843,
+          "ray": 4
+        },
+        {
+          "distance_m": 0.9764288989536519,
+          "height_m": 1.1670249938964843,
+          "ray": 5
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.2687123482065152,
+          0.14069933313276697
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.2978308195211471,
+        "thickness_m": 0.1,
+        "underside_m": 1.3463281731464645,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_uniform_05",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 5,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.2863224312099095,
+          0.14406519168618778
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.30200810846694176,
+        "thickness_m": 0.1,
+        "underside_m": 1.4478117225055371,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_uniform_06",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 6,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          0.5870523453738178,
+          0.06346646251924705
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.1376646489938403,
+        "thickness_m": 0.1,
+        "underside_m": 1.1349314017136156,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_uniform_07",
+      "predecision_clearance_m": 0.06735425192775818,
+      "reasons": [],
+      "slot": 7,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 0.018112041986707104,
+          "height_m": 1.165446425424456,
+          "ray": 0
+        },
+        {
+          "distance_m": 0.01778475733419315,
+          "height_m": 1.1654749501614359,
+          "ray": 1
+        },
+        {
+          "distance_m": 0.018006498194226752,
+          "height_m": 1.1654556241720821,
+          "ray": 2
+        },
+        {
+          "distance_m": 0.018043120198772702,
+          "height_m": 1.1670249938964843,
+          "ray": 3
+        },
+        {
+          "distance_m": 0.0177170809631715,
+          "height_m": 1.1670249938964843,
+          "ray": 4
+        },
+        {
+          "distance_m": 0.01793797803228728,
+          "height_m": 1.1670249938964843,
+          "ray": 5
+        },
+        {
+          "distance_m": 0.018112041986707104,
+          "height_m": 1.1686035623685125,
+          "ray": 6
+        },
+        {
+          "distance_m": 0.01778475733419315,
+          "height_m": 1.1685750376315327,
+          "ray": 7
+        },
+        {
+          "distance_m": 0.018006498194226752,
+          "height_m": 1.1685943636208864,
+          "ray": 8
+        },
+        {
+          "distance_m": 0.018321464411287017,
+          "height_m": 1.1702064828036938,
+          "ray": 9
+        },
+        {
+          "distance_m": 0.017990395494938673,
+          "height_m": 1.1701489932896878,
+          "ray": 10
+        },
+        {
+          "distance_m": 0.018214700257406395,
+          "height_m": 1.1701879434029323,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.172455216630262,
+          0.22625738848228205
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5097553552292178,
+        "thickness_m": 0.1,
+        "underside_m": 1.3542189401154525,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_uniform_08",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 8,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.6363258711769901,
+          "height_m": 1.4511699994956209,
+          "ray": 10
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.363247641223253,
+          0.15673760860504932
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.32017386233806056,
+        "thickness_m": 0.1,
+        "underside_m": 1.4346704402850365,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_uniform_09",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 9,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.3315545584617492,
+          0.1515653943526731
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3126918598550422,
+        "thickness_m": 0.1,
+        "underside_m": 1.4191295570241529,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_uniform_10",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 10,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.0723316607858087,
+          0.10380104843847132
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.25127073251379484,
+        "thickness_m": 0.1,
+        "underside_m": 1.4246114583337453,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_uniform_11",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 11,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.2763834086632162,
+          0.14216552181836364
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.29965047227588554,
+        "thickness_m": 0.1,
+        "underside_m": 1.282510181042633,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_uniform_12",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 12,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 0.7358885526037445,
+          "height_m": 1.2948107000220794,
+          "ray": 9
+        },
+        {
+          "distance_m": 0.7225910442717367,
+          "height_m": 1.2925016119327155,
+          "ray": 10
+        },
+        {
+          "distance_m": 0.7316003299537704,
+          "height_m": 1.2940660579734815,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.026740483079541,
+          0.21772273413244894
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.4757365954693581,
+        "thickness_m": 0.1,
+        "underside_m": 1.3022209443981418,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_uniform_13",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 13,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.5511995680317952,
+          "height_m": 1.3022209443981418,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.5511995680317952,
+          "height_m": 1.3022209443981418,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.5511995680317952,
+          "height_m": 1.3022209443981418,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.748729512509976,
+          0.3185503775460607
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6458047992279365,
+        "thickness_m": 0.1,
+        "underside_m": 1.2346627293611443,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_uniform_14",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 14,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.229669231320838,
+          0.34846776599379914
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7581704619633144,
+        "thickness_m": 0.1,
+        "underside_m": 1.205674396227805,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_uniform_15",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 15,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.8946359975654006,
+          0.33435870387079303
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6799999999999999,
+        "thickness_m": 0.1,
+        "underside_m": 1.2755151256058235,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": true,
+      "eligible": true,
+      "group_id": "icra_41001_analytic_00",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 0,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.3504065941393457,
+          "height_m": 1.3718764263676926,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.3797115303732004,
+          "height_m": 1.374430519851327,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.216224527676041,
+          0.23044633932251982
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.52,
+        "thickness_m": 0.1,
+        "underside_m": 1.2823813421624013,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_analytic_01",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 1,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.692333997709076,
+          "height_m": 1.3145216204439325,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.6617535173422424,
+          "height_m": 1.3118563559639809,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.6824723074373364,
+          "height_m": 1.3136621175035517,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.8946359975654006,
+          0.33435870387079303
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6799999999999999,
+        "thickness_m": 0.1,
+        "underside_m": 1.2805151256058234,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_analytic_02",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 2,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.393660038140543,
+          "height_m": 1.3756462124060111,
+          "ray": 6
+        },
+        {
+          "distance_m": 2.3504065941393457,
+          "height_m": 1.3718764263676926,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.3797115303732004,
+          "height_m": 1.374430519851327,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.72404004036009,
+          0.3152219650429179
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.64,
+        "thickness_m": 0.1,
+        "underside_m": 1.2833385406309228,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_analytic_03",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 3,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.2181471400465145,
+          "height_m": 1.360349255410832,
+          "ray": 6
+        },
+        {
+          "distance_m": 2.178065214635357,
+          "height_m": 1.3568558854308663,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.205221393650179,
+          "height_m": 1.3592227023830916,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.5316439799808939,
+          0.1860154229278869
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.36,
+        "thickness_m": 0.1,
+        "underside_m": 1.286158744671003,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_analytic_04",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 4,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.003403109156658,
+          "height_m": 1.3412641152668698,
+          "ray": 9
+        },
+        {
+          "distance_m": 0.9852716119929047,
+          "height_m": 1.338115613826011,
+          "ray": 10
+        },
+        {
+          "distance_m": 0.9975560064608548,
+          "height_m": 1.3402487765391122,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.216224527676041,
+          0.23044633932251982
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.52,
+        "thickness_m": 0.1,
+        "underside_m": 1.2773813421624014,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_analytic_05",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 5,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.692333997709076,
+          "height_m": 1.3145216204439325,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.6617535173422424,
+          "height_m": 1.3118563559639809,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.6824723074373364,
+          "height_m": 1.3136621175035517,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.216224527676041,
+          0.23044633932251982
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.52,
+        "thickness_m": 0.1,
+        "underside_m": 1.2873813421624012,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_analytic_06",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 6,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.692333997709076,
+          "height_m": 1.3145216204439325,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.6617535173422424,
+          "height_m": 1.3118563559639809,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.6824723074373364,
+          "height_m": 1.3136621175035517,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.72404004036009,
+          0.3152219650429179
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.64,
+        "thickness_m": 0.1,
+        "underside_m": 1.278338540630923,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_analytic_07",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 7,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.2181471400465145,
+          "height_m": 1.360349255410832,
+          "ray": 6
+        },
+        {
+          "distance_m": 2.178065214635357,
+          "height_m": 1.3568558854308663,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.205221393650179,
+          "height_m": 1.3592227023830916,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.7019649867581523,
+          0.20741106166335532
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.4,
+        "thickness_m": 0.1,
+        "underside_m": 1.281158744671003,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_analytic_08",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 8,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.1809391911785465,
+          "height_m": 1.3720929323800974,
+          "ray": 9
+        },
+        {
+          "distance_m": 1.159599616485166,
+          "height_m": 1.3683873541224048,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.174057537468979,
+          "height_m": 1.3708979457540962,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.8946359975654006,
+          0.33435870387079303
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6799999999999999,
+        "thickness_m": 0.1,
+        "underside_m": 1.2855151256058233,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_analytic_09",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 9,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.393660038140543,
+          "height_m": 1.3756462124060111,
+          "ray": 6
+        },
+        {
+          "distance_m": 2.3504065941393457,
+          "height_m": 1.3718764263676926,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.3797115303732004,
+          "height_m": 1.374430519851327,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.386374543934984,
+          0.25310583535292575
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.56,
+        "thickness_m": 0.1,
+        "underside_m": 1.2691403777854176,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_analytic_10",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "reserved_layout",
+        "contrast_audit"
+      ],
+      "slot": 10,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.8678199159008493,
+          "height_m": 1.3298162259856912,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.8340684044708897,
+          "height_m": 1.326874587938157,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.8569356214773276,
+          "height_m": 1.328867597220925,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.8946359975654006,
+          0.33435870387079303
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6799999999999999,
+        "thickness_m": 0.1,
+        "underside_m": 1.2655151256058235,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_analytic_11",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 11,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.5316439799808939,
+          0.1860154229278869
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.36,
+        "thickness_m": 0.1,
+        "underside_m": 1.281158744671003,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_analytic_12",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 12,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.003403109156658,
+          "height_m": 1.3412641152668698,
+          "ray": 9
+        },
+        {
+          "distance_m": 0.9852716119929047,
+          "height_m": 1.338115613826011,
+          "ray": 10
+        },
+        {
+          "distance_m": 0.9975560064608548,
+          "height_m": 1.3402487765391122,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.045036432324122,
+          0.21802626969003333
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.48,
+        "thickness_m": 0.1,
+        "underside_m": 1.2760303079264967,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_analytic_13",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 13,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.5170317140033311,
+          "height_m": 1.2992430197021976,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.489618946423915,
+          "height_m": 1.2968538395830447,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.5081915577953016,
+          "height_m": 1.2984725493218814,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.72404004036009,
+          0.3152219650429179
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.64,
+        "thickness_m": 0.1,
+        "underside_m": 1.2883385406309227,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_analytic_14",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 14,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.2181471400465145,
+          "height_m": 1.360349255410832,
+          "ray": 6
+        },
+        {
+          "distance_m": 2.178065214635357,
+          "height_m": 1.3568558854308663,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.205221393650179,
+          "height_m": 1.3592227023830916,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.8733752026605237,
+          0.21583194082145762
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.44000000000000006,
+        "thickness_m": 0.1,
+        "underside_m": 1.2590090244480707,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_analytic_15",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 15,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.3424849789944429,
+          "height_m": 1.2840302693683192,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.3182262714352473,
+          "height_m": 1.2819159836928993,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.3346619540624682,
+          "height_m": 1.2833484478198396,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.49401558587109,
+          0.180094821080543
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35112477351807125,
+        "thickness_m": 0.1,
+        "underside_m": 1.39921553606745,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_no_contrast_00",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 0,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.438686298964922,
+          0.17003747320521867
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3380219685331506,
+        "thickness_m": 0.1,
+        "underside_m": 1.388811820014947,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_no_contrast_01",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 1,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.3255345153654177,
+          0.24379265921706345
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5456584416834633,
+        "thickness_m": 0.1,
+        "underside_m": 1.389577582500842,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_no_contrast_02",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 2,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.825795239793271,
+          "height_m": 1.4840710100795418,
+          "ray": 9
+        },
+        {
+          "distance_m": 1.7928031143854384,
+          "height_m": 1.478341987625113,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.8151558345819874,
+          "height_m": 1.4822234967531425,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.947571360899739,
+          0.21645940771938663
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.4572883430770873,
+        "thickness_m": 0.1,
+        "underside_m": 1.3638601866179438,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_no_contrast_03",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "reserved_layout"
+      ],
+      "slot": 3,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.4342840285205438,
+          "height_m": 1.4160858017058602,
+          "ray": 9
+        },
+        {
+          "distance_m": 1.40836651186366,
+          "height_m": 1.41158527216874,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.4259260655710784,
+          "height_m": 1.4146344566706779,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.0062799110363807,
+          0.21740587226469296
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.47096885921505993,
+        "thickness_m": 0.1,
+        "underside_m": 1.3739524287396034,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_no_contrast_04",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 4,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.4946936255690484,
+          "height_m": 1.4265758181469266,
+          "ray": 9
+        },
+        {
+          "distance_m": 1.4676845073140103,
+          "height_m": 1.4218857339815487,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.485983639475015,
+          "height_m": 1.4250633449341934,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.5710329481401817,
+          0.28725675923942623
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6037548176748899,
+        "thickness_m": 0.1,
+        "underside_m": 1.3737490037987994,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_no_contrast_05",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 5,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.5735035549842635,
+          0.3857693613628387
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.8388081806700113,
+        "thickness_m": 0.1,
+        "underside_m": 1.4314145612905573,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_no_contrast_06",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 6,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          0.6060153254247918,
+          0.06399570250882229
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.1420846349579392,
+        "thickness_m": 0.1,
+        "underside_m": 1.406611879931925,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_no_contrast_07",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 7,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.6043355335022367,
+          0.19615247008025008
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.37710062541272005,
+        "thickness_m": 0.1,
+        "underside_m": 1.4079330886274914,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_no_contrast_08",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 8,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          0.7197679683091137,
+          0.06691001947957174
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.16859693181614932,
+        "thickness_m": 0.1,
+        "underside_m": 1.3857767386108084,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_no_contrast_09",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 9,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.6461535204337632,
+          0.20143157492969385
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3869213777158875,
+        "thickness_m": 0.1,
+        "underside_m": 1.3919319413115112,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_no_contrast_10",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 10,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.7470595627506844,
+          0.31834422712270755
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6454127600884629,
+        "thickness_m": 0.1,
+        "underside_m": 1.398587696024308,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_no_contrast_11",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 11,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.3510742607608115,
+          0.15471330840486655
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3172986092406055,
+        "thickness_m": 0.1,
+        "underside_m": 1.3716062252939545,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_no_contrast_12",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 12,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.546696606060907,
+          0.38150597845848633
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.8324838672171374,
+        "thickness_m": 0.1,
+        "underside_m": 1.4156577079372819,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_no_contrast_13",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 13,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          0.7589836274044489,
+          0.06767733647926738
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.17773571092389864,
+        "thickness_m": 0.1,
+        "underside_m": 1.3937848513534419,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_no_contrast_14",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 14,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          0.7112427295245952,
+          0.06671537802157726
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.16661007372304693,
+        "thickness_m": 0.1,
+        "underside_m": 1.3972314753540342,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41001_no_contrast_15",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 15,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          3.0095702318088007,
+          0.3437992584368664
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7068708867609912,
+        "thickness_m": 0.1,
+        "underside_m": 1.2671675799301805,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_motion2scene_00",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 0,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.972283059267972,
+          0.3413232211453124
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6981640560938268,
+        "thickness_m": 0.1,
+        "underside_m": 1.2606437432681812,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_motion2scene_01",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 1,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.978439837410127,
+          0.34176008823615855
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.699602195871183,
+        "thickness_m": 0.1,
+        "underside_m": 1.2628876888755285,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_motion2scene_02",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 2,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          3.0133254357023014,
+          0.3440335476615151
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7077475534865907,
+        "thickness_m": 0.1,
+        "underside_m": 1.270188427832355,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_motion2scene_03",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 3,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          3.0254394624536274,
+          0.3445090237834047
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7105722034523692,
+        "thickness_m": 0.1,
+        "underside_m": 1.2728326186752592,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_motion2scene_04",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 4,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          3.011547918786721,
+          0.3439288051525313
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7073326603940266,
+        "thickness_m": 0.1,
+        "underside_m": 1.2686534853473501,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_motion2scene_05",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 5,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.973235517304262,
+          0.34140314923080795
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6983867516329598,
+        "thickness_m": 0.1,
+        "underside_m": 1.2723188823460683,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_motion2scene_06",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 6,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.9613199397787713,
+          0.21674360931625097
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.4604923423903805,
+        "thickness_m": 0.1,
+        "underside_m": 1.2610924834588182,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_motion2scene_07",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 7,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.4318823200106923,
+          "height_m": 1.2918217610242562,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.4060082022337173,
+          "height_m": 1.2895666830714634,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.423538352469627,
+          "height_m": 1.2910945363357522,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.4073898969311265,
+          0.36264214310109805
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7997263348103023,
+        "thickness_m": 0.1,
+        "underside_m": 1.2797311932832454,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_motion2scene_08",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 8,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.285453543410352,
+          0.23854920449303607
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5362402275444684,
+        "thickness_m": 0.1,
+        "underside_m": 1.27893077493155,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_motion2scene_09",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 9,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.7635990778971662,
+          "height_m": 1.320732781439697,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.731730837319592,
+          "height_m": 1.3179552812620974,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.753322106629502,
+          "height_m": 1.3198370843756673,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.420444858541266,
+          0.3640885770239184
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.8027866828792805,
+        "thickness_m": 0.1,
+        "underside_m": 1.2747874891300408,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_motion2scene_10",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 10,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.978215228529919,
+          0.34174537542110495
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6995497515461794,
+        "thickness_m": 0.1,
+        "underside_m": 1.2715325974488199,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_motion2scene_11",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 11,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.95126143693522,
+          0.33955913499868007
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6932489613174959,
+        "thickness_m": 0.1,
+        "underside_m": 1.2625774966369685,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_motion2scene_12",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 12,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.9677787477406077,
+          0.34094522969252333
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6971108967463381,
+        "thickness_m": 0.1,
+        "underside_m": 1.2672810587412362,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_motion2scene_13",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 13,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.9742531842025846,
+          0.21698237577507606
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.46350622151605425,
+        "thickness_m": 0.1,
+        "underside_m": 1.2640743368638114,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_motion2scene_14",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 14,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.4450418396022806,
+          "height_m": 1.2929686887284633,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.4189299292671864,
+          "height_m": 1.290692885788648,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.4366211879630926,
+          "height_m": 1.2922347805804306,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.3349604425842414,
+          0.24510720523275784
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5478758656097531,
+        "thickness_m": 0.1,
+        "underside_m": 1.2718089022745076,
+        "width_m": 1.2,
+        "yaw_rad": 0.11848739107558422
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41001_motion2scene_15",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "reserved_layout",
+        "contrast_audit"
+      ],
+      "slot": 15,
+      "source": 41001,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.8146542809395094,
+          "height_m": 1.3251825355819848,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.781863472691266,
+          "height_m": 1.322324628333813,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.8040797971241769,
+          "height_m": 1.3242609085908863,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.3320047905019112,
+          0.10137173994779515
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3022818126093627,
+        "thickness_m": 0.1,
+        "underside_m": 1.1957292286432597,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_uniform_00",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 0,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 0.771052199212352,
+          "height_m": 1.2483899119442512,
+          "ray": 9
+        },
+        {
+          "distance_m": 0.725625604636865,
+          "height_m": 1.2405016665786035,
+          "ray": 10
+        },
+        {
+          "distance_m": 0.7054973583582145,
+          "height_m": 1.2370064332926847,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.373889556946917,
+          0.20069640887513432
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5392685527749628,
+        "thickness_m": 0.1,
+        "underside_m": 1.2333803032759434,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_uniform_01",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 1,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.800436305542922,
+          "height_m": 1.2714164661443905,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.7504937109935919,
+          "height_m": 1.2670636822216985,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.8948456245250493,
+          0.17944984194538563
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.43078859675440895,
+        "thickness_m": 0.1,
+        "underside_m": 1.3264215607684884,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_uniform_02",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 2,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.319333843064234,
+          "height_m": 1.3435980202473594,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.2827366277134267,
+          "height_m": 1.3372429804940076,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          3.823687860447424,
+          0.2763941479222134
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.8684072924663139,
+        "thickness_m": 0.1,
+        "underside_m": 1.112822495669907,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_uniform_03",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 3,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.5789827698743368,
+          0.13444813376268153
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35862546371215376,
+        "thickness_m": 0.1,
+        "underside_m": 1.1395468125973311,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_uniform_04",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 4,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.0358133218180243,
+          "height_m": 1.2047751820759165,
+          "ray": 6
+        },
+        {
+          "distance_m": 0.9747883070730015,
+          "height_m": 1.1994565015896272,
+          "ray": 7
+        },
+        {
+          "distance_m": 0.9477484961995508,
+          "height_m": 1.1970998267891955,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.3125046231348045,
+          0.09867344986039894
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.2978308195211471,
+        "thickness_m": 0.1,
+        "underside_m": 1.3463281731464645,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_uniform_05",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 5,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.3308056594898123,
+          0.10120589132772782
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.30200810846694176,
+        "thickness_m": 0.1,
+        "underside_m": 1.4478117225055371,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_uniform_06",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 6,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          0.6052698362806637,
+          0.06408163932415575
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.1376646489938403,
+        "thickness_m": 0.1,
+        "underside_m": 1.1349314017136156,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_uniform_07",
+      "predecision_clearance_m": 0.05782761917326479,
+      "reasons": [],
+      "slot": 7,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.243370092088765,
+          0.19902226522924515
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5097553552292178,
+        "thickness_m": 0.1,
+        "underside_m": 1.3542189401154525,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_uniform_08",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 8,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.6848108052867128,
+          "height_m": 1.4070624287165385,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.638075565233113,
+          "height_m": 1.3989469394484044,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.4104445499868083,
+          0.11181983500984895
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.32017386233806056,
+        "thickness_m": 0.1,
+        "underside_m": 1.4346704402850365,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_uniform_09",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 9,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.3776242069985747,
+          0.10759235599856909
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3126918598550422,
+        "thickness_m": 0.1,
+        "underside_m": 1.4191295570241529,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_uniform_10",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 10,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.1073354050413242,
+          0.08287878640351305
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.25127073251379484,
+        "thickness_m": 0.1,
+        "underside_m": 1.4246114583337453,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_uniform_11",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 11,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.320476667120769,
+          0.09977659693785404
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.29965047227588554,
+        "thickness_m": 0.1,
+        "underside_m": 1.282510181042633,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_uniform_12",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 12,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.0929951523305883,
+          0.19539736037033814
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.4757365954693581,
+        "thickness_m": 0.1,
+        "underside_m": 1.3022209443981418,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_uniform_13",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 13,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.5274835358978331,
+          "height_m": 1.3797428350898453,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.4851124224742354,
+          "height_m": 1.3723851684581188,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.8426014456432505,
+          0.2459327713185533
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6458047992279365,
+        "thickness_m": 0.1,
+        "underside_m": 1.2346627293611443,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_uniform_14",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 14,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.2877329534834887,
+          "height_m": 1.3138871674340946,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.2242731582209654,
+          "height_m": 1.3083562818433752,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.3367783103745707,
+          0.29168078822253835
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7581704619633144,
+        "thickness_m": 0.1,
+        "underside_m": 1.205674396227805,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_uniform_15",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 15,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.641682847516519,
+          0.22023720366196864
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6,
+        "thickness_m": 0.1,
+        "underside_m": 1.279945855907521,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_analytic_00",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 0,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.078379668432498,
+          "height_m": 1.2956408263788133,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.0207271578823987,
+          "height_m": 1.2906160790005523,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.9354629122967593,
+          0.18261461272072624
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.44000000000000006,
+        "thickness_m": 0.1,
+        "underside_m": 1.2828165249771448,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_analytic_01",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 1,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.3619931683203905,
+          "height_m": 1.351005734338592,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.3242126190307721,
+          "height_m": 1.3444452108031941,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.641682847516519,
+          0.22023720366196864
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6,
+        "thickness_m": 0.1,
+        "underside_m": 1.274945855907521,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_analytic_02",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 2,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.078379668432498,
+          "height_m": 1.2956408263788133,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.0207271578823987,
+          "height_m": 1.2906160790005523,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          3.3448678905072793,
+          0.2918672164592849
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.76,
+        "thickness_m": 0.1,
+        "underside_m": 1.277211862928516,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_analytic_03",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 3,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.7317865493878903,
+          "height_m": 1.3525889884049112,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.465491402154747,
+          0.20456128084157021
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.56,
+        "thickness_m": 0.1,
+        "underside_m": 1.2747939579204786,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_analytic_04",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "reserved_layout",
+        "contrast_audit"
+      ],
+      "slot": 4,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.8953007644834265,
+          "height_m": 1.2796844485237049,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.8427267093290078,
+          "height_m": 1.2751023176974652,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.641682847516519,
+          0.22023720366196864
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6,
+        "thickness_m": 0.1,
+        "underside_m": 1.2849458559075209,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_analytic_05",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 5,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.078379668432498,
+          "height_m": 1.2956408263788133,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.0207271578823987,
+          "height_m": 1.2906160790005523,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.9354629122967593,
+          0.18261461272072624
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.44000000000000006,
+        "thickness_m": 0.1,
+        "underside_m": 1.277816524977145,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_analytic_06",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 6,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.3619931683203905,
+          "height_m": 1.351005734338592,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.3242126190307721,
+          "height_m": 1.3444452108031941,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.9354629122967593,
+          0.18261461272072624
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.44000000000000006,
+        "thickness_m": 0.1,
+        "underside_m": 1.2878165249771447,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_analytic_07",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 7,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.3619931683203905,
+          "height_m": 1.351005734338592,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.3242126190307721,
+          "height_m": 1.3444452108031941,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.168044043952031,
+          0.28631291372384426
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.72,
+        "thickness_m": 0.1,
+        "underside_m": 1.2876949343762458,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_analytic_08",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 8,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.553881972477346,
+          "height_m": 1.3370835828660648,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.465491402154747,
+          0.20456128084157021
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.56,
+        "thickness_m": 0.1,
+        "underside_m": 1.2797939579204785,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_analytic_09",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 9,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.8965572438997143,
+          "height_m": 1.2797939579204785,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.8965572438997143,
+          "height_m": 1.2797939579204785,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.759809440514919,
+          0.16250632247968314
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.4,
+        "thickness_m": 0.1,
+        "underside_m": 1.2697416123342071,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_analytic_10",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 10,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.2507121427700445,
+          "height_m": 1.3316819870428673,
+          "ray": 9
+        },
+        {
+          "distance_m": 1.177026348866218,
+          "height_m": 1.3188865832115269,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.1443766241665276,
+          "height_m": 1.3132170180160987,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.8172112253387507,
+          0.24212867148550554
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.64,
+        "thickness_m": 0.1,
+        "underside_m": 1.2644320732575673,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_analytic_11",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 11,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.2612354825740533,
+          "height_m": 1.3115777606760484,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.198510704952609,
+          "height_m": 1.3061109360937695,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.3448678905072793,
+          0.2918672164592849
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.76,
+        "thickness_m": 0.1,
+        "underside_m": 1.282211862928516,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_analytic_12",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 12,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.7317865493878903,
+          "height_m": 1.3525889884049112,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.8172112253387507,
+          0.24212867148550554
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.64,
+        "thickness_m": 0.1,
+        "underside_m": 1.2544320732575673,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_analytic_13",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 13,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.2612354825740533,
+          "height_m": 1.3115777606760484,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.198510704952609,
+          "height_m": 1.3061109360937695,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.1118171689336966,
+          0.19653383356144682
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.48,
+        "thickness_m": 0.1,
+        "underside_m": 1.2749941449323787,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_analytic_14",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 14,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.759809440514919,
+          0.16250632247968314
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.4,
+        "thickness_m": 0.1,
+        "underside_m": 1.2597416123342071,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_analytic_15",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 15,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.2507121427700445,
+          "height_m": 1.3316819870428673,
+          "ray": 9
+        },
+        {
+          "distance_m": 1.177026348866218,
+          "height_m": 1.3188865832115269,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.1443766241665276,
+          "height_m": 1.3132170180160987,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.5488035768705137,
+          0.12992945236959147
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3517258916205164,
+        "thickness_m": 0.1,
+        "underside_m": 1.392454309793017,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_no_contrast_00",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 0,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.7121347258630686,
+          0.1549038114910642
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3890844954384593,
+        "thickness_m": 0.1,
+        "underside_m": 1.3664657228390837,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_no_contrast_01",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 1,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.2970236559871076,
+          0.19947446896552395
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5218869535280182,
+        "thickness_m": 0.1,
+        "underside_m": 1.369705530430381,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_no_contrast_02",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 2,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.7408817706347925,
+          "height_m": 1.4167990496692582,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.6925911689837025,
+          "height_m": 1.4084134746941066,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.7888548287324504,
+          0.16741013130887128
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.4066600952479869,
+        "thickness_m": 0.1,
+        "underside_m": 1.3742731074546046,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_no_contrast_03",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 3,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.0700308601739392,
+          0.19393290803750982
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.4705337332774665,
+        "thickness_m": 0.1,
+        "underside_m": 1.3828616331434829,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_no_contrast_04",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 4,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.5454439780720073,
+          "height_m": 1.3828616331434829,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.5454439780720073,
+          "height_m": 1.3828616331434829,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.8795376889636635,
+          0.25143559258632336
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6542482480686511,
+        "thickness_m": 0.1,
+        "underside_m": 1.3963522925644558,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_no_contrast_05",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 5,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.4766031640780404,
+          0.28983905971742313
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7898069096941077,
+        "thickness_m": 0.1,
+        "underside_m": 1.3979455291556029,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_no_contrast_06",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 6,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          0.620304822610626,
+          0.0649129988248104
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.14106924924583727,
+        "thickness_m": 0.1,
+        "underside_m": 1.4089364913380016,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_no_contrast_07",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 7,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.658104694028247,
+          0.14643864018749012
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3767191891861805,
+        "thickness_m": 0.1,
+        "underside_m": 1.404457943409257,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_no_contrast_08",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 8,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          0.9621910531592974,
+          0.07778504280356575
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.21843219530281116,
+        "thickness_m": 0.1,
+        "underside_m": 1.3816180206138748,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_no_contrast_09",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 9,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.700262072676852,
+          0.15301382977292757
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3863662913611513,
+        "thickness_m": 0.1,
+        "underside_m": 1.3864637200088883,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_no_contrast_10",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 10,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.8446176036549393,
+          0.2462331417999166
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6462656833216116,
+        "thickness_m": 0.1,
+        "underside_m": 1.3941194931806584,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_no_contrast_11",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 11,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.6224869520316585,
+          0.14108181735598574
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3685754508564644,
+        "thickness_m": 0.1,
+        "underside_m": 1.3659772794004106,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_no_contrast_12",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 12,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.6690106720902356,
+          0.2763250880788605
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.8334218224752122,
+        "thickness_m": 0.1,
+        "underside_m": 1.409873307113325,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_no_contrast_13",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 13,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          0.5025006844731775,
+          0.055416964157749916
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.11434126570370483,
+        "thickness_m": 0.1,
+        "underside_m": 1.4004705517950335,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_no_contrast_14",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 14,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          0.8408517699551518,
+          0.07494152762134945
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.19098911315382341,
+        "thickness_m": 0.1,
+        "underside_m": 1.4037403005422977,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41002_no_contrast_15",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 15,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.209582041512938,
+          0.19917483010193834
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5021157895044904,
+        "thickness_m": 0.1,
+        "underside_m": 1.2519546301336415,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_motion2scene_00",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 0,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.63067836436691,
+          "height_m": 1.2566210866938818,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.5854447128674292,
+          "height_m": 1.2526787142002558,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.6148043180079013,
+          0.21710890426302373
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5938817117138935,
+        "thickness_m": 0.1,
+        "underside_m": 1.2737555333306594,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_motion2scene_01",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 1,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.050395720945378,
+          "height_m": 1.2932018646505619,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.9935194616511194,
+          "height_m": 1.2882447720270624,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.205946679661477,
+          0.19919266636842753
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5012938250456753,
+        "thickness_m": 0.1,
+        "underside_m": 1.2508729435341475,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_motion2scene_02",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 2,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.6269262340304074,
+          "height_m": 1.256294066987518,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.581796663482591,
+          "height_m": 1.25236076574654,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.2127079476647076,
+          0.1991594933906504
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5028225647481468,
+        "thickness_m": 0.1,
+        "underside_m": 1.2522992093268224,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_motion2scene_03",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 3,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.6339046751938224,
+          "height_m": 1.2569022782103363,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.5885815285352944,
+          "height_m": 1.252952105699651,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.222771427736247,
+          0.19911011868747128
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.505097942905475,
+        "thickness_m": 0.1,
+        "underside_m": 1.24926320294524,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_motion2scene_04",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 4,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.6442913960788523,
+          "height_m": 1.2578075405837836,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.5986801304858966,
+          "height_m": 1.2538322568533689,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.2388711583759506,
+          0.19903112817763297
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.508738132499535,
+        "thickness_m": 0.1,
+        "underside_m": 1.2502315939682145,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_motion2scene_05",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 5,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.6609082530001165,
+          "height_m": 1.2592557950908878,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.6148360497192527,
+          "height_m": 1.2552403379939232,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.312168769831255,
+          0.19974771241482253
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5253118179137106,
+        "thickness_m": 0.1,
+        "underside_m": 1.258203524486886,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_motion2scene_06",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 6,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.736640107633793,
+          "height_m": 1.2658562611311437,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.6884671661603063,
+          "height_m": 1.2616577126366826,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.2031018335219414,
+          0.19920662410797002
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5006505981777487,
+        "thickness_m": 0.1,
+        "underside_m": 1.2538592406968143,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_motion2scene_07",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 7,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.6239900109145318,
+          "height_m": 1.256038158280981,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.598989735367857,
+          "height_m": 1.2538592406968143,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.6150192126434324,
+          0.2171321352237394
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5939305824309175,
+        "thickness_m": 0.1,
+        "underside_m": 1.2809610328041627,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_motion2scene_08",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 8,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.050619321270049,
+          "height_m": 1.2932213527029373,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.9937368594901361,
+          "height_m": 1.2882637194971935,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.2209434244669426,
+          0.1991190874654875
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5046846267682211,
+        "thickness_m": 0.1,
+        "underside_m": 1.2495291645718367,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_motion2scene_09",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 9,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.6424046770114709,
+          "height_m": 1.2576431021821097,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.5968457474245823,
+          "height_m": 1.2536723798351763,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.6807824817203705,
+          0.2248077150779532
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6089006138571428,
+        "thickness_m": 0.1,
+        "underside_m": 1.2762266029781448,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_motion2scene_10",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 10,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.1190888041729874,
+          "height_m": 1.2991888613408908,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.060307056307199,
+          "height_m": 1.2940656944456426,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.2334017454127566,
+          0.19905796289481845
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5075014844710807,
+        "thickness_m": 0.1,
+        "underside_m": 1.2502356925780695,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_motion2scene_11",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 11,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.655263161496003,
+          "height_m": 1.2587637929479685,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.6093475483235011,
+          "height_m": 1.254761983578205,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.5146230947923485,
+          0.20801094841663964
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5711361347366104,
+        "thickness_m": 0.1,
+        "underside_m": 1.274063032642817,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_motion2scene_12",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 12,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.9462846199439114,
+          "height_m": 1.2841279843145026,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.8922963153578491,
+          "height_m": 1.2794225935286176,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.2523204597013127,
+          0.19908116687437155
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5117790753235708,
+        "thickness_m": 0.1,
+        "underside_m": 1.2514764168162993,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_motion2scene_13",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 13,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.6747981634572386,
+          "height_m": 1.2604663805534768,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.6283406656985024,
+          "height_m": 1.2564173428301166,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.2377130249091897,
+          0.19903681035673568
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5084762756095919,
+        "thickness_m": 0.1,
+        "underside_m": 1.2487401807665819,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_motion2scene_14",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 14,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.6597129200753882,
+          "height_m": 1.2591516149620026,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.6136738743282995,
+          "height_m": 1.2551390477345215,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.247121836503026,
+          0.19904695515569956
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5106036422369349,
+        "thickness_m": 0.1,
+        "underside_m": 1.2514105609756334,
+        "width_m": 1.2,
+        "yaw_rad": 0.07179232999993775
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41002_motion2scene_15",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 15,
+      "source": 41002,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.669428125359838,
+          "height_m": 1.2599983508945147,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.623119587958426,
+          "height_m": 1.255962295921737,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.378590395925606,
+          0.11433855971976951
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3022818126093627,
+        "thickness_m": 0.1,
+        "underside_m": 1.1957292286432597,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_uniform_00",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 0,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 0.7721586278592443,
+          "height_m": 1.2094220797833992,
+          "ray": 6
+        },
+        {
+          "distance_m": 0.7672574793218083,
+          "height_m": 1.2089949165423024,
+          "ray": 7
+        },
+        {
+          "distance_m": 0.7861543985428239,
+          "height_m": 1.2106418915726525,
+          "ray": 8
+        },
+        {
+          "distance_m": 0.7810867946625932,
+          "height_m": 1.2777583195461772,
+          "ray": 9
+        },
+        {
+          "distance_m": 0.7761289760704673,
+          "height_m": 1.2768974033824514,
+          "ray": 10
+        },
+        {
+          "distance_m": 0.7952443929431148,
+          "height_m": 1.2802167606877304,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.461945606533996,
+          0.13608502963997685
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5392685527749628,
+        "thickness_m": 0.1,
+        "underside_m": 1.2333803032759434,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_uniform_01",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 1,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.8680740591990972,
+          "height_m": 1.3049374031904442,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.856216769630956,
+          "height_m": 1.3039039723111587,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.9019338584802108,
+          "height_m": 1.3078884791460763,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.9652082639655661,
+          0.16050074809581558
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.43078859675440895,
+        "thickness_m": 0.1,
+        "underside_m": 1.3264215607684884,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_uniform_02",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 2,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.3826825468535109,
+          "height_m": 1.3822243256062963,
+          "ray": 9
+        },
+        {
+          "distance_m": 1.3739061992252557,
+          "height_m": 1.3807003288340782,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.4077443763218946,
+          "height_m": 1.3865762666224806,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          3.9674728350576616,
+          0.1918286053432619
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.8684072924663139,
+        "thickness_m": 0.1,
+        "underside_m": 1.112822495669907,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_uniform_03",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 3,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.6342651698203903,
+          0.15374596190963943
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.35862546371215376,
+        "thickness_m": 0.1,
+        "underside_m": 1.1395468125973311,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_uniform_04",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 4,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.0320936648265406,
+          "height_m": 1.2320769109964238,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.0255426218499366,
+          "height_m": 1.231505949980026,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.0508008912120503,
+          "height_m": 1.2337073532068015,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.3585091518912749,
+          0.11051547582589387
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.2978308195211471,
+        "thickness_m": 0.1,
+        "underside_m": 1.3463281731464645,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_uniform_05",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 5,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.3773555434852114,
+          0.11410346748802758
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.30200810846694176,
+        "thickness_m": 0.1,
+        "underside_m": 1.4478117225055371,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_uniform_06",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 6,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          0.6258180999574546,
+          0.0786907874140633
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.1376646489938403,
+        "thickness_m": 0.1,
+        "underside_m": 1.1349314017136156,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_uniform_07",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 7,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.3264655236147314,
+          0.13257068774679243
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5097553552292178,
+        "thickness_m": 0.1,
+        "underside_m": 1.3542189401154525,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_uniform_08",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 8,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.7510079856197538,
+          "height_m": 1.446183366836427,
+          "ray": 9
+        },
+        {
+          "distance_m": 1.7398937534942231,
+          "height_m": 1.4442534006816612,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.782745902347815,
+          "height_m": 1.4516945982391996,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.4594884828292698,
+          0.12873925155765137
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.32017386233806056,
+        "thickness_m": 0.1,
+        "underside_m": 1.4346704402850365,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_uniform_09",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 9,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.4256072697257192,
+          0.12300971608792287
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3126918598550422,
+        "thickness_m": 0.1,
+        "underside_m": 1.4191295570241529,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_uniform_10",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 10,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.1470314512044162,
+          0.0798224321956659
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.25127073251379484,
+        "thickness_m": 0.1,
+        "underside_m": 1.4246114583337453,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_uniform_11",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 11,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.3667187559732024,
+          0.11207842705974445
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.29965047227588554,
+        "thickness_m": 0.1,
+        "underside_m": 1.282510181042633,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_uniform_12",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 12,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 0.8084516743883693,
+          "height_m": 1.282510181042633,
+          "ray": 9
+        },
+        {
+          "distance_m": 0.8084516743883693,
+          "height_m": 1.282510181042633,
+          "ray": 10
+        },
+        {
+          "distance_m": 0.8084516743883693,
+          "height_m": 1.282510181042633,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.170344059357225,
+          0.13751793859454892
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.4757365954693581,
+        "thickness_m": 0.1,
+        "underside_m": 1.3022209443981418,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_uniform_13",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 13,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.9486048040768935,
+          0.18329643290774306
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6458047992279365,
+        "thickness_m": 0.1,
+        "underside_m": 1.2346627293611443,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_uniform_14",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 14,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "uniform",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.463364200270269,
+          0.15251387632485885
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7581704619633144,
+        "thickness_m": 0.1,
+        "underside_m": 1.205674396227805,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_uniform_15",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 15,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.9219541454019655,
+          0.18264310264650968
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.64,
+        "thickness_m": 0.1,
+        "underside_m": 1.2708879114559888,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": true,
+      "eligible": false,
+      "group_id": "icra_41003_analytic_00",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "reserved_layout"
+      ],
+      "slot": 0,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.3348271592913554,
+          "height_m": 1.345617616308757,
+          "ray": 6
+        },
+        {
+          "distance_m": 2.320007232006916,
+          "height_m": 1.3443259745388154,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.3771470976152096,
+          "height_m": 1.3493060419664076,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.6405515037727523,
+          0.15432326447386974
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.36,
+        "thickness_m": 0.1,
+        "underside_m": 1.273846619080467,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": true,
+      "eligible": false,
+      "group_id": "icra_41003_analytic_01",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "reserved_layout"
+      ],
+      "slot": 1,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.0504773588517224,
+          "height_m": 1.3245375000982857,
+          "ray": 9
+        },
+        {
+          "distance_m": 1.043809628433143,
+          "height_m": 1.323379660861925,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.069517799108852,
+          "height_m": 1.3278438378509123,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.9219541454019655,
+          0.18264310264650968
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.64,
+        "thickness_m": 0.1,
+        "underside_m": 1.265887911455989,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": true,
+      "eligible": false,
+      "group_id": "icra_41003_analytic_02",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "reserved_layout"
+      ],
+      "slot": 2,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.3348271592913554,
+          "height_m": 1.345617616308757,
+          "ray": 6
+        },
+        {
+          "distance_m": 2.320007232006916,
+          "height_m": 1.3443259745388154,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.3771470976152096,
+          "height_m": 1.3493060419664076,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.189881393806733,
+          0.13622243214424562
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.48,
+        "thickness_m": 0.1,
+        "underside_m": 1.2731744480973046,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_analytic_03",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 3,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.5930672796868777,
+          "height_m": 1.2809689830614153,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.5829555499383916,
+          "height_m": 1.2800876877447223,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.621942440211634,
+          "height_m": 1.2834856191239084,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.7389709758811702,
+          0.16760704586608605
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6,
+        "thickness_m": 0.1,
+        "underside_m": 1.2654680716655569,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_analytic_04",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 4,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.1492928580160444,
+          "height_m": 1.3294472364759395,
+          "ray": 6
+        },
+        {
+          "distance_m": 2.1356505788683107,
+          "height_m": 1.3282582335040478,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.1882498920856435,
+          "height_m": 1.3328425657155212,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.9219541454019655,
+          0.18264310264650968
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.64,
+        "thickness_m": 0.1,
+        "underside_m": 1.2758879114559887,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_analytic_05",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 5,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.3348271592913554,
+          "height_m": 1.345617616308757,
+          "ray": 6
+        },
+        {
+          "distance_m": 2.320007232006916,
+          "height_m": 1.3443259745388154,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.3771470976152096,
+          "height_m": 1.3493060419664076,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.373513772630081,
+          0.13291255631842872
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.52,
+        "thickness_m": 0.1,
+        "underside_m": 1.2681744480973047,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_analytic_06",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 6,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.7785641258375968,
+          "height_m": 1.2971360984650293,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.7672749856925825,
+          "height_m": 1.296152185070708,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.8108015117232878,
+          "height_m": 1.2999457717761396,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.189881393806733,
+          0.13622243214424562
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.48,
+        "thickness_m": 0.1,
+        "underside_m": 1.2681744480973047,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_analytic_07",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 7,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.5930672796868777,
+          "height_m": 1.2809689830614153,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.5829555499383916,
+          "height_m": 1.2800876877447223,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.621942440211634,
+          "height_m": 1.2834856191239084,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.373513772630081,
+          0.13291255631842872
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.52,
+        "thickness_m": 0.1,
+        "underside_m": 1.2731744480973046,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_analytic_08",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 8,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.7785641258375968,
+          "height_m": 1.2971360984650293,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.7672749856925825,
+          "height_m": 1.296152185070708,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.8108015117232878,
+          "height_m": 1.2999457717761396,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.007280941352084,
+          0.1561185331932245
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.44000000000000006,
+        "thickness_m": 0.1,
+        "underside_m": 1.2497335393321274,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_analytic_09",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 9,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.4092407008515848,
+          "height_m": 1.2649474410462644,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.4002957797554845,
+          "height_m": 1.2641678398043146,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.4347839104661266,
+          "height_m": 1.2671736784523788,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.6405515037727523,
+          0.15432326447386974
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.36,
+        "thickness_m": 0.1,
+        "underside_m": 1.268846619080467,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_analytic_10",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "reserved_layout",
+        "contrast_audit"
+      ],
+      "slot": 10,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.0504773588517224,
+          "height_m": 1.3245375000982857,
+          "ray": 9
+        },
+        {
+          "distance_m": 1.043809628433143,
+          "height_m": 1.323379660861925,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.069517799108852,
+          "height_m": 1.3278438378509123,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.6405515037727523,
+          0.15432326447386974
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.36,
+        "thickness_m": 0.1,
+        "underside_m": 1.2788466190804668,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_analytic_11",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 11,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.0504773588517224,
+          "height_m": 1.3245375000982857,
+          "ray": 9
+        },
+        {
+          "distance_m": 1.043809628433143,
+          "height_m": 1.323379660861925,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.069517799108852,
+          "height_m": 1.3278438378509123,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.189881393806733,
+          0.13622243214424562
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.48,
+        "thickness_m": 0.1,
+        "underside_m": 1.2781744480973045,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_analytic_12",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 12,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.5930672796868777,
+          "height_m": 1.2809689830614153,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.5829555499383916,
+          "height_m": 1.2800876877447223,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.621942440211634,
+          "height_m": 1.2834856191239084,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.7389709758811702,
+          0.16760704586608605
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6,
+        "thickness_m": 0.1,
+        "underside_m": 1.2704680716655568,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_analytic_13",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 13,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.1492928580160444,
+          "height_m": 1.3294472364759395,
+          "ray": 6
+        },
+        {
+          "distance_m": 2.1356505788683107,
+          "height_m": 1.3282582335040478,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.1882498920856435,
+          "height_m": 1.3328425657155212,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.556834877814674,
+          0.1437163055170043
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.56,
+        "thickness_m": 0.1,
+        "underside_m": 1.2467346204960443,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_analytic_14",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 14,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.9642799917493843,
+          "height_m": 1.3133223026985956,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.9518120510163148,
+          "height_m": 1.312235650063471,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.9998835728413762,
+          "height_m": 1.3164253592531445,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "analytic",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          4.02043709203416,
+          0.19723610401151173
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.88,
+        "thickness_m": 0.1,
+        "underside_m": 1.2793042743231178,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_analytic_15",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 15,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.6003278894107735,
+          0.1500780963507376
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3511925549305813,
+        "thickness_m": 0.1,
+        "underside_m": 1.3677641823992113,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_no_contrast_00",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 0,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          1.540747492660921,
+          0.14167097015042482
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.33808982665563037,
+        "thickness_m": 0.1,
+        "underside_m": 1.387313976168705,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_no_contrast_01",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 1,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.4938464551899573,
+          0.1379372491856163
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.5462263148006391,
+        "thickness_m": 0.1,
+        "underside_m": 1.35331898675286,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_no_contrast_02",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 2,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.08626103264542,
+          0.14683970584474737
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.4573153424184908,
+        "thickness_m": 0.1,
+        "underside_m": 1.3529058896445747,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_no_contrast_03",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 3,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.5059392238270752,
+          "height_m": 1.4036276229480373,
+          "ray": 9
+        },
+        {
+          "distance_m": 1.4963805249302045,
+          "height_m": 1.4019677723037287,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.5332351437062917,
+          "height_m": 1.4083675096928057,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.1489628683946536,
+          0.13963879261126627
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.47105824119333595,
+        "thickness_m": 0.1,
+        "underside_m": 1.3649512699497421,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_no_contrast_04",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 4,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.5697778434925962,
+          "height_m": 1.4147130829177272,
+          "ray": 9
+        },
+        {
+          "distance_m": 1.5598139395690418,
+          "height_m": 1.4129828691589537,
+          "ray": 10
+        },
+        {
+          "distance_m": 1.5982308710558542,
+          "height_m": 1.419653899303194,
+          "ray": 11
+        }
+      ]
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          2.9881651654568944,
+          0.1834430980275274
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6544190178380755,
+        "thickness_m": 0.1,
+        "underside_m": 1.3563076907788223,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_no_contrast_05",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "reserved_layout"
+      ],
+      "slot": 5,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 2.4574820083357416,
+          "height_m": 1.3563076907788223,
+          "ray": 6
+        },
+        {
+          "distance_m": 2.4574820083357416,
+          "height_m": 1.3563076907788223,
+          "ray": 7
+        },
+        {
+          "distance_m": 2.4574820083357416,
+          "height_m": 1.3563076907788223,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.6045824510280124,
+          0.15431104131706944
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7889279530970051,
+        "thickness_m": 0.1,
+        "underside_m": 1.40120780851008,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_no_contrast_06",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 6,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          0.643328047075876,
+          0.07865594960954762
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.14147724514697657,
+        "thickness_m": 0.1,
+        "underside_m": 1.4040202498641616,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_no_contrast_07",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 7,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.7190464670019687,
+          0.16033028901568191
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.37714207758727125,
+        "thickness_m": 0.1,
+        "underside_m": 1.407010442960218,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_no_contrast_08",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 8,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.4484071654205526,
+          0.12686958569827714
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3177269312694832,
+        "thickness_m": 0.1,
+        "underside_m": 1.3885315891449004,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_no_contrast_09",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 9,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.7639954111173939,
+          0.1629312818640216
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3869456627973119,
+        "thickness_m": 0.1,
+        "underside_m": 1.3905928541242525,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_no_contrast_10",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 10,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.952038066403349,
+          0.1833254937795968
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.6465523791980846,
+        "thickness_m": 0.1,
+        "underside_m": 1.3889434680451558,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_no_contrast_11",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 11,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          1.4466758276268874,
+          0.12657747032566688
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.3173446243576544,
+        "thickness_m": 0.1,
+        "underside_m": 1.370463044918621,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_no_contrast_12",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 12,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          4.032250934859878,
+          0.19823581506130988
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.882581521372552,
+        "thickness_m": 0.1,
+        "underside_m": 1.385452764706888,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_no_contrast_13",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 13,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          0.6929851680210976,
+          0.07695919633958706
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.152295913084677,
+        "thickness_m": 0.1,
+        "underside_m": 1.3835601830960524,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_no_contrast_14",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 14,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "no_contrast",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          0.7578834075691991,
+          0.07432515794792963
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.16643861432109242,
+        "thickness_m": 0.1,
+        "underside_m": 1.387703555852065,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": true,
+      "group_id": "icra_41003_no_contrast_15",
+      "predecision_clearance_m": 0.1,
+      "reasons": [],
+      "slot": 15,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          3.4766769548881307,
+          0.15221015492042309
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7610699912916888,
+        "thickness_m": 0.1,
+        "underside_m": 1.2818686397217365,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_motion2scene_00",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 0,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          3.496457700878453,
+          0.1520234145018175
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7653772120315292,
+        "thickness_m": 0.1,
+        "underside_m": 1.2821915456381152,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_motion2scene_01",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 1,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          3.4729749074423855,
+          0.1522566118807148
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7602638319739468,
+        "thickness_m": 0.1,
+        "underside_m": 1.2848288360753515,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_motion2scene_02",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 2,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          3.4224899859966538,
+          0.1539514884899687
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.749264671309284,
+        "thickness_m": 0.1,
+        "underside_m": 1.2851487921395377,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_motion2scene_03",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 3,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          3.4614828785909033,
+          0.1525642365291009
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7577606791748674,
+        "thickness_m": 0.1,
+        "underside_m": 1.2847753128619517,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_motion2scene_04",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 4,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": true,
+      "beam": {
+        "center_xy_m": [
+          3.420981126729991,
+          0.15402072339982917
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7489357889600323,
+        "thickness_m": 0.1,
+        "underside_m": 1.287240928392449,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_motion2scene_05",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 5,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.439870815103732,
+          0.15315395875136667
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7530531279499892,
+        "thickness_m": 0.1,
+        "underside_m": 1.2865531506424503,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_motion2scene_06",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 6,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.125071532728914,
+          0.1421923748836416
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.4658262713072097,
+        "thickness_m": 0.1,
+        "underside_m": 1.2649984114837045,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_motion2scene_07",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 7,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": true,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.527780952655508,
+          "height_m": 1.2752789047377298,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.5180836170155636,
+          "height_m": 1.274433726247357,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.5554727650586,
+          "height_m": 1.27769240521575,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.4962548650208305,
+          0.15202532937666494
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7653330448998568,
+        "thickness_m": 0.1,
+        "underside_m": 1.2808740507340592,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_motion2scene_08",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 8,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.1154298089802537,
+          0.1433592285338519
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.46371157941219365,
+        "thickness_m": 0.1,
+        "underside_m": 1.2607328595194465,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_motion2scene_09",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 9,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.5180788839277755,
+          "height_m": 1.2744333137315753,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.5084431305563435,
+          "height_m": 1.2735935024895548,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.5455948413650993,
+          "height_m": 1.2768314874394382,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.507574999687188,
+          0.15192187709193544
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7677979835905112,
+        "thickness_m": 0.1,
+        "underside_m": 1.2804427414681092,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_motion2scene_10",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 10,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.444090603646204,
+          0.15302980205574923
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7539723557836877,
+        "thickness_m": 0.1,
+        "underside_m": 1.2860529366137794,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_motion2scene_11",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 11,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.478636081207469,
+          0.152191659760071
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7614965874129246,
+        "thickness_m": 0.1,
+        "underside_m": 1.282938585996099,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_motion2scene_12",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 12,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          3.46393867501081,
+          0.15249849848406596
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.7582955920054827,
+        "thickness_m": 0.1,
+        "underside_m": 1.284912607217848,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_motion2scene_13",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 13,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": []
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.046992794141479,
+          0.15141337352597284
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.4487073243924566,
+        "thickness_m": 0.1,
+        "underside_m": 1.2543715663034958,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_motion2scene_14",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 14,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.4492049117291785,
+          "height_m": 1.2684305515286252,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.4400063244476269,
+          "height_m": 1.2676288418218722,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.4754724931383394,
+          "height_m": 1.270719922096525,
+          "ray": 8
+        }
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "assigned": false,
+      "beam": {
+        "center_xy_m": [
+          2.085403161249523,
+          0.1469388624938667
+        ],
+        "length_m": 0.1,
+        "route_progress": 0.4571273072297907,
+        "thickness_m": 0.1,
+        "underside_m": 1.2561900366401002,
+        "width_m": 1.2,
+        "yaw_rad": 0.03738938500422596
+      },
+      "critical_geometry": false,
+      "eligible": false,
+      "group_id": "icra_41003_motion2scene_15",
+      "predecision_clearance_m": 0.1,
+      "reasons": [
+        "contrast_audit"
+      ],
+      "slot": 15,
+      "source": 41003,
+      "suite": "generated",
+      "target_clear_geometry": false,
+      "visibility_proposal_hits": [
+        {
+          "distance_m": 1.487862256896227,
+          "height_m": 1.2717997611593117,
+          "ray": 6
+        },
+        {
+          "distance_m": 1.4784182985420864,
+          "height_m": 1.2709766659544788,
+          "ray": 7
+        },
+        {
+          "distance_m": 1.5148305224895353,
+          "height_m": 1.2741502003777128,
+          "ray": 8
+        }
+      ]
+    }
+  ],
+  "seconds": 38.77191265998408
+}
