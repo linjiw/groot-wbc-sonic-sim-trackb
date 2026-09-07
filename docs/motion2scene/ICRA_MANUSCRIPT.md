@@ -163,6 +163,8 @@ scaling the inherited audit envelope gives the number of 10 mm two-sided contras
 witnesses below. The nominal-pose column is the achievable support; the last row is
 the envelope the study inherited.
 
+![Contrast witnesses against placement-envelope half-width, and eligible generated proposals per arm under the inherited and nominal contracts.](assets/envelope-tradeoff.png)
+
 | Envelope (xy / z) | 41001 | 41002 | 41003 |
 | --- | ---: | ---: | ---: |
 | nominal pose | 200 | 168 | 337 |
