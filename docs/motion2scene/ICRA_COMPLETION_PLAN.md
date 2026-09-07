@@ -1,6 +1,34 @@
 # Motion2Scene: completion gates for an embodied ICRA project
 
-**Current stage (September 6):** [the independent-layout evaluation](INDEPENDENT_LAYOUT_V1_RESULT.md)
+**Current stage (September 7):** [the selector breakpoint study](SELECTOR_BREAKPOINT_RESULT.md)
+completes twelve matched command executions and twenty-four shared linear-control
+executions in Isaac Lab. Walking fails at the middle-height seed-8512 encounter;
+d040 passes. The analytic-trained linear control observes the scene, requests d040
+legally and realizes that rescue with 0 N recorded beam force (walking: 57.947 N).
+Its passage is 4/6 conditions; the other three controls pass 3/6. This is development
+evidence on one observed carrier, not Motion2Scene superiority or source transfer.
+
+The original twenty MLPs remain frozen at 120/600 admitted evaluations; **480 assigned
+runs are operationally paused**. Input diagnosis finds normalized state magnitudes
+up to 1952.75. Exact observation groups have zero measured action-ambiguity gap;
+the uniform BCE is near its empirical floor. An empty-transition geometry forecast
+catches thirteen reference false-clear commands but misses two additional
+contact-qualified commands. Neither forecast replaces physical labels.
+
+**Next main experiment:** [transition-aware construction on additional development
+carriers](TRANSITION_AWARE_NEXT_STAGE.md), with the same achieved transition information
+for analytic and learned generation. Stabilize the common learner, then freeze the
+five-arm 24/48/96 comparison and genuinely new-source evaluation. No second carrier
+is yet qualified for this switching interface. The learned generator's advantage
+and a complete ICRA contribution remain unproved.
+
+[All 24 new execution replays](assets/selector-breakpoint.mp4) ·
+[Complete result and retained failures](SELECTOR_BREAKPOINT_RESULT.md) ·
+[Source archive](evidence/selector-breakpoint-source-20260907/research-source.tar.gz).
+Isaac Lab supplies physical dynamics and measured contacts; MuJoCo renders recorded
+states only. The common control changes scaling, capacity and regularization jointly.
+
+**Historical first-wave snapshot (September 6; superseded above):** [the independent-layout evaluation](INDEPENDENT_LAYOUT_V1_RESULT.md)
 has completed 120/600 assigned Isaac Lab executions, with
 120 admitted after input, command, geometry and contact audits.
 The first wave covers one reserved station, three heights and two physics seeds
@@ -19,7 +47,7 @@ the dynamics and measured contacts; MuJoCo renders recorded states only.
 The [post hoc readout diagnostic](LAYOUT_READOUT_DIAGNOSTIC_V1.md) tests sensor
 sensitivity without adding physics or changing the frozen policies.
 
-**Next research stage:** finish the remaining frozen layout and control assignments,
+**Historical sequencing (superseded by the breakpoint study):** finish the remaining frozen layout and control assignments,
 then evaluate shared scripted comparators. Preserve every failure and keep controls
 separate from traversal. Larger 24/48/96 data budgets require new corpora and
 separate fits; the reserved final-source candidates still require acquisition and
