@@ -1,0 +1,23 @@
+Traceback (most recent call last):
+  File "repository/scripts/research/motion2scene_complete_comparative_corpus.py", line 355, in <module>
+    main()
+  File "repository/scripts/research/motion2scene_complete_comparative_corpus.py", line 347, in main
+    analyze(a.out)
+  File "repository/scripts/research/motion2scene_complete_comparative_corpus.py", line 204, in analyze
+    analyze_slice(union)
+  File "repository/scripts/research/motion2scene_comparative_acquisition.py", line 506, in analyze
+    "proposals": artifact(out / "proposals.json"),
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "repository/scripts/research/motion2scene_timing_diagnostic.py", line 33, in artifact
+    return {"path": str(path.resolve()), "sha256": sha(path)}
+                                                   ^^^^^^^^^
+  File "repository/scripts/research/motion2scene_timing_diagnostic.py", line 23, in sha
+    return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+                                      ^^^^^^^^^^^^^^^^^
+  File "/home/linjiw/.local/share/uv/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/pathlib.py", line 1050, in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/home/linjiw/.local/share/uv/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/pathlib.py", line 1044, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'research-data/m2s-comparative-corpus-completion-v1/analysis_union/proposals.json'
