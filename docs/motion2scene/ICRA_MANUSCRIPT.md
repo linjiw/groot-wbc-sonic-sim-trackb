@@ -260,6 +260,28 @@ that figure overstates independence. The carrier-level statement is the honest o
 the direction is the same on all three carriers, with five, two and two extra passes
 and no reverse case, which is n = 3.
 
+What the single contrast taught is legible, and it is narrow. That group's beam sits
+at underside 1.2755 m. The evaluation panel has three underside bands, and the fitted
+learner's behaviour separates along them.
+
+| Beam underside | Conditions | Analytic requests d040 | Analytic passes | Scripted requests | Walking-only passes |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 1.18 m | 24 | 11 | 0 | 11 | 0 |
+| 1.27 m | 19 | 11 | 12 | 19 | 3 |
+| 1.36 m | 18 | 0 | 18 | 8 | 18 |
+
+The learner never requests the adaptation at 1.36 m, where walking already passes
+18 of 18, and all nine of its additional passages fall in the 1.27 m band — the band
+its one training contrast came from — spread across all three carriers, five on 41001
+and two each on the others. At 1.18 m neither command ever succeeds, so its eleven
+requests there are neither rewarded nor punished by this suite. Within the 1.27 m band
+it still requests the adaptation only 11 times in 19 conditions, against 19 for the
+scripted rule, which is where its remaining gap to the observed ceiling lies.
+
+So one example transferred across carriers within its own geometry band and not beyond
+it. That is a real but strictly band-local generalization, and it is the most this
+study can claim about what an acquired contrast teaches.
+
 Adaptation is close to free on this panel and every learner under-uses it. Of the 38
 conditions in which both commands were actually executed, 15 are d040-only successes,
 11 both-pass, 12 both-fail, and none is a walking-only success. The best outcome
