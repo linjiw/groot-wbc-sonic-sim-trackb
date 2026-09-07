@@ -1,0 +1,38 @@
+{
+  "stage": "development transitions and bounded construction pilot",
+  "date": "2026-09-07",
+  "tests": {
+    "command": "PYTHONPATH=. .venv_research/bin/pytest -q tests/dataset_generation/test_motion2scene*.py tests/dataset_generation/test_capsule_box*.py tests/dataset_generation/test_placement_certificate.py",
+    "passed": 182,
+    "skipped": 1,
+    "skip": "optional USD pxr dependency",
+    "wall_seconds": 2.45
+  },
+  "style": {
+    "black_check_files": 9,
+    "ruff_files": 9,
+    "passed": true
+  },
+  "integrity": {
+    "frozen_reference_bindings": 1314,
+    "export_hashes": 28,
+    "archived_source_files": 437,
+    "passed": true
+  },
+  "browser": {
+    "widths": [
+      1440,
+      390
+    ],
+    "horizontal_overflow": false,
+    "page_errors": [],
+    "relative_links_checked": 244,
+    "video": {
+      "width": 1024,
+      "height": 848,
+      "duration_seconds": 4,
+      "playback_verified": true
+    }
+  },
+  "scope": "CPU checks and recorded-state replay verification; physical results are separately admitted in the published experiment records."
+}
