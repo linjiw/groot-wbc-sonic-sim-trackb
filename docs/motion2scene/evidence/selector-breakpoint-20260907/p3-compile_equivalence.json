@@ -1,0 +1,62 @@
+{
+  "new_fits": 0,
+  "rows": [
+    {
+      "actions_exact": true,
+      "arm": "analytic",
+      "compiled": {
+        "path": "research-data/m2s-shared-linear-control-v2/models/analytic.pt",
+        "sha256": "sha256:44edc8eaade7607f7c36d03cec5989ce6600daf059fef9060d5e7e574cabaa5c"
+      },
+      "inputs": 158,
+      "max_probability_error": 1.1324882507324219e-06,
+      "source": {
+        "path": "research-data/m2s-selector-input-diagnostic-v2/linear_analytic.npz",
+        "sha256": "sha256:de0ba245ccf745c37c55560498f4964a889587dec55d9c82b84fb1d85f7c624e"
+      }
+    },
+    {
+      "actions_exact": true,
+      "arm": "motion2scene",
+      "compiled": {
+        "path": "research-data/m2s-shared-linear-control-v2/models/motion2scene.pt",
+        "sha256": "sha256:8dfa97afbde0ee46a08438b61c0e75d95ddcd1a075a0698ff048236281cc8a2b"
+      },
+      "inputs": 158,
+      "max_probability_error": 2.384185791015625e-07,
+      "source": {
+        "path": "research-data/m2s-selector-input-diagnostic-v2/linear_motion2scene.npz",
+        "sha256": "sha256:7d85b6020fa1e89ce9ffc1b7b34e9ed2368e5bbb3309ccab3605de705107b558"
+      }
+    },
+    {
+      "actions_exact": true,
+      "arm": "no_contrast",
+      "compiled": {
+        "path": "research-data/m2s-shared-linear-control-v2/models/no_contrast.pt",
+        "sha256": "sha256:6aea01d6853b21dca5e7d14f59353fcaf87a2f39e3ba575a51cce98f301aefe4"
+      },
+      "inputs": 158,
+      "max_probability_error": 1.1920928955078125e-07,
+      "source": {
+        "path": "research-data/m2s-selector-input-diagnostic-v2/linear_no_contrast.npz",
+        "sha256": "sha256:ea900d69a7f207a4d3e68af26aaf6a18f1d030393b102fffac2ae95fc5b290a4"
+      }
+    },
+    {
+      "actions_exact": true,
+      "arm": "uniform",
+      "compiled": {
+        "path": "research-data/m2s-shared-linear-control-v2/models/uniform.pt",
+        "sha256": "sha256:4c1f229e76d477a66890ed0b738def6a8c32551c5daae52d9801d267b0706635"
+      },
+      "inputs": 158,
+      "max_probability_error": 1.519918441772461e-06,
+      "source": {
+        "path": "research-data/m2s-selector-input-diagnostic-v2/linear_uniform.npz",
+        "sha256": "sha256:0f07cd7feafb7ede7c41ae55d2a7224a1c6836be350c165f1cd751da926f1950"
+      }
+    }
+  ],
+  "scope": "same linear functions in the existing frozen runtime container"
+}

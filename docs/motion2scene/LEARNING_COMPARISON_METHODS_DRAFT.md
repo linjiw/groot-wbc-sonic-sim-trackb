@@ -1,5 +1,12 @@
 # Learning comparison: methods draft
 
+**Scope update:** the methods below remain the original frozen development study.
+The [subsequent breakpoint diagnosis](SELECTOR_BREAKPOINT_RESULT.md) and
+[shared linear-control protocol](LINEAR_SELECTOR_EXECUTION_V2.md) are separate,
+post hoc development experiments. They do not replace the original MLPs or pending
+480 evaluations. The revised construction/comparison is specified in the
+[next-stage design](TRANSITION_AWARE_NEXT_STAGE.md).
+
 This draft describes the implemented development study. It supplies the experiment
 section, not an abstract claiming a downstream advantage. Independent-layout outcomes
 belong in the [measured result](INDEPENDENT_LAYOUT_V1_RESULT.md); pending trials are

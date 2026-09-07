@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-07",
+  "focused_tests": {
+    "command": "PYTHONPATH=. .venv_research/bin/pytest -q tests/dataset_generation/test_motion2scene*.py tests/dataset_generation/test_capsule_box*.py tests/dataset_generation/test_placement_certificate.py",
+    "passed": 180,
+    "skipped": 1,
+    "skip": "optional USD pxr dependency"
+  },
+  "style": "Black --check and Ruff passed on all thirteen added Python files",
+  "page": {
+    "widths": [
+      1440,
+      390
+    ],
+    "local_links_checked": 235,
+    "horizontal_overflow": false,
+    "javascript_errors": [],
+    "new_video": {
+      "width": 1024,
+      "height": 848,
+      "duration_seconds": 24,
+      "actual_playback_checked": true
+    }
+  },
+  "source_archive_files_verified": 423,
+  "diagnostic_archive_files_verified": 39,
+  "cpu_reproduction": {
+    "path": "docs/motion2scene/evidence/selector-breakpoint-20260907/linear-reproduction.json",
+    "sha256": "sha256:b54c5679f5cc3fb0afbccead72cdd1a20490487696466bb019a2c4bdeefaf8b4"
+  },
+  "source_manifest": {
+    "path": "docs/motion2scene/evidence/selector-breakpoint-source-20260907/research-source-manifest.json",
+    "sha256": "sha256:b8806556afac0c9039ba3198496baebfe58b355ac68ee3c0725bb27d65fa686a"
+  },
+  "evidence_manifest": {
+    "path": "docs/motion2scene/evidence/selector-breakpoint-20260907/breakpoint-evidence-manifest.json",
+    "sha256": "sha256:02182a909074657bcc914e870eca4ce881188e71bb8bf51a249f655d2d11ccce"
+  },
+  "frozen_dependency_hashes_checked": {
+    "p0": 70,
+    "p1": 368,
+    "p2": 75,
+    "p3": 508
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "p0": {
+    "analytic": {
+      "d040_recovery_by_group": {
+        "all_non_ray": 12,
+        "gravity": 0,
+        "joint_position": 0,
+        "joint_velocity": 0,
+        "phase_skill_age": 0,
+        "rays": 0,
+        "velocity": 0
+      },
+      "floor": 0.0,
+      "max_abs_normalized_feature": 1952.749267578125,
+      "max_logit": -50.18612289428711,
+      "measured_readouts": 30,
+      "min_logit": -2134.023193359375,
+      "models": 5
+    },
+    "motion2scene": {
+      "d040_recovery_by_group": {
+        "all_non_ray": 0,
+        "gravity": 0,
+        "joint_position": 0,
+        "joint_velocity": 0,
+        "phase_skill_age": 0,
+        "rays": 0,
+        "velocity": 0
+      },
+      "floor": 0.0,
+      "max_abs_normalized_feature": 1952.749267578125,
+      "max_logit": 201.188232421875,
+      "measured_readouts": 30,
+      "min_logit": -602.8134765625,
+      "models": 5
+    },
+    "no_contrast": {
+      "d040_recovery_by_group": {
+        "all_non_ray": 0,
+        "gravity": 0,
+        "joint_position": 1,
+        "joint_velocity": 0,
+        "phase_skill_age": 0,
+        "rays": 0,
+        "velocity": 1
+      },
+      "floor": 0.0,
+      "max_abs_normalized_feature": 1952.749267578125,
+      "max_logit": 387.3204650878906,
+      "measured_readouts": 30,
+      "min_logit": -149.7835235595703,
+      "models": 5
+    },
+    "uniform": {
+      "d040_recovery_by_group": {
+        "all_non_ray": 2,
+        "gravity": 0,
+        "joint_position": 0,
+        "joint_velocity": 1,
+        "phase_skill_age": 0,
+        "rays": 0,
+        "velocity": 0
+      },
+      "floor": 0.34718954634262517,
+      "max_abs_normalized_feature": 1952.749267578125,
+      "max_logit": 72.71703338623047,
+      "measured_readouts": 30,
+      "min_logit": -1448.5496826171875,
+      "models": 5
+    }
+  },
+  "paired_outcomes": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      1
+    ],
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      1
+    ],
+    [
+      1,
+      1
+    ]
+  ],
+  "controls": {
+    "uniform": {
+      "passed": 3,
+      "requests": 0,
+      "refusals": 2,
+      "returns": 0
+    },
+    "analytic": {
+      "passed": 4,
+      "requests": 2,
+      "refusals": 2,
+      "returns": 2
+    },
+    "no_contrast": {
+      "passed": 3,
+      "requests": 0,
+      "refusals": 0,
+      "returns": 0
+    },
+    "motion2scene": {
+      "passed": 3,
+      "requests": 0,
+      "refusals": 2,
+      "returns": 0
+    }
+  },
+  "transition_forecast": {
+    "empty_transition": {
+      "analytic": {
+        "commands": 16,
+        "false_clear_contact": 0,
+        "missed_contact_qualified": 2,
+        "screen_clear_task_fail": 0
+      },
+      "motion2scene": {
+        "commands": 18,
+        "false_clear_contact": 0,
+        "missed_contact_qualified": 0,
+        "screen_clear_task_fail": 0
+      },
+      "no_contrast": {
+        "commands": 18,
+        "false_clear_contact": 0,
+        "missed_contact_qualified": 0,
+        "screen_clear_task_fail": 1
+      },
+      "uniform": {
+        "commands": 18,
+        "false_clear_contact": 0,
+        "missed_contact_qualified": 2,
+        "screen_clear_task_fail": 1
+      }
+    },
+    "reference": {
+      "analytic": {
+        "commands": 16,
+        "false_clear_contact": 4,
+        "missed_contact_qualified": 0,
+        "screen_clear_task_fail": 4
+      },
+      "motion2scene": {
+        "commands": 18,
+        "false_clear_contact": 9,
+        "missed_contact_qualified": 0,
+        "screen_clear_task_fail": 9
+      },
+      "no_contrast": {
+        "commands": 18,
+        "false_clear_contact": 0,
+        "missed_contact_qualified": 0,
+        "screen_clear_task_fail": 1
+      },
+      "uniform": {
+        "commands": 18,
+        "false_clear_contact": 0,
+        "missed_contact_qualified": 2,
+        "screen_clear_task_fail": 1
+      }
+    }
+  },
+  "original_v1": {
+    "admitted": 120,
+    "assigned": 600,
+    "paused": 480
+  }
+}
