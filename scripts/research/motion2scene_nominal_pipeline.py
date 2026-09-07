@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT.parent / "research-data/groot-wbc"
 PARENT = DATA / "m2s-icra-v1"
 STUDY = DATA / "m2s-icra-nominal-v1"
+LEARNING = DATA / "m2s-icra-nominal-learning-v1"
 FLOOR_MIB = 7500
 
 
@@ -48,8 +49,8 @@ def verify_refs():
             raise RuntimeError("Frozen dependency changed: " + ref["path"])
 
 
-def pending():
-    master = json.loads((STUDY / "prepared.json").read_text())
+def pending(index):
+    master = json.loads(index.read_text())
     for block in master["batches"]:
         folder = Path(block["directory"])
         admission = folder / "admission.json"
@@ -64,6 +65,18 @@ def pending():
                 raise RuntimeError("Unresolved running or failed cell in " + str(folder))
         return folder
     return None
+
+
+def call(script, command, out):
+    log = STUDY / "pipeline.log"
+    with log.open("a") as stream:
+        stream.write(f"\n{now()} {script} {command}\n")
+        stream.flush()
+        return subprocess.run(
+            [sys.executable, str(ROOT / "scripts/research" / script), command, "--out", str(out)],
+            stdout=stream,
+            stderr=subprocess.STDOUT,
+        ).returncode
 
 
 def parent_complete():
@@ -98,6 +111,7 @@ def main():
                     "sha256": "sha256:" + hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                     "gpu_floor_mib": FLOOR_MIB,
                     "waits_for": "M2S-ICRA-v1 pipeline stage == complete",
+                    "stages": "labels -> register -> fit -> prepare -> evaluation",
                     "budgets": "unchanged rolling 8 contended GPU h/day and 24/week",
                     "stops": "changed reference, failed cell, audit rejection, runner failure",
                 },
@@ -112,37 +126,53 @@ def main():
                 status("waiting_for_parent", parent=str(PARENT))
                 time.sleep(60)
                 continue
-            folder = pending()
-            if folder is None:
-                status("complete", labels_assigned=72)
+            label_pending = pending(STUDY / "prepared.json")
+            if label_pending:
+                stage, script, folder, index = (
+                    "labels",
+                    "motion2scene_icra_nominal.py",
+                    STUDY,
+                    STUDY / "prepared.json",
+                )
+            elif not (LEARNING / "registration.json").exists():
+                status("registering_learning")
+                if call("motion2scene_icra_nominal_learning.py", "register", LEARNING):
+                    raise RuntimeError("Learning registration failed; no automatic restart")
+                continue
+            elif not (LEARNING / "fit.json").exists():
+                status("fitting")
+                if call("motion2scene_icra_nominal_learning.py", "fit", LEARNING):
+                    raise RuntimeError("Fitting failed; no automatic restart")
+                continue
+            elif not (LEARNING / "evaluation_master.json").exists():
+                status("preparing_evaluation")
+                if call("motion2scene_icra_nominal_learning.py", "prepare", LEARNING):
+                    raise RuntimeError("Evaluation preparation failed; no automatic restart")
+                continue
+            elif pending(LEARNING / "evaluation_master.json"):
+                stage, script, folder, index = (
+                    "evaluation",
+                    "motion2scene_icra_nominal_learning.py",
+                    LEARNING,
+                    LEARNING / "evaluation_master.json",
+                )
+            else:
+                status("complete", labels_assigned=72, evaluation_assigned=144)
                 return
             free = free_mib()
             if free < FLOOR_MIB:
                 status(
                     "waiting_gpu",
+                    next_stage=stage,
                     free_gpu_mib=free,
                     required_gpu_mib=FLOOR_MIB,
-                    pending_batch=str(folder),
+                    pending_batch=str(pending(index)),
                 )
                 time.sleep(30)
                 continue
-            status("running_labels", free_gpu_mib=free, pending_batch=str(folder))
-            log = STUDY / "pipeline.log"
-            with log.open("a") as stream:
-                stream.write(f"\n{now()} motion2scene_icra_nominal.py run\n")
-                stream.flush()
-                code = subprocess.run(
-                    [
-                        sys.executable,
-                        str(ROOT / "scripts/research/motion2scene_icra_nominal.py"),
-                        "run",
-                        "--out",
-                        str(STUDY),
-                    ],
-                    stdout=stream,
-                    stderr=subprocess.STDOUT,
-                ).returncode
-            blocked = pending()
+            status("running_" + stage, free_gpu_mib=free)
+            code = call(script, "run", folder)
+            blocked = pending(index)
             if code:
                 record = blocked / "run_record.json" if blocked else None
                 if (
@@ -150,7 +180,7 @@ def main():
                     or not record.exists()
                     or json.loads(record.read_text())["status"] != "yielded_gpu_contention"
                 ):
-                    raise RuntimeError(f"Unexpected runner exit {code}; no retry")
+                    raise RuntimeError(f"Unexpected {script} exit {code}; no retry")
                 time.sleep(30)
         status("stopped_wall_clock")
 
