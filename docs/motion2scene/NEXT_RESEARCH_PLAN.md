@@ -1,16 +1,21 @@
 # Research plan: robust motion-conditioned inverse scene generation
 
-**Current ICRA scope (September 7, adopted from the user's fable guidance):**
-[Four arms, one 24-requested-group budget, one deterministic learner and three already
-qualified development carriers](FABLE_ICRA_STATUS.md). No generator refit, five-arm
-24/48/96 campaign or final-source acquisition for this submission. The frozen proposal
-pass admits uniform 18/18, analytic 1/18, target-only 16/18 and Motion2Scene 0/18 generated
-groups. Including six shared backgrounds gives 82 assigned physical commands; acquisition
-and the fixed policy evaluation are ongoing. Unequal acquired counts prevent an
-equal-24-complete-label claim. [Working manuscript](ICRA_MANUSCRIPT.md).
+**September 7 result snapshot:** [82/82 labeling commands and 366/540 policy
+executions are admitted](M2S_ICRA_366_RESULT.md). All four primary fits and 24 registered
+refits are complete. Analytic-trained passage is 30/61 conditions, versus 21/61 for
+uniform, target-only and background-only Motion2Scene; scripted rays pass 36/61.
+Analytic provides nine additional contact-qualified passages across three inspected
+carriers. Motion2Scene acquires zero generated groups, so its learner uses only six
+shared backgrounds. The equal-24-label goal fails in three arms. This is an ordered
+partial panel, not a learned-generator advantage or fresh-source result.
 
-Earlier plans and snapshots below are historical; the current protocol is
-[M2S-ICRA-v1](M2S_ICRA_V1.md). The 480 original MLP assignments remain paused.
+**Remaining:** 66 traversal and 108 background executions, final grouped comparison
+and full cost accounting, then the September 10 claim decision and manuscript finish.
+The supervisor remains active under unchanged memory and rolling-budget limits.
+[Working manuscript](ICRA_MANUSCRIPT.md) · [All outcomes](assets/icra-366-outcomes.pdf) ·
+[Records and saved models](evidence/icra-results-366-20260907/exports.json).
+No generator refit, extra data budgets or final-source acquisition is added. The
+original 480 MLP assignments remain paused.
 
 ## Historical material before the fable scope revision
 

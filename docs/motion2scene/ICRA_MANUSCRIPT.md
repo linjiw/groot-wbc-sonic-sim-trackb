@@ -37,7 +37,7 @@ mismatch between complete-reference screening and achieved-command screening, an
 validates source-specific switching banks and physical contrasts in Isaac Lab.
 Third, it specifies a four-arm comparison—uniform, analytic, target-only and learned
 construction—with one shared outcome learner. The third contribution remains an
-experimental question until the registered acquisition and evaluation complete.
+experimental question: acquisition is complete, but policy evaluation is partial.
 The learned proposal is a tested factor, not an assumed source of superiority.
 
 ## II. Related work
@@ -167,9 +167,44 @@ carrier before averaging carriers. Paired tables report both-pass, method-A-only
 method-B-only and both-fail. Repeats share carriers and do not create independent
 source evidence. Background adaptation/refusal outcomes form separate suites.
 
-[Results pending: complete acquisition funnel, paired labels, fitted controls,
-432-cell traversal panel, comparator characterization and requested-slot cost table.
-Do not replace these entries with predictions or offline command lookups.]
+All 82 assigned labeling executions and 41 unique pairs pass measurement admission.
+Complete groups are 24 uniform, seven analytic, 22 target-only and six Motion2Scene,
+including the same six shared backgrounds per arm. Only one generated group, from
+analytic construction on 41001, is walk-fail/d040-pass. Uniform supplies six generated
+both-pass and twelve both-fail groups; all sixteen target-only generated groups are
+both-pass. Motion2Scene supplies no accepted generated groups. Its fitted learner is
+therefore background-only. The equal-24-complete-label target fails in three arms.
+
+Four primary fits and 24 registered leave-four-assignment-out refits are complete.
+At the September 7 snapshot, 366 of 540 policy evaluations are admitted: all six methods
+on 61 of 72 traversal conditions. Passage counts are uniform 21/61, analytic 30/61,
+target-only 21/61, background-only Motion2Scene 21/61, scripted rays 36/61 and privileged
+geometry 29/61. These are ordered partial results; 66 traversal and all 108 separate
+background runs remain pending under unchanged rolling compute and memory gates.
+
+Analytic versus uniform yields 21 both-pass, nine analytic-only, zero uniform-only
+and 31 both-fail conditions. The carrier-averaged difference is +14.603 percentage
+points in this slice, with five additional passes on 41001 and two each on 41002 and
+41003. All nine additional passages request d040 and measure 0 N beam force; matched
+walking records 385.1–1685.6 N. The scripted rule passes six further conditions with
+no reverse difference. This supports useful learned adaptation on the inspected
+layouts, while the script remains the stronger observed baseline. It does not
+establish a learned-generator advantage or source-held-out generalization.
+
+The first analytic refit removes the sole useful generated label and three refused
+assignments. Its remaining training IDs, weights, biases and scales exactly equal
+the background-only Motion2Scene primary model. On the 61 recorded inputs, its d040
+requests fall from 22 to zero. The five other analytic folds retain 22 requests;
+two remove no available labels. This controlled removal links one acquired contrast
+to the fixed learner's decisions. It is an offline refit diagnostic, not additional
+physics evaluation or a population claim about single-example learning.
+
+Acquisition spends 0.824108 contended GPU h and admitted policy evaluations spend
+3.146765 h. These are physical execution costs, not a complete end-to-end cost
+comparison: generator fitting, proposals, rejected searches and shared bank costs
+remain separately recorded. Remaining evaluation and the final grouped uncertainty
+analysis must precede the registered result decision. [Internal evidence:
+M2S_ICRA_366_RESULT; all assigned outcomes and refit checkpoints are released.]
 
 ## VII. Limitations and result decision
 
@@ -181,7 +216,7 @@ informed this revision, so their reuse is development evaluation.
 
 Geometric proposal acceptance does not guarantee a useful physical contrast. The
 current learned initializer has produced no accepted scenes in the achieved-transition
-pilot, and the matched 24-label quota may fail. Contact-qualified passage does not
+study, and the matched 24-label quota fails in three arms. Contact-qualified passage does not
 eliminate endpoint tracking error. Neither a predicted refusal nor continued neutral
 walking is a qualified protective action. The final conclusion must follow the
 registered comparison: report contrast-construction utility if supported, learned

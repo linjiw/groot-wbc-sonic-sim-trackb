@@ -33,7 +33,7 @@ h1{font-size:32px;line-height:1.2}h2{font-size:22px;margin-top:28px}p{overflow-w
 @media print{body{max-width:none;margin:0;padding:0;font:10pt/1.25 "Times New Roman",serif;color:black}
 article{columns:2;column-gap:0.25in}h1{font-size:18pt;column-span:all}h2{font-size:11pt;break-after:avoid}
 p{margin:0 0 8pt}.notice{font-size:9pt;padding:8pt;margin-bottom:12pt}a{color:black}}
-</style><div class="notice">Working draft: learning results and abstract pending.
+</style><div class="notice">Working draft: partial 366/540 evaluation results; final results and abstract pending.
 This reading copy is not an ICRA template or a submission-compliance check.</div><article>"""
         + "".join(blocks)
         + "</article></html>"
