@@ -1,6 +1,34 @@
 # Motion2Scene visual research report
 
-**Current stage (September 6):** the [comparative command corpus](COMPARATIVE_CORPUS_STAGE_RESULT.md)
+**Current stage (September 6):** [the independent-layout evaluation](INDEPENDENT_LAYOUT_V1_RESULT.md)
+has completed 120/600 assigned Isaac Lab executions, with
+120 admitted after input, command, geometry and contact audits.
+The first wave covers one reserved station, three heights and two physics seeds
+for all twenty frozen learners. The remaining 480 assignments stay pending.
+This is a partial evaluation on observed source 41002, not source-held-out transfer.
+Training remains eleven complete encounters per arm. The learned generator's
+advantage over analytic training data remains unproved. All four arms tie on these
+first six blocks, and none requests d040; the remaining panel is still pending.
+
+**Reproducibility and demos:** all twenty original selectors are now
+[downloadable with their exact training inputs](evidence/selector-bundle-20260906/selectors.tar.gz);
+CPU refitting reproduces every weight, normalization value and final loss exactly.
+The [new replay](assets/independent-layout-wave1.mp4) shows a fixed twenty-four-run subset
+covering all four data arms, both physics seeds and all three first-station heights. Isaac Lab supplies
+the dynamics and measured contacts; MuJoCo renders recorded states only.
+The [post hoc readout diagnostic](LAYOUT_READOUT_DIAGNOSTIC_V1.md) tests sensor
+sensitivity without adding physics or changing the frozen policies.
+
+**Next research stage:** finish the remaining frozen layout and control assignments,
+then evaluate shared scripted comparators. Preserve every failure and keep controls
+separate from traversal. Larger 24/48/96 data budgets require new corpora and
+separate fits; the reserved final-source candidates still require acquisition and
+qualification under the same switching contract. A complete ICRA learning claim
+also needs source-grouped effects and full acquisition cost accounting. See the
+[methods draft](LEARNING_COMPARISON_METHODS_DRAFT.md) and
+[focused prior-work comparison](RELATED_WORK_POSITIONING_20260906.md).
+
+**Historical corpus stage (September 6; superseded above):** the [comparative command corpus](COMPARATIVE_CORPUS_STAGE_RESULT.md)
 contains 76 completed Isaac Lab executions and 38 paired scene outcomes, captured at
 one common 0.30 s decision. Both-fail outcomes and the analytic test-neighborhood
 rejection remain in the record. All 38 pairs pass the direct-input/bank audits, and all twenty matched learners
@@ -16,7 +44,7 @@ provenance scope does not establish global metadata absence or source independen
 features, model requests, full trajectories and outcomes. These are observed development
 scenes, not independent performance evidence. [Integration protocol](LEARNED_COMMAND_CHECK_V1.md).
 
-**Next research stage:** [evaluate the frozen policies on the twelve independently specified layouts](INDEPENDENT_LAYOUT_EVALUATION_V1_PLAN.md).
+**Historical next step:** [evaluate the frozen policies on the twelve independently specified layouts](INDEPENDENT_LAYOUT_EVALUATION_V1_PLAN.md).
 Keep the analytic arm as the primary comparator. Report source-specific contact-qualified
 passage/recovery, unnecessary crouching and blocked-scene detection separately. This
 single-source, eleven-encounter development comparison is not the final 24/48/96
