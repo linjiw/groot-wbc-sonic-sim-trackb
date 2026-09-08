@@ -3,465 +3,306 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SweepCF — physics-verified counterfactual traversal for humanoids</title>
-<meta name="description" content="A humanoid traversal dataset where every episode is a matched pair: same journey, two rooms, and the simulator decides which motion survives.">
+<title>Motion2Scene — training scenes from executed humanoid motion contrasts</title>
+<meta name="description" content="A humanoid decides when to duck. We build its training scenes from what the robot actually did, label them with paired physics, and measure which part of that construction teaches the decision.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300&family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;800&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;1,6..72,300&family=JetBrains+Mono:wght@400;700&display=swap">
 <style>
 :root{
   --paper:#FBFBFA; --raised:#F2F3F1; --sunk:#E9EBE8; --ink:#161A1D; --ink-2:#3A4248;
-  --muted:#6C767C; --line:#DCDFDC; --accent:#9A5F0B; --accent-soft:#F6EEDF;
-  --accept:#2F6B52; --reject:#9E3A31; --measure:66ch;
+  --muted:#6C767C; --line:#DCDFDC;
+  --accent:#116B7C; --accent-soft:#E2EFF1;
+  --learn:#1B6CA8; --analytic:#27817C; --null:#9AA7B0;
+  --accept:#2F6B52; --reject:#9E3A31;
+  --display:"Archivo",system-ui,sans-serif;
+  --body:"Newsreader",Georgia,serif;
+  --mono:"JetBrains Mono",Menlo,monospace;
+  --measure:66ch;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     --paper:#0F1418; --raised:#171E23; --sunk:#1E262C; --ink:#E9EDEF; --ink-2:#BDC6CC;
-    --muted:#87949C; --line:#27313A; --accent:#E8A33D; --accent-soft:#231B0E;
-    --accept:#5FA184; --reject:#D4695F;
+    --muted:#87949C; --line:#27313A;
+    --accent:#5EB6C6; --accent-soft:#0E2A30;
+    --learn:#6DB6CF; --analytic:#5FB3AC; --null:#68757E;
+    --accept:#7CC496; --reject:#E08A8A;
   }
 }
 :root[data-theme="dark"]{
   --paper:#0F1418; --raised:#171E23; --sunk:#1E262C; --ink:#E9EDEF; --ink-2:#BDC6CC;
-  --muted:#87949C; --line:#27313A; --accent:#E8A33D; --accent-soft:#231B0E;
-  --accept:#5FA184; --reject:#D4695F;
+  --muted:#87949C; --line:#27313A;
+  --accent:#5EB6C6; --accent-soft:#0E2A30;
+  --learn:#6DB6CF; --analytic:#5FB3AC; --null:#68757E;
+  --accept:#7CC496; --reject:#E08A8A;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--paper);color:var(--ink);
-  font-family:Newsreader,Georgia,serif;font-weight:300;
-  font-size:clamp(1.02rem,.98rem + .25vw,1.14rem);line-height:1.62;-webkit-font-smoothing:antialiased}
-.wrap{max-width:72rem;margin:0 auto;padding:0 clamp(1.1rem,4vw,2.5rem)}
-h1,h2,h3,.eyebrow,.stat,th,.label,nav a,.pill{font-family:Archivo,system-ui,sans-serif}
-h1{font-size:clamp(2.1rem,1.4rem + 3vw,3.9rem);font-weight:800;letter-spacing:-.03em;line-height:1;margin:0 0 1rem;text-wrap:balance}
-h2{font-size:clamp(1.45rem,1.15rem + 1.2vw,2.1rem);font-weight:800;letter-spacing:-.022em;line-height:1.1;margin:0 0 .8rem;text-wrap:balance}
-h3{font-size:clamp(1.05rem,1rem + .4vw,1.25rem);font-weight:700;margin:0 0 .35rem}
-p{max-width:var(--measure);margin:0 0 1rem;color:var(--ink-2)}
-p.lead{font-size:clamp(1.15rem,1.05rem + .55vw,1.45rem);color:var(--ink);line-height:1.42}
-strong{font-family:Archivo,sans-serif;font-weight:700;font-size:.93em;color:var(--ink)}
-em{font-style:italic}
-a{color:var(--accent);text-underline-offset:2px}
-.mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
-code{font-family:"JetBrains Mono",monospace;font-size:.85em;background:var(--raised);
-  border:1px solid var(--line);border-radius:2px;padding:.08em .35em}
-section{padding:clamp(3rem,7vh,5.5rem) 0;border-bottom:1px solid var(--line)}
-.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--accent);margin:0 0 1rem}
-header.hero{padding:clamp(3.5rem,10vh,7rem) 0 clamp(2.5rem,6vh,4rem);border-bottom:1px solid var(--line)}
-.pills{display:flex;flex-wrap:wrap;gap:.4rem;margin:1.6rem 0 0}
-.pill{font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
-  border:1px solid var(--line);color:var(--muted);padding:.32rem .6rem;border-radius:2px}
-.pill.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
-nav.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--paper) 92%,transparent);
-  backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-nav.top .wrap{display:flex;gap:clamp(.7rem,2vw,1.6rem);overflow-x:auto;padding-top:.7rem;padding-bottom:.7rem}
-nav.top a{font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--muted);text-decoration:none;white-space:nowrap}
-nav.top a:hover{color:var(--accent)}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
-  background:var(--line);border:1px solid var(--line);margin:1.8rem 0 0}
-.stats div{background:var(--paper);padding:1.1rem 1rem}
-.stat{display:block;font-size:clamp(1.6rem,1.2rem + 1.6vw,2.4rem);font-weight:800;
-  letter-spacing:-.025em;line-height:1;font-variant-numeric:tabular-nums}
-.stats small{display:block;margin-top:.4rem;font-family:Archivo,sans-serif;font-size:.68rem;
-  letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
-.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;margin-top:1.2rem}
-.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.9rem;margin-top:1.2rem}
-.cell{background:var(--raised);border:1px solid var(--line);overflow:hidden;border-radius:2px}
-.cell video{width:100%;display:block;aspect-ratio:936/526;object-fit:cover;background:var(--sunk)}
-.cell.rej{border-color:color-mix(in srgb,var(--reject) 50%,var(--line))}
-.cell.acc{border-color:color-mix(in srgb,var(--accept) 42%,var(--line))}
-.cap{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem;padding:.5rem .65rem;border-top:1px solid var(--line)}
-.cap .label{font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
-.verdict{font-family:"JetBrains Mono",monospace;font-size:.68rem;font-weight:700}
-.rej .verdict{color:var(--reject)}.acc .verdict{color:var(--accept)}
-.axis{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;margin-top:.5rem}
-.axis span{font-family:Archivo,sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.13em;
-  text-transform:uppercase;color:var(--muted);text-align:center}
-.tbl{overflow-x:auto;border:1px solid var(--line);background:var(--raised);margin:1.2rem 0}
-table{border-collapse:collapse;width:100%;min-width:33rem;font-family:"JetBrains Mono",monospace;
-  font-size:.79rem;font-variant-numeric:tabular-nums}
-th,td{text-align:left;padding:.55rem .75rem;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-family:Archivo,sans-serif;font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;
-  color:var(--muted);font-weight:700;background:var(--paper)}
-tbody tr:last-child td{border-bottom:0}
-td.g{color:var(--accept)}td.r{color:var(--reject)}
-.bars{display:grid;gap:.5rem;margin-top:1.2rem;max-width:42rem}
-.brow{display:grid;grid-template-columns:7.5rem 1fr 3.4rem;gap:.7rem;align-items:center;font-size:.8rem}
-.brow .label{font-family:Archivo,sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.06em;
-  text-transform:uppercase;color:var(--muted)}
-.btrack{height:1.15rem;background:var(--sunk);border:1px solid var(--line);overflow:hidden}
-.bfill{height:100%;background:var(--accent);width:0;transition:width 1.1s cubic-bezier(.2,.75,.25,1)}
-.seen .bfill{width:var(--w)}
-.bnum{font-family:"JetBrains Mono",monospace;font-size:.74rem;color:var(--muted);text-align:right}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));gap:1rem;margin-top:1.4rem}
-.card{background:var(--raised);border:1px solid var(--line);padding:1.15rem 1.25rem;border-radius:2px}
-.card p{font-size:.9rem;color:var(--muted);margin:0;max-width:none}
-.rule{height:2px;width:2rem;background:var(--accent);margin-bottom:.8rem}
-.note{border-left:2px solid var(--accent);background:var(--accent-soft);padding:.9rem 1.1rem;
-  margin:1.4rem 0;max-width:var(--measure)}
-.note p{margin:0;color:var(--ink)}
-pre{background:var(--raised);border:1px solid var(--line);padding:1rem 1.1rem;overflow-x:auto;
-  font-family:"JetBrains Mono",monospace;font-size:.78rem;line-height:1.55;border-radius:2px}
-ul{max-width:var(--measure);padding-left:1.15rem;color:var(--ink-2)}
-li{margin:.3rem 0}
-footer{padding:3rem 0 4rem;color:var(--muted);font-size:.84rem}
-footer p{max-width:none}
-:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.bfill{transition:none}}
-@media (max-width:620px){.grid2{grid-template-columns:1fr}.axis{display:none}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
+  font-size:18px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--measure);margin:0 auto;padding:0 24px}
+.wide{max-width:104ch;margin:0 auto;padding:0 24px}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+h1,h2,h3,.kicker,.chip,th,.stat b,nav{font-family:var(--display)}
+
+header.mast{border-bottom:1px solid var(--line);padding:56px 0 32px;margin-bottom:8px}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-size:clamp(32px,5vw,50px);line-height:1.06;font-weight:800;margin:14px 0 18px;
+  letter-spacing:-.02em;text-wrap:balance}
+.lede{font-size:21px;line-height:1.5;color:var(--ink-2);margin:0 0 22px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--mono);font-size:12px;padding:5px 10px;border:1px solid var(--line);
+  border-radius:3px;background:var(--raised);color:var(--ink-2)}
+.chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+
+section{padding:44px 0}
+h2{font-size:27px;font-weight:700;letter-spacing:-.01em;margin:0 0 8px;text-wrap:balance}
+h3{font-size:17px;font-weight:600;margin:28px 0 6px}
+.sub{color:var(--muted);font-size:15px;margin:0 0 20px;font-family:var(--display)}
+p{margin:0 0 16px}
+ul,ol{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+strong{font-weight:600}
+code{font-family:var(--mono);font-size:.86em;background:var(--sunk);padding:1px 5px;border-radius:3px}
+
+.headline{background:var(--raised);border:1px solid var(--line);border-radius:6px;
+  padding:26px 28px;margin:26px 0}
+.headline p{margin:0;font-size:20px;line-height:1.45}
+.headline .em{color:var(--accent);font-weight:600}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:26px 0}
+.stat{background:var(--paper);padding:16px 18px}
+.stat b{display:block;font-family:var(--mono);font-size:26px;font-weight:700;letter-spacing:-.02em}
+.stat span{display:block;font-size:13px;color:var(--muted);margin-top:3px;line-height:1.35}
+.stat.learn b{color:var(--learn)} .stat.analytic b{color:var(--analytic)} .stat.null b{color:var(--null)}
+@media (max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+figure{margin:26px 0}
+figure img{width:100%;height:auto;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+figcaption{font-family:var(--display);font-size:13.5px;color:var(--muted);margin-top:10px;line-height:1.5}
+
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:6px;margin:22px 0;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-family:var(--display);font-size:14px}
+th,td{padding:9px 13px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  font-weight:600;background:var(--raised)}
+tbody tr:last-child td{border-bottom:none}
+td.n,th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.win td{background:var(--accent-soft)}
+
+.steps{counter-reset:s;list-style:none;padding:0;margin:22px 0}
+.steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:14px;
+  padding:16px 0;border-top:1px solid var(--line)}
+.steps li:last-child{border-bottom:1px solid var(--line)}
+.steps li::before{content:counter(s);font-family:var(--mono);font-size:13px;color:var(--accent);
+  font-weight:700;padding-top:2px}
+.steps b{display:block;font-family:var(--display);font-size:16px;margin-bottom:3px}
+
+.gate{border-left:3px solid var(--accent);background:var(--accent-soft);padding:16px 20px;
+  border-radius:0 5px 5px 0;margin:22px 0}
+.gate.warn{border-left-color:var(--reject);background:color-mix(in srgb,var(--reject) 8%,transparent)}
+.gate p:last-child{margin-bottom:0}
+
+.road{display:grid;gap:14px;margin:24px 0}
+.road article{border:1px solid var(--line);border-radius:6px;padding:18px 20px;background:var(--paper)}
+.road h3{margin:0 0 4px;font-size:16.5px}
+.road .why{font-size:14.5px;color:var(--muted);font-family:var(--display);margin:0 0 10px}
+.road p{margin:0 0 10px;font-size:16.5px}
+.road .have{font-family:var(--mono);font-size:12px;color:var(--accent);
+  border:1px solid var(--line);border-radius:3px;padding:3px 8px;display:inline-block;background:var(--raised)}
+
+.links{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:22px 0}
+.links a{display:block;border:1px solid var(--line);border-radius:6px;padding:14px 16px;
+  text-decoration:none;background:var(--paper)}
+.links a:hover{border-color:var(--accent);background:var(--accent-soft)}
+.links b{display:block;font-family:var(--display);font-size:15.5px;color:var(--ink);margin-bottom:2px}
+.links span{font-size:14px;color:var(--muted);font-family:var(--display)}
+@media (max-width:700px){.links{grid-template-columns:1fr}}
+
+footer{border-top:1px solid var(--line);margin-top:56px;padding:26px 0 72px;
+  color:var(--muted);font-size:14px;font-family:var(--display)}
+video{width:100%;border:1px solid var(--line);border-radius:6px;background:#000}
 </style>
 </head>
 <body>
 
-<nav class="top"><div class="wrap">
-  <a href="#idea">The idea</a><a href="#see">See it</a><a href="#data">Dataset</a>
-  <a href="#quality">Quality</a><a href="#useful">Why it helps</a><a href="#status">Status</a>
-  <a href="#use">Get it</a><a href="motion2scene/">Motion2Scene · new research</a>
-</div></nav>
-
-<header class="hero"><div class="wrap">
-  <p class="eyebrow">Unitree G1 · frozen SONIC · Isaac Lab 2.3.2</p>
-  <h1>Same journey. Two rooms.<br>Physics decides.</h1>
-  <p class="lead">SweepCF is a humanoid traversal dataset in which every episode has a twin. One
-  journey, one obstacle, two motions — and a physics simulator, not an annotator, says which one
-  survives.</p>
-  <p>It exists to teach a policy <strong>why</strong> a motion had to change, which is the one thing
-  a corpus of merely-varied rooms cannot.</p>
-  <div class="pills">
-    <span class="pill on">2 verified families</span>
-    <span class="pill">96 physics rollouts</span>
-    <span class="pill">150 screened motions</span>
-    <span class="pill">531 video clips</span>
-    <span class="pill">35 columns per episode</span>
-    <span class="pill">Pre-registered</span>
+<header class="mast">
+  <div class="wrap">
+    <div class="kicker">GR00T Whole-Body Control · simulation study · September 2026</div>
+    <h1>Training scenes built from what the robot actually did</h1>
+    <p class="lede">A Unitree G1 walking down a corridor has two options at an overhead beam: keep walking, or request a crouch. Teaching it to choose needs encounters where the choice matters. Those encounters turn out to be geometrically scarce, and we can measure exactly how scarce.</p>
+    <div class="chips">
+      <span class="chip on">Both experiments complete</span>
+      <span class="chip">684 physics executions</span>
+      <span class="chip">3 carriers · 12 held-out layouts</span>
+      <span class="chip">Simulation only · no hardware claim</span>
+    </div>
   </div>
-</div></header>
+</header>
 
-<section id="idea"><div class="wrap">
-  <p class="eyebrow">The idea</p>
-  <h2>Scene variation is not scene-conditioned behaviour.</h2>
-  <p class="lead">Generate a thousand rooms and a policy learns that rooms vary. It does not learn
-  which part of its body the room binds, or what to do about it.</p>
-  <div class="cards">
-    <div class="card"><div class="rule"></div><h3>What a normal corpus gives</h3>
-      <p>Diverse geometry, each traversal labelled succeeded or failed. The supervision says
-      <em>succeeded here</em> — never <em>succeeded because it ducked</em>.</p></div>
-    <div class="card"><div class="rule"></div><h3>What a matched pair gives</h3>
-      <p>A second episode identical in every respect except the single edit the geometry forced. The
-      difference in outcome has exactly one cause, so it can be attributed.</p></div>
-    <div class="card"><div class="rule"></div><h3>Who decides</h3>
-      <p>The simulator. Contact forces in newtons, joint-level tracking, swept-volume clearance —
-      not a human judging a video, and not a heuristic.</p></div>
+<section>
+  <div class="wrap">
+    <h2>The finding</h2>
+    <div class="headline">
+      <p>A training scene helps only if it contains a <span class="em">decision-relevant contrast</span>: a placement where walking fails and the crouch succeeds. Build scenes that way and a fixed selector learns when to adapt. Build them any other way and it never adapts at all. Whether the contrast is proposed by a learned generator or an analytic solver makes <span class="em">no measurable difference</span>.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat analytic"><b>24/36</b><span>analytic-trained selector, held-out layouts</span></div>
+      <div class="stat learn"><b>22/36</b><span>Motion2Scene-trained, statistically identical</span></div>
+      <div class="stat null"><b>14/36</b><span>uniform placement, never adapts</span></div>
+      <div class="stat null"><b>14/36</b><span>target-only construction, never adapts</span></div>
+    </div>
+
+    <p>All four arms were trained on exactly fifteen labelled encounter groups, from the same carriers, with the same frozen controller, the same 214-input selector and the same optimizer. The only thing that differs is how the training scenes were placed.</p>
+
+    <figure>
+      <img src="motion2scene/assets/nominal-outcomes.png" alt="Left: each arm acquires nine generated groups, but only the two contrast arms yield useful contrasts, nine each. Right: passage on held-out layouts, analytic 24 of 36, Motion2Scene 22, uniform and target-only 14 each.">
+      <figcaption>Left: every arm acquired nine generated groups; only the two contrast constructions produced scenes where the choice matters. Right: passage on twelve held-out layouts across three carriers. Both contrast arms beat both non-contrast arms with no reverse case on any carrier.</figcaption>
+    </figure>
   </div>
-</div></section>
+</section>
 
-<section id="see"><div class="wrap">
-  <p class="eyebrow">See it</p>
-  <h2>One family, four rollouts, one cause.</h2>
-  <p>The same walk, run twice in an easy room and twice in a hard one — once as generated, once with
-  a single local edit. Fixed camera in the room so gait stays legible.
-  <strong>Three survive. One does not.</strong></p>
-  <div class="axis"><span>As generated · strikes</span><span>One local edit · clears</span></div>
-  <div class="grid2">
-    <div class="cell rej"><video src="media/family_nominal_hard.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">Hard room · as generated</span><span class="verdict">−0.0 mm · STRIKES</span></div></div>
-    <div class="cell acc"><video src="media/family_adapted_hard.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">Hard room · one local edit</span><span class="verdict">+55.6 mm · CLEARS</span></div></div>
+<section style="background:var(--raised);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <p class="sub">Four stages, each one falsifiable by the next</p>
+    <ol class="steps">
+      <li><div><b>Execute the contrast, don't imagine it</b>In an empty room the robot runs both commands: walk through, and request the crouch at 0.30 s. We keep the achieved 50 Hz body trajectories, not the reference the controller was asked to track.</div></li>
+      <li><div><b>Place the beam where the two executions differ</b>Any placement the crouch clears by 10 mm and the walk strikes by 10 mm is a candidate. Four constructions compete: uniform, an analytic capsule-box solver, a learned generator, and a target-only ablation that never looks at the walk.</div></li>
+      <li><div><b>Let physics decide the label</b>Both commands are executed again with the beam present in Isaac Lab. A group is useful only if walking measurably fails and the crouch passes contact-qualified, under 1 N through the crossing with 0.3 s of upright stability.</div></li>
+      <li><div><b>Train one fixed selector and test it elsewhere</b>A deterministic linear model reads 144 ray values plus proprioception and predicts whether each command will succeed. It is evaluated on twelve layouts it never saw, on all three carriers.</div></li>
+    </ol>
   </div>
-  <p style="margin-top:1rem">Same shelf, same room, same controller. On the left the head meets the
-  plank and the physics reports it in newtons. On the right the robot is <strong>visibly lower</strong>
-  — knees bent, torso dropped — and passes under with 55.6 mm to spare. That difference is the label,
-  and nobody wrote it down by hand.</p>
+</section>
 
-  <h3 style="margin-top:2.4rem">The other half of the family</h3>
-  <p>The same two motions in the easy room, where the shelf sits 178 mm higher and both survive.
-  Without this half there is no counterfactual — only a hard scene and a motion that failed in it.</p>
-  <div class="grid2">
-    <div class="cell acc"><video src="media/family_nominal_easy.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">Easy room · as generated</span><span class="verdict">+89.7 mm · CLEARS</span></div></div>
-    <div class="cell acc"><video src="media/family_adapted_easy.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">Easy room · one local edit</span><span class="verdict">+193.4 mm · CLEARS</span></div></div>
+<section>
+  <div class="wrap">
+    <h2>What almost sank it</h2>
+    <p>The first run of this experiment produced nothing from the learned generator: zero accepted scenes out of forty-eight proposals, and one from the analytic solver. It would have been easy to report that as a failure of the generator. It was not.</p>
+    <p>The acceptance test had been inherited from an earlier study that certified obstacle <em>placement</em>. It required each contrast to survive the beam moving ±20 mm. The entire executed window between a walk and a crouch is only 20 to 27 mm wide, so the test was asking a scene to tolerate a displacement the size of the effect itself.</p>
+
+    <figure>
+      <img src="motion2scene/assets/envelope-tradeoff.png" alt="Contrast witnesses fall from 200, 168 and 337 at the nominal pose to 2, 0 and 32 under the inherited plus or minus 20 mm envelope; the acquisition funnel opens from 1 and 0 eligible proposals to 41 and 33 under the matched contract.">
+      <figcaption>Sweeping 11,421 candidate placements per carrier prices the requirement directly. At the nominal pose there are hundreds of valid contrasts; at ±20 mm there are two, zero and thirty-two. Re-registering the contract at the pose the simulator actually authors moved eligibility from 1/48 to 41/48 for the analytic solver and from 0/48 to 33/48 for the learned generator.</figcaption>
+    </figure>
+
+    <div class="gate">
+      <p>The second contract was registered with its predictions filed <strong>before any proposal was drawn</strong>, changes exactly one thing, and keeps the original envelope as a reported diagnostic that gates nothing. A unit test asserts both contracts decide identically whenever their geometry agrees. The first study keeps its own results unchanged.</p>
+    </div>
   </div>
-  <p style="margin-top:1rem;font-size:.85rem;color:var(--muted)">Family <span class="mono">duck_003</span>,
-  rendered in Isaac Sim from the fixed observer camera and trimmed to the crossing. The rooms are
-  deliberately bare: the geometry is controlled to the millimetre, so nothing is in them that does
-  not have to be.</p>
+</section>
 
-  <h3 style="margin-top:2.8rem">How close is close? Down to the millimetre.</h3>
-  <p>Difficulty here is not a word, it is a measured distance. Between the easy room and the hard
-  one the shelf drops <strong>178 mm</strong> — and that is the whole difference between a walk that
-  passes and one that does not.</p>
-  <img src="media/difficulty.png" alt="Left: the shelf at 1.391 m in the easy room and 1.212 m in the hard room. Right: headroom per cell, from +193.4 mm down to -0.0 mm" style="width:100%;display:block;border:1px solid var(--line);background:#fff;margin-top:1rem">
-  <div class="tbl"><table>
-    <thead><tr><th>Room</th><th>Shelf underside</th><th>As generated</th><th>One local edit</th></tr></thead>
-    <tbody>
-      <tr><td>easy</td><td>1.3906 m</td><td class="g">+89.7 mm · clears</td><td class="g">+193.4 mm · clears</td></tr>
-      <tr><td>hard</td><td>1.2125 m</td><td class="r">−0.0 mm · strikes</td><td class="g">+55.6 mm · clears</td></tr>
-    </tbody>
-  </table></div>
-  <p>The edited motion clears the hard shelf by <strong>55.6 mm</strong> — about two finger widths.
-  That is the margin the whole dataset is built on, and it is why the labels have to come from
-  physics: no annotator watching a video can call 55 mm from 0 mm reliably.</p>
+<section style="background:var(--raised);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <h2>The numbers</h2>
+    <p class="sub">Equal labels, four arms, twelve held-out layouts, three carriers</p>
 
-  <h3 style="margin-top:2.8rem">Where the obstacle goes, and why that is the hard part</h3>
-  <p>Putting an obstacle <em>near</em> a trajectory is easy. Putting it where exactly one of two
-  motions survives is a measurement problem, and it is the part of this work that took longest to
-  get right. Nothing is sampled or hand-placed:</p>
-  <ol class="steps">
-    <li><div><b>Roll the motion out in an empty room</b>
-      <span>The reference clip is not the robot. Placement is measured against the body the
-      controller actually produced, because the two differ by centimetres.</span></div></li>
-    <li><div><b>Sweep the body into a volume</b>
-      <span>29 collision capsules over 14 links, every frame. This is the space the robot really
-      occupies, not a bounding cylinder.</span></div></li>
-    <li><div><b>Ask which part binds, at each height</b>
-      <span>Within a height band the criticality map finds the body part that reaches furthest:
-      torso overhead, upper arm at chest, wrist at waist. A ceiling and a wall bind different
-      parts of the same walk, so the same clip poses several distinct problems.</span></div></li>
-    <li><div><b>Apply the edit and measure again</b>
-      <span>The adapted clip is swept the same way, giving a second reach. The gap between them is
-      the <em>window</em> — the band of obstacle positions where the original strikes and the
-      edited one clears.</span></div></li>
-    <li><div><b>Place the easy face above it, the hard face inside it</b>
-      <span>Easy sits 50 mm clear of the original's reach; hard sits at the window's centre. Both
-      are then verified against the executed body before any rollout is spent.</span></div></li>
-  </ol>
-  <div class="note"><p><strong>The windows are genuinely narrow.</strong> Measured across bands they
-  run 21–105 mm wide, and what the controller actually delivers is 30–70% of what the geometry
-  predicts. A batch of fourteen configurations was refused entirely by preflight on that basis —
-  which is the point: the difficulty is real enough to be hard to manufacture.</p></div>
+    <div class="tbl"><table>
+      <thead><tr><th>Construction</th><th class="n">Groups</th><th class="n">Useful contrasts</th><th class="n">Passage</th><th class="n">Adapts</th></tr></thead>
+      <tbody>
+        <tr><td>Uniform placement</td><td class="n">15</td><td class="n">0</td><td class="n">14/36</td><td class="n">0</td></tr>
+        <tr class="win"><td>Analytic solver</td><td class="n">15</td><td class="n">9</td><td class="n">24/36</td><td class="n">24</td></tr>
+        <tr><td>Target-only ablation</td><td class="n">15</td><td class="n">0</td><td class="n">14/36</td><td class="n">0</td></tr>
+        <tr class="win"><td>Motion2Scene (learned)</td><td class="n">15</td><td class="n">9</td><td class="n">22/36</td><td class="n">22</td></tr>
+      </tbody>
+    </table></div>
 
-  <h3 style="margin-top:2.8rem">The same second, from every camera we record</h3>
-  <p>One episode, three synchronised viewpoints. Ego is what a policy would see, chase is what a
-  reviewer needs, and wrist is there for the manipulation phase that follows this one. The overhead
-  camera is <em>known broken</em> — it renders blank frames, the cause is unfound, and the drawn
-  route below serves that purpose until it is fixed.</p>
-  <div class="grid2">
-    <div class="cell"><video src="media/cam_ego.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">Ego · head camera</span><span class="verdict mono">policy input</span></div></div>
-    <div class="cell"><video src="media/cam_chase.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">Chase</span><span class="verdict mono">review</span></div></div>
-    <div class="cell"><video src="media/cam_wrist.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">Wrist</span><span class="verdict mono">manipulation</span></div></div>
+    <div class="tbl"><table>
+      <thead><tr><th>Paired comparison</th><th class="n">Both pass</th><th class="n">A only</th><th class="n">B only</th><th class="n">Neither</th><th class="n">p</th></tr></thead>
+      <tbody>
+        <tr><td>Motion2Scene vs uniform</td><td class="n">14</td><td class="n">8</td><td class="n">0</td><td class="n">14</td><td class="n">0.008</td></tr>
+        <tr><td>Analytic vs uniform</td><td class="n">14</td><td class="n">10</td><td class="n">0</td><td class="n">12</td><td class="n">0.002</td></tr>
+        <tr><td>Motion2Scene vs analytic</td><td class="n">22</td><td class="n">0</td><td class="n">2</td><td class="n">12</td><td class="n">0.50</td></tr>
+      </tbody>
+    </table></div>
+
+    <p>The thirty-six conditions are twelve layouts on three carriers, so those p values overstate independence. The claim that survives grouping is simpler: contrast construction wins on three carriers out of three, with no reverse case, and the learned-versus-analytic difference is a null at n = 3 rather than an equivalence.</p>
+
+    <h3>One place the learned generator is measurably worse</h3>
+    <p>Its training loss is 0.139 against the analytic solver's 0.00054 on identical architecture and label count. The reason is in the construction record: only 24 of its 34 critical scenes are visible to the robot's sensor at the moment the command must be issued, against 44 of 47 for the analytic solver. A contrast the robot cannot see is a label the learner cannot fit. That is a specific, fixable defect, and no visibility filter was added after the fact to hide it.</p>
   </div>
+</section>
 
-  <h3 style="margin-top:2.8rem">Rooms the corpus actually contains</h3>
-  <p>117 scenes across 11 packages — hand-authored rooms, procedurally cluttered ones, a density
-  ladder from sparse to tight, and the counterfactual pairs. Every one is a USD file shipped beside
-  the episode, so the geometry a claim rests on is the geometry you can load.</p>
-  <div class="grid3">
-    <div class="cell"><video src="media/scene_factory.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">Factory aisle</span><span class="verdict mono">authored</span></div></div>
-    <div class="cell"><video src="media/scene_curved.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">Curved route</span><span class="verdict mono">clutter</span></div></div>
-    <div class="cell"><video src="media/scene_waypoints.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">Waypoint route</span><span class="verdict mono">clutter</span></div></div>
-    <div class="cell"><video src="media/scene_household.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">Household room</span><span class="verdict mono">authored</span></div></div>
-    <div class="cell"><video src="media/density_sparse.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">Density · sparse</span><span class="verdict mono">ladder</span></div></div>
-    <div class="cell"><video src="media/density_tight.mp4" muted loop playsinline preload="metadata"></video>
-      <div class="cap"><span class="label">Density · tight</span><span class="verdict mono">ladder</span></div></div>
+<section>
+  <div class="wrap">
+    <h2>What this is not</h2>
+    <div class="gate warn">
+      <p>Every result here is simulation. One beam family, two commands, ideal ray sensing, three development carriers, one frozen controller, and layouts held out rather than source ancestry. The evaluation demonstrates <strong>unseen-layout transfer, not source-held-out transfer</strong>, and nothing on this page may be read as uncertainty-robust: acceptance was judged at the exact pose the simulator authors.</p>
+      <p>A hand-written ray rule still reaches 46 of 72 conditions in the larger panel, above every learned arm, while failing to classify a single blocked scene as impassable where every learned selector classifies all six. Neither approach dominates, and we report both directions.</p>
+    </div>
   </div>
+</section>
 
-  <h3 style="margin-top:2.8rem">And the route itself, drawn</h3>
-  <p>A camera shows what a traversal looked like; the route view shows what it <em>was</em> —
-  executed against commanded, with the frame of closest approach marked. The left pair is the cell
-  that struck the shelf, the right pair the one that cleared it.</p>
-  <div class="grid2">
-    <div class="cell rej"><img src="media/route_nominal_hard.png" alt="Route of the rejected cell: executed path stops short, contact marked at frame 155" style="width:100%;display:block;background:#fff">
-      <div class="cap"><span class="label">As generated · hard room</span><span class="verdict">STRUCK</span></div></div>
-    <div class="cell acc"><img src="media/route_adapted_hard.png" alt="Route of the accepted cell: executed path completes with no contact" style="width:100%;display:block;background:#fff">
-      <div class="cap"><span class="label">One local edit · hard room</span><span class="verdict">CLEARED</span></div></div>
+<section style="background:var(--raised);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <h2>Toward the real robot</h2>
+    <p class="sub">Five gates, in dependency order. Each has a measured starting point from this study.</p>
+
+    <div class="road">
+      <article>
+        <h3>1 · Re-price the contrast for a real obstacle pose</h3>
+        <p class="why">Because on hardware the beam's pose is uncertain, and this study deliberately assumed it is not.</p>
+        <p>The envelope sweep already states the cost: at ±20 mm only 2, 0 and 32 placements survive per carrier. A deployment needs either a much larger executed window, obtained by a deeper or slower adaptation, or obstacle localisation tight enough to make the nominal contract honest. Measure the achievable window against a real perception stack before building anything else.</p>
+        <span class="have">have: the full envelope/yield curve</span>
+      </article>
+
+      <article>
+        <h3>2 · Replace ideal rays with the real sensor</h3>
+        <p class="why">Because the selector's inputs are currently 144 exact ray returns from a scripted lidar.</p>
+        <p>Re-acquire the same encounters through the deployed depth or lidar pipeline, with its actual noise, dropout and field of view, and refit the same fixed selector. The visibility gap already found in simulation, 24 of 34 learned scenes observable against 44 of 47 analytic, is the quantity that will get worse first. The 500 ms observation-delay failure already measured is the timing budget this stage must respect.</p>
+        <span class="have">have: delay panel, visibility per construction</span>
+      </article>
+
+      <article>
+        <h3>3 · Source-held-out transfer</h3>
+        <p class="why">Because every result so far varies layout, not motion ancestry.</p>
+        <p>Eight candidate source identifiers are reserved against a provenance ledger and none has been generated or qualified. Acquire them, qualify their switching banks under the same 0.30 s contract, and re-run the four-arm comparison with ancestry held out. This is the single largest gap between the present claim and a general one, and it needs no new method.</p>
+        <span class="have">have: reserved IDs, qualification protocol</span>
+      </article>
+
+      <article>
+        <h3>4 · Close the loop the controller actually runs</h3>
+        <p class="why">Because the selector issues one command from a shared approach and never revises it.</p>
+        <p>A deployed robot decides repeatedly as the scene resolves. Extending to sequential decisions changes the state distribution the selector sees, so it needs matched data aggregation across every arm and fresh labels, not a re-scored version of these. The timing result, where 0.20 s and 0.40 s both fail while 0.30 s passes, shows how narrow the admissible window already is.</p>
+        <span class="have">have: timing window, legal-transition manager</span>
+      </article>
+
+      <article>
+        <h3>5 · Hardware safety qualification</h3>
+        <p class="why">Because a refusal here continues walking; it is not a stop.</p>
+        <p>Nothing in this study is a protective action. Before any physical trial the command bank needs a genuine abort, the blocked-scene classification needs to drive it, and contact thresholds calibrated in simulation need re-derivation against real contact sensing. Treat the 1 N contact-qualified criterion as a simulation convention, not a safety margin.</p>
+        <span class="have">have: blocked-scene refusal at 6/6 for every learner</span>
+      </article>
+    </div>
   </div>
-</div></section>
+</section>
 
-<section id="data"><div class="wrap">
-  <p class="eyebrow">Dataset</p>
-  <h2>What is actually in it, today.</h2>
-  <div class="stats">
-    <div><span class="stat">96</span><small>physics rollouts</small></div>
-    <div><span class="stat">150</span><small>motions screened</small></div>
-    <div><span class="stat">531</span><small>rendered clips</small></div>
-    <div><span class="stat">35</span><small>columns per episode</small></div>
-    <div><span class="stat" style="color:var(--accept)">2</span><small>verified families</small></div>
-    <div><span class="stat">3</span><small>flat CSV indexes</small></div>
+<section>
+  <div class="wrap">
+    <h2>Read the work</h2>
+    <div class="links">
+      <a href="motion2scene/ICRA_MANUSCRIPT.pdf"><b>Working manuscript (PDF)</b><span>Method, both panels, limitations</span></a>
+      <a href="motion2scene/M2S_ICRA_NOMINAL_V1_RESULT.md"><b>Final comparison</b><span>Equal labels, four arms, 144 executions</span></a>
+      <a href="motion2scene/M2S_ICRA_540_RESULT.md"><b>The 540-run panel</b><span>Full traversal and background suites</span></a>
+      <a href="motion2scene/ENVELOPE_TRADEOFF_V1_RESULT.md"><b>Why the funnel closed</b><span>The envelope/contrast trade-off</span></a>
+      <a href="motion2scene/index.html"><b>Full research report</b><span>Every experiment, including the failures</span></a>
+      <a href="sweepcf.html"><b>Earlier line: SweepCF</b><span>Prior counterfactual traversal corpus</span></a>
+    </div>
+
+    <p>Every registered protocol states its predictions before the physics ran, and failed predictions are kept in the record rather than removed. Raw run records, admission audits, fitted models and hash manifests are published beside each result.</p>
+
+    <h3>Reproducing it</h3>
+    <p>The two studies together cost <strong>6.6 contended GPU-hours</strong> on a single RTX 5080. Construction and fitting are CPU-only and take minutes; the cost is entirely Isaac Lab execution at roughly 32 seconds per cell.</p>
   </div>
-  <p style="margin-top:1.6rem">Three indexes at three grains — one row per motion, one per family,
-  one per episode — so a consumer can filter at whichever level their question lives at, with the
-  videos sitting beside them.</p>
+</section>
 
-  <h3 style="margin-top:2rem">Every episode carries its own evidence</h3>
-  <div class="tbl"><table>
-    <thead><tr><th>Dimension</th><th>Columns</th><th>What it answers</th></tr></thead>
-    <tbody>
-      <tr><td>Identity</td><td>episode_id, family_id, cell_role, motion_role</td><td>Which twin of which pair is this?</td></tr>
-      <tr><td>Behaviour</td><td>operator, behaviour_class</td><td>What edit was applied, and to what kind of motion?</td></tr>
-      <tr><td>Scene</td><td>scene_id, scene_path, obstacle_underside_m, route_reaches_obstacle</td><td>What geometry, and did the robot ever meet it?</td></tr>
-      <tr><td>Verdict</td><td>outcome, rejection_reasons</td><td>Accepted or refused, and precisely why</td></tr>
-      <tr><td>Clearance</td><td>min_clearance_mm, clearance_frame, closest_body</td><td>How close, when, and on which link</td></tr>
-      <tr><td>Contact</td><td>external / overhead / lateral / self force, contact_body, contact_frame</td><td>What touched what, decomposed by direction</td></tr>
-      <tr><td>Fidelity</td><td>drift_rate_mps, commanded_amplitude_rad, executed_amplitude_rad, operator_survival</td><td>How much of the commanded edit actually happened</td></tr>
-      <tr><td>Media</td><td>video_room / side / ego / front / top, n_videos</td><td>Five viewpoints, addressable per episode</td></tr>
-    </tbody>
-  </table></div>
-
-  <h3 style="margin-top:2.4rem">The corpus, drawn honestly</h3>
-  <p>Four distributions that decide whether this is usable: what behaviours it covers, why episodes
-  are refused, how close the accepted ones come, and how much of each commanded edit survived the
-  controller. The thin parts are drawn at the same scale as the thick ones.</p>
-  <img src="media/corpus_stats.png" alt="Four panels: behaviour coverage, refusal reasons, closest-approach histogram, and commanded against executed amplitude" style="width:100%;display:block;border:1px solid var(--line);background:#fff;margin-top:1rem">
-  <p style="margin-top:.9rem;font-size:.85rem;color:var(--muted)">Bottom right is the dataset-quality
-  claim in one picture: every point sits below the diagonal, and the leg edits sit furthest below it.
-  Regenerate with <code>render_corpus_stats.py</code>.</p>
-
-  <h3 style="margin-top:2rem">Behaviour spread across the screened motions</h3>
-  <div class="bars" id="bars">
-    <div class="brow"><span class="label">Turn</span><div class="btrack"><div class="bfill" style="--w:100%"></div></div><span class="bnum">67</span></div>
-    <div class="brow"><span class="label">Walk</span><div class="btrack"><div class="bfill" style="--w:63%"></div></div><span class="bnum">42</span></div>
-    <div class="brow"><span class="label">Stop / start</span><div class="btrack"><div class="bfill" style="--w:34%"></div></div><span class="bnum">23</span></div>
-    <div class="brow"><span class="label">Crouch</span><div class="btrack"><div class="bfill" style="--w:13%"></div></div><span class="bnum">9</span></div>
-    <div class="brow"><span class="label">Arms</span><div class="btrack"><div class="bfill" style="--w:9%"></div></div><span class="bnum">6</span></div>
-    <div class="brow"><span class="label">Side / narrow</span><div class="btrack"><div class="bfill" style="--w:4.5%"></div></div><span class="bnum">3</span></div>
+<footer>
+  <div class="wrap">
+    Motion2Scene is part of GR00T-WholeBodyControl. The motion-tracking controller is SONIC, inherited and frozen; its locomotion capability is not a contribution of this work. Simulation results only, September 2026.
   </div>
-  <div class="note"><p>The tail is the honest part. Crouch, arms and side-step are the behaviours a
-  traversal dataset most needs and the generator produces least — 18 of 150. That imbalance is why
-  the corpus is built by <em>editing</em> motions rather than waiting for a generator to sample
-  them.</p></div>
-</div></section>
+</footer>
 
-<section id="quality"><div class="wrap">
-  <p class="eyebrow">Quality</p>
-  <h2>One success rate would hide everything that matters.</h2>
-  <p>Synthetic humanoid corpora usually report a single number. It conflates four different
-  questions with four different answers, and the honest headline is the smallest of them.</p>
-  <div class="tbl"><table>
-    <thead><tr><th>Label</th><th>Question</th><th>Measured</th></tr></thead>
-    <tbody>
-      <tr><td>embodiment_feasible</td><td>Can the body reach this pose at all?</td><td class="g">144 / 150 · 96%</td></tr>
-      <tr><td>controller_trackable</td><td>Can the frozen controller execute it?</td><td class="g">96%</td></tr>
-      <tr><td>semantically_valid</td><td>Does the execution contain the named behaviour?</td><td class="r">32%</td></tr>
-      <tr><td>scene_compatible</td><td>Does it survive <em>this</em> room?</td><td>the counterfactual signal itself</td></tr>
-    </tbody>
-  </table></div>
-
-  <h3 style="margin-top:2rem">Commanded is not delivered</h3>
-  <p>We ask for the smallest edit that clears each obstacle, then measure what actually arrives at
-  the surface the obstacle binds against. It is consistently less, and by how much depends on the
-  body part — a property of the controller, measured, not assumed.</p>
-  <div class="tbl"><table>
-    <thead><tr><th>Edit</th><th>Survives execution</th><th>Costs forward progress</th></tr></thead>
-    <tbody>
-      <tr><td>Arms (tuck)</td><td class="g">88–105%</td><td class="g">falls as the edit grows</td></tr>
-      <tr><td>Legs (crouch)</td><td class="r">46–67%</td><td class="r">rises with depth</td></tr>
-    </tbody>
-  </table></div>
-  <p><strong>An adaptation that moves the arms is nearly free to the controller; one that moves the
-  legs is charged for.</strong> This is a controller-characterisation result that holds whether or
-  not you adopt our dataset thesis, and it is what makes per-episode fidelity columns necessary
-  rather than decorative.</p>
-</div></section>
-
-<section id="useful"><div class="wrap">
-  <p class="eyebrow">Why it helps</p>
-  <h2>What this is good for.</h2>
-  <div class="cards">
-    <div class="card"><div class="rule"></div><h3>Perceptive traversal</h3>
-      <p>Learning <em>which</em> whole-body adjustment a doorway, shelf or low ceiling demands —
-      from ego RGB or depth — rather than only whether a gap is passable. The matched pair supplies
-      the contrast that makes the mapping learnable.</p></div>
-    <div class="card"><div class="rule"></div><h3>Navigation that respects a body</h3>
-      <p>Planners treat the robot as a cylinder. Here the binding body part is recorded per episode,
-      so a route can be costed by <em>what it would bind</em> — wrist at waist height, shoulder at
-      chest, torso overhead.</p></div>
-    <div class="card"><div class="rule"></div><h3>Benchmarking, not just training</h3>
-      <p>Thirty evaluation scenes frozen before any operator existed, with a geometry rule stating
-      which can grade a policy at all. Test labels come from physics, so a benchmark cannot drift
-      with an annotator.</p></div>
-    <div class="card"><div class="rule"></div><h3>Sim-to-real grounding</h3>
-      <p>Every episode records the exact token stream the deployment runtime consumes, byte-identical
-      to what the on-robot stack would see. The corpus is addressed to a real controller, not an
-      abstraction of one.</p></div>
-  </div>
-  <div class="note"><p><strong>Named honestly:</strong> we call the task
-  <em>perceptive whole-body traversal</em>. It is not navigation, and nothing here claims continuous
-  visuomotor control.</p></div>
-</div></section>
-
-<section id="status"><div class="wrap">
-  <p class="eyebrow">Status</p>
-  <h2>Where the work actually stands.</h2>
-  <div class="tbl"><table>
-    <thead><tr><th>#</th><th>Claim</th><th>Status</th></tr></thead>
-    <tbody>
-      <tr><td>1</td><td>Swept volumes separate, so a geometric window exists</td><td class="g">established</td></tr>
-      <tr><td>2</td><td>The same controller succeeds or fails as that geometry changes</td><td class="g">established · 2 verified families</td></tr>
-      <tr><td>3</td><td>The 2×2 outcome survives a jittered start pose</td><td class="g">established · 12/12 cells</td></tr>
-      <tr><td>4</td><td>The scene reverses the minimum-edit feasible behaviour</td><td class="g">established on the matched overhead family</td></tr>
-      <tr><td>5</td><td>A learner given counterfactual data uses scene geometry when it could otherwise ignore it</td><td class="r">not started — the decisive experiment</td></tr>
-      <tr><td>6</td><td>That advantage survives on held-out scenes</td><td class="r">not started</td></tr>
-    </tbody>
-  </table></div>
-  <p>Everything above claim 5 is instrumentation and physics, and it is solid. <strong>The paper
-  stands or falls on claim 5</strong>, which runs on a pre-registered date — 24 August — against
-  whatever families exist then, because the question needs contrast rather than corpus size.</p>
-  <div class="note"><p><strong>Known limits, stated rather than buried.</strong> Two verified
-  families is a small n. The corpus is single-embodiment. No hardware replication yet. The
-  human-review pass over 100 episodes is running and is submission-blocking. A prediction register
-  records every refuted hypothesis and every retraction, including a same-day retraction of a
-  scoring error that had made the family count look worse than it was.</p></div>
-</div></section>
-
-<section id="use"><div class="wrap">
-  <p class="eyebrow">Get it</p>
-  <h2>Reproduce or extend.</h2>
-  <pre>git clone https://github.com/linjiw/groot-wbc-sonic-sim-trackb
-cd groot-wbc-sonic-sim-trackb &amp;&amp; git lfs pull
-python check_environment.py --training
-
-# score a counterfactual family
-python scripts/research/score_family_batch.py &lt;families-dir&gt; --plans batch.json
-
-# refuse a batch whose cells are already known to fail, before spending a GPU
-python scripts/research/batch_preflight.py --plans batch.json --rollouts &lt;dir&gt; --out manifest.json</pre>
-  <h3 style="margin-top:2.2rem">Read further</h3>
-  <div class="cards">
-    <div class="card"><div class="rule"></div><h3><a href="progress/sweepcf_draft.html">The working draft</a></h3>
-      <p>The full argument, claim by claim, with every level marked and the decisive experiment
-      named as not yet run.</p></div>
-    <div class="card"><div class="rule"></div><h3><a href="progress/sweepcf_pitch.html">The short version</a></h3>
-      <p>Eight slides for someone with four minutes, built on the same numbers.</p></div>
-    <div class="card"><div class="rule"></div><h3><a href="progress/sweepcf_review.html">The review pack</a></h3>
-      <p>A hundred episodes put to human raters with the automatic verdict hidden, so the gates can
-      be checked rather than trusted.</p></div>
-  </div>
-  <ul style="margin-top:1.8rem">
-    <li><strong>Code</strong> — Apache 2.0, on top of NVIDIA's GR00T-WholeBodyControl.</li>
-    <li><strong>Motions</strong> — generated with Kimodo-G1-RP-v1; NVIDIA claims no ownership of
-      outputs, and the weights are not vendored here.</li>
-    <li><strong>Controller</strong> — the released SONIC checkpoint, frozen. Never fine-tuned, so
-      every verdict in the corpus is reproducible against a public artifact.</li>
-  </ul>
-</div></section>
-
-<footer><div class="wrap">
-  <p>SweepCF · a research corpus under active construction, with a pre-registered analysis and an
-  open prediction register. Every figure on this page is generated from the release index, not
-  written by hand.</p>
-</div></footer>
-
-<script>
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('seen')}),{threshold:.25});
-const bars=document.getElementById('bars'); if(bars) io.observe(bars);
-const vio=new IntersectionObserver(es=>es.forEach(e=>{
-  const v=e.target.querySelector('video'); if(!v) return;
-  if(e.isIntersecting){v.play().catch(()=>{})}else{v.pause()}
-}),{threshold:.25});
-document.querySelectorAll('.cell').forEach(c=>vio.observe(c));
-const g=[...document.querySelectorAll('.grid2 video')];
-if(g.length){g[0].addEventListener('timeupdate',()=>{const t=g[0].currentTime;
-  g.forEach(v=>{if(Math.abs(v.currentTime-t)>0.12)v.currentTime=t})})}
-</script>
 </body>
 </html>
