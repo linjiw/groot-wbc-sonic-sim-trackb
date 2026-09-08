@@ -37,9 +37,10 @@ mismatch between complete-reference screening and achieved-command screening, an
 validates source-specific switching banks and physical contrasts in Isaac Lab.
 Third, it specifies a four-arm comparison—uniform, analytic, target-only and learned
 construction—with one shared outcome learner. The third contribution remains an
-experimental question, and the completed panel answers part of it: contrast
-construction helps, and the learned proposal supplied nothing to test. The learned
-proposal is a tested factor, not an assumed source of superiority.
+experimental question, and the two completed panels answer it: contrast construction
+is what teaches the selector, and learning the proposal neither helps nor hurts once
+the acceptance geometry lets it acquire data at all. The learned proposal is a tested
+factor, not an assumed source of superiority.
 
 The experiment's most transferable outcome is about scarcity rather than about which
 generator wins. A training scene helps this decision only if it carries a contrast
@@ -315,26 +316,64 @@ remain separately recorded. Remaining evaluation and the final grouped uncertain
 analysis must precede the registered result decision. [Internal evidence:
 M2S_ICRA_540_RESULT; all assigned outcomes and refit checkpoints are released.]
 
-### A second contract, registered before its proposals
+### A second contract, and the equal-label comparison it makes possible
 
-Because the envelope and not the proposal model dominates the funnel, a second
-contract is registered separately, with its predictions filed before any proposal was
-drawn. It changes exactly one thing: criticality is judged at the nominal pose, with
-the 17-offset and 113-offset survivals still computed and stored for every proposal
-as reported diagnostics that never gate acceptance. Everything else is unchanged, and
-the six shared background groups are reused by reference rather than re-executed, so
-no reused trace counts as a new example. A unit test asserts that both contracts reach
-identical decisions whenever their geometry verdicts agree.
+Because the envelope and not the proposal model dominates the funnel, a second contract
+is registered separately, with its predictions filed before any proposal was drawn. It
+changes exactly one thing: criticality is judged at the nominal pose, with the 17-offset
+and 113-offset survivals still computed and stored for every proposal as reported
+diagnostics that never gate acceptance. Everything else is unchanged, and the six shared
+background groups are reused by reference rather than re-executed, so no reused trace
+counts as a new example. A unit test asserts that both contracts reach identical
+decisions whenever their geometry verdicts agree.
 
 Under this contract eligible generated proposals move from 1 of 48 to 41 of 48 for
-analytic and from 0 of 48 to 33 of 48 for Motion2Scene, with at least one eligible
-group on every carrier for both. Three groups per carrier and arm are assigned, giving
-36 groups and 72 label commands. Of the 18 assigned contrast-arm proposals, 17 fail
-the 113-offset diagnostic, which is the expected consequence of the measured envelope
-price rather than a new finding. Larger accepted yield is geometric acceptance only:
-whether these are useful contrasts is decided by the paired physical labels, and
-whether they teach is decided by the evaluation. Both are pending at this snapshot,
-and no learning conclusion is drawn from acceptance counts.
+analytic and from 0 of 48 to 33 of 48 for Motion2Scene. Three groups per carrier and arm
+are assigned, giving 36 groups and 72 label commands, all of which completed. Every arm
+holds exactly fifteen groups, so this is the equal-label comparison the first contract
+could not produce.
+
+| Arm | Groups | Generated | Both pass | Useful contrast | Both fail | Training BCE |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Uniform | 15 | 9 | 7 | 0 | 8 | 0.001762 |
+| Analytic | 15 | 9 | 4 | **9** | 2 | 0.000542 |
+| Target-only | 15 | 9 | 13 | 0 | 2 | 0.000175 |
+| Motion2Scene | 15 | 9 | 4 | **9** | 2 | 0.139004 |
+
+Both contrast constructions acquire nine useful contrasts from nine generated groups.
+Both non-contrast constructions acquire nine groups and no useful contrast at all. All
+four registered acquisition predictions hold, including the two that failed under the
+inherited envelope.
+
+All 144 evaluation executions on the twelve reserved layouts at seed 8511 are admitted.
+
+| Policy | Passage | d040 requests | Refusals | Per-carrier passage |
+| --- | ---: | ---: | ---: | --- |
+| Uniform | 14/36 | 0 | 17 | 0.333 / 0.417 / 0.417 |
+| Analytic | 24/36 | 24 | 0 | 0.667 / 0.667 / 0.667 |
+| Target-only | 14/36 | 0 | 0 | 0.333 / 0.417 / 0.417 |
+| Motion2Scene | 22/36 | 22 | 0 | 0.583 / 0.583 / 0.667 |
+
+Motion2Scene beats uniform and target-only by eight discordant conditions to zero, and
+analytic beats them by ten to zero, with no reverse case on any carrier. Motion2Scene
+and analytic are indistinguishable: two discordant conditions of 36, both favouring
+analytic, p = 0.50. So contrast construction is what teaches the selector, and learning
+the proposal neither helps nor hurts at this label count. As before, 36 conditions are
+twelve layouts on three carriers, so the carrier-level statement is the honest one:
+contrast arms win on three of three carriers, and the learned-analytic difference is
+-0.083, -0.083 and 0.000 by carrier.
+
+One deficiency is specifically the learned generator's. Its training loss is 0.139
+against analytic's 0.000542 on identical architecture, optimizer and label count. The
+construction record explains it: among proposals critical at the nominal pose, 44 of 47
+analytic scenes but only 24 of 34 learned scenes are visible to the decision-time sensor,
+and 8 of 12 are invisible on 41003, where the learned initializer concentrates
+late-station draws. Four of the nine assigned Motion2Scene groups record zero sensor ray
+hits. A contrast the robot cannot observe is a label the learner cannot fit. Visibility
+is gated by neither contract and none was added after the fact.
+
+The whole second study cost 1.442 contended GPU-hours.
+[Internal evidence: M2S_ICRA_NOMINAL_V1_RESULT.]
 
 ## VII. Limitations and result decision
 
@@ -344,16 +383,29 @@ source-held-out transfer claim. The original 120/600 MLP evaluation remains a re
 partial failure, with 480 assignments paused. Existing layout diagnostics have
 informed this revision, so their reuse is development evaluation.
 
-Geometric proposal acceptance does not guarantee a useful physical contrast. The
-current learned initializer has produced no accepted scenes in the achieved-transition
-study, and the matched 24-label quota fails in three arms. Contact-qualified passage does not
-eliminate endpoint tracking error. Neither a predicted refusal nor continued neutral
-walking is a qualified protective action. The final conclusion must follow the
-registered comparison: report contrast-construction utility if supported, learned
-proposal benefit only if measured, and a construction/validation result if learning
-utility remains unresolved.
+Geometric proposal acceptance does not guarantee a useful physical contrast: under the
+inherited envelope the learned initializer produced no accepted scenes at all, and the
+24-label quota failed in three arms. Contact-qualified passage does not eliminate
+endpoint tracking error, and neither a predicted refusal nor continued neutral walking
+is a qualified protective action.
 
-## References (verified primary records, September 7)
+Two results are supported and one is not. Contrast construction improves the fixed
+selector over untargeted and target-only construction, at equal labels, with no reverse
+case on any carrier. Learning the proposal distribution neither helps nor hurts relative
+to the execution-aware analytic solver at this label count; the two are indistinguishable
+on 36 paired conditions, which is a null at n = 3 carriers and not an equivalence claim.
+What the learned generator does buy is measured elsewhere and is modest: a 68.7 per cent
+reduction in search time and acceptance on fresh sources where uniform sampling fails.
+What it costs is also measured: its critical scenes are less often visible at decision
+time, and its training loss is two orders of magnitude higher for that reason.
+
+Every conclusion here is a simulation result on three development carriers under one
+frozen controller. The evaluation varies layout and carrier, not source ancestry, so it
+is unseen-layout transfer rather than source-held-out transfer. No claim extends to
+hardware, and the placement robustness a hardware claim would require is exactly what the
+envelope sweep prices at 2, 0 and 32 surviving centres.
+
+## References (verified primary records, September 8)
 
 [1] Z. Wang et al., “From Agile Ground to Aerial Navigation: Learning from Learned
 Hallucination,” IROS, 2021. https://arxiv.org/abs/2108.09793
