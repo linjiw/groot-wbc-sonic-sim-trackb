@@ -72,8 +72,8 @@ h3{font-size:10pt;break-after:avoid}p{margin:0 0 8pt}
 table{font-size:7pt;break-inside:avoid}th,td{padding:1.5pt 3pt}
 figure{break-inside:avoid}
 .notice{font-size:9pt;padding:8pt;margin-bottom:12pt}a{color:black}}
-</style><div class="notice">Working draft: partial 366/540 evaluation results; final results and abstract pending.
-This reading copy is not an ICRA template or a submission-compliance check.</div><article>"""
+</style><div class="notice">Working draft: the 540-run panel is complete; the nominal-contract study and the
+abstract are pending. This reading copy is not an ICRA template or a submission-compliance check.</div><article>"""
         + "".join(blocks)
         + "</article></html>"
     )

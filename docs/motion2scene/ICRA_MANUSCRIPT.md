@@ -37,8 +37,9 @@ mismatch between complete-reference screening and achieved-command screening, an
 validates source-specific switching banks and physical contrasts in Isaac Lab.
 Third, it specifies a four-arm comparison—uniform, analytic, target-only and learned
 construction—with one shared outcome learner. The third contribution remains an
-experimental question: acquisition is complete, but policy evaluation is partial.
-The learned proposal is a tested factor, not an assumed source of superiority.
+experimental question, and the completed panel answers part of it: contrast
+construction helps, and the learned proposal supplied nothing to test. The learned
+proposal is a tested factor, not an assumed source of superiority.
 
 The experiment's most transferable outcome is about scarcity rather than about which
 generator wins. A training scene helps this decision only if it carries a contrast
@@ -237,29 +238,27 @@ fitted policy not at all; adding one contrast changes it completely. Both statem
 rest on a single acquired example, so the effect size is not estimable from this study.
 
 Four primary fits and 24 registered leave-four-assignment-out refits are complete.
-At the September 7 snapshot, 366 of 540 policy evaluations are admitted: all six methods
-on 61 of 72 traversal conditions. Passage counts are uniform 21/61, analytic 30/61,
-target-only 21/61, background-only Motion2Scene 21/61, scripted rays 36/61 and privileged
-geometry 29/61. These are ordered partial results; 66 traversal and all 108 separate
-background runs remain pending under unchanged rolling compute and memory gates.
+All 540 policy evaluations are admitted: six methods on all 72 traversal conditions,
+plus the 108 background control runs. Passage is uniform 28/72, analytic 39/72,
+target-only 28/72, background-only Motion2Scene 28/72, scripted rays 46/72 and
+privileged geometry 39/72. Nothing remains pending.
 
-Analytic versus uniform yields 21 both-pass, nine analytic-only, zero uniform-only
-and 31 both-fail conditions. The carrier-averaged difference is +14.603 percentage
-points in this slice, with five additional passes on 41001 and two each on 41002 and
-41003. All nine additional passages request d040 and measure 0 N beam force; matched
-walking records 385.1–1685.6 N. The scripted rule passes six further conditions with
-no reverse difference. This supports useful learned adaptation on the inspected
-layouts, while the script remains the stronger observed baseline. It does not
-establish a learned-generator advantage or source-held-out generalization.
+Analytic versus uniform yields 28 both-pass, eleven analytic-only, zero uniform-only
+and 33 both-fail conditions. The carrier-averaged difference is +15.278 percentage
+points, with six additional passes on 41001, three on 41003 and two on 41002. All
+eleven additional passages request d040 and measure 0 N beam force; matched walking
+records 385.1–1685.5 N. This supports useful learned adaptation on the inspected
+layouts. It does not establish a learned-generator advantage or source-held-out
+generalization.
 
 The comparison is one contrast against three copies of the same policy, and must be
 reported as such. The uniform, target-only and background-only Motion2Scene learners
-issue walking on all 61 conditions and are behaviourally identical; each therefore
-gives the same 21/61 and the same nine-to-zero paired table against analytic. The
-condition-level sign test over nine one-directional discordant pairs gives p = 0.0039,
-but the 61 conditions are twelve layouts and two seeds inside only three carriers, so
+issue walking on all 72 conditions and are behaviourally identical; each therefore
+gives the same 28/72 and the same eleven-to-zero paired table against analytic. The
+condition-level discordance test over eleven one-directional pairs gives p = 0.00098,
+but the 72 conditions are twelve layouts and two seeds inside only three carriers, so
 that figure overstates independence. The carrier-level statement is the honest one:
-the direction is the same on all three carriers, with five, two and two extra passes
+the direction is the same on all three carriers, with six, three and two extra passes
 and no reverse case, which is n = 3.
 
 What the single contrast taught is legible, and it is narrow. That group's beam sits
@@ -269,30 +268,37 @@ learner's behaviour separates along them.
 | Beam underside | Conditions | Analytic requests d040 | Analytic passes | Scripted requests | Walking-only passes |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | 1.18 m | 24 | 11 | 0 | 11 | 0 |
-| 1.27 m | 19 | 11 | 12 | 19 | 3 |
-| 1.36 m | 18 | 0 | 18 | 8 | 18 |
+| 1.27 m | 24 | 14 | 15 | 23 | 4 |
+| 1.36 m | 24 | 4 | 24 | 12 | 24 |
 
-The learner never requests the adaptation at 1.36 m, where walking already passes
-18 of 18, and all nine of its additional passages fall in the 1.27 m band — the band
-its one training contrast came from — spread across all three carriers, five on 41001
-and two each on the others. At 1.18 m neither command ever succeeds, so its eleven
-requests there are neither rewarded nor punished by this suite. Within the 1.27 m band
-it still requests the adaptation only 11 times in 19 conditions, against 19 for the
-scripted rule, which is where its remaining gap to the observed ceiling lies.
+The learner almost never requests the adaptation at 1.36 m, where walking already
+passes 24 of 24, and all eleven of its additional passages fall in the 1.27 m band, the
+band its one training contrast came from, spread across all three carriers with six on
+41001. At 1.18 m neither command ever succeeds, so its eleven requests there are neither
+rewarded nor punished by this suite. Within the 1.27 m band it requests the adaptation
+14 times in 24 conditions against the scripted rule's 23, which is where its remaining
+gap to the observed ceiling lies.
 
 So one example transferred across carriers within its own geometry band and not beyond
 it. That is a real but strictly band-local generalization, and it is the most this
 study can claim about what an acquired contrast teaches.
 
-Adaptation is close to free on this panel and every learner under-uses it. Of the 38
-conditions in which both commands were actually executed, 15 are d040-only successes,
-11 both-pass, 12 both-fail, and none is a walking-only success. The best outcome
-available from the observed commands is 36 of 61, which the scripted rule attains
-by requesting d040 38 times; analytic requests it 22 times and reaches 30, and the
-privileged geometric forecast requests it only 10 times, succeeding in all 10. Under-
-adaptation, not misfiring adaptation, is what separates the learners from the ceiling
-here. The separately reported background suites are where unnecessary adaptation is
-charged, so this panel alone does not argue for always crouching.
+Adaptation is close to free on this panel and every learner under-uses it. Of the 47
+conditions in which both commands were actually executed, 19 are d040-only successes,
+16 both-pass, 12 both-fail, and none is a walking-only success. The best outcome
+available from the observed commands is 47 of 72, which the scripted rule nearly
+attains at 46 by requesting d040 46 times; analytic requests it 29 times and reaches
+39. Under-adaptation, not misfiring adaptation, is what separates the learners from the
+ceiling here.
+
+The background suites settle the cost side. Across the absent and raised controls no
+policy requests the adaptation even once, so no arm pays an unnecessary-adaptation
+penalty on this panel and the learned request is not indiscriminate. The blocked suite
+reverses the ranking: every learner and the privileged forecast classify the scene as
+infeasible and refuse on 6 of 6, while the scripted rule refuses on none. No blocked
+scene is passable, so refusal there is correct classification rather than successful
+avoidance, and it is reported apart from passage. The stronger traversal baseline is
+therefore the weaker infeasibility detector, and neither dominates.
 
 The first analytic refit removes the sole useful generated label and three refused
 assignments. Its remaining training IDs, weights, biases and scales exactly equal
@@ -307,7 +313,7 @@ Acquisition spends 0.824108 contended GPU h and admitted policy evaluations spen
 comparison: generator fitting, proposals, rejected searches and shared bank costs
 remain separately recorded. Remaining evaluation and the final grouped uncertainty
 analysis must precede the registered result decision. [Internal evidence:
-M2S_ICRA_366_RESULT; all assigned outcomes and refit checkpoints are released.]
+M2S_ICRA_540_RESULT; all assigned outcomes and refit checkpoints are released.]
 
 ### A second contract, registered before its proposals
 
