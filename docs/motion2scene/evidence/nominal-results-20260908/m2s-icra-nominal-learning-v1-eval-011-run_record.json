@@ -1,0 +1,451 @@
+{
+  "authority": "docs/hallucination/GOVERNANCE.md",
+  "budget": {
+    "actual_contended_gpu_hours": 0.026624324470548244,
+    "daily_limit_gpu_hours": 8.0,
+    "projected_gpu_hours": 0.4166666666666667
+  },
+  "cells": {
+    "nom_eval_41003_layout_03_p8511_analytic": {
+      "command": [
+        "repository/scripts/research/run_kimodo_sonic_rollout.sh",
+        "--scene",
+        "nom_eval_41003_layout_03_p8511",
+        "--motion",
+        "research-data/cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41003/neutral.pkl",
+        "--out",
+        "research-data/m2s-icra-nominal-learning-v1-eval-011/rollouts/nom_eval_41003_layout_03_p8511_analytic",
+        "--python",
+        "repository/.venv_isaaclab/bin/python",
+        "--checkpoint",
+        "repository/sonic_release/last.pt",
+        "--trajectory-only",
+        "--task",
+        "A humanoid walks straight at a steady pace",
+        "--scene-package",
+        "research-data/m2s-icra-nominal-learning-v1/scenes",
+        "--extra",
+        "++manager_env.config.beam_contact_body_names=[pelvis,left_hip_pitch_link,right_hip_pitch_link,waist_yaw_link,left_hip_roll_link,right_hip_roll_link,waist_roll_link,left_hip_yaw_link,right_hip_yaw_link,torso_link,left_knee_link,right_knee_link,left_shoulder_pitch_link,right_shoulder_pitch_link,left_ankle_pitch_link,right_ankle_pitch_link,left_shoulder_roll_link,right_shoulder_roll_link,left_ankle_roll_link,right_ankle_roll_link,left_shoulder_yaw_link,right_shoulder_yaw_link,left_elbow_link,right_elbow_link,left_wrist_roll_link,right_wrist_roll_link,left_wrist_pitch_link,right_wrist_pitch_link,left_wrist_yaw_link,right_wrist_yaw_link]",
+        "--extra",
+        "++manager_env.config.reactive_mode=oracle",
+        "--extra",
+        "++manager_env.config.observation_delay_s=0.0",
+        "--extra",
+        "++manager_env.config.decision_time_s=0.3",
+        "--extra",
+        "++manager_env.config.encounter_action=0",
+        "--extra",
+        "++manager_env.config.reactive_alternate_path=research-data/cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41003/d040.pkl",
+        "--extra",
+        "++seed=8511",
+        "--extra",
+        "++manager_env._target_=gear_sonic.dataset_generation.hallucination.motion2scene_icra_execution.LearnedEnvCfg",
+        "--extra",
+        "++manager_env.recorders.trajectory._target_=gear_sonic.dataset_generation.hallucination.motion2scene_icra_execution.LearnedRecorderCfg",
+        "--extra",
+        "++manager_env.config.learned_policy_path=research-data/m2s-icra-nominal-learning-v1/models/analytic.pt",
+        "--extra",
+        "++manager_env.config.learned_policy_sha256=sha256:ed70a03eb8d128eec3bee54d7a8610e7b8c9466816e2a74dcf4b1c7f6f94c090"
+      ],
+      "elapsed_seconds": 23.896,
+      "ended_at": "2026-09-07T21:48:52-04:00",
+      "expected_outcome": null,
+      "free_gpu_mib_at_start": 15183,
+      "prediction_matches": null,
+      "scientific": {
+        "artifacts": {
+          "rollout_log": "research-data/m2s-icra-nominal-learning-v1-eval-011/rollouts/nom_eval_41003_layout_03_p8511_analytic/rollout.log",
+          "rollout_log_sha256": "sha256:887dd45e9597f1b1254db503e7bec5357a8a101dcfd2edbccf0819e7049a39a9",
+          "success_manifest": "research-data/m2s-icra-nominal-learning-v1-eval-011/rollouts/nom_eval_41003_layout_03_p8511_analytic/success_manifest.json",
+          "success_manifest_sha256": "sha256:4f8f0fce3889fd5ba51141fc1c3a7ca92a594ceef7fccdae9cbfd1efb76aab0f",
+          "trajectory": "research-data/m2s-icra-nominal-learning-v1-eval-011/rollouts/nom_eval_41003_layout_03_p8511_analytic/trajectories/000000.trajectory.pkl",
+          "trajectory_sha256": "sha256:715f5ae3494322173cc1b96fc1648d047561fd17d1af251fec5044b8f088bba5"
+        },
+        "demoted_failures": [],
+        "diagnostics": {
+          "contact_decomposition": {
+            "external_contact_bodies": [
+              "torso_link"
+            ],
+            "max_external_contact_force_n": 920.0604775237153,
+            "max_external_contact_frame": 88,
+            "max_lateral_contact_force_n": 856.170349931291,
+            "max_lateral_contact_frame": 88,
+            "max_overhead_contact_force_n": 336.873291015625,
+            "max_overhead_contact_frame": 88,
+            "max_self_contact_force_n": 174.5731678019242,
+            "max_self_contact_frame": 106,
+            "max_support_contact_force_n": 0.0,
+            "self_contact_events": 6,
+            "self_contact_pairs": [
+              [
+                "right_hip_roll_link",
+                "right_wrist_yaw_link"
+              ]
+            ]
+          },
+          "endpoint_error_m": 0.5223947234105583,
+          "max_nonfoot_contact_bodies": [
+            "torso_link"
+          ],
+          "max_nonfoot_contact_frame": 88,
+          "max_nonfoot_contact_time_s": 1.76,
+          "max_reference_root_tilt_rad": 0.2102166629631699,
+          "max_root_height_below_reference_m": 0.027695417404174805,
+          "max_root_height_deficit_frame": 98,
+          "max_root_tilt_above_reference_rad": 0.23838536927701154,
+          "max_self_contact_time_s": 2.12,
+          "min_reference_root_height_m": 0.6705629825592041,
+          "phase_share_of_schedule_error": 0.7804333052217207,
+          "raw_max_nonfoot_contact_force_n": 920.0604775237153,
+          "schedule_error_p95_m": 0.4021274462786589
+        },
+        "frames": 116,
+        "outcome": "rejected",
+        "policy": "reference_trackability",
+        "recovered_from_split": true,
+        "rejection_reasons": [
+          "reference_endpoint_tracking_error",
+          "disallowed_robot_contact"
+        ]
+      },
+      "started_at": "2026-09-07T21:48:28-04:00",
+      "status": "completed"
+    },
+    "nom_eval_41003_layout_03_p8511_motion2scene": {
+      "command": [
+        "repository/scripts/research/run_kimodo_sonic_rollout.sh",
+        "--scene",
+        "nom_eval_41003_layout_03_p8511",
+        "--motion",
+        "research-data/cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41003/neutral.pkl",
+        "--out",
+        "research-data/m2s-icra-nominal-learning-v1-eval-011/rollouts/nom_eval_41003_layout_03_p8511_motion2scene",
+        "--python",
+        "repository/.venv_isaaclab/bin/python",
+        "--checkpoint",
+        "repository/sonic_release/last.pt",
+        "--trajectory-only",
+        "--task",
+        "A humanoid walks straight at a steady pace",
+        "--scene-package",
+        "research-data/m2s-icra-nominal-learning-v1/scenes",
+        "--extra",
+        "++manager_env.config.beam_contact_body_names=[pelvis,left_hip_pitch_link,right_hip_pitch_link,waist_yaw_link,left_hip_roll_link,right_hip_roll_link,waist_roll_link,left_hip_yaw_link,right_hip_yaw_link,torso_link,left_knee_link,right_knee_link,left_shoulder_pitch_link,right_shoulder_pitch_link,left_ankle_pitch_link,right_ankle_pitch_link,left_shoulder_roll_link,right_shoulder_roll_link,left_ankle_roll_link,right_ankle_roll_link,left_shoulder_yaw_link,right_shoulder_yaw_link,left_elbow_link,right_elbow_link,left_wrist_roll_link,right_wrist_roll_link,left_wrist_pitch_link,right_wrist_pitch_link,left_wrist_yaw_link,right_wrist_yaw_link]",
+        "--extra",
+        "++manager_env.config.reactive_mode=oracle",
+        "--extra",
+        "++manager_env.config.observation_delay_s=0.0",
+        "--extra",
+        "++manager_env.config.decision_time_s=0.3",
+        "--extra",
+        "++manager_env.config.encounter_action=0",
+        "--extra",
+        "++manager_env.config.reactive_alternate_path=research-data/cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41003/d040.pkl",
+        "--extra",
+        "++seed=8511",
+        "--extra",
+        "++manager_env._target_=gear_sonic.dataset_generation.hallucination.motion2scene_icra_execution.LearnedEnvCfg",
+        "--extra",
+        "++manager_env.recorders.trajectory._target_=gear_sonic.dataset_generation.hallucination.motion2scene_icra_execution.LearnedRecorderCfg",
+        "--extra",
+        "++manager_env.config.learned_policy_path=research-data/m2s-icra-nominal-learning-v1/models/motion2scene.pt",
+        "--extra",
+        "++manager_env.config.learned_policy_sha256=sha256:5650128513db4d611cae686f38b95cdb01498603412fc5c92f7c38cb7795cd2c"
+      ],
+      "elapsed_seconds": 23.845,
+      "ended_at": "2026-09-07T21:49:40-04:00",
+      "expected_outcome": null,
+      "free_gpu_mib_at_start": 15182,
+      "prediction_matches": null,
+      "scientific": {
+        "artifacts": {
+          "rollout_log": "research-data/m2s-icra-nominal-learning-v1-eval-011/rollouts/nom_eval_41003_layout_03_p8511_motion2scene/rollout.log",
+          "rollout_log_sha256": "sha256:1553725b399b8873736fe243b3388016d04f0b9438a7e5e75b4e2ce6c6808447",
+          "success_manifest": "research-data/m2s-icra-nominal-learning-v1-eval-011/rollouts/nom_eval_41003_layout_03_p8511_motion2scene/success_manifest.json",
+          "success_manifest_sha256": "sha256:275f73de5e94a1cc1880d242a8ad5d9fefdf04d2c5ec036c018faae917bc981f",
+          "trajectory": "research-data/m2s-icra-nominal-learning-v1-eval-011/rollouts/nom_eval_41003_layout_03_p8511_motion2scene/trajectories/000000.trajectory.pkl",
+          "trajectory_sha256": "sha256:715f5ae3494322173cc1b96fc1648d047561fd17d1af251fec5044b8f088bba5"
+        },
+        "demoted_failures": [],
+        "diagnostics": {
+          "contact_decomposition": {
+            "external_contact_bodies": [
+              "torso_link"
+            ],
+            "max_external_contact_force_n": 920.0604775237153,
+            "max_external_contact_frame": 88,
+            "max_lateral_contact_force_n": 856.170349931291,
+            "max_lateral_contact_frame": 88,
+            "max_overhead_contact_force_n": 336.873291015625,
+            "max_overhead_contact_frame": 88,
+            "max_self_contact_force_n": 174.5731678019242,
+            "max_self_contact_frame": 106,
+            "max_support_contact_force_n": 0.0,
+            "self_contact_events": 6,
+            "self_contact_pairs": [
+              [
+                "right_hip_roll_link",
+                "right_wrist_yaw_link"
+              ]
+            ]
+          },
+          "endpoint_error_m": 0.5223947234105583,
+          "max_nonfoot_contact_bodies": [
+            "torso_link"
+          ],
+          "max_nonfoot_contact_frame": 88,
+          "max_nonfoot_contact_time_s": 1.76,
+          "max_reference_root_tilt_rad": 0.2102166629631699,
+          "max_root_height_below_reference_m": 0.027695417404174805,
+          "max_root_height_deficit_frame": 98,
+          "max_root_tilt_above_reference_rad": 0.23838536927701154,
+          "max_self_contact_time_s": 2.12,
+          "min_reference_root_height_m": 0.6705629825592041,
+          "phase_share_of_schedule_error": 0.7804333052217207,
+          "raw_max_nonfoot_contact_force_n": 920.0604775237153,
+          "schedule_error_p95_m": 0.4021274462786589
+        },
+        "frames": 116,
+        "outcome": "rejected",
+        "policy": "reference_trackability",
+        "recovered_from_split": true,
+        "rejection_reasons": [
+          "reference_endpoint_tracking_error",
+          "disallowed_robot_contact"
+        ]
+      },
+      "started_at": "2026-09-07T21:49:16-04:00",
+      "status": "completed"
+    },
+    "nom_eval_41003_layout_03_p8511_no_contrast": {
+      "command": [
+        "repository/scripts/research/run_kimodo_sonic_rollout.sh",
+        "--scene",
+        "nom_eval_41003_layout_03_p8511",
+        "--motion",
+        "research-data/cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41003/neutral.pkl",
+        "--out",
+        "research-data/m2s-icra-nominal-learning-v1-eval-011/rollouts/nom_eval_41003_layout_03_p8511_no_contrast",
+        "--python",
+        "repository/.venv_isaaclab/bin/python",
+        "--checkpoint",
+        "repository/sonic_release/last.pt",
+        "--trajectory-only",
+        "--task",
+        "A humanoid walks straight at a steady pace",
+        "--scene-package",
+        "research-data/m2s-icra-nominal-learning-v1/scenes",
+        "--extra",
+        "++manager_env.config.beam_contact_body_names=[pelvis,left_hip_pitch_link,right_hip_pitch_link,waist_yaw_link,left_hip_roll_link,right_hip_roll_link,waist_roll_link,left_hip_yaw_link,right_hip_yaw_link,torso_link,left_knee_link,right_knee_link,left_shoulder_pitch_link,right_shoulder_pitch_link,left_ankle_pitch_link,right_ankle_pitch_link,left_shoulder_roll_link,right_shoulder_roll_link,left_ankle_roll_link,right_ankle_roll_link,left_shoulder_yaw_link,right_shoulder_yaw_link,left_elbow_link,right_elbow_link,left_wrist_roll_link,right_wrist_roll_link,left_wrist_pitch_link,right_wrist_pitch_link,left_wrist_yaw_link,right_wrist_yaw_link]",
+        "--extra",
+        "++manager_env.config.reactive_mode=oracle",
+        "--extra",
+        "++manager_env.config.observation_delay_s=0.0",
+        "--extra",
+        "++manager_env.config.decision_time_s=0.3",
+        "--extra",
+        "++manager_env.config.encounter_action=0",
+        "--extra",
+        "++manager_env.config.reactive_alternate_path=research-data/cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41003/d040.pkl",
+        "--extra",
+        "++seed=8511",
+        "--extra",
+        "++manager_env._target_=gear_sonic.dataset_generation.hallucination.motion2scene_icra_execution.LearnedEnvCfg",
+        "--extra",
+        "++manager_env.recorders.trajectory._target_=gear_sonic.dataset_generation.hallucination.motion2scene_icra_execution.LearnedRecorderCfg",
+        "--extra",
+        "++manager_env.config.learned_policy_path=research-data/m2s-icra-nominal-learning-v1/models/no_contrast.pt",
+        "--extra",
+        "++manager_env.config.learned_policy_sha256=sha256:9b596fe6bab023eeeea2378055aef101508bb2e4d65c86dec96510bab0eaaff3"
+      ],
+      "elapsed_seconds": 23.903,
+      "ended_at": "2026-09-07T21:49:16-04:00",
+      "expected_outcome": null,
+      "free_gpu_mib_at_start": 15182,
+      "prediction_matches": null,
+      "scientific": {
+        "artifacts": {
+          "rollout_log": "research-data/m2s-icra-nominal-learning-v1-eval-011/rollouts/nom_eval_41003_layout_03_p8511_no_contrast/rollout.log",
+          "rollout_log_sha256": "sha256:f5bceedad522f07299925059b6a8175c7f10692c4b627145dfdcf2aecdfd39fa",
+          "success_manifest": "research-data/m2s-icra-nominal-learning-v1-eval-011/rollouts/nom_eval_41003_layout_03_p8511_no_contrast/success_manifest.json",
+          "success_manifest_sha256": "sha256:fac47bfec2d8fdea91bc20bb7d55ab948ccf06246e2ee3c70a656e87fae7a878",
+          "trajectory": "research-data/m2s-icra-nominal-learning-v1-eval-011/rollouts/nom_eval_41003_layout_03_p8511_no_contrast/trajectories/000000.trajectory.pkl",
+          "trajectory_sha256": "sha256:b3b3d669f48844aff4c3bd5f1ea125651edf868fd282bb2fe9f88eb0b1f0fce6"
+        },
+        "demoted_failures": [],
+        "diagnostics": {
+          "contact_decomposition": {
+            "external_contact_bodies": [
+              "torso_link"
+            ],
+            "max_external_contact_force_n": 1125.4559197442675,
+            "max_external_contact_frame": 85,
+            "max_lateral_contact_force_n": 1125.4106970452192,
+            "max_lateral_contact_frame": 85,
+            "max_overhead_contact_force_n": 336.2706604003906,
+            "max_overhead_contact_frame": 122,
+            "max_self_contact_force_n": 30.974791078014675,
+            "max_self_contact_frame": 111,
+            "max_support_contact_force_n": 0.0,
+            "self_contact_events": 13,
+            "self_contact_pairs": [
+              [
+                "left_hip_roll_link",
+                "left_wrist_yaw_link"
+              ],
+              [
+                "right_hip_roll_link",
+                "right_wrist_yaw_link"
+              ]
+            ]
+          },
+          "endpoint_error_m": 1.115086666419771,
+          "max_nonfoot_contact_bodies": [
+            "torso_link"
+          ],
+          "max_nonfoot_contact_frame": 85,
+          "max_nonfoot_contact_time_s": 1.7,
+          "max_reference_root_tilt_rad": 0.2102166629631699,
+          "max_root_height_below_reference_m": 0.08864343166351318,
+          "max_root_height_deficit_frame": 104,
+          "max_root_tilt_above_reference_rad": 0.23181067840477723,
+          "max_self_contact_time_s": 2.22,
+          "min_reference_root_height_m": 0.7268804311752319,
+          "phase_share_of_schedule_error": 0.91493778133188,
+          "raw_max_nonfoot_contact_force_n": 1125.4559197442675,
+          "schedule_error_p95_m": 1.0920167825960145
+        },
+        "frames": 199,
+        "outcome": "rejected",
+        "policy": "reference_trackability",
+        "recovered_from_split": false,
+        "rejection_reasons": [
+          "reference_endpoint_tracking_error",
+          "disallowed_robot_contact"
+        ]
+      },
+      "started_at": "2026-09-07T21:48:52-04:00",
+      "status": "completed"
+    },
+    "nom_eval_41003_layout_03_p8511_uniform": {
+      "command": [
+        "repository/scripts/research/run_kimodo_sonic_rollout.sh",
+        "--scene",
+        "nom_eval_41003_layout_03_p8511",
+        "--motion",
+        "research-data/cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41003/neutral.pkl",
+        "--out",
+        "research-data/m2s-icra-nominal-learning-v1-eval-011/rollouts/nom_eval_41003_layout_03_p8511_uniform",
+        "--python",
+        "repository/.venv_isaaclab/bin/python",
+        "--checkpoint",
+        "repository/sonic_release/last.pt",
+        "--trajectory-only",
+        "--task",
+        "A humanoid walks straight at a steady pace",
+        "--scene-package",
+        "research-data/m2s-icra-nominal-learning-v1/scenes",
+        "--extra",
+        "++manager_env.config.beam_contact_body_names=[pelvis,left_hip_pitch_link,right_hip_pitch_link,waist_yaw_link,left_hip_roll_link,right_hip_roll_link,waist_roll_link,left_hip_yaw_link,right_hip_yaw_link,torso_link,left_knee_link,right_knee_link,left_shoulder_pitch_link,right_shoulder_pitch_link,left_ankle_pitch_link,right_ankle_pitch_link,left_shoulder_roll_link,right_shoulder_roll_link,left_ankle_roll_link,right_ankle_roll_link,left_shoulder_yaw_link,right_shoulder_yaw_link,left_elbow_link,right_elbow_link,left_wrist_roll_link,right_wrist_roll_link,left_wrist_pitch_link,right_wrist_pitch_link,left_wrist_yaw_link,right_wrist_yaw_link]",
+        "--extra",
+        "++manager_env.config.reactive_mode=oracle",
+        "--extra",
+        "++manager_env.config.observation_delay_s=0.0",
+        "--extra",
+        "++manager_env.config.decision_time_s=0.3",
+        "--extra",
+        "++manager_env.config.encounter_action=0",
+        "--extra",
+        "++manager_env.config.reactive_alternate_path=research-data/cg-wbc-v2-shared-seed-confirmatory/e1_controlled_duck_ladders_v1/duck_seed_41003/d040.pkl",
+        "--extra",
+        "++seed=8511",
+        "--extra",
+        "++manager_env._target_=gear_sonic.dataset_generation.hallucination.motion2scene_icra_execution.LearnedEnvCfg",
+        "--extra",
+        "++manager_env.recorders.trajectory._target_=gear_sonic.dataset_generation.hallucination.motion2scene_icra_execution.LearnedRecorderCfg",
+        "--extra",
+        "++manager_env.config.learned_policy_path=research-data/m2s-icra-nominal-learning-v1/models/uniform.pt",
+        "--extra",
+        "++manager_env.config.learned_policy_sha256=sha256:933ab11382700ff283531831dd5cf400c91c5999eb8d1568943a981d7d539b3a"
+      ],
+      "elapsed_seconds": 24.203,
+      "ended_at": "2026-09-07T21:48:28-04:00",
+      "expected_outcome": null,
+      "free_gpu_mib_at_start": 15183,
+      "prediction_matches": null,
+      "scientific": {
+        "artifacts": {
+          "rollout_log": "research-data/m2s-icra-nominal-learning-v1-eval-011/rollouts/nom_eval_41003_layout_03_p8511_uniform/rollout.log",
+          "rollout_log_sha256": "sha256:2b2c56062feb30e39c3a2ecff835741541dd77f6f8402c0af78dee5acec2789d",
+          "success_manifest": "research-data/m2s-icra-nominal-learning-v1-eval-011/rollouts/nom_eval_41003_layout_03_p8511_uniform/success_manifest.json",
+          "success_manifest_sha256": "sha256:ea95676a369c8ae72cbca5f2647eb98b11c68a1927c801da0099c0c17f71ce0f",
+          "trajectory": "research-data/m2s-icra-nominal-learning-v1-eval-011/rollouts/nom_eval_41003_layout_03_p8511_uniform/trajectories/000000.trajectory.pkl",
+          "trajectory_sha256": "sha256:b3b3d669f48844aff4c3bd5f1ea125651edf868fd282bb2fe9f88eb0b1f0fce6"
+        },
+        "demoted_failures": [],
+        "diagnostics": {
+          "contact_decomposition": {
+            "external_contact_bodies": [
+              "torso_link"
+            ],
+            "max_external_contact_force_n": 1125.4559197442675,
+            "max_external_contact_frame": 85,
+            "max_lateral_contact_force_n": 1125.4106970452192,
+            "max_lateral_contact_frame": 85,
+            "max_overhead_contact_force_n": 336.2706604003906,
+            "max_overhead_contact_frame": 122,
+            "max_self_contact_force_n": 30.974791078014675,
+            "max_self_contact_frame": 111,
+            "max_support_contact_force_n": 0.0,
+            "self_contact_events": 13,
+            "self_contact_pairs": [
+              [
+                "left_hip_roll_link",
+                "left_wrist_yaw_link"
+              ],
+              [
+                "right_hip_roll_link",
+                "right_wrist_yaw_link"
+              ]
+            ]
+          },
+          "endpoint_error_m": 1.115086666419771,
+          "max_nonfoot_contact_bodies": [
+            "torso_link"
+          ],
+          "max_nonfoot_contact_frame": 85,
+          "max_nonfoot_contact_time_s": 1.7,
+          "max_reference_root_tilt_rad": 0.2102166629631699,
+          "max_root_height_below_reference_m": 0.08864343166351318,
+          "max_root_height_deficit_frame": 104,
+          "max_root_tilt_above_reference_rad": 0.23181067840477723,
+          "max_self_contact_time_s": 2.22,
+          "min_reference_root_height_m": 0.7268804311752319,
+          "phase_share_of_schedule_error": 0.91493778133188,
+          "raw_max_nonfoot_contact_force_n": 1125.4559197442675,
+          "schedule_error_p95_m": 1.0920167825960145
+        },
+        "frames": 199,
+        "outcome": "rejected",
+        "policy": "reference_trackability",
+        "recovered_from_split": false,
+        "rejection_reasons": [
+          "reference_endpoint_tracking_error",
+          "disallowed_robot_contact"
+        ]
+      },
+      "started_at": "2026-09-07T21:48:04-04:00",
+      "status": "completed"
+    }
+  },
+  "claim5_isolation": true,
+  "ended_at": "2026-09-07T21:49:40-04:00",
+  "experiment": "nom_eval_41003_layout_03_p8511",
+  "manifest": "research-data/m2s-icra-nominal-learning-v1-eval-011/manifest.json",
+  "manifest_sha256": "sha256:61e0edf66be694ff4d91211b0dd5efbf8201d141d90c7a8159b20e52c5a2ecf1",
+  "schema_version": "lfh_physics_run_v1",
+  "started_at": "2026-09-07T21:48:04-04:00",
+  "status": "completed",
+  "timing_override": "User requests next stage; at most 20 cells, 2.083334 GPU h; checked against standing daily/weekly envelope before launch."
+}

@@ -1,0 +1,250 @@
+{
+  "admissions": [
+    {
+      "path": "research-data/m2s-icra-nominal-v1-labels-00/admission.json",
+      "sha256": "sha256:cf25c3ab579281abf96d0102e78988aa19143e536995fcc814c0d6e4a297175f"
+    },
+    {
+      "path": "research-data/m2s-icra-nominal-v1-labels-01/admission.json",
+      "sha256": "sha256:391cc58adba9479e47614ec3a476104c1ef9de154bcbe1108118a5c333898706"
+    },
+    {
+      "path": "research-data/m2s-icra-nominal-v1-labels-02/admission.json",
+      "sha256": "sha256:7630124f7d0f94c3726f2a802803cc85fdebb9299446b1841e90810942a9449e"
+    },
+    {
+      "path": "research-data/m2s-icra-nominal-v1-labels-03/admission.json",
+      "sha256": "sha256:3a4761123ab02b2d52e81861488d827ce50b9488b146f110ad863d2b687eca15"
+    },
+    {
+      "path": "research-data/m2s-icra-nominal-v1-labels-04/admission.json",
+      "sha256": "sha256:1506318f2d3dccb11aae2dddaa94929311b4c1d9273514eb55fa05051d990c90"
+    },
+    {
+      "path": "research-data/m2s-icra-nominal-v1-labels-05/admission.json",
+      "sha256": "sha256:c38258d68aa0060996a1bba0225ea3312e1e5c1e4ba8f4402e98b5cf28ec4921"
+    },
+    {
+      "path": "research-data/m2s-icra-nominal-v1-labels-06/admission.json",
+      "sha256": "sha256:0d2c44ba778c0b637aba7d21d7cea72ff121affc712e8d32c64057822e5692b2"
+    },
+    {
+      "path": "research-data/m2s-icra-nominal-v1-labels-07/admission.json",
+      "sha256": "sha256:cfa31a8f6f88053e41fd68ddb2ba4a5931917ed9204bf9d8604d9ffcac42a66e"
+    },
+    {
+      "path": "research-data/m2s-icra-nominal-v1-labels-08/admission.json",
+      "sha256": "sha256:4fb69506ed78f24e5141218bcc62e4ce8c40c0ad8c2d48bc528d212106696496"
+    }
+  ],
+  "equal_label_counts": true,
+  "fits": [
+    {
+      "arm": "uniform",
+      "compile_probability_error": 1.7881393432617188e-07,
+      "missing_ids": [],
+      "model": {
+        "path": "research-data/m2s-icra-nominal-learning-v1/models/uniform.pt",
+        "sha256": "sha256:933ab11382700ff283531831dd5cf400c91c5999eb8d1568943a981d7d539b3a"
+      },
+      "outcome_counts": {
+        "(False, False)": 8,
+        "(True, True)": 7
+      },
+      "requested_ids": [
+        "icra_41001_shared_absent",
+        "icra_41001_shared_raised",
+        "icra_41002_shared_absent",
+        "icra_41002_shared_blocked",
+        "icra_41003_shared_blocked",
+        "icra_41003_shared_raised",
+        "nom_41001_uniform_00",
+        "nom_41001_uniform_01",
+        "nom_41001_uniform_02",
+        "nom_41002_uniform_00",
+        "nom_41002_uniform_01",
+        "nom_41002_uniform_02",
+        "nom_41003_uniform_00",
+        "nom_41003_uniform_01",
+        "nom_41003_uniform_02"
+      ],
+      "training_bce": 0.001761514926329255,
+      "training_ids": [
+        "icra_41001_shared_absent",
+        "icra_41001_shared_raised",
+        "icra_41002_shared_absent",
+        "icra_41002_shared_blocked",
+        "icra_41003_shared_blocked",
+        "icra_41003_shared_raised",
+        "nom_41001_uniform_00",
+        "nom_41001_uniform_01",
+        "nom_41001_uniform_02",
+        "nom_41002_uniform_00",
+        "nom_41002_uniform_01",
+        "nom_41002_uniform_02",
+        "nom_41003_uniform_00",
+        "nom_41003_uniform_01",
+        "nom_41003_uniform_02"
+      ]
+    },
+    {
+      "arm": "analytic",
+      "compile_probability_error": 1.1920928955078125e-07,
+      "missing_ids": [],
+      "model": {
+        "path": "research-data/m2s-icra-nominal-learning-v1/models/analytic.pt",
+        "sha256": "sha256:ed70a03eb8d128eec3bee54d7a8610e7b8c9466816e2a74dcf4b1c7f6f94c090"
+      },
+      "outcome_counts": {
+        "(False, False)": 2,
+        "(False, True)": 9,
+        "(True, True)": 4
+      },
+      "requested_ids": [
+        "icra_41001_shared_absent",
+        "icra_41001_shared_raised",
+        "icra_41002_shared_absent",
+        "icra_41002_shared_blocked",
+        "icra_41003_shared_blocked",
+        "icra_41003_shared_raised",
+        "nom_41001_analytic_00",
+        "nom_41001_analytic_01",
+        "nom_41001_analytic_02",
+        "nom_41002_analytic_00",
+        "nom_41002_analytic_01",
+        "nom_41002_analytic_02",
+        "nom_41003_analytic_03",
+        "nom_41003_analytic_04",
+        "nom_41003_analytic_05"
+      ],
+      "training_bce": 0.000541579385753721,
+      "training_ids": [
+        "icra_41001_shared_absent",
+        "icra_41001_shared_raised",
+        "icra_41002_shared_absent",
+        "icra_41002_shared_blocked",
+        "icra_41003_shared_blocked",
+        "icra_41003_shared_raised",
+        "nom_41001_analytic_00",
+        "nom_41001_analytic_01",
+        "nom_41001_analytic_02",
+        "nom_41002_analytic_00",
+        "nom_41002_analytic_01",
+        "nom_41002_analytic_02",
+        "nom_41003_analytic_03",
+        "nom_41003_analytic_04",
+        "nom_41003_analytic_05"
+      ]
+    },
+    {
+      "arm": "no_contrast",
+      "compile_probability_error": 1.1920928955078125e-07,
+      "missing_ids": [],
+      "model": {
+        "path": "research-data/m2s-icra-nominal-learning-v1/models/no_contrast.pt",
+        "sha256": "sha256:9b596fe6bab023eeeea2378055aef101508bb2e4d65c86dec96510bab0eaaff3"
+      },
+      "outcome_counts": {
+        "(False, False)": 2,
+        "(True, True)": 13
+      },
+      "requested_ids": [
+        "icra_41001_shared_absent",
+        "icra_41001_shared_raised",
+        "icra_41002_shared_absent",
+        "icra_41002_shared_blocked",
+        "icra_41003_shared_blocked",
+        "icra_41003_shared_raised",
+        "nom_41001_no_contrast_00",
+        "nom_41001_no_contrast_01",
+        "nom_41001_no_contrast_02",
+        "nom_41002_no_contrast_00",
+        "nom_41002_no_contrast_01",
+        "nom_41002_no_contrast_02",
+        "nom_41003_no_contrast_00",
+        "nom_41003_no_contrast_01",
+        "nom_41003_no_contrast_02"
+      ],
+      "training_bce": 0.00017518318782094866,
+      "training_ids": [
+        "icra_41001_shared_absent",
+        "icra_41001_shared_raised",
+        "icra_41002_shared_absent",
+        "icra_41002_shared_blocked",
+        "icra_41003_shared_blocked",
+        "icra_41003_shared_raised",
+        "nom_41001_no_contrast_00",
+        "nom_41001_no_contrast_01",
+        "nom_41001_no_contrast_02",
+        "nom_41002_no_contrast_00",
+        "nom_41002_no_contrast_01",
+        "nom_41002_no_contrast_02",
+        "nom_41003_no_contrast_00",
+        "nom_41003_no_contrast_01",
+        "nom_41003_no_contrast_02"
+      ]
+    },
+    {
+      "arm": "motion2scene",
+      "compile_probability_error": 5.960464477539063e-08,
+      "missing_ids": [],
+      "model": {
+        "path": "research-data/m2s-icra-nominal-learning-v1/models/motion2scene.pt",
+        "sha256": "sha256:5650128513db4d611cae686f38b95cdb01498603412fc5c92f7c38cb7795cd2c"
+      },
+      "outcome_counts": {
+        "(False, False)": 2,
+        "(False, True)": 9,
+        "(True, True)": 4
+      },
+      "requested_ids": [
+        "icra_41001_shared_absent",
+        "icra_41001_shared_raised",
+        "icra_41002_shared_absent",
+        "icra_41002_shared_blocked",
+        "icra_41003_shared_blocked",
+        "icra_41003_shared_raised",
+        "nom_41001_motion2scene_06",
+        "nom_41001_motion2scene_07",
+        "nom_41001_motion2scene_09",
+        "nom_41002_motion2scene_00",
+        "nom_41002_motion2scene_01",
+        "nom_41002_motion2scene_02",
+        "nom_41003_motion2scene_00",
+        "nom_41003_motion2scene_01",
+        "nom_41003_motion2scene_02"
+      ],
+      "training_bce": 0.13900436460971832,
+      "training_ids": [
+        "icra_41001_shared_absent",
+        "icra_41001_shared_raised",
+        "icra_41002_shared_absent",
+        "icra_41002_shared_blocked",
+        "icra_41003_shared_blocked",
+        "icra_41003_shared_raised",
+        "nom_41001_motion2scene_06",
+        "nom_41001_motion2scene_07",
+        "nom_41001_motion2scene_09",
+        "nom_41002_motion2scene_00",
+        "nom_41002_motion2scene_01",
+        "nom_41002_motion2scene_02",
+        "nom_41003_motion2scene_00",
+        "nom_41003_motion2scene_01",
+        "nom_41003_motion2scene_02"
+      ]
+    }
+  ],
+  "registration": {
+    "path": "research-data/m2s-icra-nominal-learning-v1/registration.json",
+    "sha256": "sha256:016d16996361edef3d583b6da9b08d94fe20932136894d852f6fb9d4c2dfecc4"
+  },
+  "reused_background_ids": [
+    "icra_41001_shared_absent",
+    "icra_41001_shared_raised",
+    "icra_41002_shared_absent",
+    "icra_41002_shared_blocked",
+    "icra_41003_shared_blocked",
+    "icra_41003_shared_raised"
+  ],
+  "scope": "Nominal-contract corpus with M2S-ICRA-v1 backgrounds reused by reference; unequal acquired counts are reported, never refilled"
+}
