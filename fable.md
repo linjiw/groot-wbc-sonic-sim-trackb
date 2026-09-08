@@ -1,4 +1,4 @@
-# Fable — guidance for the Motion2Scene ICRA paper
+# Fable — guidance for the Motion2Scene ICRA paper (experiments complete, 2026-09-08)
 
 Written 2026-09-07 (00:30 EDT), after reading the full `docs/motion2scene/` trail
 (all `*_RESULT.md` through `SELECTOR_BREAKPOINT_RESULT.md`), the August LfH line
@@ -13,77 +13,73 @@ not on the critical path. That leaves eight days, of which at least four must be
 
 ---
 
-## Update — 2026-09-07, 09:00 EDT, after executing this plan
+## Final — 2026-09-08. Both experiments are complete.
 
-The plan below was written at 00:30. It has now largely been executed, by an
-autonomous supervisor plus this session. Five things are settled and two change the
-paper. Everything in §1–§9 still stands except where this section overrides it.
+The plan below was written at 00:30 on Sep 7 and has been executed in full. Two
+registered studies ran to completion for **6.6 contended GPU-hours** total. The result
+is **outcome B**, exactly as pre-declared in §2.3.
 
-**A. All three carriers qualified, and the panel ran.** The transition bank finished
-12/12 at 0.105 GPU-h with 41001, 41002 and 41003 qualified at both seeds
-([result](docs/motion2scene/DEVELOPMENT_TRANSITION_BANK_V1_RESULT.md)). M2S-ICRA-v1 was
-registered, 82/82 labels acquired, four learners fitted, and 366 of 540 evaluations
-admitted before the GPU filled with other projects' jobs.
+### What was measured
 
-**B. The headline outcome is none of A/B/C. Call it D.** Under the registered contract
-the learned arm acquired **zero** generated groups and the analytic arm **one**. Three
-of the four fitted learners — uniform, target-only and Motion2Scene — are
-*behaviourally identical*: they issue walk on all 61 conditions and pass 21/61. The
-analytic learner issues d040 22 times and passes 30/61, with **9 wins and 0 losses**
-against each of the other three, consistent on all three carriers (5/2/2). Removing its
-single useful label drops its adaptation requests from 22 to 0 and makes it bit-identical
-to the background-only model. So the whole measured effect rests on **one physically
-verified contrast**, and the paper's real subject is contrast scarcity.
+| Construction | Groups | Useful contrasts | Passage (held-out) | Adapts |
+|---|---:|---:|---:|---:|
+| Uniform | 15 | 0 | 14/36 | 0 |
+| **Analytic** | 15 | **9** | **24/36** | 24 |
+| Target-only | 15 | 0 | 14/36 | 0 |
+| **Motion2Scene** | 15 | **9** | **22/36** | 22 |
 
-**C. The acquisition failure was the inherited envelope, not the generator.** The
-[envelope sweep](docs/motion2scene/ENVELOPE_TRADEOFF_V1_RESULT.md) over 11,421 centres
-per carrier shows 10 mm contrast witnesses collapsing as the audit envelope grows:
+Both contrast arms beat both non-contrast arms with **no reverse case on any carrier**
+(8–0 and 10–0). Motion2Scene and analytic are **indistinguishable**: 0–2 discordant of
+36, p = 0.50. Contrast construction is what teaches the selector; learning the proposal
+neither helps nor hurts at this label count.
+[Result](docs/motion2scene/M2S_ICRA_NOMINAL_V1_RESULT.md).
 
-| envelope | 41001 | 41002 | 41003 |
-|---|---:|---:|---:|
-| nominal pose | 200 | 168 | 337 |
-| ±10 mm / ±5 mm | 50 | 27 | 150 |
-| ±20 mm / ±10 mm (inherited) | **2** | **0** | **32** |
+The larger 540-run panel stands behind it: 72 traversal conditions, analytic 39/72
+against 28/72 for the three non-adapting arms, 11–0 paired, all wins in the band its one
+training contrast came from, plus the background suites showing no unnecessary adaptation
+anywhere and blocked-scene refusal at 6/6 for every learner against 0/6 for the scripted
+rule. [Result](docs/motion2scene/M2S_ICRA_540_RESULT.md).
 
-Best nominal joint margin is 24.4 / 20.5 / 27.0 mm, so the inherited ±20 mm placement
-envelope is the size of the entire executed window. It was the right instrument for a
-placement certificate and the wrong one for a study whose beam is authored at an exact
-simulator pose. A separately registered
-[nominal contract](docs/motion2scene/M2S_ICRA_NOMINAL_V1.md) — predictions filed before
-its proposals were drawn — moves eligibility from 1/48 to **41/48** for analytic and
-from 0/48 to **33/48** for Motion2Scene. 36 groups are assigned and 72 label commands
-are prepared and waiting on the card.
+### The one thing that nearly sank it
 
-**D. A second, separate defect belongs to the generator.** On 41003 the inherited
-envelope still leaves 32 witnesses and the learned draws reached none of them, and
-across the nominal proposals only **24/34** of the learned arm's critical scenes are
-visible to the sensor at the 0.30 s decision, against **44/47** for analytic — 8 of 12
-invisible on 41003 alone. Placing a contrast where the robot cannot see it is a real
-quality gap, it is independent of the envelope, and it is not gated by either contract.
-Report it; do not add a visibility gate post hoc.
+The first contract accepted **zero** learned and **one** analytic scene. The cause was
+measured, not guessed: the inherited audit demanded each contrast survive a ±20 mm beam
+displacement while the entire executed window is 20–27 mm wide. Witnesses fall from
+200/168/337 at the nominal pose to 2/0/32. A separately registered nominal contract, with
+predictions filed before its proposals were drawn, moved eligibility from 1/48 to 41/48
+(analytic) and 0/48 to 33/48 (learned).
+[Result](docs/motion2scene/ENVELOPE_TRADEOFF_V1_RESULT.md).
 
-**E. Adaptation is nearly free on this panel, and every learner under-uses it.** Of the
-38 conditions where both commands were executed: 15 d040-only successes, 11 both-pass,
-12 both-fail and **zero walk-only successes**. The scripted ray rule requests d040 38
-times and reaches 36/61, exactly the best-of-observed ceiling; the analytic learner
-requests it 22 times and reaches 30/61. A hand-written rule still beats every learned
-arm. Say so plainly — and note the pending background suites are where unnecessary
-adaptation gets charged, so the ceiling is not the whole story.
+### The learned generator's one measured deficiency
 
-**Revised thesis.** Not "learned beats analytic", and not "construction matters" in the
-abstract. It is: *a training scene is useful only if it contains a decision-relevant
-contrast that survives execution and is visible at decision time; such scenes are
-geometrically scarce, the scarcity is measurable and designable, and one verified
-contrast is enough to change a fixed learner's behaviour.*
+Its training loss is 0.139 against analytic's 0.00054 on identical architecture and label
+count, because only 24 of 34 of its critical scenes are visible to the decision-time
+sensor against 44 of 47 for analytic. Four of its nine assigned groups record zero ray
+hits. Report it; no visibility gate was added after the fact.
 
-**Revised order of remaining work.** (1) Let the supervisor finish v1's 174 runs — it
-is blocked only by other projects holding the card, and it self-resumes. (2) Run the 72
-prepared nominal label commands (~0.6 GPU-h), then fit and evaluate at seed 8511 only
-(144 runs, ~1.3 GPU-h), reusing v1's comparators. (3) Decide Sep 10 on the combined
-funnel. Total remaining ≈ 3.4 GPU-h. **The binding risk is no longer scope or budget —
-it is that three other projects are holding 13.5 of 16.3 GB on the shared card.** If
-that persists through Sep 8, drop the nominal evaluation and publish the nominal
-*acquisition funnel* alone, which is already a complete result.
+### Final thesis
+
+*A training scene is useful only if it contains a decision-relevant contrast that
+survives execution and is visible at decision time. Such contrasts are geometrically
+scarce, the scarcity is measurable before any simulation, and how the contrast is
+proposed matters far less than whether the acceptance geometry lets it exist at all.*
+
+### What remains for the submission
+
+Writing only. The abstract can now be written; the decision §2.3 asked for is made.
+Sections I–VII of `docs/motion2scene/ICRA_MANUSCRIPT.md` carry the final numbers, five
+pages with figures. Remaining: cut to eight pages in the ICRA template, internal review
+against the `xiao-paper-review` rubric, and the video from existing replays during the
+17–22 Sep window. **No further physics is required for this submission.**
+
+### Beyond the paper
+
+Hardware is a separate program, not an extension of this one. The five gates in
+dependency order are on the [project page](docs/index.html): re-price the contrast
+against real obstacle-pose uncertainty (the envelope curve already gives its cost),
+replace ideal rays with the deployed sensor, run source-held-out transfer on the eight
+reserved ancestors, extend to sequential decisions with matched data aggregation, and
+qualify a genuine abort — a refusal here continues walking and is not a protective stop.
 
 ---
 
