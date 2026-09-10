@@ -1,0 +1,2193 @@
+{
+  "schema": "motion2scene_evaluation_geometry_and_comparison_lock_v2",
+  "created_utc": "2026-09-08T15:58:43.740761+00:00",
+  "status": "geometry_and_comparison_recipe_locked; implementation_lock_pending; zero_evaluation_runs",
+  "claim_boundary": "New generated layouts on previously inspected motion sources; no motion-source transfer, physical feasibility, closed-loop result, or hardware claim.",
+  "generation": {
+    "seed": 202609081601,
+    "rng": "Python random.Random (MT19937), uniform draws, round to 9 decimal places",
+    "draw_order": [
+      "route_progress_fraction",
+      "underside_m",
+      "length_m",
+      "width_m",
+      "thickness_m",
+      "lateral_offset_m",
+      "yaw_offset_rad"
+    ],
+    "single_order": "8 short,8 sustained,8 early_constraint; assign source_ids[index % 3]",
+    "course_order": "12 courses,first then second beam; assign source_ids[index % 3]",
+    "rejection_sampling": false,
+    "outcomes_used": false,
+    "geometry_units": "metres and radians; route progress is normalized neutral-reference XY arc length",
+    "range_rationale": "A priori static overhead variation in length,placement,height; no success- or clearance-conditioned selection",
+    "single_families": [
+      {
+        "name": "short",
+        "route_progress_fraction_range": [
+          0.26,
+          0.77
+        ],
+        "length_m_range": [
+          0.1,
+          0.25
+        ],
+        "count": 8
+      },
+      {
+        "name": "sustained",
+        "route_progress_fraction_range": [
+          0.32,
+          0.68
+        ],
+        "length_m_range": [
+          0.5,
+          0.9
+        ],
+        "count": 8
+      },
+      {
+        "name": "early_constraint",
+        "route_progress_fraction_range": [
+          0.15,
+          0.35
+        ],
+        "length_m_range": [
+          0.1,
+          0.45
+        ],
+        "count": 8
+      }
+    ],
+    "common_ranges": {
+      "underside_m": [
+        1.14,
+        1.4
+      ],
+      "width_m": [
+        1.15,
+        1.55
+      ],
+      "thickness_m": [
+        0.08,
+        0.16
+      ],
+      "lateral_offset_m": [
+        -0.08,
+        0.08
+      ],
+      "yaw_offset_rad": [
+        -0.06,
+        0.06
+      ]
+    },
+    "course_station_ranges": [
+      [
+        0.24,
+        0.35
+      ],
+      [
+        0.65,
+        0.77
+      ]
+    ],
+    "course_length_ranges": [
+      [
+        0.1,
+        0.45
+      ],
+      [
+        0.15,
+        0.65
+      ]
+    ]
+  },
+  "splits": {
+    "development_sources": [
+      41001,
+      41002,
+      41003
+    ],
+    "source_assignment": "8 single layouts and4 two-beam compositions per development source",
+    "evaluation_layout_ids": [
+      "locked_v2_single_00",
+      "locked_v2_single_01",
+      "locked_v2_single_02",
+      "locked_v2_single_03",
+      "locked_v2_single_04",
+      "locked_v2_single_05",
+      "locked_v2_single_06",
+      "locked_v2_single_07",
+      "locked_v2_single_08",
+      "locked_v2_single_09",
+      "locked_v2_single_10",
+      "locked_v2_single_11",
+      "locked_v2_single_12",
+      "locked_v2_single_13",
+      "locked_v2_single_14",
+      "locked_v2_single_15",
+      "locked_v2_single_16",
+      "locked_v2_single_17",
+      "locked_v2_single_18",
+      "locked_v2_single_19",
+      "locked_v2_single_20",
+      "locked_v2_single_21",
+      "locked_v2_single_22",
+      "locked_v2_single_23",
+      "locked_v2_course_00",
+      "locked_v2_course_01",
+      "locked_v2_course_02",
+      "locked_v2_course_03",
+      "locked_v2_course_04",
+      "locked_v2_course_05",
+      "locked_v2_course_06",
+      "locked_v2_course_07",
+      "locked_v2_course_08",
+      "locked_v2_course_09",
+      "locked_v2_course_10",
+      "locked_v2_course_11"
+    ],
+    "train_and_validation_exclusions": "All exact evaluation layouts/compositions and their perturbations,branches,frames,derived labels; no outcome or teacher query on these layouts during tuning",
+    "source_heldout": {
+      "status": "deferred",
+      "source_ids": [],
+      "reason": "No audited new-source ancestry and transition qualification. Reserve separately before claiming motion-source transfer."
+    },
+    "known_geometry_audit": {
+      "scope": "Top-level m2s manifest/registration geometry plus clean development groups; identity on route_progress,underside,length rounded to9decimals; no outcome inspection for generation",
+      "historical_unique_geometry_triples": 92,
+      "matching_new_beam_triples": 0,
+      "limitation": "Not an exhaustive audit of every historical scratch file, inherited prior, or approximate geometric similarity. New exact layouts are not a new-source guarantee.",
+      "input_snapshot": [
+        {
+          "path": "/home/linjiw/groot-wbc-sonic-sim-trackb/docs/motion2scene/submission/evidence/matched-commands.csv",
+          "sha256": "6ab55d3fee8c4ad9b22f3a9d353eefd8bfb88c8f586092b858349ff187df32a0"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-action-label-completion-v1/manifest.json",
+          "sha256": "628c77987a356bbe53e727659d11c9d07df85e6bb1e8d4a5df28dd35b7762503"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-analytic-distinct-v1/registration.json",
+          "sha256": "27559cc30a3fafd6ea24d97c4943403b612c3e61e63a72f1233b86d9ff5a4585"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-analytic-global-v1/registration.json",
+          "sha256": "686b44ed2a8cdcf08e43673b80d61aba444e692f69d87a588a42bf66d112f1b1"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-carrier-learning-v1/manifest.json",
+          "sha256": "59aed5b0dc96fe652162c2faa4d7b33842a805f090306050f6881d9d38efd0b3"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-carrier-learning-v1/registration.json",
+          "sha256": "e62e53748acc8e60bd1520d138a4d22537447c4a4dec946ded5cc449af5376cf"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-comparative-acquisition-v1/manifest.json",
+          "sha256": "b11ac6ad72dd2e761388f97f1f3722f6571a13f9eea89faba3b31385a7a77c18"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-comparative-acquisition-v1/registration.json",
+          "sha256": "7c123e96d3613b30ccc7f70b75a85f5f30c1d4944f486ea0242ba1b8faf6a64b"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-comparative-corpus-completion-v1/manifest.json",
+          "sha256": "e383007ff983ccf839a5b9169e8cf75d7400ec2b479e07f719431568dd80139f"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-comparative-corpus-completion-v1/registration.json",
+          "sha256": "34290457f8233a87836e5707fa9599d9b357b651ffbfd741b3b6aa7efe6553c0"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-coverage-diagnostic-v1/registration.json",
+          "sha256": "707f2c52bbac8886c19169639bdf35d85a772680d3db294727ac9a9aab8bfdb0"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-d040-beam-execution-v1/manifest.json",
+          "sha256": "dccf18df066cf2d5d961e5d792b8aa4eef4b16bbf4bdaa793e8702f41b0a9737"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-decision-binding-v1/registration.json",
+          "sha256": "d57a60a3f6df5dcaf41d177b67a8204e60fd86d6ac229aa6715e42ed3610038f"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-development-transition-bank-v2/manifest.json",
+          "sha256": "f89851eefce9517279dd9f226e7f0feb0bf14ef7520871b48cdf27042c397a88"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-distillation-v1/registration.json",
+          "sha256": "10472587ce58e44c4a737bafc2d6de5eedad18dee88dafb10443f08356ede2f9"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-event-scaling-v1/registration.json",
+          "sha256": "aceab9a9b4340500c563899b2b7a44c5003906d0a7cfeaf0b4ea562ccae8fbd9"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-fresh-local-pose-certificate-v1/registration.json",
+          "sha256": "3c0a630a3776c0f99f272cc4bc1789d532341b8558e76931e571d17afe5a77bb"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-fresh-native-temporal-v1/registration.json",
+          "sha256": "1032c158cd349ca296f50e4c9a184fd1f1b48b8d4eb9833e91333467da3cb22b"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-fresh-native-uncapped-v2/registration.json",
+          "sha256": "97ee9495a4c3878cf6e3a7fe9035e8c6075bbaab865af3dfde87e40b0b8c5c1a"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-fresh-source-v1/manifest.json",
+          "sha256": "09eb13620d68d22a7e8816900951b78c73c489a3595a82dd6f2c6873fb94d61a"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-fresh-source-v1/registration.json",
+          "sha256": "9da4f7903233984f9a764b6f501f8bf7a91711171d8b270950cf6a8dcaf991d9"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-history-smoke-v1/manifest.json",
+          "sha256": "64ae19b2350804e91d5fae64f4a8b67024cca4f21a0b5dc5f511e8d49cf71505"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1/registration.json",
+          "sha256": "73d30c6a0623fff5e7f12c9e52190074ad767ad5e8bf0bf3ff27425896fb1b84"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-000/manifest.json",
+          "sha256": "52bfe3daa8352cf90e3716f8d1c1589be41c2e31298465a785f28211d8924d84"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-001/manifest.json",
+          "sha256": "c38a86471093c51c99644504ad7d1bb912cc098e72e43e457fa6d904c287dcd5"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-002/manifest.json",
+          "sha256": "712e1db8324c01edfe8624d2e14fb852f6d2a585641d5a53f740506bcf96d74f"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-003/manifest.json",
+          "sha256": "81911a6e2cb763f2434e8294af659027b46f842eb3ccc3491902ca0e5d3e8c7a"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-004/manifest.json",
+          "sha256": "4de9abc4f5c617a2d513e6962191d1a3484700e41dfffe8586ccb8694da1d774"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-005/manifest.json",
+          "sha256": "acdea526cdef50408b09c96abe251b74a635680308d66035e2c5d960d93de89a"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-006/manifest.json",
+          "sha256": "74f0115a3b3391c934d351219be76992c2ea46b923b311fd123ed96d2805d5c7"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-007/manifest.json",
+          "sha256": "b867750277f83db1c2b322b47e0bbeb08385b990abeaafe6a32370492825f314"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-008/manifest.json",
+          "sha256": "18dab2f8e41974de1f6f1c897f3f34df5c65ec0a30fbf0ed1483f1b5708f0701"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-009/manifest.json",
+          "sha256": "8fc0d83fadda7885a510ff40395eb291a3bd0da46c5d8fcdabf9e420ea8e4990"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-010/manifest.json",
+          "sha256": "26117f96a5dcce52a4183a6c6565db2c5d7fdab843357cb70becf3f6b68aa486"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-011/manifest.json",
+          "sha256": "39bb55a1bf0bc8d03e748852dcb7ac827535d830b4fb0bf85fc2cda954142623"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-012/manifest.json",
+          "sha256": "65632ad325651f7598d03d9b0f6f1d7717f9ce1043209e97bd7e5890ad67b254"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-013/manifest.json",
+          "sha256": "f6f3c98c7bf31e3de91dfe1124d80ea2726c4135ee6518bdbe7a762da68b6acf"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-014/manifest.json",
+          "sha256": "72ef986dac2c6bc5236897350ff10647a2986822274c3331f2489ff2854043ef"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-015/manifest.json",
+          "sha256": "84c78a6217b3873c74c9cb7c6a0130386612845a4486506b97fedff9dae75a36"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-016/manifest.json",
+          "sha256": "b6672fdee0e728c2ead14a5b8f91b80f07dde2b8ac95708d92710bd44c177127"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-017/manifest.json",
+          "sha256": "1e5a3e67ca8b53812de61e1c8a5b86759d164a58286f5427292c98544a0fe25d"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-018/manifest.json",
+          "sha256": "e2e50219c4d69ed74cd486ab63cbaebfc0cb0c3f0f9b3b30b09a33745fbeac57"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-019/manifest.json",
+          "sha256": "34e1f13b3bc337d5014dbcc0ca86b6636a92429d9a98a842f7060e74a6a67065"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-020/manifest.json",
+          "sha256": "f2498e11eb980cf04cd033538e709a77fa6586e34fc90617ace5a715f22111e2"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-021/manifest.json",
+          "sha256": "9a4228b02a82c27585caf9f3173e76cc37ab09d1e390ac062c15e9e146fe98d1"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-022/manifest.json",
+          "sha256": "11f47c4e20e814e56767a1bfcabb1198796f2e423154db7869e45a28201a3c2c"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-023/manifest.json",
+          "sha256": "28c7fbad02be40a79b156165aedaf4df241de628efe45f5080ae05a5672175e7"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-024/manifest.json",
+          "sha256": "acb87620dfd5dad056a69bff85fc2b10412ee7aaa1eaa0204a7829d3a9dffe49"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-025/manifest.json",
+          "sha256": "01bceeb5ea918257df984084ba4a8c71bef9ca137b4c23e532505841dfae829f"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-026/manifest.json",
+          "sha256": "dc1e3166e074c1fb771222c4f71345ead3a1227a9a0860ffe5c7aaa72c689496"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-027/manifest.json",
+          "sha256": "b7b675b7325c5abd6384105874618beefb0eede3b6ef0038d1c2b35a13cbd6ee"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-028/manifest.json",
+          "sha256": "7d81aa1dd03301c75eca84c3937104c3ee43bdbc585aeb2a7f35eb5e7d341594"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-029/manifest.json",
+          "sha256": "455026925137ae6990ee3382823e2e61dc59d3c3fd037b09bf636b28558a353f"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-030/manifest.json",
+          "sha256": "ec43435c134136fc685136b7edb0ba9d2af47f7407bdd2064d2eea99b2028631"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-031/manifest.json",
+          "sha256": "ff4b890f9639004c518422db66a54d31f8dfcbab7971bc52d27b1a8203de3395"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-032/manifest.json",
+          "sha256": "d5c378ee23f42fc9b1c4632cb073a5720524ebbff7309fb3c34b3cbf75594230"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-033/manifest.json",
+          "sha256": "0cea74050bc6035cb3847c0440e2303762ff16c9c119d434b709485f7d2e385d"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-034/manifest.json",
+          "sha256": "c55fe5a81938162d40f598ce66d3994496768707ceba5671f8749fc2f276b7ab"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-035/manifest.json",
+          "sha256": "3e46a8803375201692091c9247043ff446499766104c85db3cceddf7a8fb5fb9"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-036/manifest.json",
+          "sha256": "2b532f05b85871d5c16ed51fb7ec1daf4b06f1701b932c78f9463119e9f2b346"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-037/manifest.json",
+          "sha256": "e6e645a4d4003a12657f301a6245909bef9c637389970bd3fd2bfed60777790d"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-038/manifest.json",
+          "sha256": "7e55832afdfeabe06d0f31feccf3d2bcc68eb47e04760c71164e4cd53b17674f"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-039/manifest.json",
+          "sha256": "9ff76125bd9b7c1f3a2f142178b8bee4b565dcdf1127059eeafd9814fce9cf61"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-040/manifest.json",
+          "sha256": "37e6d64f406bcfc0b7e447c2d95aafe5c13236fd2cd8e32431d89a41c9714958"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-041/manifest.json",
+          "sha256": "cb5ab9800b692ad226e58946c634d2ccbf4f25e39d0d71c159f6e05ad6f7b1be"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-042/manifest.json",
+          "sha256": "bd79d472844af72697f600c0b6169d9bf326977f212d164d01d6b3e109967e68"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-043/manifest.json",
+          "sha256": "208dec109fe1fbc0cb375ccc9b254a8c402d749f2e9b1012501c3ca503307888"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-044/manifest.json",
+          "sha256": "2071d154c52815c55a7157be241ad88e49879757eaba2fb95142fdeff05ff559"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-045/manifest.json",
+          "sha256": "6689fe1845dfd39d2f8303ee0f54f16d4dbbaf2d42978e29bdc3d7dd882aac68"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-046/manifest.json",
+          "sha256": "e7eb574f0d7f582db305777f58018f073c11dcd5ad0c977a8bc8ea69681a4944"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-047/manifest.json",
+          "sha256": "f22c2f400869bbfe385f2450f03615a61f186ce14600b5f33f469c77af1503cf"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-048/manifest.json",
+          "sha256": "7ee4dd855f912523f32fef1c3b312e453b5830298ef0d7a6820ca222eff3ffc9"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-049/manifest.json",
+          "sha256": "0a2da86f0f907149c6d0804148f1ee82275d9d52600acb4ae887f346fcd7fbb0"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-050/manifest.json",
+          "sha256": "38199470b13f4019b9a6fec75423ba7e183f61751d02d1854393b9daa8a4cb6b"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-051/manifest.json",
+          "sha256": "044ca63e9cecd422ca87ae6ef30e55eebfa3825ff3a74edce7862d2111711c06"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-052/manifest.json",
+          "sha256": "1d4a342ec2c62d515271286222f3e92b86458336481615a794a187d9036e5b13"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-053/manifest.json",
+          "sha256": "8fbf6d90ba3efe73229ae1c13e866b7804695b2cd7e347d50cb7d8e2f00a558b"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-054/manifest.json",
+          "sha256": "bd97bb57366e3bb5a0a29090111e94f4a8016e077c3db25acbb69b2a6fb69c1a"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-055/manifest.json",
+          "sha256": "763d38e7fef74428733993cace9f6c6d2682a781f1a83ec7e89af164d234e38a"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-056/manifest.json",
+          "sha256": "c5432e917c3503026824b698f41aa68af61e98ae279020698fd5fefe8e8e2e01"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-057/manifest.json",
+          "sha256": "92693a9600b181fe71ca032ba7e0f3ea0d9455a29eea6f2aeea3de64a51d2250"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-058/manifest.json",
+          "sha256": "8fbb2b40b2d2b12c936ce897fc19d29f537bef1ab086e5688b14d7e081303db7"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-059/manifest.json",
+          "sha256": "dd4639acbae0e538adad67b0744d58d95ec3343092fda12ecf3bb00750889ded"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-060/manifest.json",
+          "sha256": "f893d4d4f829bf193232ec2ac39ea654a759a9ac679ee2f15549f32fb9e00b45"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-061/manifest.json",
+          "sha256": "7cab4a6adaf42f1ca2e1af6fd7508dea500e253af24fddd5d3aeebf0b1ab3d91"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-062/manifest.json",
+          "sha256": "0ebe0c1fea650fcaf406cc5b2507ef98575a1fe7a60eca13fc7eb1bb56d954a9"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-063/manifest.json",
+          "sha256": "59d140f195f652b204c02928a43b9de9886493e08881da7affa8b6dbcb269e92"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-064/manifest.json",
+          "sha256": "f0dd35538c0749028f3d2ef3bbd030fea9db0fbd1222dc44c63fb8b28dd36218"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-065/manifest.json",
+          "sha256": "6b184df171c6fea9978270782cb8cf30e75c87198f5f848abd9b7f71e9936590"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-066/manifest.json",
+          "sha256": "37c6ba9ad289a161ff54932988a1cebc84841e476d9ae2979788acb2942c4e07"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-067/manifest.json",
+          "sha256": "cbd2b9a947ea4eeae03cdd55ccb6351f5546ed75e88fa3275d8b4595998d8732"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-068/manifest.json",
+          "sha256": "f0fd2181ace2e30706d25aa885527960ac1ffeb468f2e212cf0a8739849fbbfc"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-069/manifest.json",
+          "sha256": "ee0f2374accf1822fd6a9893306ce624ec117219dbb2e14dd27b6c90e19e85c2"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-070/manifest.json",
+          "sha256": "66bb2c97fbc1d343d16c12408330c964c4f97b64509c1b44c1f26195291ff7b7"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-071/manifest.json",
+          "sha256": "5b2eb535f6e8adc5ebb786ea9c7c7708d63bb00df7ba5ea6ea40ead87c291108"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-072/manifest.json",
+          "sha256": "c09e8b6d5ff6e5a6a5ba041b49615c4a61492c8d79b980d848c8c55d1cf86be9"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-073/manifest.json",
+          "sha256": "5bda98453c5697ca27a9302f54271ffd6d302f9697aee15888ababb4990a7a73"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-074/manifest.json",
+          "sha256": "b708f2579332280427433d29a379b7e17dcdcc923eab22385e58a92974d55242"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-075/manifest.json",
+          "sha256": "b6b39aad250e468b2d675a6225fec90098eabdd88e900582813c70001cdf019b"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-076/manifest.json",
+          "sha256": "5903ce039ff89ab07ec67196a84724840334136a870f6e564aea9db1b83f95c7"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-077/manifest.json",
+          "sha256": "0da1f82d465e86c28b3017712eaaafcc7ca9b81047c6836026ea4f0539a68f69"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-078/manifest.json",
+          "sha256": "f7316785ca343244553eae0ae84ad80c7137024e0229a179fec31bc592e822ca"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-079/manifest.json",
+          "sha256": "d0aaee3ae64953c375e39c16c965226cb99a1acd3fceb10aa2d5bcbd0aad6ad1"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-080/manifest.json",
+          "sha256": "8ba4e67ffbdbd279fb2394e64841290041331eae1e81ad238fbb96b9f1fb6255"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-081/manifest.json",
+          "sha256": "29fb2cef5cbac8a71d5f3be8562c263d476cb19fcd1b3c9c93ae3fc102ac3315"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-082/manifest.json",
+          "sha256": "d5456de64f4925c339825b2efc8767bb25e0b77eedfe1f424528059417641377"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-083/manifest.json",
+          "sha256": "1041e49e35db5e6c10d48eb5aaf6099bbf9dfa70bbc099b09133069b6453ca45"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-084/manifest.json",
+          "sha256": "de9adcf35e946dc65ef96b7e8b81a3c26d2bfd143cc1640b9a1f3a4fcdfa386e"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-085/manifest.json",
+          "sha256": "506e52a35bbae0a22bab5a31eede75346a65c5dfccb88fea1b7e9ba8ae333dd3"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-086/manifest.json",
+          "sha256": "5287b31641ef7c52c5822adf6e79bb334a911265eb11ec730eab5a8060d0e343"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-087/manifest.json",
+          "sha256": "e32740aed3048fa48969e4304525d12bf9d292c34680d059fc2e22a0e99b3ab4"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-088/manifest.json",
+          "sha256": "4d3884ece240b9e26e3a612784426fabdde87c363c0b8a3c6915544e80faa3d6"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-learning-v1-eval-089/manifest.json",
+          "sha256": "935c7a5d85740e96808c12c594e26fff68599f534fba8dc676fe0c2da038b42b"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1/registration.json",
+          "sha256": "016d16996361edef3d583b6da9b08d94fe20932136894d852f6fb9d4c2dfecc4"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-000/manifest.json",
+          "sha256": "33854d718f2ceb72fac6a3bceed2100ad14795b35270f5663864d5d923336907"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-001/manifest.json",
+          "sha256": "14962ae6de8c8d959d2ab80c99ca7bf2639d2d84d39a9ee7de5b5d1b8a9cc76a"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-002/manifest.json",
+          "sha256": "60237aac3c2be17c56cc70672285dfa38f1bdad211b0442f8e51c815f802c921"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-003/manifest.json",
+          "sha256": "06e9dd2cc99f8766d701b98b8f1ad2c8a042881e0b446652cb44583bf3198f83"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-004/manifest.json",
+          "sha256": "4feca69c04c400d3471666dc5c2472d9d121ef773eafd24b0c29909c711f5a82"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-005/manifest.json",
+          "sha256": "09f7dc828cd526cb9b9e61af3938bbef9a0f37591eab1a4ab3397956b238d2f7"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-006/manifest.json",
+          "sha256": "702b0f966bdfcf4aa251916fe7a91db45338d0ba889f3bea484eecdd79c761cc"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-007/manifest.json",
+          "sha256": "b9f2629fc3e3880c8a329c0163828bf1d2970592a80eac7c3f9a2b2ec3e8d9c3"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-008/manifest.json",
+          "sha256": "696a8d5e7703de5f5d5f95d723c8c7b18ae92bcf637192a7c3a31a32719f370e"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-009/manifest.json",
+          "sha256": "78c00ea5bb81a1f8d6bfbba590d3e81d0a4e0adc3f728c23975894c98086b21a"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-010/manifest.json",
+          "sha256": "2237f7684f504582d89be14e4f2c1505437a3d7679486efe9da5ca3389367dca"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-011/manifest.json",
+          "sha256": "61e0edf66be694ff4d91211b0dd5efbf8201d141d90c7a8159b20e52c5a2ecf1"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-012/manifest.json",
+          "sha256": "5667aeb6134cc39c1f50bc30dbf42e75e874510f12c44cc0f7fc4b10f7c830ce"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-013/manifest.json",
+          "sha256": "02c443c50767111efd76dd0c52bbddb2e0215c37d0c86d30ed33f6eebae7235e"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-014/manifest.json",
+          "sha256": "09111d984d86a0b8ad54bbb0d3049112aaf74bc6e39239ca632a6471ed87a81f"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-015/manifest.json",
+          "sha256": "064bac707d327863353e8413d02572dffd1a50a34981101eb225ca187c99fa50"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-016/manifest.json",
+          "sha256": "8c5901051395d1e401348298e0fc04be4614314828f7fad090036892db3ac9b0"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-017/manifest.json",
+          "sha256": "a12691aaade2e10275862c0be5822202eb8a4558a334f53f0bae830f38b98a02"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-018/manifest.json",
+          "sha256": "2cf5b74cc44c1a00a8814d027fd3ed58e0ed111101e377ed7039eee1310f9681"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-019/manifest.json",
+          "sha256": "22e85588b2c35dfb4ba525f7048375f1e549fa14589a030b5f61fbd5a9b9ade4"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-020/manifest.json",
+          "sha256": "9a2a8bc62c2f9a09ba6e274d82fe20f49c751e088c04a890c62721c88fc23084"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-021/manifest.json",
+          "sha256": "9a3098daa6d85645d6a8df86d6f44d122d7c3c8f239bd13de59ffab6f06022a4"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-022/manifest.json",
+          "sha256": "8d9a4b2bf97215bcf103c24eec26cd68f8cea7bfe7faece4aefc6acc1d588f36"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-023/manifest.json",
+          "sha256": "9274e19f60fc8d337d90d78d1cbae180f752902421a28f4640ba100b187943c9"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-024/manifest.json",
+          "sha256": "f53318493ba6c099e696e5ce309389fe349f74636f6b96740e4a34496e61c194"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-025/manifest.json",
+          "sha256": "4f3b92953c6948217adfa41379e64ffe7bb9aba835a489295800443b307afa92"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-026/manifest.json",
+          "sha256": "92b8cb4ad4c8c21306ed37d4d092fd06d8c3269380566df3fa5e4cdda8ecd99c"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-027/manifest.json",
+          "sha256": "716c6c41b362f5b838664833b65bd044f6ac20024f01d5589b72a0ccbab65cfa"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-028/manifest.json",
+          "sha256": "81971230d87e3bee814ae53ec8fff280c7e01cf7c13737267ecc6534441587af"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-029/manifest.json",
+          "sha256": "bc88abd2721bd621099a34c081410db7cb5b97cce4c21b57b7be2d07aeb3d66d"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-030/manifest.json",
+          "sha256": "18c949a65951f9766be316b6cbd32b91bcf0ecec863611a965d624dfc48db5d4"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-031/manifest.json",
+          "sha256": "0c6c5817dc91977ce4f7c1fc32cd0f8d7471858af4acb930c9182546aa81dc14"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-032/manifest.json",
+          "sha256": "d2819a8b55ec3a085c19fe33815ce92621604af53a87f0e03bb3af45f57c2617"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-033/manifest.json",
+          "sha256": "feed4a1d6fc3875c3046b58a9ec14d5169f4aa600dd9d00266de95ed78993a96"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-034/manifest.json",
+          "sha256": "a584838a01c6cae3856649e8842b0d0ad2596684c46a6f410058da8751fb22c1"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-learning-v1-eval-035/manifest.json",
+          "sha256": "0f12d04a8068d60db502f6f632b84eab56180b995a9df90196db9e25c4cfd964"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-v1/registration.json",
+          "sha256": "0f9bb3b96e031d902534f61f49e0d8595c2b20645e9a7a7430d42ef5f37c51f3"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-v1-labels-00/manifest.json",
+          "sha256": "f0a1b77fb8a90667c83d9ec1c2ae7c87c025243f620e197a945445b2778ae744"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-v1-labels-01/manifest.json",
+          "sha256": "029a660fd1513bc354fca398932f54797233c8b0b159ec31c5fcb1a658e0a4dd"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-v1-labels-02/manifest.json",
+          "sha256": "8388113826409ed62adb715e9f3186f617aa4307533f123ceeaf273b6ec750fe"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-v1-labels-03/manifest.json",
+          "sha256": "a7a036fc75b1dde75cc173d5637cbfbaacaeb3dd3ac0f598ac282d17d7854e30"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-v1-labels-04/manifest.json",
+          "sha256": "ea5a4f22fa65113fb7cfe7972caf09e0816ba42b39687de1791d1111c37c7560"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-v1-labels-05/manifest.json",
+          "sha256": "6d7ed6fd526618172e9c29d3444286e1ffc7d9751fc8a635bfecdaadd25247ab"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-v1-labels-06/manifest.json",
+          "sha256": "057bfc40f5dfebb65f8b409aa760c9ffeca064e231358c0d49415e7b4314a5d8"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-v1-labels-07/manifest.json",
+          "sha256": "851e68fab7d05eeaece194513ae655f34b6ed99c1e5009447f30f6d93714a35d"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-nominal-v1-labels-08/manifest.json",
+          "sha256": "a665425f9e44430bea5b0757f3cf1b60679ef562f8db43242fd743a1814357b3"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-v1/registration.json",
+          "sha256": "a4e39e4a7b2770ed3312ebf65e7807bded7e7e51c11ba906aa3c96a057c39b01"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-v1-labels-00/manifest.json",
+          "sha256": "506e50004d2814321f9a435a22bc679cb64fc403420a7d19c7a46a9268b37102"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-v1-labels-01/manifest.json",
+          "sha256": "88110308ff752aa9cf7c687dfdccc8e7942a75f247ab90b740f060ca1aaac41d"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-v1-labels-02/manifest.json",
+          "sha256": "038db1cd9be799c40660f771c462c174c3b53ee35996024bea39bcdca94898e6"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-v1-labels-03/manifest.json",
+          "sha256": "968f4dae2aa56d17d7c1b71c5743f153d56a87bf86c1af552e949c55c6fade15"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-v1-labels-04/manifest.json",
+          "sha256": "d4426b0b38048f4fa1fb2bed886bd31c478765db83ea9a9b63f709d824d37847"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-v1-labels-05/manifest.json",
+          "sha256": "49164ff74ed32e0c3afcb4b19377bddb083dd0bebc24631a14c935e776fcb7c5"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-v1-labels-06/manifest.json",
+          "sha256": "8d3b73b2fa5b208a9be9a648c501cf7a6f40dd58b8a4add3922ebd9b1718d6bb"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-v1-labels-07/manifest.json",
+          "sha256": "055243ac31f9dc8d9a914de1b641bd9b42a3fac1d032c264a6ad819c578eabcd"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-v1-labels-08/manifest.json",
+          "sha256": "59de54010b9043d8aa7e0e296c265f44de7607b3f4206be212d8ee20ec85b691"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-v1-labels-09/manifest.json",
+          "sha256": "3af410fbca6e8a0c5d927ca602cddd4a576de635e9c5b86bb6d22fd156efd38c"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-icra-v1-labels-10/manifest.json",
+          "sha256": "b4867e909a8fc4caa8897b47bef321b43ef02cf217c09653db69855673912f90"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b00/manifest.json",
+          "sha256": "fd79b7d3fa96b93b2ce71063067b475d16bb345476d4ffc60c7e4b9a5efee3b1"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b01/manifest.json",
+          "sha256": "d76ea2a55ecb83143193bdb392ab45ba2716301f3ab427af17999e32bbe071c0"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b02/manifest.json",
+          "sha256": "4844f4b9bbdbd2e9ddede85da66d2833aa22636adcc04c344b1eb5227928a163"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b03/manifest.json",
+          "sha256": "6d7819fddf8cf58300d67930ca035d0b65a74d072832fd2fd9bac84b5ccf70d4"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b04/manifest.json",
+          "sha256": "6160e1a39f3b7b2dad7496bc0454d0d5c8a6af4b32ae3b70232910ebb4196fcd"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b05/manifest.json",
+          "sha256": "948acaa849bb3d4979a3fbfb65aa17a8d5a24b36673ba7ff8248973b68abc31e"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b06/manifest.json",
+          "sha256": "30da3e1a7b3c288d1aa80a457e38975b20626fdb1121055bbf02bd589b2680d4"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b07/manifest.json",
+          "sha256": "1f258ce117444da20eab6564c7a7263ebf3206074737cfa8fc74d7483aea8838"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b08/manifest.json",
+          "sha256": "18fdd17cd7fb47ff57cd3e6f8421235c0588dac3bddfe9a26897fb64f40a3fae"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b09/manifest.json",
+          "sha256": "6f95768271783746fc08638ddc239cc2ef3d7c92ff293e7002d01bafa9069968"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b10/manifest.json",
+          "sha256": "5d37e4be3d19a26010ed517a95edc9afe9021d3cf5c0ca7719caa2525e37e848"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b11/manifest.json",
+          "sha256": "ccf814939d042cf710e3fbc4c464e95e19a912199b46247167121d779af338ea"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b12/manifest.json",
+          "sha256": "552594a26b63ae9e2a033f15680923f2efecf267eccff139a39efc682e629278"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b13/manifest.json",
+          "sha256": "827fa21fb8e90fe96b3862d198de3438ab84958745d824fd712cc29eb4d5551f"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b14/manifest.json",
+          "sha256": "f37374fec7be4e62eedce949dce4c909969467ace8f88b57fa9f6c3014068198"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b15/manifest.json",
+          "sha256": "61240de16916c5865ba27b79d3ac01d861734e3b60a732a86bfcf6c6da6baac8"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b16/manifest.json",
+          "sha256": "c9c4279e3ba9fb8c2921b6f414522a777a3720a2a27d13a91e1527020b15e29f"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b17/manifest.json",
+          "sha256": "ff3eae0e0f2eebb553a0fce4819c2f5531155e64fad21a8d3143609a1b08e114"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b18/manifest.json",
+          "sha256": "112a3a99f64ad4e9c739d0292601b9be16f2e09723a4a134b981309688f205da"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b19/manifest.json",
+          "sha256": "3d8870893354fa112170a73bb108bf6eefa0edfbdbcbcf646950f577c9e1a60c"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b20/manifest.json",
+          "sha256": "81762aacaab11c159afac006b9f5215f15624ad6ef86a8bd8b8b448cb0cf7c50"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b21/manifest.json",
+          "sha256": "df700c44620bf008bb833967e504e62978c992ff44721e5a8acae3084e7288b4"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b22/manifest.json",
+          "sha256": "baa752e11ded51ee22d8e41fc71116d5bc50a5b9324520ec550fc5e1c777391f"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b23/manifest.json",
+          "sha256": "df9a246c8be79b43cbbbca16e250b975dab1b0ffeb203ea1b09c8c65e0c211b3"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b24/manifest.json",
+          "sha256": "b12b7248c75e6af599c44e057d634b9ef250f3c8810d7d2f7b12e3ef2049c849"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b25/manifest.json",
+          "sha256": "465da7730ff27f606190c3f3f3038f1150c18f8cb91ae7b62b3ca5ad44fbe60c"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b26/manifest.json",
+          "sha256": "364ec3f77e3d6aca35c35fc7a2e0613800c6711c482aa561874c93d4e8632b7a"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b27/manifest.json",
+          "sha256": "7b9221808c94e35e5a133cbace40011a1ed1211bce1ffe3d22fff52d5da5c69f"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b28/manifest.json",
+          "sha256": "c66611bbc52e45c12690a4058538c81c82c7a6bbe5c2114b94e6ac6d40fe23ec"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-independent-layout-v1-b29/manifest.json",
+          "sha256": "875d317939c1b62144be755949cfe66995e24b42d404f3de83aa7a4a483fd434"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-inverse-learning-v1/manifest.json",
+          "sha256": "3413b1a941f0137da985116f1fa330616b209d47f6a6313e28d4db6b61b1e2fe"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-inverse-smoke-v1/manifest.json",
+          "sha256": "eb3a7f6f18caf51cf049bb8dd1221db686428d991152c02f0a42b6e376e5335d"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-ladder-extension-resource-v2/manifest.json",
+          "sha256": "68b5648616d0c7e5463254c5e83eed399436dc8c3fa58cf1efe9f908a0580e0d"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-ladder-extension-v1/manifest.json",
+          "sha256": "80e3b12ac6f6718820fd462836340112ddcc6053fdfbb473362b06f88fe35027"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-learned-command-check-v1/manifest.json",
+          "sha256": "d69b0a97f9c61e546bae962712fe32cc7e507da8eac69f10ca6b8fa781ba902e"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-learning-contract-v1/registration.json",
+          "sha256": "0e3d4fc28920964674a21c79369fb7da8380879f5955ff3421f57bf26b63816e"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-learning-contract-v2/registration.json",
+          "sha256": "ddff3268fd401ee8d31bb01a76eaf6fb70e315f75187eb642dae1be6e813a4ba"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-learning-input-audit-v1/registration.json",
+          "sha256": "c930139bdaeafbee304a5931cddeb4a46865b6ac98306e4578a5ee6ab175a812"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-learning-input-audit-v2/registration.json",
+          "sha256": "c2bfbd7782ed509ab71eed00d1088908b9be15e36b41e81f0b47fcc73b78cf6b"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-learning-input-audit-v3/registration.json",
+          "sha256": "8aadb94f097380cb40cdd66b78bcbce59bc8ea75777472cc040b11cc3fd7dbca"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-margin-learning-v1/manifest.json",
+          "sha256": "a6ba7d7d95f185da6bdd5b77c6494c7eea8052fef3ef2d573fb1406a86e70918"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-margin-smoke-v1/manifest.json",
+          "sha256": "525d6e1f016152609df124d3ac7902df83c39902039252295aec6592f28734cb"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-native-beam-audit-v1/registration.json",
+          "sha256": "f238373f5ca1ad29dcad80f895c6e157d9c1b6a0f04989491c2c5b373b276bc5"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-native-crossing-audit-v1/registration.json",
+          "sha256": "b01e28b5eb3fc549fc826501976f22d7079c3ce90fc53bc189ff77eab7f8ea65"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-native-frame-binding-v1/registration.json",
+          "sha256": "a7b682c0e0357a973d32f2a087eae0c211483c60bcea0e4c0a06e4e99a104c41"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-no-contrast-baseline-v1/registration.json",
+          "sha256": "eef932f642faa6a0a96bd3ba327a85cd2a3dd0aa2c953f4b1eeb5cc4169f6467"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-option-contrast-preparation-v1/registration.json",
+          "sha256": "daf4fb1c1a3e36619b5d6b7e185e2afb28b3cc24e3ed0dbe26235e0186deda10"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-option-contrast-v1/manifest.json",
+          "sha256": "276ffc96e46bd953f7b4a05cb4717ed7c0fcd7060935f5a683e4b1490ac20421"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-option-lowbeam-v1/manifest.json",
+          "sha256": "5050daab9062c0349755dd1a72a69d9783e2e3f2446f8bce7d9eea828979fa95"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-option-qualification-v1/manifest.json",
+          "sha256": "e9b7f1e927a170f6a0209105483ed24569acbdf088bd4f8e242bdf475c932533"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-option-qualification-v2/manifest.json",
+          "sha256": "47375da8eac171864fd7d217e81d49432048fd7206b2842eae700c791e4af08c"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-overhang-eval-bank-v2/manifest.json",
+          "sha256": "6dbdd4eefe345d7bfa0c253ecaa7dcf80266ba1da18bb7c52db654a2e4e57f23"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-overhang-interface-v1/manifest.json",
+          "sha256": "9fd9cb7c714be7fac40edda2bf986597649b0869bbcf6c839a46eed4fde2c3d8"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-overhang-variation-v1/manifest.json",
+          "sha256": "667f62b09b2f0565e36b5b0dfa0463b2d392cc7e39915aa85e5403be2c991017"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-placement-certificate-v1/manifest.json",
+          "sha256": "a6af55c13bc62445c18abaa5c449e7235217fbdd6b97356591b8db777f01fa0b"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-policy-readiness-v1/registration.json",
+          "sha256": "d1c3317c391c5c3c47694f7e001d2a1deeaf66e0b6b037cdbe69456bf8fbd25e"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-reactive-interface-query-v2/manifest.json",
+          "sha256": "11710e4975a89836b9db405cfb1fa4b22d75742022a1c44354b1e6646334ed86"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-reactive-interface-resource-v1/manifest.json",
+          "sha256": "cb041ad3b7baab7ce555b4767b991c789f4ee982cf47e3fb7e7587a6607f4a2d"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-reactive-interface-typed-v3/manifest.json",
+          "sha256": "ff74a6497e014e247e0626744b5288e68e6da350610e4b50fcee831013fbaeba"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-reactive-interface-v1/manifest.json",
+          "sha256": "8ea0e8511243724bc263d83ba2005ab6608bc35d23e04b83ba610c6163afd693"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-reactive-interface-v1-prelaunch-v2/manifest.json",
+          "sha256": "f0e0f2239b9bb9f5964ca87732991dff863f7be79924ad7b2a6a3ff3039a53e9"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-refinement-v1/registration.json",
+          "sha256": "689159717e5e346820f3691ccea1de2c84881f77c435a1a0179255dbeecae083"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-repeatability-v1/manifest.json",
+          "sha256": "d54869e3aaec013a478b69b6afc8b76046c85a70ac4ae7e2c09c8aee6ca0f0d2"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-selector-breakpoint-v1/manifest.json",
+          "sha256": "bc27aa3cd52865c33d0ea1b1d56d39a7f9dd9f1d1693cceef80a21c80f92fc52"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-selector-breakpoint-v1/registration.json",
+          "sha256": "f1d9344ad18b53ea0dd1814c3e1cde813ef7b8f8edbc64397c02c3db3996a4d7"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-selector-input-diagnostic-v1/registration.json",
+          "sha256": "ee85d248d5fa64fc8ce168a391380d78c49b45d5d245c597de7c9c224420554f"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-selector-input-diagnostic-v2/registration.json",
+          "sha256": "8c54e76237166183552353aecac236e3919917d138306690077e7b69cfa6746b"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-shared-linear-control-v2/manifest.json",
+          "sha256": "82260efe405fa2245a0530e960b58217c18a9c5380e7a40b6a4e0739a0933069"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-solution-curriculum-v2/registration.json",
+          "sha256": "36aca171b985c4f213bb755a30c8aeae24e05f18fa06d8ccbcf10c2d46926b81"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-solution-curriculum-v3/registration.json",
+          "sha256": "93720cc652ba08ee87f478db45e26bc6b787ed6465507af6fa9b0f7d8d18da8e"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-source-execution-recovery-v1/registration.json",
+          "sha256": "ef51d34b53c9146bcb315aef81b1a4225da1e7548616db0f1bc7a7c5d3a424cc"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-source-execution-v1/registration.json",
+          "sha256": "ef51d34b53c9146bcb315aef81b1a4225da1e7548616db0f1bc7a7c5d3a424cc"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-source-phase-v1/manifest.json",
+          "sha256": "db1b13d5fe683fd4f28c836fe400b7dd96c528588e095d2a99dd4c32d089c6f7"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-source-phase-v1/registration.json",
+          "sha256": "d76bb56568717ceac853748b7fca7689a79d6cdae96a946ef7c96652addd5192"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-station-search-v1/registration.json",
+          "sha256": "adc38d663454431d2b7e63c87dd8a45f9e4e4b30ae778c49fc12fe7ac36677ce"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-submission-command-audit-v1/registration.json",
+          "sha256": "8c8cd9322c0e86f56135c7c61f898e1d33341c324d85924499f1e39a2dd8455d"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-submission-command-audit-v1-eval-00/manifest.json",
+          "sha256": "c15de3e7ee4e78ad11c494c96120b80909580495c7361b49c2892eb73c893571"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-submission-command-audit-v1-eval-01/manifest.json",
+          "sha256": "887a44eb8541a0d65268a2ff84c4f7a28df6cfbe15b748c5d971440c13fb384e"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-submission-command-audit-v1-eval-02/manifest.json",
+          "sha256": "7a52e1985765f1921b54bb7235b5932e8662298b50a60e1d63fb92946a657c76"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-submission-command-audit-v1-eval-03/manifest.json",
+          "sha256": "aff73d701a77371d080f87a8bccdcd55d3762291ac83068ca6b20c022d9a7b2e"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-submission-command-audit-v1-eval-04/manifest.json",
+          "sha256": "9dbedf3d3d08ffa12a0320d5e96a1b69735590d1fce185a7872afcbb04501578"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-submission-command-audit-v1-eval-05/manifest.json",
+          "sha256": "06f219b2fe66372ab2c3355aa8c9c2b0b8ffa43fd5915006b4bcc2d93d339e66"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-submission-command-audit-v1-eval-06/manifest.json",
+          "sha256": "eb1da865c916cafad49826b8bd137d198dded5c6cd20e8517f7f3c70287db60a"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-submission-command-audit-v1-eval-07/manifest.json",
+          "sha256": "0a139234f847c381110d4b2bea12b4fb7331b5b63c7759ce49712c3531257570"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-temporal-native-audit-v1/registration.json",
+          "sha256": "6a37aab7ddc681950c7038f59d69216cda28b8a7e3963fa55a4ff9ba6e5fc722"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-timing-diagnostic-v1/manifest.json",
+          "sha256": "d5507b411da8d86f67477e61266c6c3b362aea17747009affc148d9c8e76de7e"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-transition-construction-v1/registration.json",
+          "sha256": "0b3344287c97ad82770fc7c958927a25d3d540b605c0ffd27c6b7fccb297a5d4"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-transition-construction-v1-s41001/manifest.json",
+          "sha256": "147b991a6aa6b002518c18ade3cc100e99cd710121c0a55ed6714948fdfdae0a"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-transition-forecast-v1/registration.json",
+          "sha256": "8bef187586754b53177b1c3117172e8a90446c6feba6c8c3f1a7719b26b147e9"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-transition-support-v1/registration.json",
+          "sha256": "3eabfd734143aa20a988811f317586b6a8bb583eebba2fef86d012d3faae6435"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-traversal-development-dataset-v2/manifest.json",
+          "sha256": "001e5c439b330284e8ec698f9da98b260e40b169b75a5fc01189ac62b89a4640"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-traversal-development-dataset-v2-clean/groups.json",
+          "sha256": "8852b7c5217f0cc8adc1462218dfb24854fc99820df81b273b2da7a1461dfe40"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-traversal-development-dataset-v2-clean/manifest.json",
+          "sha256": "5f49e6d19ca27e9c211582835223ad155a5a73b59d8ce01a59b183b2d33a391d"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-uncertainty-learning-v1/manifest.json",
+          "sha256": "fadcb06f44e49bc0a91222eab95951b25f234065e1f53388a268d6355bb217aa"
+        },
+        {
+          "path": "/home/linjiw/research-data/groot-wbc/m2s-uncertainty-smoke-v1/manifest.json",
+          "sha256": "00c04932d4ae8fa7a6ba87dd6963b42fe86d9316b4373942a8104798e096319d"
+        }
+      ]
+    }
+  },
+  "evaluation": {
+    "physics_seeds": [
+      93101,
+      93102
+    ],
+    "seeds_reused_across_methods": true,
+    "single_layouts": [
+      {
+        "layout_id": "locked_v2_single_00",
+        "source_id": 41001,
+        "family": "short",
+        "beams": [
+          {
+            "route_progress_fraction": 0.273498853,
+            "underside_m": 1.295394903,
+            "length_m": 0.20986329,
+            "width_m": 1.518494441,
+            "thickness_m": 0.081377572,
+            "lateral_offset_m": -0.037191665,
+            "yaw_offset_rad": 0.005876333
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_01",
+        "source_id": 41002,
+        "family": "short",
+        "beams": [
+          {
+            "route_progress_fraction": 0.477083357,
+            "underside_m": 1.389373184,
+            "length_m": 0.139945623,
+            "width_m": 1.327975055,
+            "thickness_m": 0.13524297,
+            "lateral_offset_m": -0.043525349,
+            "yaw_offset_rad": 0.042229796
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_02",
+        "source_id": 41003,
+        "family": "short",
+        "beams": [
+          {
+            "route_progress_fraction": 0.28262011,
+            "underside_m": 1.158399447,
+            "length_m": 0.181781524,
+            "width_m": 1.400428537,
+            "thickness_m": 0.11159203,
+            "lateral_offset_m": 0.008379578,
+            "yaw_offset_rad": -0.000421361
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_03",
+        "source_id": 41001,
+        "family": "short",
+        "beams": [
+          {
+            "route_progress_fraction": 0.40837659,
+            "underside_m": 1.238358302,
+            "length_m": 0.240711973,
+            "width_m": 1.198698209,
+            "thickness_m": 0.120798043,
+            "lateral_offset_m": -0.070664198,
+            "yaw_offset_rad": -0.046370941
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_04",
+        "source_id": 41002,
+        "family": "short",
+        "beams": [
+          {
+            "route_progress_fraction": 0.643439222,
+            "underside_m": 1.257411575,
+            "length_m": 0.171409587,
+            "width_m": 1.44455521,
+            "thickness_m": 0.08938188,
+            "lateral_offset_m": 0.07627911,
+            "yaw_offset_rad": 0.033073374
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_05",
+        "source_id": 41003,
+        "family": "short",
+        "beams": [
+          {
+            "route_progress_fraction": 0.750981027,
+            "underside_m": 1.241990674,
+            "length_m": 0.232421855,
+            "width_m": 1.530209721,
+            "thickness_m": 0.12173867,
+            "lateral_offset_m": -0.06278071,
+            "yaw_offset_rad": 0.04411631
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_06",
+        "source_id": 41001,
+        "family": "short",
+        "beams": [
+          {
+            "route_progress_fraction": 0.594759872,
+            "underside_m": 1.237876437,
+            "length_m": 0.118351667,
+            "width_m": 1.478290179,
+            "thickness_m": 0.091212823,
+            "lateral_offset_m": 0.003662875,
+            "yaw_offset_rad": -0.014952682
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_07",
+        "source_id": 41002,
+        "family": "short",
+        "beams": [
+          {
+            "route_progress_fraction": 0.38657555,
+            "underside_m": 1.153014308,
+            "length_m": 0.229942746,
+            "width_m": 1.370066903,
+            "thickness_m": 0.097154048,
+            "lateral_offset_m": 0.00507541,
+            "yaw_offset_rad": 0.051706164
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_08",
+        "source_id": 41003,
+        "family": "sustained",
+        "beams": [
+          {
+            "route_progress_fraction": 0.346712297,
+            "underside_m": 1.388280967,
+            "length_m": 0.506117293,
+            "width_m": 1.48552284,
+            "thickness_m": 0.157722292,
+            "lateral_offset_m": 0.026296826,
+            "yaw_offset_rad": -0.02719451
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_09",
+        "source_id": 41001,
+        "family": "sustained",
+        "beams": [
+          {
+            "route_progress_fraction": 0.369852736,
+            "underside_m": 1.348370774,
+            "length_m": 0.802157407,
+            "width_m": 1.476239344,
+            "thickness_m": 0.087795778,
+            "lateral_offset_m": 0.025442283,
+            "yaw_offset_rad": 0.05349247
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_10",
+        "source_id": 41002,
+        "family": "sustained",
+        "beams": [
+          {
+            "route_progress_fraction": 0.540406998,
+            "underside_m": 1.253141372,
+            "length_m": 0.789251979,
+            "width_m": 1.260768346,
+            "thickness_m": 0.147453139,
+            "lateral_offset_m": -0.003316771,
+            "yaw_offset_rad": 0.001026916
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_11",
+        "source_id": 41003,
+        "family": "sustained",
+        "beams": [
+          {
+            "route_progress_fraction": 0.666939018,
+            "underside_m": 1.20174061,
+            "length_m": 0.700467676,
+            "width_m": 1.539866029,
+            "thickness_m": 0.156775645,
+            "lateral_offset_m": 0.079654308,
+            "yaw_offset_rad": -0.047459699
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_12",
+        "source_id": 41001,
+        "family": "sustained",
+        "beams": [
+          {
+            "route_progress_fraction": 0.490423086,
+            "underside_m": 1.398375884,
+            "length_m": 0.649440437,
+            "width_m": 1.455399243,
+            "thickness_m": 0.127427658,
+            "lateral_offset_m": 0.010846226,
+            "yaw_offset_rad": -0.031743011
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_13",
+        "source_id": 41002,
+        "family": "sustained",
+        "beams": [
+          {
+            "route_progress_fraction": 0.327585698,
+            "underside_m": 1.286524312,
+            "length_m": 0.826548666,
+            "width_m": 1.241809025,
+            "thickness_m": 0.095752044,
+            "lateral_offset_m": 0.044436212,
+            "yaw_offset_rad": 0.034558093
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_14",
+        "source_id": 41003,
+        "family": "sustained",
+        "beams": [
+          {
+            "route_progress_fraction": 0.501781246,
+            "underside_m": 1.340198997,
+            "length_m": 0.553934428,
+            "width_m": 1.197299144,
+            "thickness_m": 0.099758528,
+            "lateral_offset_m": -0.068057894,
+            "yaw_offset_rad": -0.050582798
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_15",
+        "source_id": 41001,
+        "family": "sustained",
+        "beams": [
+          {
+            "route_progress_fraction": 0.342120301,
+            "underside_m": 1.23275009,
+            "length_m": 0.559353005,
+            "width_m": 1.284807658,
+            "thickness_m": 0.128944983,
+            "lateral_offset_m": 0.046783721,
+            "yaw_offset_rad": 0.041274476
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_16",
+        "source_id": 41002,
+        "family": "early_constraint",
+        "beams": [
+          {
+            "route_progress_fraction": 0.292798882,
+            "underside_m": 1.390005123,
+            "length_m": 0.13423926,
+            "width_m": 1.190765512,
+            "thickness_m": 0.096319535,
+            "lateral_offset_m": 0.024291995,
+            "yaw_offset_rad": 0.025217511
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_17",
+        "source_id": 41003,
+        "family": "early_constraint",
+        "beams": [
+          {
+            "route_progress_fraction": 0.34947516,
+            "underside_m": 1.202279789,
+            "length_m": 0.382375819,
+            "width_m": 1.499714476,
+            "thickness_m": 0.118187936,
+            "lateral_offset_m": 0.047236117,
+            "yaw_offset_rad": -0.020930248
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_18",
+        "source_id": 41001,
+        "family": "early_constraint",
+        "beams": [
+          {
+            "route_progress_fraction": 0.321542207,
+            "underside_m": 1.281002747,
+            "length_m": 0.243364395,
+            "width_m": 1.315085497,
+            "thickness_m": 0.138548681,
+            "lateral_offset_m": -0.005347038,
+            "yaw_offset_rad": -0.016357383
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_19",
+        "source_id": 41002,
+        "family": "early_constraint",
+        "beams": [
+          {
+            "route_progress_fraction": 0.272455289,
+            "underside_m": 1.220792301,
+            "length_m": 0.102730184,
+            "width_m": 1.252252228,
+            "thickness_m": 0.0859394,
+            "lateral_offset_m": 0.076663259,
+            "yaw_offset_rad": -0.007758938
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_20",
+        "source_id": 41003,
+        "family": "early_constraint",
+        "beams": [
+          {
+            "route_progress_fraction": 0.153206913,
+            "underside_m": 1.217623135,
+            "length_m": 0.307337121,
+            "width_m": 1.444275648,
+            "thickness_m": 0.145403577,
+            "lateral_offset_m": 0.008414946,
+            "yaw_offset_rad": -0.01453283
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_21",
+        "source_id": 41001,
+        "family": "early_constraint",
+        "beams": [
+          {
+            "route_progress_fraction": 0.200424649,
+            "underside_m": 1.157514417,
+            "length_m": 0.147885996,
+            "width_m": 1.437837545,
+            "thickness_m": 0.143387046,
+            "lateral_offset_m": -0.034224643,
+            "yaw_offset_rad": 0.030389207
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_22",
+        "source_id": 41002,
+        "family": "early_constraint",
+        "beams": [
+          {
+            "route_progress_fraction": 0.187646465,
+            "underside_m": 1.194756262,
+            "length_m": 0.27917669,
+            "width_m": 1.325819495,
+            "thickness_m": 0.080006291,
+            "lateral_offset_m": 0.047554216,
+            "yaw_offset_rad": 0.006907132
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_single_23",
+        "source_id": 41003,
+        "family": "early_constraint",
+        "beams": [
+          {
+            "route_progress_fraction": 0.203274533,
+            "underside_m": 1.171082043,
+            "length_m": 0.330115671,
+            "width_m": 1.282769742,
+            "thickness_m": 0.135548783,
+            "lateral_offset_m": 0.050583192,
+            "yaw_offset_rad": 0.006571724
+          }
+        ]
+      }
+    ],
+    "two_beam_compositions": [
+      {
+        "layout_id": "locked_v2_course_00",
+        "source_id": 41001,
+        "family": "two_overhead_passages",
+        "beams": [
+          {
+            "route_progress_fraction": 0.315289775,
+            "underside_m": 1.228593415,
+            "length_m": 0.386009715,
+            "width_m": 1.221935363,
+            "thickness_m": 0.088764264,
+            "lateral_offset_m": 0.05249302,
+            "yaw_offset_rad": 0.027772229
+          },
+          {
+            "route_progress_fraction": 0.676906225,
+            "underside_m": 1.303497187,
+            "length_m": 0.320993652,
+            "width_m": 1.526928871,
+            "thickness_m": 0.124464385,
+            "lateral_offset_m": -0.033146706,
+            "yaw_offset_rad": 0.012597541
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_course_01",
+        "source_id": 41002,
+        "family": "two_overhead_passages",
+        "beams": [
+          {
+            "route_progress_fraction": 0.294890993,
+            "underside_m": 1.335339209,
+            "length_m": 0.306740107,
+            "width_m": 1.479129246,
+            "thickness_m": 0.130409427,
+            "lateral_offset_m": 0.075326965,
+            "yaw_offset_rad": -0.03508208
+          },
+          {
+            "route_progress_fraction": 0.733851169,
+            "underside_m": 1.143048427,
+            "length_m": 0.355711174,
+            "width_m": 1.470790616,
+            "thickness_m": 0.143015159,
+            "lateral_offset_m": -0.065987725,
+            "yaw_offset_rad": 0.042067216
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_course_02",
+        "source_id": 41003,
+        "family": "two_overhead_passages",
+        "beams": [
+          {
+            "route_progress_fraction": 0.331515032,
+            "underside_m": 1.151147056,
+            "length_m": 0.178081754,
+            "width_m": 1.204455505,
+            "thickness_m": 0.112528307,
+            "lateral_offset_m": -0.064841408,
+            "yaw_offset_rad": -0.045579369
+          },
+          {
+            "route_progress_fraction": 0.719205602,
+            "underside_m": 1.310277607,
+            "length_m": 0.160671613,
+            "width_m": 1.34805303,
+            "thickness_m": 0.110752329,
+            "lateral_offset_m": 0.065044245,
+            "yaw_offset_rad": -0.051411581
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_course_03",
+        "source_id": 41001,
+        "family": "two_overhead_passages",
+        "beams": [
+          {
+            "route_progress_fraction": 0.245658373,
+            "underside_m": 1.373897601,
+            "length_m": 0.349225083,
+            "width_m": 1.497821025,
+            "thickness_m": 0.156966999,
+            "lateral_offset_m": 0.048563045,
+            "yaw_offset_rad": 0.042156021
+          },
+          {
+            "route_progress_fraction": 0.753980547,
+            "underside_m": 1.165721755,
+            "length_m": 0.384925792,
+            "width_m": 1.285446214,
+            "thickness_m": 0.114164985,
+            "lateral_offset_m": -0.011001298,
+            "yaw_offset_rad": 0.017861349
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_course_04",
+        "source_id": 41002,
+        "family": "two_overhead_passages",
+        "beams": [
+          {
+            "route_progress_fraction": 0.303581332,
+            "underside_m": 1.149257917,
+            "length_m": 0.428513972,
+            "width_m": 1.465772204,
+            "thickness_m": 0.125401154,
+            "lateral_offset_m": -0.034045461,
+            "yaw_offset_rad": -0.031848649
+          },
+          {
+            "route_progress_fraction": 0.757873528,
+            "underside_m": 1.246727247,
+            "length_m": 0.258897542,
+            "width_m": 1.386018202,
+            "thickness_m": 0.15468894,
+            "lateral_offset_m": -0.029466706,
+            "yaw_offset_rad": 0.011973825
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_course_05",
+        "source_id": 41003,
+        "family": "two_overhead_passages",
+        "beams": [
+          {
+            "route_progress_fraction": 0.252273021,
+            "underside_m": 1.204046842,
+            "length_m": 0.317385429,
+            "width_m": 1.187918618,
+            "thickness_m": 0.099616363,
+            "lateral_offset_m": -0.011252753,
+            "yaw_offset_rad": -0.020007633
+          },
+          {
+            "route_progress_fraction": 0.758296466,
+            "underside_m": 1.397799795,
+            "length_m": 0.152842508,
+            "width_m": 1.368382944,
+            "thickness_m": 0.123376711,
+            "lateral_offset_m": 0.034059222,
+            "yaw_offset_rad": -0.036127126
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_course_06",
+        "source_id": 41001,
+        "family": "two_overhead_passages",
+        "beams": [
+          {
+            "route_progress_fraction": 0.331728985,
+            "underside_m": 1.182800155,
+            "length_m": 0.313481729,
+            "width_m": 1.236390435,
+            "thickness_m": 0.152877184,
+            "lateral_offset_m": 0.035034793,
+            "yaw_offset_rad": -0.04980818
+          },
+          {
+            "route_progress_fraction": 0.69635763,
+            "underside_m": 1.243587873,
+            "length_m": 0.201153813,
+            "width_m": 1.30692829,
+            "thickness_m": 0.101564208,
+            "lateral_offset_m": -0.010367824,
+            "yaw_offset_rad": -0.000474639
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_course_07",
+        "source_id": 41002,
+        "family": "two_overhead_passages",
+        "beams": [
+          {
+            "route_progress_fraction": 0.347266972,
+            "underside_m": 1.356886779,
+            "length_m": 0.241645518,
+            "width_m": 1.45981903,
+            "thickness_m": 0.132652743,
+            "lateral_offset_m": -0.048531882,
+            "yaw_offset_rad": 0.04560258
+          },
+          {
+            "route_progress_fraction": 0.742686409,
+            "underside_m": 1.334884741,
+            "length_m": 0.538708882,
+            "width_m": 1.275029223,
+            "thickness_m": 0.119046905,
+            "lateral_offset_m": 0.048929642,
+            "yaw_offset_rad": 0.034345334
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_course_08",
+        "source_id": 41003,
+        "family": "two_overhead_passages",
+        "beams": [
+          {
+            "route_progress_fraction": 0.318019041,
+            "underside_m": 1.389269385,
+            "length_m": 0.420470917,
+            "width_m": 1.275111979,
+            "thickness_m": 0.125125436,
+            "lateral_offset_m": -0.051246595,
+            "yaw_offset_rad": -0.029487089
+          },
+          {
+            "route_progress_fraction": 0.722685363,
+            "underside_m": 1.314737352,
+            "length_m": 0.638130696,
+            "width_m": 1.473086781,
+            "thickness_m": 0.140820471,
+            "lateral_offset_m": -0.059203409,
+            "yaw_offset_rad": 0.038333991
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_course_09",
+        "source_id": 41001,
+        "family": "two_overhead_passages",
+        "beams": [
+          {
+            "route_progress_fraction": 0.240143452,
+            "underside_m": 1.329076726,
+            "length_m": 0.444408497,
+            "width_m": 1.216758521,
+            "thickness_m": 0.147849796,
+            "lateral_offset_m": 0.022964624,
+            "yaw_offset_rad": 0.05004009
+          },
+          {
+            "route_progress_fraction": 0.655480934,
+            "underside_m": 1.305189365,
+            "length_m": 0.608435885,
+            "width_m": 1.363686629,
+            "thickness_m": 0.135210498,
+            "lateral_offset_m": -0.028959961,
+            "yaw_offset_rad": -0.054596165
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_course_10",
+        "source_id": 41002,
+        "family": "two_overhead_passages",
+        "beams": [
+          {
+            "route_progress_fraction": 0.241095555,
+            "underside_m": 1.165673492,
+            "length_m": 0.415997519,
+            "width_m": 1.161446122,
+            "thickness_m": 0.133451745,
+            "lateral_offset_m": -0.025195551,
+            "yaw_offset_rad": 0.046966805
+          },
+          {
+            "route_progress_fraction": 0.698250848,
+            "underside_m": 1.143068898,
+            "length_m": 0.311194779,
+            "width_m": 1.309324507,
+            "thickness_m": 0.114852356,
+            "lateral_offset_m": -0.040255743,
+            "yaw_offset_rad": -0.007457467
+          }
+        ]
+      },
+      {
+        "layout_id": "locked_v2_course_11",
+        "source_id": 41003,
+        "family": "two_overhead_passages",
+        "beams": [
+          {
+            "route_progress_fraction": 0.348070818,
+            "underside_m": 1.180745398,
+            "length_m": 0.326774116,
+            "width_m": 1.356160657,
+            "thickness_m": 0.145565739,
+            "lateral_offset_m": 0.026738419,
+            "yaw_offset_rad": -0.004158398
+          },
+          {
+            "route_progress_fraction": 0.720588913,
+            "underside_m": 1.294223436,
+            "length_m": 0.470186944,
+            "width_m": 1.227116769,
+            "thickness_m": 0.110889529,
+            "lateral_offset_m": -0.006494324,
+            "yaw_offset_rad": -0.000545948
+          }
+        ]
+      }
+    ],
+    "nominal_episodes_per_policy": 72,
+    "single_episodes_per_policy": 48,
+    "course_episodes_per_policy": 24,
+    "execution_order_seed": 202609081602,
+    "main_panel": "nominal offset only,all36 layouts x2 physics seeds; course execution held until continuation interface qualified",
+    "stress_panel": "all8 nonzero axis offsets for every layout and physics seed,separately reported; no additions to main denominator",
+    "stress_episodes_per_policy": 576,
+    "course_perturbation_application": "Apply the same delta independently to both beam parameter records; never relabel nominal success as perturbed success",
+    "perturbation_set": [
+      {
+        "id": "nominal",
+        "delta_route_progress_fraction": 0.0,
+        "delta_underside_m": 0.0,
+        "delta_lateral_m": 0.0,
+        "delta_yaw_rad": 0.0
+      },
+      {
+        "id": "route_progress_fraction_minus",
+        "delta_route_progress_fraction": -0.01,
+        "delta_underside_m": 0.0,
+        "delta_lateral_m": 0.0,
+        "delta_yaw_rad": 0.0
+      },
+      {
+        "id": "route_progress_fraction_plus",
+        "delta_route_progress_fraction": 0.01,
+        "delta_underside_m": 0.0,
+        "delta_lateral_m": 0.0,
+        "delta_yaw_rad": 0.0
+      },
+      {
+        "id": "underside_m_minus",
+        "delta_route_progress_fraction": 0.0,
+        "delta_underside_m": -0.01,
+        "delta_lateral_m": 0.0,
+        "delta_yaw_rad": 0.0
+      },
+      {
+        "id": "underside_m_plus",
+        "delta_route_progress_fraction": 0.0,
+        "delta_underside_m": 0.01,
+        "delta_lateral_m": 0.0,
+        "delta_yaw_rad": 0.0
+      },
+      {
+        "id": "lateral_m_minus",
+        "delta_route_progress_fraction": 0.0,
+        "delta_underside_m": 0.0,
+        "delta_lateral_m": -0.02,
+        "delta_yaw_rad": 0.0
+      },
+      {
+        "id": "lateral_m_plus",
+        "delta_route_progress_fraction": 0.0,
+        "delta_underside_m": 0.0,
+        "delta_lateral_m": 0.02,
+        "delta_yaw_rad": 0.0
+      },
+      {
+        "id": "yaw_rad_minus",
+        "delta_route_progress_fraction": 0.0,
+        "delta_underside_m": 0.0,
+        "delta_lateral_m": 0.0,
+        "delta_yaw_rad": -0.02
+      },
+      {
+        "id": "yaw_rad_plus",
+        "delta_route_progress_fraction": 0.0,
+        "delta_underside_m": 0.0,
+        "delta_lateral_m": 0.0,
+        "delta_yaw_rad": 0.02
+      }
+    ],
+    "feasibility_filter": "none; retain all geometries; mark unsupported runtime as not_run,never as a passing/failing rollout",
+    "course_rendering": "Instantiate both beams together and run one continuous episode; never stitch independently reset passages",
+    "student_input_exclusions": [
+      "layout_id",
+      "source_id",
+      "beam parameters",
+      "scene object identity",
+      "physical branch labels",
+      "teacher state",
+      "held-out outcomes"
+    ]
+  },
+  "construction_contract": {
+    "margin_m": 0.01,
+    "positive": "minimum signed executed-envelope clearance over the9 finite offsets >=margin",
+    "negative": "nominal executed-envelope clearance <=-margin",
+    "observation": "causal delivered sensor evidence before empirically qualified transition deadline; timing rule fixed in implementation lock",
+    "physical_labels": "every compared option receives an actual matched-context branch; geometry never substituted for physical passage",
+    "offsets_reference": "evaluation.perturbation_set",
+    "screen_ablation": "old all-offset contrast may be reported separately,never confused with the revised objective"
+  },
+  "acquisition": {
+    "primary_budget_unit": "actual physics integration steps advanced across every new teacher,student,positive,negative,failed,reset and rejected-execution branch; record control frames separately",
+    "budget_checkpoints": [
+      50000,
+      150000,
+      450000
+    ],
+    "acquisition_seeds": [
+      93201,
+      93202,
+      93203
+    ],
+    "nested_corpora": true,
+    "budget_rule": "Count all branches; only begin a matched group when its predeclared maximum step cost fits the remaining budget; do not silently exceed or truncate a group",
+    "shared_option_qualification_cost": "Record once and allocate equally across arm reporting; inherited corpus and reuse are separately disclosed",
+    "proposal_costs": [
+      "all geometry queries",
+      "analytic search wall seconds",
+      "learned proposal fit wall seconds",
+      "proposal inference wall seconds",
+      "teacher search wall seconds",
+      "student training wall seconds"
+    ],
+    "priority_mixture": {
+      "uniform_fraction": 0.2,
+      "coverage_fraction": 0.2,
+      "verified_gap_fraction": 0.6,
+      "coverage_key": "teacher option x declared obstacle-length stratum x timing-eligibility class",
+      "unknown_gap": "zero regret weight; diagnostic role only without admissible teacher target"
+    }
+  },
+  "common_implementation": {
+    "status": "pending separate immutable implementation lock before evaluation or method tuning on evaluation outcomes",
+    "retained_tracker": "frozen SONIC,identical checkpoint+simulator+robot hashes across all arms",
+    "initial_action_interface": [
+      "walk",
+      "one qualified adaptation reference at repeated legal entry/return points"
+    ],
+    "expanded_candidate_options": [
+      "walk",
+      "d040_t020",
+      "d040_t030",
+      "d040_t040",
+      "d055_t030",
+      "d070_t030",
+      "d085_t030"
+    ],
+    "qualification_rule": "Empty-scene transition qualification only; same admitted options for every curriculum/baseline; select no option using locked evaluation outcomes",
+    "sensor": "35 rays from one body-mounted sensor pose with measured surface normals; causal floor/ceiling and occupancy history with separate observed/unknown masks",
+    "sensor_feature_module": "gear_sonic/dataset_generation/hallucination/motion2scene_closed_loop_policy.py",
+    "initial_feature_dimension": 100,
+    "initial_learner": "guarded2-class linear readout; passage-first teacher then measured passage-time regret weighted cross entropy; corpus-specific normalization fitted only on training data",
+    "multi_reference_policy": "not integrated; separate frozen implementation required before using an expanded action set",
+    "course_continuation": "not qualified; no course execution/ranking until implementation lock includes supported repeated transitions and horizon",
+    "required_implementation_lock_fields": [
+      "code closure hashes",
+      "robot/controller/reference ancestry hashes",
+      "qualified common options and entry/return guards",
+      "sensor mount/ray directions/range/rate/noise",
+      "history grid bounds/resolution/retention/normal thresholds",
+      "feature names",
+      "learner optimizer/steps/regularization/seed protocol",
+      "teacher branch horizon and matched restoration procedure",
+      "timing evidence rule and empirical transition delay/margins",
+      "physics dt/control dt/contact logger and scoring implementation",
+      "continuous single/course horizon and intervention rules"
+    ]
+  },
+  "comparison_matrix": [
+    {
+      "arm": "uniform",
+      "scene_proposal": "uniform in same training domain",
+      "acceptance": "common executable positive support and observation validity; no explicit contrast targeting",
+      "replay": "uniform"
+    },
+    {
+      "arm": "target_only",
+      "scene_proposal": "positive executed envelope only",
+      "acceptance": "common positive support and observation validity; no negative alternative condition",
+      "replay": "uniform"
+    },
+    {
+      "arm": "analytic_contrast",
+      "scene_proposal": "analytic matched executed alternatives",
+      "acceptance": "common revised positive/nominal-negative screen",
+      "replay": "uniform"
+    },
+    {
+      "arm": "analytic_observation_curriculum",
+      "scene_proposal": "same analytic alternatives with sensor deadline admission",
+      "acceptance": "common revised screen plus causally available decision",
+      "replay": "uniform/coverage/verified-gap mixture"
+    },
+    {
+      "arm": "learned_proposal_ablation",
+      "scene_proposal": "conditional mixture fitted to same analytic exemplars,all search/fit charged",
+      "acceptance": "identical to analytic_observation_curriculum",
+      "replay": "identical to analytic_observation_curriculum"
+    },
+    {
+      "arm": "analytic_resample_ablation",
+      "scene_proposal": "resample/jitter the same accepted analytic exemplars",
+      "acceptance": "identical to learned_proposal_ablation",
+      "replay": "identical to learned_proposal_ablation"
+    }
+  ],
+  "fixed_baselines": [
+    "always_walk",
+    "constant_adaptation with the same applicable qualified duration/return interface",
+    "scripted sensor policy tuned only on development",
+    "finite privileged teacher upper comparator; no global optimality claim"
+  ],
+  "isolating_ablations": {
+    "sensor_representation": "fixed corpus,options,training; current-frame rays vs common temporal representation",
+    "timing": "same proposer,sensor,learner,replay; deadline admission on/off",
+    "adversarial_replay": "same eligible data/proposer,sensor,options; uniform vs .2uniform/.2coverage/.6verified-gap",
+    "dataset_aggregation": "same initial corpus; initial imitation vs additional matched teacher labels on student states,all steps counted"
+  },
+  "scoring": {
+    "passage": "complete assigned course within timeout,without reset/disqualifying beam contact/fall/illegal command",
+    "beam_force_threshold_n": 1.0,
+    "body_completion": "all recorded body origins beyond downstream edge of final beam plus0.1m; collider extents not implied",
+    "downstream_margin_m": 0.1,
+    "upright_hold_s": 0.3,
+    "root_height_min_m": 0.5,
+    "minus_projected_gravity_z_min": 0.5,
+    "single_timeout_s": 8.0,
+    "course_timeout_s": 12.0,
+    "any_fall_before_finish_is_failure": true,
+    "first_episode_only": true,
+    "failure_precedence": [
+      "infrastructure_invalid",
+      "illegal_command",
+      "fall",
+      "disqualifying_contact",
+      "timeout_or_no_completion",
+      "success"
+    ],
+    "retain_all_failure_flags": true,
+    "teacher_cost_weights": {
+      "elapsed_time_s": 1.0,
+      "absolute_mechanical_work_j": 0.0,
+      "switch_count": 0.0
+    },
+    "cost_reporting": [
+      "passage fraction with denominator",
+      "successful-branch elapsed time with denominator",
+      "all attempted elapsed time",
+      "absolute mechanical work if measured",
+      "switch count",
+      "contact force",
+      "late-decision count"
+    ],
+    "missing_torque": "unknown,never zero; mechanical work is not battery energy"
+  },
+  "analysis": {
+    "primary_unit": "layout/composition; physics seeds are repeats; independently acquired corpus is a separate replication axis",
+    "pairing": "same layout,source,physics seed and implementation across arms",
+    "reporting": "numerator/denominator by task stratum and source; course-level paired difference with uncertainty; separate acquisition-corpus variability",
+    "claim_constraints": [
+      "no source-heldout claim on these development carriers",
+      "no lookup evaluation for sequential policies",
+      "no physical robustness from finite geometry screens",
+      "no continuous-course result from stitched/reset trajectories",
+      "no post-outcome geometry selection or discarded impossible cases"
+    ]
+  },
+  "amendments": {
+    "rule": "Never overwrite this recipe; any substantive change writes a new version citing this SHA256 and states whether prior evaluation outcomes were inspected",
+    "implementation_lock": "May complete runtime details in a separate hash-linked file without changing locked geometry; freeze before running this evaluation",
+    "test_use": "Any teacher/model/curriculum adaptation using these layouts invalidates their untouched status and must be disclosed"
+  }
+}
