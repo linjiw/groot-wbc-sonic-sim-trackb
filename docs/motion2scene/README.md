@@ -1,4 +1,150 @@
-# Motion2Scene visual research report
+# Motion2Scene
+
+Stable research reference: [research compass](RESEARCH_COMPASS.md).
+Current experiment handoff: [persistent research state](RESEARCH_STATE.md).
+
+**The five-arm M8 common-set comparison is complete, and it is a null result for the
+central claim.** All 138 predeclared assignments are measured: 90 learned M8 policy
+executions plus the 48 frozen comparators, 105 passes and 33 failures, no unknown
+outcome. Executed-envelope contrast does not beat feasibility-screened uniform — the
+declared comparison is a passage difference of 0 and a paired time difference of 0.000
+in all three corpora, with the same single failing context. Historical replay is a clean
+null on the same measure. The mechanism is response collapse: 13 of 15 learned policies
+select one schedule on all six contexts, so they are constant functions rather than
+perceptive selectors, and none passes anywhere the seven-schedule bank fails.
+
+The one property that predicts a selective policy predicts it exactly. The two corpora
+that no single fixed schedule can cover are the only two whose policies use more than one
+schedule, and all thirteen single-schedule-coverable corpora trained constant policies —
+15/15 agreement. That is a correspondence across corpora, not a controlled manipulation,
+and testing it is the next experiment.
+
+The original four-arm [M4 checkpoint](M4_ACQUISITION_CHECKPOINT.md) remains complete and
+independently re-audited: 468 acquisition episodes and 557,856 measured physics steps.
+Executed contrast has higher adaptation-required task yield than target-only, which the
+M8 result leaves standing as an acquisition-stage mechanism while withdrawing the
+downstream claim it was expected to support. See the
+[current progress and reproducible controls](RESEARCH_PROGRESS_20260909.md)
+and the [recorded complementary-response example](ACQUIRED_RESPONSE_WITNESS_20260909.md).
+The completed [portable M2 acquisition release](PORTABLE_ACQUISITION_M2_V1.md)
+retains 276 episodes and 328,992 measured steps. Its NumPy reader reconstructs all
+36 frozen fits and reproduces the M1/M2 task-yield and acquisition-cost tables.
+
+Start with the [project guide and dataset quickstart](PROJECT_GUIDE.md).
+The current seven-schedule interface now has two complementary physical
+capability results: the prior option passes an early beam that authored
+adaptations cannot, and sustained adaptation passes a constructed passage that
+the prior option cannot. Across six inspected contexts, the 42 forced episodes
+contain a passing option for every context; the strongest constant schedule
+passes five. A subsequent actual comparison now gives the updated learner and
+script 6/6 passage, versus 5/6 for the original learner and constant prior, with
+measured 0.50 s costs on two passages. This is development evidence; held-out
+performance remains pending. The fixed four-arm primary acquisition
+began with its first bootstrap model under the adopted
+measured-tie amendment. The original seven captures are reused only in their
+original corpus and counted once; the earlier failed fit and startup attempt
+remain preserved. The [first-model record](PRIMARY_ACQUISITION_TIE_CONTINUATION_V1.md)
+documents that earlier milestone and its failure history.
+
+The current [42-episode portable dataset](/home/linjiw/research-data/groot-wbc/m2s-timed-schedule-six-context-dataset-v1.tar.gz)
+includes the NumPy toolkit, 12,516 aligned 114D sensor/state inputs, 50,064 physics
+steps, and 18 available teacher tables (17 consequential). Standalone fitting
+reproduces all 18 teacher-packet and 84 repeated neutral-packet model decisions.
+The [release note](PORTABLE_SIX_CONTEXT_DATASET_V1.md) documents the original scorer,
+separate later correction receipt, and unchanged earlier 35-episode archive.
+
+The separate [36-attempt policy archive](/home/linjiw/research-data/groot-wbc/m2s-six-context-policy-dataset-v1.tar.gz)
+preserves the completed actual comparison: 35 complete captures and one partial
+verified failure, 10,619 physical rows, 10,618 sensor packets and 42,476 physics
+steps. Its two source-version children retain their original scorers; the partial
+attempt keeps 189 physical rows, 188 packets, 756 steps and null passage cost.
+The [policy release note and audit command](PORTABLE_POLICY_PANEL_V1.md) explain
+the mixed scoring versions. This archive adds zero teacher targets and does not
+replace the teacher quickstart above.
+
+See the [registered development comparison](SEVEN_SCHEDULE_DEVELOPMENT_EXPERIMENT_V1.md),
+[baseline selection](SEVEN_OPTION_BASELINE_SELECTION_V1.md), and
+[working manuscript](submission/traversal_method_v2.pdf).
+
+## Earlier development snapshots
+
+The following records describe earlier interfaces and retained experiments;
+the project guide above identifies the current interface and evidence.
+
+**Six-second duration extension completed:** short and sustained authored options
+now have matched physical outcomes on empty, short-beam and long-passage development
+scenes. Within that three-reference interface, both adaptations pass the 0.10 m beam; only sustained passes the 1.00 m
+passage. The [measured figure](evidence/traversal-v2/duration_extension.pdf) separates
+executed body envelopes, geometric witnesses and actual outcomes. The
+[16-episode dataset](TIMED_DATASET_V1.md) provides 4,768 aligned sensor/physical
+rows, 19,072 physics steps and three exact 106D teacher decisions, with all
+failures and corrected analysis provenance retained. The completed
+[15-episode policy comparison](TIMED_POLICY_DEVELOPMENT_V1.md) adds 4,470 aligned
+106D rows and 17,880 physics steps in a separate archive. Learned and scripted
+policies both pass 3/3 with identical times; learned misses the available 0.04 s
+short-beam saving. Held-out and curriculum gains remain unestablished. The
+[recorded execution video](/home/linjiw/research-data/groot-wbc/m2s-duration-visual-demo-v1/duration_execution.mp4)
+illustrates the earlier three long-passage teacher recordings with measured contacts.
+
+**September 8 traversal redesign:** the project now implements executable motion
+options, a solution-preserving analytic screen, conditional learned proposals,
+causal observation history, and a common guarded imitation interface. Seven
+options qualify in one empty-scene setting. At a separately registered development
+beam, walking and d040 fail while d055/d070/d085 pass with 0 N recorded beam force
+and legal return. This demonstrates an additional usable response at one condition;
+held-out perceptive traversal improvement remains unmeasured.
+
+A binary student now executes both reused development layouts under a second
+physics seed, matching the scripted controller (2/2 passage each; always-walk
+1/2). Learned and scripted policies save 0.42 s relative to constant adaptation
+on the absent condition. The four-branch training acquisition contains actual
+65-ray sensor histories and matched 100D inputs. This establishes integration
+and a local measured cost difference; curriculum superiority remains unmeasured.
+
+The strengthened same-context geometric comparison favors analytic resampling
+(123/192 accepted proposals) over learned proposals (41/192); uniform accepts 0/192.
+Analytic remains the primary constructor. A clean local dataset packages 72 paired
+groups / 144 historical simulation branches, retaining failures and excluding
+simulator object identity from sensor records. New evaluation geometry is locked
+at 24 single passages and 12 two-beam compositions; runtime qualification is pending.
+The new [49-episode dataset](../../../research-data/groot-wbc/m2s-executed-options-development-dataset-v2-aligned/manifest.json)
+and [35.5 MiB archive](../../../research-data/groot-wbc/m2s-executed-options-development-dataset-v2-aligned.tar.gz)
+add the executed options, three-height checks, actual sensor acquisition and
+binary policy episodes. All 19 failed episodes and reset histories are retained;
+100D history inputs and 214D legacy inputs remain separate. Corrected releases
+retain every raw packet with explicit alignment/eligibility masks. A separate
+[19-episode, 110D multi-option package](../../../research-data/groot-wbc/m2s-multi-option-development-dataset-v1-aligned/manifest.json)
+adds 18 finite teacher schedules and one smoke, with six portable continuation
+targets. All three packages remain development data.
+
+A subsequent [multi-option development comparison](MULTI_POLICY_DEVELOPMENT_V1.md)
+adds 18 actual policy episodes. A value student fitted to the same 18 teacher
+branches removes unnecessary adaptation on empty, while remaining 0.02 s slower
+than scripted d070 on the lower beam. Its [separate policy archive](../../../research-data/groot-wbc/m2s-multi-policy-development-dataset-v1-aligned.tar.gz)
+retains every aligned 110D history and actual switch. Adding nine matched lower
+teacher branches then improves lower by 0.02 s but regresses empty by 0.06 s;
+three actual shared-model aggregated-student episodes show no net benefit.
+A separate fixed phase-specific fitter now preserves empty/nominal times and
+removes one 0.02 s control tick on lower, matching the script. The
+[incremental 18-episode archive](../../../research-data/groot-wbc/m2s-aggregation-increment-development-dataset-v1-aligned.tar.gz)
+preserves both outcomes, nine lower teacher branches and exact 110D alignment.
+This is local development data-update evidence; held-out gains remain pending.
+The [offline dataset baseline CLI](DATASET_BASELINE_V1.md) supports downstream
+reuse with exact sensor/teacher alignment and no simulator dependency.
+
+One [fresh two-beam development course](DEVELOPMENT_COURSE_V1.md) also passes in
+3.04 s during a single authored d085 adaptation, with both measured beam forces
+zero. This separate physical demonstration does not establish learned-course
+performance, repeated adaptation, route choice or held-out generalization.
+
+[Current execution status and commands](TRAVERSAL_V2_STATUS.md) ·
+[Method and evidence map](TRAVERSAL_METHOD_V2.md) ·
+[New manuscript draft](submission/traversal_method_v2.pdf) ·
+[Measured development figure](evidence/traversal-v2/traversal_revision.pdf) ·
+[Recorded floor/ceiling history](evidence/traversal-v2/history_maps.pdf) ·
+[Original evaluation recipe](TRAVERSAL_EVALUATION_LOCK_V2.md) ·
+[Separate six-second geometry lock](TRAVERSAL_EVALUATION_LOCK_V3.md).
+The completed diagnostic paper and earlier progress records remain below.
 
 **September 7 result snapshot:** [82/82 labeling commands and 366/540 policy
 executions are admitted](M2S_ICRA_366_RESULT.md). All four primary fits and 24 registered

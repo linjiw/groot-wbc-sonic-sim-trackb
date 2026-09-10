@@ -1,5 +1,182 @@
 # Motion2Scene: progress toward the complete project
 
+Read the [September 9 research brief](RESEARCH_BRIEF_20260909.md) for the dated acquisition snapshot, full paper link, method explanation, evidence assessment, and prioritized ICRA experiment plan.
+
+**Completed M4 acquisition:** all twelve original corpora and the independent
+raw-record audit are complete. The [M4 checkpoint report](M4_ACQUISITION_CHECKPOINT.md)
+records 468 acquisition episodes and 557,856 measured physics steps including
+bootstrap. At 139,464 steps per arm, adaptation-required yield is 2/12 for
+uniform, 4/12 for target-only and 12/12 for executed contrast and replay. Every
+assigned task is bank-solvable, but every individual corpus remains solvable
+by one fixed schedule. Across constructors, the bank covers all 34 unique
+geometry/seed conditions and the best fixed schedule covers 32. This supports
+a task-yield difference at matched cost, not held-out policy performance.
+
+**First cross-corpus learning result:** the completed
+[M1 readout](EXPANDED_DEVELOPMENT_STUDY.md#cross-corpus-decision-learning-at-m1)
+uses eight unique acquired scenes from other seeds. Executed contrast improves
+the recorded passage count over uniform for one seed (5/5 versus 2/5), while
+the other two seeds tie. Target-only gives 4/5 on the differing seed; replay adds
+no gain. A fixed late sustained schedule covers all eight scenes, so the result
+does not establish better perceptive selection than a constant response.
+The completed M2 cross-corpus readout contains 17 unique tasks. Uniform,
+executed contrast and observation replay tie at 11/11, 11/12 and 10/11 branch
+proxies across the three training seeds; target-only gives 10/11, 11/12 and 10/11.
+A fixed late sustained schedule covers all 17 tasks. The M2 useful-task yield
+advantage has not yet translated into improved policy selection. Separately,
+all three seven-way replay-control comparisons tie at 5/6 recorded development
+passages, missing the complementary context. No M2 replay advantage is measured.
+
+At M4, uniform, executed contrast and replay still tie in recorded-input
+cross-corpus readouts: 21/22, 21/23 and 22/23; target-only gives 16/22, 21/23
+and 16/23. The tied arms select a fixed prior within each corpus. These folds
+reuse conditions and add no policy executions. The separate
+[seven-way M2/M4 replay controls](REPLAY_CONTROLS_M2_M4.md) all give 5/6 on the
+same development recordings, with no changes in selected schedules. No replay
+benefit is established through M4. The three reference bootstrap prefixes are
+complete and the existing expanded worker is now collecting its acquisition
+encounters; no M8 or reserved policy result is available yet.
+
+**Execution sequence:** original M4 → five-arm M8 → matched development policy
+panel → independent extension capability panel → six equivalent-teaching fits
+and 24 matched arm-policy trials → M16/M32. The revised
+[staged worker](/home/linjiw/research-data/groot-wbc/m2s-expanded-and-capability-stages-20260909-v3/sequence.json)
+is live. Its predecessor was stopped while waiting for M4, before any expanded
+acquisition output existed; no active rollout was interrupted. The
+[M8 panel](/home/linjiw/research-data/groot-wbc/m2s-M8-native-development-panel-20260909-v1/study.json)
+assigns 138 episodes: all 15 acquired policies, the strong script, and all seven
+fixed schedules on six development contexts at the same physics seed. This will
+separate matched capability from policy selection. Reserved evaluation remains
+untouched.
+
+**Repeatable option extraction:** the [matched extension study](OPTION_EXTENSION_STUDY.md)
+has completed four fresh neural samples and four authored alternatives, applying
+the same repair to all eight. All 17 physical executions have completed: both
+procedures qualify 8/8 schedules and 4/4 candidates, with 20,264 measured physics
+steps including the shared neutral. This establishes repeatable qualification,
+not a generated-motion advantage. Independently fixed task coverage is next.
+The current curriculum bank and reserved evaluation are unchanged.
+The candidate-level coverage analysis is now implemented and tested alongside
+the bank scorer (14 focused tests). It groups the two entry schedules by motion
+reference and reports every candidate's incremental and nonredundant coverage;
+the 204 assigned task outcomes remain unmeasured.
+The equivalent-teaching core now recomputes WAIT within each arm's available
+motions and projects the common ridge interface without changing sensing.
+Twenty-three combined tests pass; the recorded-data reconstruction reproduces
+all 18 original teacher tables. Three whole-longitudinal-center folds are fixed
+before new task outcomes. Their native integration and 24 learned-policy trials
+remain to be completed after the fixed-task recordings become available.
+The equivalent-teaching CPU fitter is now declared and running in wait mode:
+it will fit six models after the twelve-task capability panel completes, using
+only each fold's eight training tasks. Thirty combined focused tests pass.
+No new policy fit or physical result is claimed from this waiting worker.
+The arm-specific simulator adapter and model loader are implemented with 40
+combined focused tests. The adapter retains the full physical bank and records
+the arm-projected inputs separately. Its episode preparation/scoring wrapper is
+now implemented: 54 combined tests pass, with the same physical criteria and
+explicit held-task/model binding. The 24-episode batch is not yet prepared or
+executed; runtime tests use simulator doubles until the fitted models are ready.
+The complete batch is now declared and queued after capability and fitting,
+before continuation through M16/M32. All 64 combined focused tests pass. The
+previous continuation parent and child were replaced while both were waiting
+for M4; no expanded output existed and no active physical rollout was interrupted.
+The held-center policy analysis now compares each arm against its own bank and
+training-selected constant, and reports cross-arm passage differences and
+mutually successful timing. All 78 combined extension tests pass. The analysis
+does not treat overlapping folds as independent corpus replicates; no policy
+outcomes are available yet. All 168 queued panel sources remain unchanged.
+
+**Decision learner:** the fixed depth-two feasibility/time model now has a
+NumPy-only native deployment path. Its exported decisions exactly match all 18
+training and 18 whole-context-holdout predictions. The completed six-context
+closed-loop comparison gives ridge 6/6 passages and the tree 4/6: the tree loses
+the long and complementary passages and is 0.12 s slower over the four mutually
+successful contexts. All six captures are complete (7,152 physics steps).
+Ridge remains the common acquisition learner. Seventy-eight combined focused
+tests pass. Primary acquisition resumed after this bounded comparison.
+
+**Sensor sensitivity:** the [separate intervention pipeline](SENSOR_SENSITIVITY_STUDY.md)
+now supports channel dropout, hit-range noise and causal packet latency. Its
+recorded-input check reproduces all 18 nominal vectors exactly. The subsequent
+four-episode native short-passage study passes all four conditions with zero
+measured beam force: nominal/dropout/range-noise take 4.10 s, while 100 ms latency
+changes commitment to the prior and takes 3.60 s. All 1,192 control-row inputs
+reconstruct exactly across 4,768 physics steps. Twenty-two focused sensor tests
+and 53 combined method/experiment tests pass. The primary dispatcher has resumed
+after the bounded study. Reserved evaluation remains untouched.
+
+**Action-relevant gate:** the completed
+[finite continuation comparison](INFORMATION_CONSISTENT_TEACHING.md#action-relevant-continuation-gate)
+admits five early nonempty-context decisions when scene features first arrive at
+1.00 s, because a common WAIT has successful distinguishable continuations.
+One original immediate teacher action must change. With a 1.40 s reveal, no
+common all-passing early policy exists. Under nominal sensing, the original cue
+gate already admits all 18 phases and the action rule admits 17, so no nominal
+admission gain is measured. All 32 combined gate/information tests pass. This
+is a completed recorded-data method comparison, not a new replay or rollout gain;
+the active acquisition's gate and teacher remain unchanged.
+
+**Information-consistent teaching:** a completed
+[recorded-data information ablation](INFORMATION_CONSISTENT_TEACHING.md) shows
+that revealing scene summaries at 1.00 s permits a common WAIT followed by six
+passing continuations, while revealing them at 1.40 s limits any finite
+observation-consistent policy to five. The scene-wise bank remains 6/6.
+The extension now constructs the passage-first optimal shared policy and trains
+the existing ridge equations with group-consistent regret targets. A controlled
+three-scene test corrects an unrealizable WAIT preference, improving the common
+policy from one to two passages. On the actual six-context recorded tables,
+both teachers tie at 6/6 or 5/6 depending on information timing; nominal fitted
+models are identical. This is a completed fixed-data method comparison, not new
+physical policy performance. Seven
+replay controls also fit the first acquired checkpoint successfully; all tie at
+5/6 recorded development proxies. Their M2/M4/M8/M16/M32 worker is live and
+waiting for completed corpora. Physical acquisition continues separately.
+
+**Expanded construction experiment:** the completed
+[3,840-candidate comparison](EXPANDED_DEVELOPMENT_STUDY.md) finds that 169/645
+reference-selected pairs retain the executed geometric contrast. This is a
+construction-mechanism result, not physical passage. The five-arm, three-seed
+8/16/32-encounter plan is fixed and its continuation worker is waiting for the
+original M4 corpora. The original acquisition completed all twelve first-round
+models at 16:33 UTC and began M2 acquisition at 16:34 UTC on September 9.
+Reserved evaluation remains untouched.
+
+**September 9 method update:** completed [decision-learning and replay
+experiments](DECISION_LEARNING_RESULTS_20260909.md) on the 42-branch development
+corpus. A separate feasibility/time learner reduces training regret but ties
+ridge at 4/6 whole-context holdout branch proxies. Four replay controls also tie
+at 4/6. Exact student features form six distinct groups at every phase; the
+observation-consistent teacher therefore finds no nontrivial collision in these
+data. The [revised paper](submission/traversal_method_v2.pdf) now defines the
+continuation extension and coverage weights, explains passage versus recovery
+time, and moves initialization history to the supplement. Larger independent
+training corpora and actual final-policy evaluation remain necessary.
+
+The [project guide](PROJECT_GUIDE.md) and
+[current execution status](TRAVERSAL_V2_STATUS.md) describe the present seven-schedule
+traversal interface. The [42-episode teacher archive](PORTABLE_SIX_CONTEXT_DATASET_V1.md)
+and its NumPy quickstart are complete. The separate
+[36-attempt actual policy archive](PORTABLE_POLICY_PANEL_V1.md) retains 35 complete
+captures and one partial verified failure: 10,619 physical rows, 10,618 sensor
+packets and 42,476 physics steps. Original scorer versions remain separate, with
+the partial attempt's missing sensor packet and null cost preserved explicitly.
+These are development releases; held-out gains and curriculum superiority remain
+unestablished. The adopted continuation completed its first primary bootstrap
+model at 04:34:26 UTC on September 9. It uses two consequential decisions and
+one exact measured-tie initializer from the original seven captures, with no
+new physics from reuse or fitting. The [bounded status receipt](PRIMARY_ACQUISITION_TIE_CONTINUATION_V1.md)
+records adoption, preserved failures and V8 accounting; curriculum checkpoint
+results remain pending.
+
+The reserved handoff was [stopped at 06:33 UTC](/home/linjiw/research-data/groot-wbc/m2s-reserved-handoff-hold-v1/decision.json)
+to finish development choices before evaluation. The primary acquisition
+dispatcher remains active. Its current outputs are in the
+[dispatch directory](/home/linjiw/research-data/groot-wbc/m2s-primary-acquisition-dispatch-tie-proposed-v5).
+Reserved outcomes remain unexecuted. These model counts are acquisition progress,
+not traversal-performance results.
+
+## Historical snapshots
+
 **September 7 result snapshot:** [82/82 labeling commands and 366/540 policy
 executions are admitted](M2S_ICRA_366_RESULT.md). All four primary fits and 24 registered
 refits are complete. Analytic-trained passage is 30/61 conditions, versus 21/61 for
