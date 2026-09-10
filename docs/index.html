@@ -123,19 +123,25 @@ tr.win td{background:var(--accent-soft)}
 footer{border-top:1px solid var(--line);margin-top:56px;padding:26px 0 72px;
   color:var(--muted);font-size:14px;font-family:var(--display)}
 video{width:100%;border:1px solid var(--line);border-radius:6px;background:#000}
+
+.chip.warn{border-color:var(--reject);color:var(--reject);
+  background:color-mix(in srgb,var(--reject) 8%,transparent)}
+.stats{grid-template-columns:repeat(4,1fr)}
+@media (max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}
+figure video{width:100%;height:auto}
 </style>
 </head>
 <body>
 
 <header class="mast">
   <div class="wrap">
-    <div class="kicker">GR00T Whole-Body Control · simulation study · September 2026</div>
-    <h1>Training scenes built from what the robot actually did</h1>
-    <p class="lede">A Unitree G1 walking down a corridor has two options at an overhead beam: keep walking, or request a crouch. Teaching it to choose needs encounters where the choice matters. Those encounters turn out to be geometrically scarce, and we can measure exactly how scarce.</p>
+    <div class="kicker">GR00T Whole-Body Control · simulation study · updated 10 September 2026</div>
+    <h1>Building training scenes from what the robot actually did</h1>
+    <p class="lede">A Unitree G1 walking a corridor meets an overhead beam. It can keep walking, or commit to a crouch. Teaching it to choose needs encounters where the choice has consequences — so we construct those encounters from the robot's own executed motion, label them with paired physics, and then measure which part of that construction actually teaches the decision.</p>
     <div class="chips">
-      <span class="chip on">Both experiments complete</span>
-      <span class="chip">684 physics executions</span>
-      <span class="chip">3 carriers · 12 held-out layouts</span>
+      <span class="chip on">1,264,988 measured acquisition steps</span>
+      <span class="chip">Five-arm comparison complete</span>
+      <span class="chip warn">Downstream benefit: null so far</span>
       <span class="chip">Simulation only · no hardware claim</span>
     </div>
   </div>
@@ -143,85 +149,223 @@ video{width:100%;border:1px solid var(--line);border-radius:6px;background:#000}
 
 <section>
   <div class="wrap">
-    <h2>The finding</h2>
-    <div class="headline">
-      <p>A training scene helps only if it contains a <span class="em">decision-relevant contrast</span>: a placement where walking fails and the crouch succeeds. Build scenes that way and a fixed selector learns when to adapt. Build them any other way and it never adapts at all. Whether the contrast is proposed by a learned generator or an analytic solver makes <span class="em">no measurable difference</span>.</p>
-    </div>
-
-    <div class="stats">
-      <div class="stat analytic"><b>24/36</b><span>analytic-trained selector, held-out layouts</span></div>
-      <div class="stat learn"><b>22/36</b><span>Motion2Scene-trained, statistically identical</span></div>
-      <div class="stat null"><b>14/36</b><span>uniform placement, never adapts</span></div>
-      <div class="stat null"><b>14/36</b><span>target-only construction, never adapts</span></div>
-    </div>
-
-    <p>All four arms were trained on exactly fifteen labelled encounter groups, from the same carriers, with the same frozen controller, the same 214-input selector and the same optimizer. The only thing that differs is how the training scenes were placed.</p>
+    <h2>The idea, in one execution pair</h2>
+    <p class="sub">Same scene, same seed, two commands — forced, not selected by a learner</p>
 
     <figure>
-      <img src="motion2scene/assets/nominal-outcomes.png" alt="Left: each arm acquires nine generated groups, but only the two contrast arms yield useful contrasts, nine each. Right: passage on held-out layouts, analytic 24 of 36, Motion2Scene 22, uniform and target-only 14 each.">
-      <figcaption>Left: every arm acquired nine generated groups; only the two contrast constructions produced scenes where the choice matters. Right: passage on twelve held-out layouts across three carriers. Both contrast arms beat both non-contrast arms with no reverse case on any carrier.</figcaption>
+      <video controls playsinline preload="metadata" poster="motion2scene/assets/transition-construction.jpg" aria-label="Matched walking and crouch executions on the same beam-present scene, both physics seeds">
+        <source src="motion2scene/assets/transition-construction.mp4" type="video/mp4">
+        <a href="motion2scene/assets/transition-construction.mp4">Download the matched execution replay</a>
+      </video>
+      <figcaption>All four obstacle-present runs on the one scene that survived every proposal check: matched walking and the <code>d040</code> crouch under both physics seeds. Walking records <strong>1635.1 N</strong> and <strong>1130.9 N</strong> of beam contact. The crouch records <strong>0 N</strong> through the passage and returns to neutral in both seeds. Forced commands, not a learned selector. Isaac Lab supplies dynamics and 200 Hz contacts; MuJoCo renders the recorded states only — a visual replay, not a second physics run and not a real-robot demonstration.</figcaption>
     </figure>
+
+    <div class="headline">
+      <p>That pair is the unit of supervision. A scene is worth labelling when the robot's <span class="em">own executed alternatives</span> disagree there — one clears, another strikes. The research question is whether constructing scenes that way teaches a sensor-driven policy to <span class="em">choose</span> better than simpler constructions do.</p>
+    </div>
   </div>
 </section>
 
 <section style="background:var(--raised);border-block:1px solid var(--line)">
   <div class="wrap">
-    <h2>How it works</h2>
-    <p class="sub">Four stages, each one falsifiable by the next</p>
+    <h2>The proposed method</h2>
+    <p class="sub">Four stages. Each is falsifiable by the next, and stage four is where the claim lives.</p>
     <ol class="steps">
-      <li><div><b>Execute the contrast, don't imagine it</b>In an empty room the robot runs both commands: walk through, and request the crouch at 0.30 s. We keep the achieved 50 Hz body trajectories, not the reference the controller was asked to track.</div></li>
-      <li><div><b>Place the beam where the two executions differ</b>Any placement the crouch clears by 10 mm and the walk strikes by 10 mm is a candidate. Four constructions compete: uniform, an analytic capsule-box solver, a learned generator, and a target-only ablation that never looks at the walk.</div></li>
-      <li><div><b>Let physics decide the label</b>Both commands are executed again with the beam present in Isaac Lab. A group is useful only if walking measurably fails and the crouch passes contact-qualified, under 1 N through the crossing with 0.3 s of upright stability.</div></li>
-      <li><div><b>Train one fixed selector and test it elsewhere</b>A deterministic linear model reads 144 ray values plus proprioception and predicts whether each command will succeed. It is evaluated on twelve layouts it never saw, on all three carriers.</div></li>
+      <li><div><b>Execute the alternatives, don't imagine them</b>In an empty room the frozen SONIC tracker runs every command in a qualified repertoire — neutral walking plus six timed crouch schedules. We keep the achieved 50 Hz whole-body trajectories, not the references the controller was asked to track.</div></li>
+      <li><div><b>Place the obstacle where those executions disagree</b>A candidate scene is one where some schedule keeps clearance across all 81 placement offsets (the <em>positive</em> screen) and some other schedule nominally interferes (the <em>negative</em> screen). Geometry proposes; it never labels.</div></li>
+      <li><div><b>Let physics assign the label</b>With the beam present, all seven schedules are executed. An encounter is useful only if the outcome table contains a verified continuation the teacher can recommend — passage under a 1 N contact criterion with 0.3 s of upright stability.</div></li>
+      <li><div><b>Train one fixed learner and evaluate it by execution</b>A per-phase ridge readout over a 114-dimensional causal sensor/state vector picks a complete schedule at one of three decision ticks. Privileged scene parameters and future outcomes are teaching signal only, never policy inputs. Then we run it in physics.</div></li>
     </ol>
+    <div class="gate">
+      <p>Every protocol is registered with its predictions filed <strong>before</strong> the physics runs, failed predictions are retained rather than removed, and every artifact is hash-bound to the sources that produced it. Where a prediction failed, this page says so.</p>
+    </div>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <h2>What almost sank it</h2>
-    <p>The first run of this experiment produced nothing from the learned generator: zero accepted scenes out of forty-eight proposals, and one from the analytic solver. It would have been easy to report that as a failure of the generator. It was not.</p>
-    <p>The acceptance test had been inherited from an earlier study that certified obstacle <em>placement</em>. It required each contrast to survive the beam moving ±20 mm. The entire executed window between a walk and a crouch is only 20 to 27 mm wide, so the test was asking a scene to tolerate a displacement the size of the effect itself.</p>
+    <h2>What we have measured</h2>
+    <p class="sub">Two generations of the comparison, and they disagree in a way that is informative</p>
 
-    <figure>
-      <img src="motion2scene/assets/envelope-tradeoff.png" alt="Contrast witnesses fall from 200, 168 and 337 at the nominal pose to 2, 0 and 32 under the inherited plus or minus 20 mm envelope; the acquisition funnel opens from 1 and 0 eligible proposals to 41 and 33 under the matched contract.">
-      <figcaption>Sweeping 11,421 candidate placements per carrier prices the requirement directly. At the nominal pose there are hundreds of valid contrasts; at ±20 mm there are two, zero and thirty-two. Re-registering the contract at the pose the simulator actually authors moved eligibility from 1/48 to 41/48 for the analytic solver and from 0/48 to 33/48 for the learned generator.</figcaption>
-    </figure>
+    <h3>Generation one — against unscreened placement, construction wins</h3>
+    <p>Four arms, equal label budgets, one frozen controller, two commands. The uniform arm draws beam station and height from a flat random distribution with no feasibility check at all. Evaluated on twelve layouts per carrier that the learner never saw:</p>
+
+    <div class="tbl"><table>
+      <thead><tr><th>Construction</th><th class="n">Groups</th><th class="n">Useful contrasts</th><th class="n">Passage</th><th class="n">Adapts</th></tr></thead>
+      <tbody>
+        <tr><td>Uniform placement (unscreened)</td><td class="n">15</td><td class="n">0</td><td class="n">14/36</td><td class="n">0</td></tr>
+        <tr class="win"><td>Analytic contrast solver</td><td class="n">15</td><td class="n">9</td><td class="n">24/36</td><td class="n">24</td></tr>
+        <tr><td>Target-only ablation</td><td class="n">15</td><td class="n">0</td><td class="n">14/36</td><td class="n">0</td></tr>
+        <tr class="win"><td>Motion2Scene (learned proposer)</td><td class="n">15</td><td class="n">9</td><td class="n">22/36</td><td class="n">22</td></tr>
+      </tbody>
+    </table></div>
+
+    <p>Twelve of those thirty-six conditions are unsolvable by <em>either</em> command — at a 1.18 m underside neither walking nor the crouch ever passes — so 14/36 is the walking-only floor and 24/36 is the panel ceiling. Read against solvable conditions the analytic solver reached 24 of 24 and the learned proposer 22 of 24, with two discordant conditions both favouring analytic (p = 0.50): a null at n = 3 carriers, not demonstrated equivalence. The thirty-six conditions are twelve layouts on three carriers, so they are not thirty-six independent draws.</p>
+
+    <h3>Generation two — against a <em>feasibility-screened</em> baseline, the benefit is zero</h3>
+    <p>The full apparatus: seven qualified schedules, three decision phases, a causal 114-input learner, five construction arms × three acquisition seeds, evaluated on six shared development contexts. All <strong>138 predeclared assignments</strong> are measured — 90 learned policy executions, 42 forced single-schedule branches, 6 strong-script runs, one physics seed.</p>
+
+    <div class="stats">
+      <div class="stat null"><b>0</b><span>passage difference, executed contrast vs screened uniform, in all three corpora</span></div>
+      <div class="stat null"><b>0.000</b><span>paired passage-time difference on mutually successful contexts</span></div>
+      <div class="stat null"><b>18/18</b><span>cells where historical replay is identical to no replay</span></div>
+      <div class="stat"><b>13/15</b><span>learned policies that emit one schedule on all six contexts</span></div>
+    </div>
+
+    <div class="tbl"><table>
+      <thead><tr><th>Construction arm</th><th class="n">93201</th><th class="n">93202</th><th class="n">93203</th><th class="n">Mean</th></tr></thead>
+      <tbody>
+        <tr><td>Feasibility-screened uniform</td><td class="n">5/6</td><td class="n">5/6</td><td class="n">5/6</td><td class="n">5.00</td></tr>
+        <tr><td>Executed-envelope contrast</td><td class="n">5/6</td><td class="n">5/6</td><td class="n">5/6</td><td class="n">5.00</td></tr>
+        <tr><td>Executed contrast + replay</td><td class="n">5/6</td><td class="n">5/6</td><td class="n">5/6</td><td class="n">5.00</td></tr>
+        <tr><td>Reference-envelope contrast</td><td class="n">6/6</td><td class="n">5/6</td><td class="n">4/6</td><td class="n">5.00</td></tr>
+        <tr><td>Target-only ablation</td><td class="n">4/6</td><td class="n">4/6</td><td class="n">5/6</td><td class="n">4.33</td></tr>
+      </tbody>
+    </table></div>
+
+    <p>Note the reverse case in row four: reference-envelope contrast runs 6/6, 5/6, 4/6 against screened uniform's flat 5/6, so it both beats and loses to the baseline depending on the seed. The only arm executed contrast beats is target-only, the weakest. Any "no reverse case" generalisation fails at this layer.</p>
+
+    <p>The strong scripted comparator passes 6 of 6 and sits at this panel's ceiling, so a tie in success count is a property of the panel, not evidence that the populations are equal. What the panel does establish is that the distinctive ingredient did not change behaviour: thirteen of fifteen learned policies collapsed to a constant schedule, and none passed anywhere the seven-schedule bank failed.</p>
+
+    <div class="headline">
+      <p>Reconciling the two generations gives the finding that actually survives. Executed-contrast construction beats <span class="em">unscreened</span> placement decisively, and does not beat <span class="em">feasibility-screened</span> placement at all. The part carrying the measured benefit is the <span class="em">positive executable-support screen</span>. The additional negative-interference targeting — the distinctive Motion2Scene ingredient — has no measured downstream effect.</p>
+    </div>
+
+    <h3>Why the corpora collapsed</h3>
+    <p>The two corpora that no single fixed schedule can cover are exactly the two whose policies used more than one schedule; all thirteen single-schedule-coverable corpora trained constant policies. The correspondence holds on <strong>15 of 15</strong> corpora. A Fisher exact figure of p ≈ 0.0095 is recorded in the decision note as prose; it appears in no measured artifact, and two qualifications belong with it: the fifteen corpora are 5 arms × 3 seeds over six shared contexts and one execution seed, so they are not fifteen independent draws, and the hypothesis was formed after seeing the table. Corpus complementarity is also necessary but not sufficient — one non-constant policy used three schedules and still selected the wrong one on the only context that discriminates. Non-constancy is a diagnostic, never the objective.</p>
+    <p>Two method components remain <strong>untested</strong> rather than supported. Complete-continuation teaching was common to all five arms, so nothing in this panel isolates it. Historical observation-gated replay is a measured null — identical to executed contrast in all eighteen cells, down to the selected schedule — and is reported as a tested component, not a contribution.</p>
+  </div>
+</section>
+
+<section style="background:var(--raised);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <h2>The screen is high-precision and low-recall</h2>
+    <p class="sub">Calibrated against measured outcomes on 92 already-executed encounters, at zero additional physics cost</p>
+
+    <div class="tbl"><table>
+      <thead><tr><th>Negative interference threshold</th><th class="n">Screen fires</th><th class="n">Recall of the measured property</th></tr></thead>
+      <tbody>
+        <tr><td>≤ −20 mm</td><td class="n">1</td><td class="n">1/7</td></tr>
+        <tr class="win"><td>≤ −10 mm (as deployed)</td><td class="n">2</td><td class="n">2/7</td></tr>
+        <tr><td>≤ −5 mm</td><td class="n">2</td><td class="n">2/7</td></tr>
+        <tr><td>≤ −2 mm</td><td class="n">3</td><td class="n">3/7</td></tr>
+        <tr><td>≤ 0 mm</td><td class="n">4</td><td class="n">3/7</td></tr>
+      </tbody>
+    </table></div>
+
+    <p>Relaxing the threshold all the way to zero interference buys one additional encounter. The binding constraint is <strong>recall, not threshold</strong>: two of the encounters the screen misses have covering schedules predicted <em>clear</em> that physically <em>failed</em>, so no negative margin can ever reach them, and a third is rejected by the positive robustness bar instead. The threshold hypothesis is therefore closed rather than promising.</p>
+
+    <div class="gate warn">
+      <p>The 2-of-2 precision figure is retrospective and selection-conditioned on encounters that were chosen for labelling by this very screen. It is not an established population precision, and the threshold sweep is not held-out calibration.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>What is running right now</h2>
+    <p class="sub">One bounded intervention, registered before any of its physics — and with no result yet</p>
+
+    <p>If the positive screen carries the benefit and the negative screen has poor recall, the natural test is to keep the executed geometry as a <em>proposal bias</em> while allowing bounded exploration outside the gate. Three nested acquisition controls draw from one fresh reservoir of 3,840 candidates in the same declared task domain:</p>
+
+    <div class="tbl"><table>
+      <thead><tr><th>Arm</th><th>Proposal rule</th><th class="n">Share of the domain admitted</th></tr></thead>
+      <tbody>
+        <tr><td><b>A</b> strict</td><td>the unchanged executed-contrast rule and ranking</td><td class="n">6.4%</td></tr>
+        <tr><td><b>B</b> broad</td><td>every validly drawn candidate, neither geometric gate applied</td><td class="n">100%</td></tr>
+        <tr><td><b>C</b> mixture</td><td>a committed half-and-half alternation, ε = 1/2 fixed in advance</td><td class="n">—</td></tr>
+      </tbody>
+    </table></div>
+
+    <p>All three arms import a byte-identical four-encounter prefix and the same M4 checkpoint, so exactly one thing varies: which channel proposes each of four new encounters. The tracker, the seven schedules, the causal input, the complete-continuation teacher, the ridge learner at λ = 10 and the physics seed are common. 60.4% of the declared domain lies outside the positive robustness bar, so the exploration channel genuinely has support the strict gate cannot reach.</p>
 
     <div class="gate">
-      <p>The second contract was registered with its predictions filed <strong>before any proposal was drawn</strong>, changes exactly one thing, and keeps the original envelope as a reported diagnostic that gates nothing. A unit test asserts both contracts decide identically whenever their geometry agrees. The first study keeps its own results unchanged.</p>
+      <p><strong>Status as of 10 September 2026: acquisition in flight.</strong> 288 new encounter episodes are assigned and being executed; the 200-episode evaluation panel has not run. There is <strong>no downstream result</strong>, and nothing on this page should be read as one. The evaluation uses a separate ten-context validation sample drawn from task geometry alone — zero clearance queries, zero outcome queries — because one of the six original development contexts was minted by the same predicate a support-driven selector would use, and so cannot confirm this intervention.</p>
     </div>
   </div>
 </section>
 
 <section style="background:var(--raised);border-block:1px solid var(--line)">
   <div class="wrap">
-    <h2>The numbers</h2>
-    <p class="sub">Equal labels, four arms, twelve held-out layouts, three carriers</p>
+    <h2>The measured operating range</h2>
+    <p class="sub">Where the inherited capability holds, and where it breaks</p>
 
-    <div class="tbl"><table>
-      <thead><tr><th>Construction</th><th class="n">Groups</th><th class="n">Useful contrasts</th><th class="n">Passage</th><th class="n">Adapts</th></tr></thead>
-      <tbody>
-        <tr><td>Uniform placement</td><td class="n">15</td><td class="n">0</td><td class="n">14/36</td><td class="n">0</td></tr>
-        <tr class="win"><td>Analytic solver</td><td class="n">15</td><td class="n">9</td><td class="n">24/36</td><td class="n">24</td></tr>
-        <tr><td>Target-only ablation</td><td class="n">15</td><td class="n">0</td><td class="n">14/36</td><td class="n">0</td></tr>
-        <tr class="win"><td>Motion2Scene (learned)</td><td class="n">15</td><td class="n">9</td><td class="n">22/36</td><td class="n">22</td></tr>
-      </tbody>
-    </table></div>
+    <figure>
+      <video style="aspect-ratio:3" controls playsinline preload="metadata" poster="motion2scene/assets/overhang-variation-demo.jpg" aria-label="Recorded blind, reactive and delayed-observation trials rendered from Isaac states">
+        <source src="motion2scene/assets/overhang-variation-demo.mp4" type="video/mp4">
+        <a href="motion2scene/assets/overhang-variation-demo.mp4">Download the variation replay</a>
+      </video>
+      <figcaption><strong>Variation panel, frozen first seed 8041.</strong> Nominal blind walking, reactive <code>d040</code>, and 500 ms delayed sensing shown together. Contact is measured in Isaac at 200 Hz; MuJoCo renders recorded states only. A failed earlier-beam trial in the second seed is retained in the result table rather than dropped.</figcaption>
+    </figure>
 
-    <div class="tbl"><table>
-      <thead><tr><th>Paired comparison</th><th class="n">Both pass</th><th class="n">A only</th><th class="n">B only</th><th class="n">Neither</th><th class="n">p</th></tr></thead>
-      <tbody>
-        <tr><td>Motion2Scene vs uniform</td><td class="n">14</td><td class="n">8</td><td class="n">0</td><td class="n">14</td><td class="n">0.008</td></tr>
-        <tr><td>Analytic vs uniform</td><td class="n">14</td><td class="n">10</td><td class="n">0</td><td class="n">12</td><td class="n">0.002</td></tr>
-        <tr><td>Motion2Scene vs analytic</td><td class="n">22</td><td class="n">0</td><td class="n">2</td><td class="n">12</td><td class="n">0.50</td></tr>
-      </tbody>
-    </table></div>
+    <p>Across 42 registered executions, reactive and scripted privileged crouching each pass 9 of 10 pose trials while all ten blind trials contact the beam. Blind walking still <em>crosses</em> under contact, so contact is not evidence of impassability — the criterion is contact-qualified passage, not mere arrival. The causal observation delay locates the timing budget directly: 100 ms and 260 ms both pass 2/2, while <strong>500 ms refuses and fails 2/2</strong>. Both reactive and oracle failures occur at the same condition — station −15 cm in the second seed, with a 429 N contact — so the limit is the geometry of that approach, not the sensing policy alone.</p>
+  </div>
+</section>
 
-    <p>The thirty-six conditions are twelve layouts on three carriers, so those p values overstate independence. The claim that survives grouping is simpler: contrast construction wins on three carriers out of three, with no reverse case, and the learned-versus-analytic difference is a null at n = 3 rather than an equivalence.</p>
+<section>
+  <div class="wrap">
+    <h2>Paper status</h2>
+    <p class="sub">Where the manuscripts actually stand, and which of two papers the evidence supports</p>
 
-    <h3>One place the learned generator is measurably worse</h3>
-    <p>Its training loss is 0.139 against the analytic solver's 0.00054 on identical architecture and label count. The reason is in the construction record: only 24 of its 34 critical scenes are visible to the robot's sensor at the moment the command must be issued, against 44 of 47 for the analytic solver. A contrast the robot cannot see is a label the learner cannot fit. That is a specific, fixable defect, and no visibility filter was added after the fact to hide it.</p>
+    <div class="gate warn">
+      <p><strong>No current draft contains the five-arm result.</strong> Three drafts exist: a 20-page working manuscript (9 Sep), the only 8-page conference-format draft (8 Sep), and a superseded 7 Sep draft that carries its own banner because three of its claim families assert exactly the downstream benefit the five-arm panel measured as zero. All three predate the panel. Reconciling the manuscript with the null is the most urgent writing task, ahead of any new experiment.</p>
+      <p>The recorded venue is ICRA 2027, eight pages including references, closing 15 September 2026. Of the five items below, only the first fits that window at ≈7.6 GPU-hours. Items 2 through 5 do not, and this page does not pretend otherwise.</p>
+    </div>
+
+    <div class="road">
+      <article>
+        <h3>Methods paper — the contribution has narrowed and is still real</h3>
+        <p class="why">Target: ICRA 2027. The abstract and performance claims are limited to completed development evidence.</p>
+        <p>The defensible claim today is mechanistic rather than performance-based: <em>executed-motion construction reliably concentrates physical labelling on solvable adaptation-required encounters, and that is not sufficient to teach perceptive selection.</em> What distinguishes the corpora that trained selective policies is response complementarity across the corpus, and the executed-envelope screen predicts that property with high precision and low recall. The acquisition-stage yield advantage is <strong>not</strong> the downstream result, and this page does not present it as one.</p>
+        <span class="have">have: five-arm panel, screen calibration, mechanism account</span>
+      </article>
+      <article>
+        <h3>System / dataset paper — assets exist, reuse evidence does not</h3>
+        <p class="why">Branch-linked teacher and student data with hash-bound provenance is a genuine companion asset.</p>
+        <p>1,065 recorded captures across fifteen corpora, hash-bound registrations for every stage, and one portable release that is exported and offline-verifiable: 12 corpora, 276 episodes, 328,992 measured physics steps, reconstructed to a maximum coefficient difference of 5.55e-17. No M8, M16 or M32 release has been exported, and the archive-integrity counts are verification totals over that 276-episode slice, not dataset scale. What is missing is the part that makes a dataset paper: a demonstration that the corpus is useful to a <em>different</em> learner or robot, plus licensing and a public reproduction harness. The research compass is explicit that new-learner or new-robot utility requires additional evidence, and none has been collected.</p>
+        <span class="have">have: corpus, exporter, provenance; missing: reuse demo, licence</span>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section style="background:var(--raised);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <h2>What remains</h2>
+    <p class="sub">In dependency order. Each item states what it would settle, not merely what it would produce.</p>
+
+    <div class="road">
+      <article>
+        <h3>1 · Finish the support-preserving pilot</h3>
+        <p class="why">Because it is the smallest test of the one mechanism the calibration actually implicated.</p>
+        <p>Complete the 288 acquisition episodes and the 200-episode validation panel. It settles whether restoring proposal support outside the negative screen changes physically executed passage, and it distinguishes "broadening support helps" from "the guided half adds value". If action diversity improves without passage improving, the central hypothesis stays unsupported.</p>
+        <span class="have">in flight · ~7.6 GPU-hours total</span>
+      </article>
+      <article>
+        <h3>2 · Protected held-out evaluation</h3>
+        <p class="why">Because every result so far is development or regression evidence.</p>
+        <p>Eighteen reserved layouts are geometry-locked with their generation recorded at zero clearance queries and zero physics steps. They have <strong>never been executed</strong>, and eight of nine adoption gates remain unmet — the implementation lock and the finite-horizon terminal-censoring policy must be fixed before a single episode runs. This is the difference between a development claim and a held-out one.</p>
+        <span class="have">have: locked geometry + hashes; blocked: adoption gates</span>
+      </article>
+      <article>
+        <h3>3 · Source-held-out transfer</h3>
+        <p class="why">Because every evaluation so far varies layout, not motion ancestry.</p>
+        <p>Reserved source identifiers are registered against a provenance ledger and none has been generated or qualified. Acquiring them and re-running the comparison with ancestry held out is the single largest gap between the present claim and a general one, and it needs no new method.</p>
+        <span class="have">have: reserved IDs, qualification protocol</span>
+      </article>
+      <article>
+        <h3>4 · Replace ideal sensing with the deployed pipeline</h3>
+        <p class="why">Because the learner currently reads exact ray returns from a scripted sensor.</p>
+        <p>Re-acquire the same encounters through the real depth or lidar path with its noise, dropout and field of view, and refit the identical learner. The measured 500 ms delay failure already bounds the timing budget; sensor visibility of the critical moment is the quantity expected to degrade first.</p>
+        <span class="have">have: delay panel, per-construction visibility</span>
+      </article>
+      <article>
+        <h3>5 · Sequential decisions, then hardware qualification</h3>
+        <p class="why">Because the policy commits once from a fixed approach, and a real robot decides repeatedly.</p>
+        <p>Closing the loop changes the state distribution the learner sees, so it requires matched data aggregation across every arm and fresh labels. Only then does hardware become meaningful — and nothing here is a protective action: a refusal continues walking. The 1 N contact criterion is a simulation convention, not a safety margin. The C++ TensorRT runtime exists, but <strong>no Motion2Scene hardware transfer evidence exists at all</strong>.</p>
+        <span class="have">have: deploy stack, timing window, legal-transition manager</span>
+      </article>
+    </div>
   </div>
 </section>
 
@@ -229,78 +373,36 @@ video{width:100%;border:1px solid var(--line);border-radius:6px;background:#000}
   <div class="wrap">
     <h2>What this is not</h2>
     <div class="gate warn">
-      <p>Every result here is simulation. One beam family, two commands, ideal ray sensing, three development carriers, one frozen controller, and layouts held out rather than source ancestry. The evaluation demonstrates <strong>unseen-layout transfer, not source-held-out transfer</strong>, and nothing on this page may be read as uncertainty-robust: acceptance was judged at the exact pose the simulator authors.</p>
-      <p>A hand-written ray rule still reaches 46 of 72 conditions in the larger panel, above every learned arm, while failing to classify a single blocked scene as impassable where every learned selector classifies all six. Neither approach dominates, and we report both directions.</p>
+      <p>Everything here is simulation: one overhead-beam family along a fixed approach, seven qualified schedules, three decision phases, at most one adaptation followed by recovery, ideal ray sensing, and one frozen inherited controller whose locomotion capability is not a contribution of this work.</p>
+      <p><strong>Every completed evaluation on this page is development or regression evidence.</strong> No result reported here is protected held-out: layouts were withheld from fitting, but some had published outcomes before the learner form was chosen, and source ancestry was never varied. A protected held-out evaluation is item 2 on the remaining-work list, not a property of any result shown. Acceptance was judged at the exact pose the simulator authors, so nothing here is uncertainty-robust. No claim is made about general navigation, steering, protective stopping, repeated skill chaining, hardware transfer, or energy efficiency. Passage time is crossing plus stabilization, not full maneuver completion.</p>
+      <p>A hand-written ray rule remains a legitimate and strong comparator, and on the larger panel it beats every learned arm on success count. We report that direction too.</p>
     </div>
   </div>
 </section>
 
 <section style="background:var(--raised);border-block:1px solid var(--line)">
   <div class="wrap">
-    <h2>Toward the real robot</h2>
-    <p class="sub">Five gates, in dependency order. Each has a measured starting point from this study.</p>
-
-    <div class="road">
-      <article>
-        <h3>1 · Re-price the contrast for a real obstacle pose</h3>
-        <p class="why">Because on hardware the beam's pose is uncertain, and this study deliberately assumed it is not.</p>
-        <p>The envelope sweep already states the cost: at ±20 mm only 2, 0 and 32 placements survive per carrier. A deployment needs either a much larger executed window, obtained by a deeper or slower adaptation, or obstacle localisation tight enough to make the nominal contract honest. Measure the achievable window against a real perception stack before building anything else.</p>
-        <span class="have">have: the full envelope/yield curve</span>
-      </article>
-
-      <article>
-        <h3>2 · Replace ideal rays with the real sensor</h3>
-        <p class="why">Because the selector's inputs are currently 144 exact ray returns from a scripted lidar.</p>
-        <p>Re-acquire the same encounters through the deployed depth or lidar pipeline, with its actual noise, dropout and field of view, and refit the same fixed selector. The visibility gap already found in simulation, 24 of 34 learned scenes observable against 44 of 47 analytic, is the quantity that will get worse first. The 500 ms observation-delay failure already measured is the timing budget this stage must respect.</p>
-        <span class="have">have: delay panel, visibility per construction</span>
-      </article>
-
-      <article>
-        <h3>3 · Source-held-out transfer</h3>
-        <p class="why">Because every result so far varies layout, not motion ancestry.</p>
-        <p>Eight candidate source identifiers are reserved against a provenance ledger and none has been generated or qualified. Acquire them, qualify their switching banks under the same 0.30 s contract, and re-run the four-arm comparison with ancestry held out. This is the single largest gap between the present claim and a general one, and it needs no new method.</p>
-        <span class="have">have: reserved IDs, qualification protocol</span>
-      </article>
-
-      <article>
-        <h3>4 · Close the loop the controller actually runs</h3>
-        <p class="why">Because the selector issues one command from a shared approach and never revises it.</p>
-        <p>A deployed robot decides repeatedly as the scene resolves. Extending to sequential decisions changes the state distribution the selector sees, so it needs matched data aggregation across every arm and fresh labels, not a re-scored version of these. The timing result, where 0.20 s and 0.40 s both fail while 0.30 s passes, shows how narrow the admissible window already is.</p>
-        <span class="have">have: timing window, legal-transition manager</span>
-      </article>
-
-      <article>
-        <h3>5 · Hardware safety qualification</h3>
-        <p class="why">Because a refusal here continues walking; it is not a stop.</p>
-        <p>Nothing in this study is a protective action. Before any physical trial the command bank needs a genuine abort, the blocked-scene classification needs to drive it, and contact thresholds calibrated in simulation need re-derivation against real contact sensing. Treat the 1 N contact-qualified criterion as a simulation convention, not a safety margin.</p>
-        <span class="have">have: blocked-scene refusal at 6/6 for every learner</span>
-      </article>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
     <h2>Read the work</h2>
     <div class="links">
-      <a href="motion2scene/ICRA_MANUSCRIPT.pdf"><b>Working manuscript (PDF)</b><span>Method, both panels, limitations</span></a>
-      <a href="motion2scene/M2S_ICRA_NOMINAL_V1_RESULT.md"><b>Final comparison</b><span>Equal labels, four arms, 144 executions</span></a>
-      <a href="motion2scene/M2S_ICRA_540_RESULT.md"><b>The 540-run panel</b><span>Full traversal and background suites</span></a>
-      <a href="motion2scene/ENVELOPE_TRADEOFF_V1_RESULT.md"><b>Why the funnel closed</b><span>The envelope/contrast trade-off</span></a>
-      <a href="motion2scene/index.html"><b>Full research report</b><span>Every experiment, including the failures</span></a>
-      <a href="sweepcf.html"><b>Earlier line: SweepCF</b><span>Prior counterfactual traversal corpus</span></a>
+      <a href="motion2scene/POST_M8_DECISION_V1.md"><b>What the five-arm result changed</b><span>The null, its mechanism, and what is refused — the current record</span></a>
+      <a href="motion2scene/submission/traversal_method_v2.pdf"><b>Working manuscript (20 pp, 9 Sep)</b><span>Execution-conditioned teaching — pre-M8; no five-arm or reserved results</span></a>
+      <a href="motion2scene/submission/paper.pdf"><b>Conference-format draft (8 pp, 8 Sep)</b><span>The only ICRA-format draft — earlier two-command layer</span></a>
+      <a href="motion2scene/ICRA_MANUSCRIPT.md"><b>Superseded 7 Sep draft</b><span>Carries its own banner; its generalizations are falsified</span></a>
+      <a href="motion2scene/SUPPORT_PRESERVING_ACQUISITION_PILOT_V1.md"><b>The pilot now running</b><span>Registered design, measured support, no result yet</span></a>
+      <a href="motion2scene/M2S_ICRA_NOMINAL_V1_RESULT.md"><b>Generation-one comparison</b><span>Four arms, equal labels, unseen layouts</span></a>
+      <a href="motion2scene/ENVELOPE_TRADEOFF_V1_RESULT.md"><b>Why the funnel closed</b><span>The envelope / contrast trade-off</span></a>
+      <a href="motion2scene/index.html"><b>Research report archive</b><span>Snapshot of 7 Sep — superseded figures, retained for the record</span></a>
     </div>
 
-    <p>Every registered protocol states its predictions before the physics ran, and failed predictions are kept in the record rather than removed. Raw run records, admission audits, fitted models and hash manifests are published beside each result.</p>
-
     <h3>Reproducing it</h3>
-    <p>The two studies together cost <strong>6.6 contended GPU-hours</strong> on a single RTX 5080. Construction and fitting are CPU-only and take minutes; the cost is entirely Isaac Lab execution at roughly 32 seconds per cell.</p>
+    <p>The five-arm acquisition recorded <strong>1,264,988</strong> measured physics steps across 1,065 captures, taken from its own boundary receipts. Its evaluation panel scored <strong>138 of 138</strong> assignments — 105 passes, 33 failures, no unrun and no technically-missing cells. We deliberately do not quote a step total for the panel: 164,496 is its declared assignment <em>ceiling</em>, and the study protocol forbids summing that ceiling as though it were a measurement. Construction, screening and fitting are CPU-only and take minutes — the pilot's entire 3,840-candidate reservoir cost 999,424 clearance queries and zero physics. The cost is Isaac Lab execution, at a measured <strong>56.5 s median</strong> per 1,192-step episode on a single RTX 5080 (p95 60.3 s). Earlier notes quoting ~32 s describe a retired shorter horizon and do not apply to this path.</p>
+    <p>Raw run records, admission audits, fitted models and hash manifests are published beside each result, and every registered protocol states its predictions before the physics runs.</p>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
-    Motion2Scene is part of GR00T-WholeBodyControl. The motion-tracking controller is SONIC, inherited and frozen; its locomotion capability is not a contribution of this work. Simulation results only, September 2026.
+    Motion2Scene is part of GR00T-WholeBodyControl. The motion-tracking controller is SONIC, inherited and frozen. Simulation results only. Page updated 10 September 2026, while the support-preserving pilot was still executing.
   </div>
 </footer>
 
